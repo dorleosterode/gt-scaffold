@@ -1,0 +1,110 @@
+\documentclass[a4paper,10pt,parskip]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage[lined,algoruled,linesnumbered]{algorithm2e}
+
+
+\title{Treffen 30.10.2014}
+\author{Dorle Osterode, Stefan Dang \& Lukas Götz}
+
+\begin{document}
+
+\maketitle{}
+
+Anhand der verwendeten Datentypen in der Implementation des
+Scaffoldings in dem Programm SGA, wurde eine Liste an grundlegend
+benötigten Datentypen mit den jeweils benötigten Informationen
+bzw. Feldern erstellt. Die Liste orientiert sich sehr stark an der
+Implementation.
+
+\begin{itemize}
+\item Datentyp Graph: Der Graph enthält die Contigs als Knoten und
+  Kanten zwischen zwei Knoten, wenn diese Knoten über eine
+  \textit{paired-end} oder \textit{mate-pair} Information miteinander
+  verbunden sind. Auf diesem Graph sollen dann die Algorithmen
+  arbeiten. Der Graph ist bidirektional. Der Graph enthält folgende
+  Informationen:
+  \begin{itemize}
+  \item Knoten
+  \item Kanten
+  \item ungewurzelt
+  \end{itemize}
+\item Datentyp Knoten: Ein Knoten ist spezialisiert und enthält alle
+  Informationen über den zu repräsentierenden Contig direkt. Diese
+  Informationen könnten allerdings auch in einen weiteren Datentyp
+  ausgelagert werden. Der Vorteil einer Auslagerung wäre, dass eine
+  generische Graph-Struktur und damit generische Graph-Algorithmen mit
+  \textit{call-back}-Funktionen verwendet werden können, falls eine
+  solche Graph-Struktur in den Genometools schon vorhanden ist. Ein
+  Knoten bzw. Contig braucht folgende Informationen:
+  \begin{itemize}
+  \item VertexID m-id \# eindeutige ID für den Knoten
+  \item size-t m-seqLen \# Länge des Sequenz, die der Contig darstellt
+  \item double m-AStatistic \# Wert der A-Statistik, um Contigs als
+    REPEAT oder UNIQUE klassifizieren zu können
+  \item double m-estCopyNumber \# abgeschätzte Anzahl an Vorkommen des
+    Contigs im Genom
+  \item ScaffoldEdgePtrVector m-edges \# Sammlung von Kanten, die von
+    dem Contig abgehen
+  \item ScaffoldVertexClassification m-classification \#
+    Klassifikation: REPEAT oder UNIQUE
+  \item GraphColor m-color \# Markierung für Algorithmen
+  \item bool m-hasConflictingLink \# $\top$, wenn der Contig im
+    Konflikt stehende Kanten hat
+  \end{itemize}
+\item Datentyp Kante: Eine Kante verbindet zwei Knoten und hat eine
+  Richtung. Eine Kante braucht folgende Informationen:
+  \begin{itemize}
+  \item ScaffoldVertex* m-pEnd \# der Knoten, zu dem die Kante führt
+  \item ScaffoldEdge* m-pTwin \# Kante, die genau in die andere
+    Richtung führt
+  \item ScaffoldLink m-link \# Informationen zu der Verbindung
+    zwischen den Knoten
+  \item GraphColor m-color \# Markierung für Algorithmen
+  \end{itemize}
+\item Datentyp Link: Ein Link enthält alle Informationen zu einer
+  Verbindung zwischen zwei Knoten. Ein Link hat folgende Information
+  über eine Kante:
+  \begin{itemize}
+  \item std::string endpointID \# Id von dem Knoten auf den die Kante zeigt
+  \item int seqLen; \# Länge der Sequenz des Contigs, auf den die Kante zeigt
+  \item ScaffoldLinkType type \# Typ der Verbindung: Distanz aus einer
+    Eingabedatei (SLT-DISTANCEEST), (SLT-REFERENCE), (SLT-INFERRED), eine
+    andere Verbindung (SLT-NOTYPE)
+  \item EdgeData edgeData \# enthält die Richtung (Sense, Antisense)
+    und welche Stränge die paired-Information enthalten (die gleiche
+    Richtung oder das Reverse)
+  \end{itemize}
+  In der Implementation von SGA hat ein Link noch folgende
+  Informationen, die allerdings nicht weiter erklärt wurden. Diese
+  Informationen werden aus den Eingabedateien übernommen:
+  \begin{itemize}
+  \item int distance
+  \item double stdDev
+  \item int numPairs
+  \end{itemize}
+\end{itemize}
+
+
+
+\begin{algorithm}[H]
+  \SetAlgoLined
+  \KwData{Contigs, Distanzinformationen}
+  \KwResult{Scaffold der einzelnen Contigs}
+  Graph konstruieren mit Contigs als Knoten und Kanten aus den Distanzinformationen\;
+  repititive Knoten anhand von Astatistik entfernen\;
+  \dots alle möglichen Dinge herausfiltern, wenn gewünscht (nicht default)\;
+  Polymorphe Knoten entfernen und inkonsistente Kanten löschen\;
+  Anfangs- und Endknoten von Zyklen löschen\;
+  Scaffold aus dem gefilterten Graphen berechnen\;
+  \caption{Grober Ablauf des Scaffoldings bei SGA}
+\end{algorithm}
+
+\end{document}
