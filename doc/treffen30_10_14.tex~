@@ -132,9 +132,9 @@ Implementation.
   \While{es gibt noch polymorphe Knoten}{
     \ForEach{Knoten}{
       \If{Knoten ist REPEAT}{breche das ganze ab\;}
-      \If{jedes Paar von Kanten in die gleiche Richtung uneindeutig geordnet
-	ist mit	Wahrscheinlichkeit $>$ p-cutoff
-	{\bf and} die Summe der estCopyNum $<$ cn-cutoff ist}
+      \If{jedes Paar von Kanten in die gleiche Richtung mit höherer
+	Wahrscheinlichkeit uneindeutig geordnet ist als p-cutoff
+	{\bf and} die Summe der estCopyNum kleiner als cn-cutoff ist}
          {Knoten wird als polymorph markiert.\;}
       }
   Lösche alle polymorph markierten Knoten\;
