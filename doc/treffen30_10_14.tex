@@ -73,22 +73,22 @@ Implementation.
   Verbindung zwischen zwei Knoten. Ein Link hat folgende Information
   über eine Kante:
   \begin{itemize}
-  \item std::string endpointID \# Id von dem Knoten auf den die Kante zeigt
-  \item int seqLen; \# Länge der Sequenz des Contigs, auf den die Kante zeigt
+  \item std::string endpointID \# Id von dem Knoten auf den die Kante
+    zeigt
+  \item int seqLen \# Länge der Sequenz des Contigs, auf den die Kante
+    zeigt
+  \item int distance \# Abschätzung der Entfernung der verbundenen
+    Contigs
+  \item double stdDev \# Standardabweichung von der abgeschätzten
+    Entfernung
+  \item int numPairs \# Anzahl der Distanzinformationen, die ein
+    Anzeichen für die Verbindung der Contigs geben
   \item ScaffoldLinkType type \# Typ der Verbindung: Distanz aus einer
-    Eingabedatei (SLT-DISTANCEEST), (SLT-REFERENCE), (SLT-INFERRED), eine
-    andere Verbindung (SLT-NOTYPE)
+    Eingabedatei (SLT-DISTANCEEST), (SLT-REFERENCE), (SLT-INFERRED),
+    eine andere Verbindung (SLT-NOTYPE)
   \item EdgeData edgeData \# enthält die Richtung (Sense, Antisense)
     und welche Stränge die paired-Information enthalten (die gleiche
     Richtung oder das Reverse)
-  \end{itemize}
-  In der Implementation von SGA hat ein Link noch folgende
-  Informationen, die allerdings nicht weiter erklärt wurden. Diese
-  Informationen werden aus den Eingabedateien übernommen:
-  \begin{itemize}
-  \item int distance
-  \item double stdDev
-  \item int numPairs
   \end{itemize}
 \end{itemize}
 
@@ -98,13 +98,94 @@ Implementation.
   \SetAlgoLined
   \KwData{Contigs, Distanzinformationen}
   \KwResult{Scaffold der einzelnen Contigs}
-  Graph konstruieren mit Contigs als Knoten und Kanten aus den Distanzinformationen\;
+  Graph konstruieren mit Contigs als Knoten und Kanten 
+  aus den Distanzinformationen\;
   repititive Knoten anhand von Astatistik entfernen\;
   \dots alle möglichen Dinge herausfiltern, wenn gewünscht (nicht default)\;
   Polymorphe Knoten entfernen und inkonsistente Kanten löschen\;
   Anfangs- und Endknoten von Zyklen löschen\;
   Scaffold aus dem gefilterten Graphen berechnen\;
   \caption{Grober Ablauf des Scaffoldings bei SGA}
+\end{algorithm}
+
+\begin{algorithm}[H]
+  \SetAlgoLined
+  \KwData{AStatistik-Datei}
+  \KwResult{Graph ohne Knoten mit zu kleinem AStatistik-Wert oder zu großem 
+    estCopyNum-Wert}
+  Lade AStatistik- und estCopyNum-Werte für jeden Knoten 
+  aus einer Datei und setzte die Werte für jeden Knoten \;
+  \ForEach{Knoten im Graph}{
+    \If{Knoten ist REPEAT}{continue\;}
+    \eIf{Astatistik $>$ min-Astatistik}
+        {Knoten ist UNIQUE\;}
+        {Knoten ist REPEAT\;}
+    \If{estCopyNum $>$ min-estCopyNum}{Knoten ist REPEAT\;}
+  }
+  Lösche alle Knoten und deren Kanten, die als REPEAT gekennzeichnet sind.
+  \caption{Astatistik behandeln (Schritt 2)}
+\end{algorithm}
+
+\begin{algorithm}[H]
+  \KwData{Graph}
+  \KwResult{Graph ohne polymorphe Knoten}
+  \While{es gibt noch polymorphe Knoten}{
+    \ForEach{Knoten}{
+      \If{Knoten ist REPEAT}{breche das ganze ab\;}
+      \If{jedes Paar von Kanten in die gleiche Richtung mit mehr 
+        als der Wahrscheinlichkeit p-cutoff uneindeutig geordnet
+        ist {\bf and} die Summe der estCopyNum kleiner als cn-cutoff ist}
+         {Knoten wird als polymorph markiert.\;}
+      }
+  }
+  Lösche alle polymorph markierten Knoten\;
+  \caption{Polymorphe Knoten entfernen (Schritt 4a)}
+\end{algorithm}
+
+\begin{algorithm}[H]
+  \KwData{Graph}
+  \KwResult{Graph ohne inkonsistente Kanten}
+  \ForEach{Knoten}{
+    berechne den längsten Overlap aller Paare von Kanten in die gleiche Richtung\;
+    \If{längster Overlap $>$ 400}{
+      färbe alle Kanten und Rückkanten schwarz\;
+    }
+    }
+  Lösche alle schwarzen Kanten\;
+  \caption{Inkonsistente Kanten entfernen (Schritt 4b)}
+\end{algorithm}
+
+\begin{algorithm}[H]
+  \KwData{Graph}
+  \KwResult{Graph ohne Zyklen}
+  \While{noch nicht fertig}{
+  Suche alle Zusammenhangskomponenten\;
+  \ForEach{Zusammenhangskomponente}{
+    Suche alle terminalen Knoten\;
+    \ForEach{terminalen Knoten}{
+      Suche mit einer Tiefensuche nach Rückkanten zu diesem Knoten\;
+      \If{Rückkante gefunden}{
+        markiere den terminalen Knoten und den Knoten, von dem die 
+        Rückkante ausgeht, als REPEAT\;
+        }
+      }
+    }
+  Lösche alle Knoten, die als REPEAT markiert sind\;
+  }
+  \caption{Löse Zyklen auf (Schritt 5)}
+\end{algorithm}
+
+\begin{algorithm}[H]
+  Färbe alle Kanten schwarz\;
+  Berechne alle Zusammenhangskomponenten\;
+  \ForEach{Zusammenhangskomponente}{
+    Berechne alle terminalen Knoten\;
+    \ForEach{terminalen Knoten}{
+      Berechne einen Walk durch die Zusammenhangskomponente mit der meisten abgedeckten Sequenz und markiere diesen Walk weiß um ihn zu behalten\;
+      }
+    }
+  Lösche alle schwarzen Kanten\; 
+  \caption{Scaffold berechnen (Schritt 6)}
 \end{algorithm}
 
 \end{document}
