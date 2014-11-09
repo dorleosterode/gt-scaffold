@@ -1,0 +1,112 @@
+\documentclass[a4paper,10pt,parskip]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage[lined,algoruled,linesnumbered]{algorithm2e}
+
+
+\title{Treffen 07.11.2014}
+\author{Dorle Osterode, Stefan Dang \& Lukas Götz}
+
+\begin{document}
+
+\maketitle{}
+
+Erste Ideen zur Implementierung der Datentypen fuer Scaffold-Graphen in C unter
+Verwendung bestehender Datentypen aus Genome-Tools.
+
+/* Scaffold-Graph */
+
+typedef enum \{ VC\_UNIQUE, VC\_REPEAT,VC\_POLYMORPHIC, VC\_UNKNOWN \}
+	 	VertexClass;\\
+typedef enum \{ ED\_ANTISENSE, ED\_SENSE \} Direction;\\
+typedef enum \{ EC\_REVERSE, EC\_SAME \} Composition;
+
+/* Vertex */
+
+struct GtScaffoldGraphVertex\\
+\{\\
+\begin{tabular}{l}
+  /* eindeutige ID für den Knoten */\\
+  GtUword id;\\
+  /* Länge der Sequenz, die der Contig darstellt */\\
+  GtUword seqlen;\\ 
+  /* Wert der A-Statistik, um Contigs als REPEAT oder UNIQUE
+     klassifizieren zu können;\\
+     in Genom-Tools vom Typ float */\\
+  float astat;\\	
+  /* abgeschätzte Anzahl an Vorkommen des Contigs im Genom */\\
+  float copynum;\\  
+  /* zur Klassifikation des Knotens: REPEAT, UNIQUE, ... */\\
+  VertexClass vertexclass;\\ 
+  bool hasconflictinglink;\\
+  GtUword nofedges;\\
+  /* Sammlung von Kanten, die von dem Contig abgehen */\\
+  struct GtScaffoldGraphEdge   **edges;\\  
+  /* Markierung für Algorithmen; aus Genome-Tools entnommen siehe
+  match/rdj-contigs-graph.c */\\
+  GtContigsGraphMarks color;\\ 	  
+\end{tabular}
+\};
+
+/* Edge */
+
+struct GtScaffoldGraphEdge\\
+\{\\
+\begin{tabular}{l}
+  /*  Knoten, zu dem die Kante führt */\\
+  struct GtScaffoldGraphVertex *pend;\\ 
+  /* Kante, die genau in die andere Richtung führt */\\
+  struct GtScaffoldGraphEdge *ptwin;\\ 
+  /* Informationen zu der Verbindung zwischen den Knoten */\\
+  GtScaffoldGraphLink link;\\ 
+  /* Markierung für Algorithmen */\\
+  GtContigsGraphMarks color;\\ 
+\end{tabular}
+\};\\
+
+/* Link */\\
+struct GtScaffoldGraphLink\\
+\{\\
+\begin{tabular}{l}
+  /* Id von dem Knoten auf den die Kante zeigt */\\
+  GtUword id;\\ 	
+  /* Länge der Sequenz des Contigs, auf den die Kante zeigt */\\
+  GtUword seqlen;\\ 
+  /*redundant ?*/\\
+
+  /* Abschätzung der Entfernung der verbundenen Contigs */\\
+  Gtword dist;\\
+  /* Standardabweichung von der abgeschätzten Entfernung */\\
+  float stddev;\\
+  /* Anzahl der Distanzinformationen, die ein Anzeichen für die
+  Verbindung der Contigs geben */\\
+  GtUword numpairs;\\
+  /* Typ der Verbindung: Distanz aus einer Eingabedatei\\
+     (SLT-DISTANCEEST), (SLT-REFERENCE), (SLT-INFERRED),\\
+     eine andere Verbindung (SLT-NOTYPE) */\\	    
+  LinkType type;\\
+  /* enthält die Richtung (Sense, Antisense) und welche\\
+     Stränge die paired-Information enthalten (die gleiche\\
+     Richtung oder das Reverse) */\\
+  Direction direction;\\
+  Composition composition;
+\end{tabular}
+\};
+
+/* Graph */
+
+struct GtScaffoldGraph\\
+\{\\
+\begin{tabular}{l}
+  struct GtScaffoldGraphVertex **vertices;\\
+  GtUword nofvertices;
+\end{tabular}
+\};
+\end{document}
