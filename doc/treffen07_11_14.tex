@@ -112,6 +112,65 @@ struct GtScaffoldGraph\\
 
 \section{Verfeinerung des Algorithmus zur Filterung der Knoten}
 
+\begin{itemize}
+\item graph.visit() Funktion durchläuft alle Knoten (HashMap) und ruft
+  auf jedem Knoten die übergebene Vistor-Funktion auf. Vorher wird
+  previsit() und danach postvisit() aufgerufen. (Quelle
+  ScaffoldGraph.h)
+\item Es dürfte keine Probleme beim zusammenlegen der Filterfunktionen
+  geben, da die Bedingungen nacheinander für jeden Knoten lokal
+  geprüft werden können.
+\item Es sollte beachtet werden, dass es gegebenfalls andere
+  Ergebnisse geben könnte, wenn in einem späteren Schritt die vorher
+  schon herausgefilterten Knoten noch beachtet werden.
+\item Die repetitiven Knoten sollten schon bei der Konstruktion des
+  Graphen herausgefiltert werden.
+\item Die markierten Knoten und Kanten können nicht sofort gelöscht
+  werden, da die restlichen Knoten noch nicht klassifiziert sind. Da
+  die Klassifikation eines Knoten aber anhand aller Nachbarn
+  durchgeführt wird, können die Knoten und Kanten noch nicht füher
+  gelöscht werden.
+\item Bei SGA wird gezählt, wie viele Knoten anhand welches Kriteriums
+  gelöscht werden. Dies könnte auch noch eingebaut werden.
+\end{itemize}
+
+\begin{algorithm}[H]
+  \ForEach{Knoten im Graph}{
+    \If{jedes Paar von Kanten in die gleiche Richtung
+      uneindeutig geordnet ist mit Wahrscheinlichkeit 
+      $>$ p-cutoff {\bf and} die Summe der estCopyNum $<$ 
+      cn-cutoff ist}
+       {markiere den Endknoten mit der kleineren 
+	 estCopyNum als polymorph. Markiere Kante zum
+	 polymorphen Knoten und alle Kanten vom polymorphen 
+         Knoten, so dass sie im nächsten 
+	 Schritt nicht mitbeachtet wird\;}
+       Berechne den längsten Overlap von allen Paaren von
+       Kanten in die gleiche Richtung, deren Endpunkt 
+       nicht polymorph markiert ist.\;
+       \If{längster Overlap $>$ 400} {
+	 markiere alle Kanten und Rückkanten schwarz\;
+       }
+  }
+  Lösche alle markierten Knoten und Kanten\;
+  \caption{Zusammengefasste Filterfunktion (Schritt 4a und 4b in einem)}
+\end{algorithm}
+
+
 \section{Notizen zu dem Layout-Algorithmus}
+
+\begin{itemize}
+\item terminale Knoten: Knoten, die nur SENSE oder ANTISENES Kanten
+  haben (Quelle: ScaffoldAlgorithms)
+\item Zusammenhangskomponenten-Funktion wird in
+  StringGraph/GraphSearchTree.h definiert
+\item beim Walk für den Scaffold wird zuerst für jede
+  Zusammenhangskomponente jeder Pfad zwischen terminalen Knoten mit
+  einer Breitensuche (ohne heuristische Auswahl der Reihenfolge der
+  Kindsknoten) berechnet. Dabei wird die Pfadlänge (Gap-Größe)
+  minimiert. Als Layout für eine Zusammenhangskomponente wird dann
+  der Pfad mit der längsten Sequenz (ohne Gaps) gewählt. (Quelle:
+  ScaffoldGraph und ScaffoldWalk)
+\end{itemize}
 
 \end{document}
