@@ -136,24 +136,31 @@ struct GtScaffoldGraph\\
 
 \begin{algorithm}[H]
   \ForEach{Knoten im Graph}{
-    \If{jedes Paar von Kanten in die gleiche Richtung
-      uneindeutig geordnet ist mit Wahrscheinlichkeit 
-      $>$ p-cutoff {\bf and} die Summe der estCopyNum $<$ 
-      cn-cutoff ist}
-       {markiere den Endknoten mit der kleineren 
-	 estCopyNum als polymorph. Markiere Kante zum
-	 polymorphen Knoten und alle Kanten vom polymorphen 
-         Knoten, so dass sie im nächsten 
-	 Schritt nicht mitbeachtet wird\;}
-       Berechne den längsten Overlap von allen Paaren von
-       Kanten in die gleiche Richtung, deren Endpunkt 
-       nicht polymorph markiert ist.\;
+    \ForEach{Kantenrichtung}{
+      \ForEach{Kantenpaar in gleiche Richtung}{
+        \If{Kantenpaar uneindeutig geordnet ist mit
+           Wahrscheinlichkeit $>$ p-cutoff {\bf and}
+           Summe der estCopyNum der zugehörigen
+           Endknoten $<$ cn-cutoff ist}
+          {Markiere Endknoten mit kleineren 
+	   estCopyNum als polymorph. Markiere alle Sense-
+           /Antisensekanten des polymorphen Knoten schwarz,
+           so dass sie im nächsten Schritt nicht mitbeachtet
+           werden.
+           break\;}           
+        }
+       \If{Knoten ist polymorph}
+         {break\;}
+       \ForEach{Kantenpaar in gleiche Richtung}{
+         Berechne Overlap von nicht-schwarzen Kantenpaar.\;
+       }   
        \If{längster Overlap $>$ 400} {
-	 markiere alle Kanten und Rückkanten schwarz\;
-       }
+	 Markiere alle Sense-/Antisensekanten rot\;       
+      }
+    }
   }
   Lösche alle markierten Knoten und Kanten\;
-  \caption{Zusammengefasste Filterfunktion (Schritt 4a und 4b in einem)}
+  \caption{Zusammengefasste Filterfunktion (Schritt 4a und 4b vereinigt)}
 \end{algorithm}
 
 
