@@ -146,9 +146,16 @@ struct GtScaffoldGraph\\
 	   estCopyNum als polymorph. Markiere alle Sense-
            /Antisensekanten des polymorphen Knoten schwarz,
            so dass sie im nächsten Schritt nicht mitbeachtet
-           werden.
-           break\;}           
+           werden.\;
+           \tcp{bei polymorphen Knoten wird nur das erste 
+             polymorphe Kantenpaar markiert}
+           \If{Knoten ist polymorph markiert}{
+             break\;
+           }
+          }           
         }
+      \tcp{polymorphe Knoten müssen nicht mehr auf 
+        inkonsistente Kanten überprüft werden}
        \If{Knoten ist polymorph}
          {break\;}
        \ForEach{Kantenpaar in gleiche Richtung}{
