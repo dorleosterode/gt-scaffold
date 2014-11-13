@@ -186,6 +186,19 @@ struct GtScaffoldGraph
 \end{algorithm}
 
 
+\begin{algorithm}[H]
+  \KwData{Kante $A$ und Kante $B$, die auf eindeutige Ordnung geprüft werden 
+    sollen. Wahrscheinlichkeitsschwellenwert $p\_cutoff$}
+  \KwResult{Ob die Kanten $A$ und $B$ nicht eindeutig geordnet werden können}
+  $\mu = A.dist - B.dist$\;
+  $\sigma^2 = A.\sigma^2 + B.\sigma^2$\;
+  $t = \frac{-\mu}{\sigma\cdot\sqrt{2}}$\;
+  $P_{AB} = \frac{1}{2} \cdot \left( 1 + \frac{2}{\sqrt{\pi}} \int_{0}^{t} \exp{-x^2}\mathrm dx\right)$\;
+  $P_{BA} = 1 - P_{AB}$\;
+  \Return $\max\{P_{AB}, P_{BA}\} \leq p\_cutoff$
+  \caption{Funktion \textsc{AmbiguousOrdering}$(A, B, p\_cutoff)$}
+\end{algorithm}
+
 \section{Notizen zu dem Layout-Algorithmus}
 
 \begin{itemize}
