@@ -152,9 +152,8 @@ struct GtScaffoldGraph
 \begin{algorithm}[H]
   \ForEach{Knoten im Graph}{
     \ForEach{Kantenrichtung}{
-      \ForEach{Kantenpaar in gleiche Richtung}{
-        \If{Kantenpaar uneindeutig geordnet ist mit
-           Wahrscheinlichkeit $>$ p-cutoff {\bf and}
+      \ForEach{Kantenpaar $(A,B)$ in gleiche Richtung}{
+        \If{AmbiguousOrdering($A,B,p\_cutoff$) {\bf and}
            Summe der estCopyNum der zugehörigen
            Endknoten $<$ cn-cutoff ist}
           {Markiere Endknoten mit kleineren 
