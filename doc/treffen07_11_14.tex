@@ -72,35 +72,35 @@ struct GtScaffoldGraphVertex
   /* eindeutige ID fuer den Knoten */
   GtUword id;
   /* Laenge der Sequenz, die der Contig darstellt */
-  GtUword seqlen; 
+  GtUword seqlen;
   /* Wert der A-Statistik, um Contigs als REPEAT oder UNIQUE
      klassifizieren zu koennen;
      in Genom-Tools vom Typ float */
-  float astat;	
+  float astat;
   /* abgeschaetzte Anzahl an Vorkommen des Contigs im Genom */
-  float copynum;  
+  float copynum;
   /* zur Klassifikation des Knotens: REPEAT, UNIQUE, ... */
-  VertexClass vertexclass; 
+  VertexClass vertexclass;
   bool hasconflictinglink;
   GtUword nofedges;
   /* Sammlung von Kanten, die von dem Contig abgehen */
-  struct GtScaffoldGraphEdge   **edges;  
+  struct GtScaffoldGraphEdge   **edges;
   /* Markierung fuer Algorithmen; aus Genome-Tools entnommen siehe
   match/rdj-contigs-graph.c */
-  GtContigsGraphMarks color; 	  
+  GtContigsGraphMarks color;
 };
 
 /* Edge */
 struct GtScaffoldGraphEdge
 {
   /*  Knoten, zu dem die Kante fuehrt */
-  struct GtScaffoldGraphVertex *pend; 
+  struct GtScaffoldGraphVertex *pend;
   /* Kante, die genau in die andere Richtung fuehrt */
-  struct GtScaffoldGraphEdge *ptwin; 
+  struct GtScaffoldGraphEdge *ptwin;
   /* Informationen zu der Verbindung zwischen den Knoten */
-  GtScaffoldGraphLink link; 
+  GtScaffoldGraphLink link;
   /* Markierung fuer Algorithmen */
-  GtContigsGraphMarks color; 
+  GtContigsGraphMarks color;
   /* Abschaetzung der Entfernung der verbundenen Contigs */
   Gtword dist;
   /* Standardabweichung von der abgeschaetzten Entfernung */
@@ -156,27 +156,27 @@ struct GtScaffoldGraph
         \If{AmbiguousOrdering($A,B,p\_cutoff$) {\bf and}
            Summe der estCopyNum der zugehörigen
            Endknoten $<$ cn-cutoff ist}
-          {Markiere Endknoten mit kleineren 
+          {Markiere Endknoten mit kleineren
 	   estCopyNum als polymorph. Markiere alle Sense-
            /Antisensekanten des polymorphen Knoten schwarz,
            so dass sie im nächsten Schritt nicht mitbeachtet
            werden.\;
-           \tcp{bei polymorphen Knoten wird nur das erste 
+           \tcp{bei polymorphen Knoten wird nur das erste
              polymorphe Kantenpaar markiert}
            \If{Knoten ist polymorph markiert}{
              break\;
            }
-          }           
+          }
         }
-      \tcp{polymorphe Knoten müssen nicht mehr auf 
+      \tcp{polymorphe Knoten müssen nicht mehr auf
         inkonsistente Kanten überprüft werden}
        \If{Knoten ist polymorph}
          {break\;}
        \ForEach{Kantenpaar in gleiche Richtung}{
          Berechne Overlap von nicht-schwarzen Kantenpaar.\;
-       }   
+       }
        \If{längster Overlap $>$ 400} {
-	 Markiere alle Sense-/Antisensekanten rot\;       
+	 Markiere alle Sense-/Antisensekanten rot\;
       }
     }
   }
@@ -186,7 +186,7 @@ struct GtScaffoldGraph
 
 
 \begin{algorithm}[H]
-  \KwData{Kante $A$ und Kante $B$, die auf eindeutige Ordnung geprüft werden 
+  \KwData{Kante $A$ und Kante $B$, die auf eindeutige Ordnung geprüft werden
     sollen. Wahrscheinlichkeitsschwellenwert $p\_cutoff$}
   \KwResult{Ob die Kanten $A$ und $B$ nicht eindeutig geordnet werden können}
   $\mu = A.dist - B.dist$\;
@@ -213,5 +213,52 @@ struct GtScaffoldGraph
   der Pfad mit der längsten Sequenz (ohne Gaps) gewählt. (Quelle:
   ScaffoldGraph und ScaffoldWalk)
 \end{itemize}
+
+\subsection{Layout-Algorithmus}
+
+\begin{algorithm}[H]
+  \SetAlgoLined
+  \KwData{Graph}
+  \KwResult{Graph ohne Knoten, die nicht zum bestem Walk gehören}
+  Markiere alle Knoten schwarz\;
+  \ForEach{Connected Component}{
+    Berechne Menge der terminalen Knoten (mit ausschließlich SENSE oder ANTISENSE Kanten)\\
+    \ForEach{Terminaler Knoten}{
+      Berechne alle Walks\;
+      \ForEach{Walk}{
+        \If{Contig-Länge > bislang beste Contig-Länge}{
+          Setze aktuellen Walk als bestWalk\;
+        }
+      }
+    }
+  }
+  Setze alle Knoten bestWalk Knoten weiß\;
+  Lösche alle schwarzen Knoten\;
+  \caption{Berechnung der Scaffolds (Schritt 6)}
+\end{algorithm}
+
+\begin{algorithm}[H]
+  \SetAlgoLined
+  \KwData{terminaler Startknoten}
+  \KwResult{Alle von diesem Knoten möglichen Walks}
+  Konstruktionsrichtung = Richtung der vom terminalen Knoten ausgehenden Kanten\;
+  \ForEach{Alle vom Knoten ausgehenden Kanten (in Konstruktionsrichtung)}{
+    Speichere Startknoten und Distanz in Map (für spätere Traversierung)\\
+    Schiebe Startknoten und Distanz in Queue
+  }
+  \While{BFS über Queue nicht beendet}{
+    \If{Distanz zu aktuell betrachtetem Knoten z < bisher ermittelte Distanz zu diesem Knoten {\bf OR} Knoten noch unbetrachtet}{
+      \If{Keine Kanten mehr zu betrachten}{
+        Schiebe Knoten in terminalSet
+      }
+      Speichere Distanz und Kante in Map
+      Schiebe z in Queue
+    }
+  }
+  \ForEach{Knoten in terminalSet}{
+    Erzeuge Walk mithilfe einer Traversierung über die Map
+  }
+  \caption{Berechnung der Walks (Schritt 6.1)}
+\end{algorithm}
 
 \end{document}
