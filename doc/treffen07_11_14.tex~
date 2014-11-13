@@ -252,7 +252,7 @@ struct GtScaffoldGraph
         Schiebe Knoten in terminalSet
       }
       Speichere Kante und Distanz in Map\;
-      Schiebe Kante und Distanz in Queue\;
+      Schiebe Startkante und Distanz in Queue\;
     }
   }
   \ForEach{Knoten in terminalSet}{
