@@ -227,17 +227,19 @@ struct GtScaffoldGraph
 
 \begin{algorithm}[H]
   \SetAlgoLined
-  \KwData{Graph}
-  \KwResult{Graph ohne Knoten, die nicht zum bestem Walk gehören}
-  Markiere alle Knoten schwarz\;
-  Berechnung aller Connected Components\;
-  \ForEach{Connected Component}{
-    Berechne Menge der terminalen Knoten (mit ausschließlich SENSE oder ANTISENSE Kanten)\\
-    \ForEach{Terminaler Knoten}{
-      Berechne alle Walks\;
-      \ForEach{Walk}{
+  \KwData{Graph $G$}
+  \KwResult{Graph $G$ ohne Knoten, die nicht zum bestem Walk gehören}
+  Markiere alle Kanten aus $G$ schwarz\;
+  Berechnung der Menge $C$ aller Connected Components von $G$\;
+  \ForEach{Connected Component $c_0$ aus der Menge $C$}{
+    Berechne Menge der terminalen Knoten $T$ (mit ausschließlich SENSE 
+    oder ANTISENSE Kanten) für die Connected Component $c_0$\;
+    \ForEach{Terminaler Knoten $t_0$ aus der Menge $T$}{
+      Berechne die Menge $W$ aller Walks durch die Connected 
+      Component $c_0$ von $t_0$ aus\;
+      \ForEach{Walk $w_0$ aus $W$}{
         \If{Contig-Gesamtlänge > bislang beste Contig-Gesamtlänge}{
-          Setze aktuellen Walk als bestWalk\;
+          Setze aktuellen Walk $w_0$ als bestWalk\;
         }
       }
     }
