@@ -62,8 +62,6 @@ Verwendung bestehender Datentypen aus Genome-Tools.
 
 typedef enum { VC_UNIQUE, VC_REPEAT,VC_POLYMORPHIC, VC_UNKNOWN }
 	 	VertexClass;
-typedef enum { ED_ANTISENSE, ED_SENSE } Direction;
-typedef enum { EC_REVERSE, EC_SAME } Composition;
 
 /* Vertex */
 
@@ -97,12 +95,10 @@ struct GtScaffoldGraphEdge
   struct GtScaffoldGraphVertex *pend;
   /* Kante, die genau in die andere Richtung fuehrt */
   struct GtScaffoldGraphEdge *ptwin;
-  /* Informationen zu der Verbindung zwischen den Knoten */
-  GtScaffoldGraphLink link;
   /* Markierung fuer Algorithmen */
   GtContigsGraphMarks color;
   /* Abschaetzung der Entfernung der verbundenen Contigs */
-  Gtword dist;
+  GtWord dist;
   /* Standardabweichung von der abgeschaetzten Entfernung */
   float stddev;
   /* Anzahl der Distanzinformationen, die ein Anzeichen fuer die
@@ -111,8 +107,8 @@ struct GtScaffoldGraphEdge
   /* enthaelt die Richtung (Sense, Antisense) und welche
      Straenge die paired-Information enthalten (die gleiche
      Richtung oder das Reverse) */
-  Direction direction;
-  Composition composition;
+  bool antisense;
+  bool reverse;
 };
 
 /* Graph */
