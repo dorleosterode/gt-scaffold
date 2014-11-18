@@ -251,23 +251,32 @@ struct GtScaffoldGraph
 
 \begin{algorithm}[H]
   \SetAlgoLined
-  \KwData{terminaler Startknoten}
+  \KwData{terminaler Startknoten $t_0$}
   \KwResult{Alle von diesem Knoten möglichen Walks}
-  Konstruktionsrichtung = Richtung der vom terminalen Knoten ausgehenden Kanten\;
-  \ForEach{Alle vom Knoten ausgehenden Kanten (in Konstruktionsrichtung)}{
-    Speichere Startkante und Distanz in Map (für spätere Traversierung)\\
-    Schiebe Startkante und Distanz in Queue
+  Konstruktionsrichtung = Richtung der vom terminalen Knoten $t_0$ ausgehenden Kanten\;
+  \ForEach{Kante $A$ vom Knoten $t_0$ ausgehend (in Konstruktionsrichtung)}{
+    $k_0$ = $A.pend$\;
+    Speichere Startkante $A$ und Distanz $A.dist$ in Map an Position 
+    $k_0$ (für spätere Traversierung)\;
+    Schiebe Startkante $A$ und Distanz $A.dist$ in Queue\;
   }
   \While{BFS über Queue nicht beendet}{
-    \If{Distanz zu aktuell betrachtetem Knoten z < bisher ermittelte Distanz zu diesem Knoten {\bf OR} Knoten noch unbetrachtet}{
-      \If{Keine Kanten mehr zu betrachten}{
-        Schiebe Knoten in terminalSet
+    Poppe Kante $A$ und Distanz $A.dist$ aus der Queue\;
+    $k_0$ = $A.pend$\;
+    \ForEach{Kante $B$ in Konstruktionsrichtung von $k_0$ aus} {
+      $k_1$ = $B.pend$\;
+      \If{Distanz zu aktuell betrachtetem Knoten $k_1$ $<$
+        bisher ermittelte Distanz zu $k_1$ {\bf OR} Knoten $k_1$ 
+        noch unbetrachtet}{
+        Speichere Kante $B$ und Distanz $B.dist$ in Map an Position $k_1$\;
+        Schiebe Kante $B$ und Distanz $B.dist$ in Queue\;
       }
-      Speichere Kante und Distanz in Map\;
-      Schiebe Kante und Distanz in Queue\;
+    }
+    \If{$k_0$ hat keine Kanten in Konstruktionsrichtung}{
+      Schiebe Knoten $k_0$ in terminalSet\;
     }
   }
-  \ForEach{Knoten in terminalSet}{
+  \ForEach{Knoten $k_0$ in terminalSet}{
     Erzeuge Walk mithilfe einer Traversierung über die Map
   }
   \caption{Berechnung der Walks (Schritt 6.1)}
