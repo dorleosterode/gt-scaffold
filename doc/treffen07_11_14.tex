@@ -78,7 +78,7 @@ struct GtScaffoldGraphVertex
   /* abgeschaetzte Anzahl an Vorkommen des Contigs im Genom */
   float copynum;
   /* zur Klassifikation des Knotens: REPEAT, UNIQUE, ... */
-  VertexClass vertexclass;
+  VertexClass vertexclassification;
   bool hasconflictinglink;
   GtUword nofedges;
   /* Sammlung von Kanten, die von dem Contig abgehen */
@@ -155,15 +155,15 @@ struct GtScaffoldGraph
            $k_1.estCopy + k_2.estCopy < cn\_cutoff$}
           {
             \If{$k_1.estCopy < k_2.estCopy$}{
-              markiere $k_1$ als polymorph und alle aus- 
+              markiere $k_1$ als polymorph und alle aus-
               und eingehenden SENSE und ANTISENSE Kanten von $k_1$
-              schwarz, so dass sie im nächsten Schritt nicht 
+              schwarz, so dass sie im nächsten Schritt nicht
               mitbeachtet werden.\;
             }
             \Else {
-              markiere $k_2$ als polymorph und alle aus- 
+              markiere $k_2$ als polymorph und alle aus-
               und eingehenden SENSE und ANTISENSE Kanten von $k_2$
-              schwarz, so dass sie im nächsten Schritt nicht 
+              schwarz, so dass sie im nächsten Schritt nicht
               mitbeachtet werden.\;
             }
            \tcp{bei polymorphen Knoten wird nur das erste
@@ -178,14 +178,14 @@ struct GtScaffoldGraph
        \If{Knoten $k_0$ ist polymorph}
          {break\;}
        \ForEach{Kantenpaar $(A,B)$ in Richtung $dir$}{
-         \If{$A$ ist nicht schwarz und $B$ ist nicht schwarz} 
+         \If{$A$ ist nicht schwarz und $B$ ist nicht schwarz}
             {
-              Berechne Overlap von $A$ und $B$ und speichere 
+              Berechne Overlap von $A$ und $B$ und speichere
               längsten Overlap.\;
             }
        }
        \If{längster Overlap $>$ 400} {
-	 Markiere alle ausgehenden Sense-/Antisensekanten 
+	 Markiere alle ausgehenden Sense-/Antisensekanten
          von $k_0$ rot\;
       }
     }
@@ -232,10 +232,10 @@ struct GtScaffoldGraph
   Markiere alle Kanten aus $G$ schwarz\;
   Berechnung der Menge $C$ aller Connected Components von $G$\;
   \ForEach{Connected Component $c_0$ aus der Menge $C$}{
-    Berechne Menge der terminalen Knoten $T$ (mit ausschließlich SENSE 
+    Berechne Menge der terminalen Knoten $T$ (mit ausschließlich SENSE
     oder ANTISENSE Kanten) für die Connected Component $c_0$\;
     \ForEach{Terminaler Knoten $t_0$ aus der Menge $T$}{
-      Berechne die Menge $W$ aller Walks durch die Connected 
+      Berechne die Menge $W$ aller Walks durch die Connected
       Component $c_0$ von $t_0$ aus\;
       \ForEach{Walk $w_0$ aus $W$}{
         \If{Contig-Gesamtlänge > bislang beste Contig-Gesamtlänge}{
@@ -256,7 +256,7 @@ struct GtScaffoldGraph
   Konstruktionsrichtung = Richtung der vom terminalen Knoten $t_0$ ausgehenden Kanten\;
   \ForEach{Kante $A$ vom Knoten $t_0$ ausgehend (in Konstruktionsrichtung)}{
     $k_0$ = $A.pend$\;
-    Speichere Startkante $A$ und Distanz $A.dist$ in Map an Position 
+    Speichere Startkante $A$ und Distanz $A.dist$ in Map an Position
     $k_0$ (für spätere Traversierung)\;
     Schiebe Startkante $A$ und Distanz $A.dist$ in Queue\;
   }
@@ -266,7 +266,7 @@ struct GtScaffoldGraph
     \ForEach{Kante $B$ in Konstruktionsrichtung von $k_0$ aus} {
       $k_1$ = $B.pend$\;
       \If{Distanz zu aktuell betrachtetem Knoten $k_1$ $<$
-        bisher ermittelte Distanz zu $k_1$ {\bf OR} Knoten $k_1$ 
+        bisher ermittelte Distanz zu $k_1$ {\bf OR} Knoten $k_1$
         noch unbetrachtet}{
         Speichere Kante $B$ und Distanz $B.dist$ in Map an Position $k_1$\;
         Schiebe Kante $B$ und Distanz $B.dist$ in Queue\;
