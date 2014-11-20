@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <math.h>
+#include <assert.h>
 #include "gt_scaffolder_graph.h"
 #include "core/queue_api.h"
 #include "core/types_api.h"
@@ -20,7 +21,85 @@
 #define REVERSE 1
 #define SAME 0
 
-GtScaffoldGraph *new_graph(void){
+GtScaffoldGraph *new_graph(const GtUword nofvertices, const GtUword nofedges){
+  GtScaffoldGraph *graph;
+
+  /* SD: malloc innerhalb des Konstruktors oder in der Caller Funktion? */
+  graph = malloc(sizeof(*graph));
+  assert(graph != NULL);
+  graph->vertices = malloc(sizeof(*graph->vertices) * nofvertices);
+  assert(graph->vertices != NULL);
+  graph->edges = malloc(sizeof(*graph->edges) * nofedges);
+  assert(graph->edges != NULL);
+  graph->nofvertices = 0;
+  graph->maxnofvertices = nofvertices;
+  graph->nofedges = 0;
+  graph->maxnofedges = nofedges;
+
+  return graph;
+}
+
+void graph_add_vertex(GtScaffoldGraph *graph, const GtUword seqlen,
+  const float astat, const float copynum){
+  assert(graph != NULL);
+
+  if(graph->nofvertices >= graph->maxnofvertices){
+    fprintf(stderr, "Trying to insert too many vertices!\n");
+    exit(EXIT_FAILURE);
+  }
+
+  /* Knoten erstellen */
+  graph->vertices[graph->nofvertices].id = graph->nofvertices;
+  graph->vertices[graph->nofvertices].seqlen = seqlen;
+  graph->vertices[graph->nofvertices].astat = astat;
+  graph->vertices[graph->nofvertices].copynum = copynum;
+  graph->vertices[graph->nofvertices].nofedges = 0;
+  /* SD: Standardstatus einfügen? Spart evtl einen Initialisierungs-Durchlauf.
+  graph->vertices[graph->nofvertices].state = GS_UNVISITED; */
+
+  graph->nofvertices++;
+}
+
+void graph_add_edge(GtScaffoldGraph *graph, const GtUword vstartID,
+  const GtUword vendID, const GtWord dist, const float stddev,
+  const GtUword numpairs, const bool dir, const bool comp){
+
+  assert(graph != NULL);
+
+  if(graph->nofedges >= graph->maxnofedges){
+    fprintf(stderr, "Trying to insert too many edges!\n");
+    exit(EXIT_FAILURE);
+  }
+
+  /* Kante erstellen */
+  graph->edges[graph->nofedges].id = graph->nofedges;
+  graph->edges[graph->nofedges].start = &graph->vertices[vstartID];
+  graph->edges[graph->nofedges].end = &graph->vertices[vendID];
+  graph->edges[graph->nofedges].dist = dist;
+  graph->edges[graph->nofedges].stddev = stddev;
+  graph->edges[graph->nofedges].numpairs = numpairs;
+  graph->edges[graph->nofedges].dir = dir;
+  graph->edges[graph->nofedges].comp = comp;
+
+  /* Kante im Startknoten eintragen */
+  assert(vstartID < graph->nofvertices && vendID < graph->nofvertices);
+  if(graph->vertices[vstartID].nofedges == 0){
+    graph->vertices[vstartID].edges = malloc( sizeof(*graph->edges) );
+  }
+  else {
+    graph->vertices[vstartID].edges = realloc(graph->vertices[vstartID].edges,
+                                              sizeof(*graph->edges) *
+                                              (graph->vertices[vstartID].nofedges + 1));
+  }
+  graph->vertices[vstartID].edges[graph->vertices[vstartID].nofedges] =
+    &graph->edges[graph->nofedges];
+
+  graph->vertices[vstartID].nofedges++;
+
+  graph->nofedges++;
+}
+
+GtScaffoldGraph *new_graph2(void){
   GtScaffoldGraph *graph;
 
   /* SD: malloc innerhalb des Konstruktors oder in der Caller Funktion? */

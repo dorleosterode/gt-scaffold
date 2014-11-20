@@ -61,8 +61,10 @@ typedef struct GtScaffoldGraphEdge{
 typedef struct GtScaffoldGraph{
   struct GtScaffoldGraphVertex *vertices;
   GtUword nofvertices;
+  GtUword maxnofvertices;
   struct GtScaffoldGraphEdge *edges;
   GtUword nofedges;
+  GtUword maxnofedges;
 } GtScaffoldGraph;
 
 /* Datenstruktur fuer Queue-Element */
@@ -85,7 +87,12 @@ typedef struct Walk{
 
 
 /* Grundlegende Graphfunktionen */
-GtScaffoldGraph *new_graph(void);
+GtScaffoldGraph *new_graph(const GtUword nofvertices, const GtUword nofedges);
+void graph_add_vertex(GtScaffoldGraph *graph, const GtUword seqlen,
+  const float astat, const float copynum);
+void graph_add_edge(GtScaffoldGraph *graph, const GtUword vstartID,
+  const GtUword vendID, const GtWord dist, const float stddev,
+  const GtUword numpairs, const bool dir, const bool comp);
 
 /* Darstellung des Graphen */
 int write_graph(struct GtScaffoldGraph *g, char *filename);

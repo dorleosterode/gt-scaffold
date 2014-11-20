@@ -6,5 +6,6 @@
 *.log
 *.aux
 *~
-.DS_Store
-.pdf
+*.DS_Store
+*.pdf
+*.dot
