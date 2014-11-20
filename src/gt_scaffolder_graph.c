@@ -364,11 +364,11 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
    vorliegen */
 static bool gt_scaffolder_graph_isterminal(const GtScaffoldGraphVertex vertex){
   GtUword sense = 0, antisense = 0, eid;
-  GtScaffoldGraphEdge edge;
+  GtScaffoldGraphEdge *edge;
 
   for (eid = 0; eid < vertex.nofedges; eid++){
     edge = vertex.edges[eid];
-    if (edge.dir == SENSE)
+    if (edge->dir == SENSE)
       sense++;
     else
       antisense++;
