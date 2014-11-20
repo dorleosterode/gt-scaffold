@@ -200,14 +200,14 @@ GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *filename,
 
 /* Pruefung auf eindeutige Ordnung der Kanten edge1, edge 2 mit Wahrscheinlichkeit
    cutoff */
-static bool gt_scaffolder_graph_ambiguousorder(const GtScaffoldGraphEdge edge1,
-      const GtScaffoldGraphEdge edge2, float cutoff){
+static bool gt_scaffolder_graph_ambiguousorder(const GtScaffoldGraphEdge *edge1,
+      const GtScaffoldGraphEdge *edge2, float cutoff){
 
   float expval, variance, interval, prob12, prob21;
 
-  expval = edge1.dist - edge2.dist;
+  expval = edge1->dist - edge2->dist;
   /* sichere Multiplikation, Division */
-  variance = 2 * pow(edge1.stddev,2) - pow(edge2.stddev,2);
+  variance = 2 * pow(edge1->stddev,2) - pow(edge2->stddev,2);
   interval = -expval / sqrt(variance);
   /* Integralfunktion fehlt */
   prob12 = 0.5 * (1 + erf(interval) );
