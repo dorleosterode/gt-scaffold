@@ -7,10 +7,10 @@
 
 int main(void){
   GtScaffoldGraph *graph;
- 
-  graph = new_graph();
+  char outfile[] = "foo.dot";
 
-  graph_show(graph);
+  graph = new_graph();
+  write_graph(graph, outfile);
 
   return EXIT_SUCCESS;
 }

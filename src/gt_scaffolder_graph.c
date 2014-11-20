@@ -20,80 +20,6 @@
 #define REVERSE 1
 #define SAME 0
 
-typedef enum { GS_UNVISITED, GS_REPEAT, GS_POLYMORPHIC, GS_INCONSISTENT,
-               GS_VISITED, GS_PROCESSED } GraphState;
-
-/* Knoten */
-struct GtScaffoldGraphVertex{
-  /* eindeutige ID fuer den Knoten */
-  GtUword id;
-  /* Laenge der Sequenz, die der Contig darstellt */
-  GtUword seqlen;
-  /* Wert der A-Statistik, um Contigs als REPEAT oder UNIQUE
-     klassifizieren zu koennen;
-     in Genom-Tools vom Typ float */
-  float astat;
-  /* abgeschaetzte Anzahl an Vorkommen des Contigs im Genom */
-  float copynum;  
-  GtUword nofedges;
-  /* Sammlung von Kanten, die von dem Contig abgehen */
-  /* Speicherung der ID der Kanten statt Ptr auf Kanten? */
-  struct GtScaffoldGraphEdge **edges;
-  /* Zustand des Knotens */
-  GraphState state;
-};
-
-/* Kante */
-struct GtScaffoldGraphEdge{
-  /* eindeutige ID fuer die Kante */
-  GtUword id;
-  /* Pointer zu dem Knoten, zu dem die Kante fuehrt */
-  struct GtScaffoldGraphVertex *end;
-  /* Pointer zu dem Knoten, von dem die Kante kommt */
-  struct GtScaffoldGraphVertex *start;
-  /* Abschaetzung der Entfernung der verbundenen Contigs */
-  GtWord dist;
-  /* Standardabweichung von der abgeschaetzten Entfernung */
-  float stddev;
-  /* Zustand der Kante */
-  GraphState state;
-  /* Anzahl der Distanzinformationen, die ein Anzeichen fuer die
-  Verbindung der Contigs geben */
-  GtUword numpairs;
-  /* enthaelt die Richtung (Sense, Antisense) und welche
-     Straenge die paired-Information enthalten (die gleiche
-     Richtung oder das Reverse) */
-  bool dir;
-  bool comp;
-};
-
-/* Graph */
-struct GtScaffoldGraph{
-  struct GtScaffoldGraphVertex *vertices;
-  GtUword nofvertices;
-  struct GtScaffoldGraphEdge *edges;
-  GtUword nofedges;
-};
-
-/* Datenstruktur fuer Queue-Element */
-/* SD: Benötigt? */
-typedef struct Pair{
-  float dist;
-  struct GtScaffoldGraphEdge *edge;
-} Pair;
-
-/* Datenstruktur fuer Walk */
-typedef struct Walk{
-  GtUword nofedges;
-  GtUword size;
-  GtUword totalcontiglen;
-  struct GtScaffoldGraphEdge *edges;
-} Walk;
-
-/* Datenstruktur fuer DistanceMap */
-/* Datenstruktur fuer EdgeMap */
-
-
 GtScaffoldGraph *new_graph(void){
   GtScaffoldGraph *graph;
 
@@ -194,7 +120,7 @@ int write_graph(struct GtScaffoldGraph *g, char *filename) {
   FILE *f = fopen(filename, "w");
   if (f == NULL)
     return errno;
-  
+
   /* TODO: errorhandling einfuehren */
   print_graph(g, f);
 
@@ -274,7 +200,7 @@ GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *filename,
 
 /* Pruefung auf eindeutige Ordnung der Kanten edge1, edge 2 mit Wahrscheinlichkeit
    cutoff */
-static bool gt_scaffolder_graph_ambiguousorder(const GtScaffoldGraphEdge edge1,    
+static bool gt_scaffolder_graph_ambiguousorder(const GtScaffoldGraphEdge edge1,
       const GtScaffoldGraphEdge edge2, float cutoff){
 
   float expval, variance, interval, prob12, prob21;
@@ -286,7 +212,7 @@ static bool gt_scaffolder_graph_ambiguousorder(const GtScaffoldGraphEdge edge1,
   /* Integralfunktion fehlt */
   prob12 = 0.5 * (1 + erf(interval) );
   prob21 = 1.0 - prob12;
-  
+
   return (prob12 <= cutoff && prob21 <= cutoff);
 }
 
@@ -299,21 +225,21 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
   GtUword vid, eid_1, eid_2, eid_3, maxoverlap;
   float sum_copynum;
   unsigned int dir; /* int statt bool, weil Iteration bislang nicht möglich */
-  int had_err = 0; 
-  
+  int had_err = 0;
+
   /* Iteration ueber alle Knoten */
   for (vid = 0; vid < graph->nofvertices; vid++){
     vertex = graph->vertices[vid];
     /* Iteration ueber alle Richtungen (Sense/Antisense) */
-    for (dir = 0; dir < 2; dir++){ 
-      /* Iteration ueber alle Kantenpaare */    
+    for (dir = 0; dir < 2; dir++){
+      /* Iteration ueber alle Kantenpaare */
       for (eid_1 = 0; eid_1 < vertex.nofedges; eid_1++){
         for (eid_2 = eid_1+1; eid_2 < vertex.nofedges; eid_2++){
           edge1 = vertex.edges[eid_1];
           edge2 = vertex.edges[eid_2];
           if (edge1->dir == dir && edge2->dir == dir){
-            /* Pruefung des Kantenpaares edge1, edge2 auf polymorphe Merkmale */  
-            sum_copynum = edge1->end->copynum + edge2->end->copynum;       
+            /* Pruefung des Kantenpaares edge1, edge2 auf polymorphe Merkmale */
+            sum_copynum = edge1->end->copynum + edge2->end->copynum;
             if (gt_scaffolder_graph_ambiguousorder(*edge1, *edge2, pcutoff) &&
                 sum_copynum < cncutoff){
               /* Markierung Endknoten mit kleinerer estCopyNum als polymorph */
@@ -322,7 +248,7 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
               else
                 polymorphic_vertex = *edge2->end;
               /* Markierung aller Sense- /Antisensekanten des polymorphen Knoten
-                 als polymorph */   
+                 als polymorph */
               for (eid_3 = 0; eid_3 < polymorphic_vertex.nofedges; eid_3++)
                 polymorphic_vertex.edges[eid_3]->state = GS_POLYMORPHIC;
               polymorphic_vertex.state = GS_POLYMORPHIC;
@@ -335,20 +261,20 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
       /* keine Pruefung auf inkonsistente Kanten fuer polymorphe Knoten
          notwendig */
       if (vertex.state == GS_POLYMORPHIC)
-        break; 
-      /* Iteration ueber alle nicht-polymorphen Kantenpaare in derselben Richtung */    
+        break;
+      /* Iteration ueber alle nicht-polymorphen Kantenpaare in derselben Richtung */
       for (eid_1 = 0; eid_1 < vertex.nofedges; eid_1++){
         for (eid_2 = eid_1+1; eid_2 < vertex.nofedges; eid_2++){
           edge1 = vertex.edges[eid_1];
-          edge2 = vertex.edges[eid_2]; 
+          edge2 = vertex.edges[eid_2];
           if (edge1->dir == dir && edge2->dir == dir &&
               edge1->state != GS_POLYMORPHIC && edge2->state != GS_POLYMORPHIC){
-            /* TODO: calculate overlapp*/               
+            /* TODO: calculate overlapp*/
           }
           maxoverlap = 10; /* Compiler meckert sonst über unbenutzte Variable */
         }
       }
-      
+
      /* Pruefung aller Kantenpaare auf maximale Ueberlappung > ocutoff */
       if (maxoverlap > ocutoff){
         for (eid_1 = 0; eid_1 < vertex.nofedges; eid_1++)
@@ -377,11 +303,11 @@ static bool gt_scaffolder_graph_isterminal(const GtScaffoldGraphVertex vertex){
   return ((sense == 0 && antisense != 0) || (sense != 0 && antisense == 0));
 }
 
-/* Entfernung von Zyklen 
+/* Entfernung von Zyklen
 static void gt_scaffolder_removecycles(GtScaffoldGraph *graph){
 }*/
 
-/* Erstellung eines neuen Walks */ 
+/* Erstellung eines neuen Walks */
 static Walk *gt_scaffolder_walk_new(void){
   Walk *walk;
 
@@ -426,8 +352,8 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
   Pair *pair, *updatepair;
   bool dir;
   Walk *bestwalk, *currentwalk;
-  
-  /* Entfernung von Zyklen 
+
+  /* Entfernung von Zyklen
      gt_scaffolder_removecycles(graph); */
 
   /* Iteration ueber alle Knoten, Makierung aller Knoten als unbesucht */
@@ -438,7 +364,7 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
       continue;
     vertex.state = GS_UNVISITED;
   }
-  
+
  /* BFS-Traversierung durch Zusammenhangskomponenten des Graphen,
     siehe GraphSearchTree.h */
   ccnumber = 0;
@@ -453,7 +379,7 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
     if (vertex.state == GS_REPEAT || vertex.state == GS_POLYMORPHIC ||
         vertex.state == GS_VISITED)
       continue;
-    ccnumber += 1; 
+    ccnumber += 1;
     vertex.state = GS_PROCESSED;
     gt_queue_add(vqueue, &vertex);
 
@@ -465,7 +391,7 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
          ausgehend von terminalen Knoten zu terminalen Knoten */
       lengthbestwalk = 0;
       bestwalk = gt_scaffolder_walk_new();
-      wqueue = gt_queue_new(); 
+      wqueue = gt_queue_new();
 
       if (gt_scaffolder_graph_isterminal(vertex)){
         dir = vertex.edges[0]->dir;
@@ -474,12 +400,12 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
           endvertex = *edge->end;
           pair->edge = edge;
           pair->dist = edge->dist;
-        
+
           distancemap[endvertex.id] = edge->dist;
           edgemap[endvertex.id] = edge;
 
           gt_queue_add(wqueue, pair);
-        } 
+        }
         while(gt_queue_size(wqueue) != 0){
           pair = (Pair*)gt_queue_get(wqueue);
           edge = pair->edge;
@@ -488,7 +414,7 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
           /* Ruecktraversierung durch EdgeMap wenn terminaler Knoten erreicht,
              Konstruktion des Walks  */
           if (gt_scaffolder_graph_isterminal(endvertex)){
-            
+
             currentwalk = gt_scaffolder_walk_new();
             currentvertex = endvertex;
             while (currentvertex.id != vertex.id){
@@ -496,10 +422,10 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
              /* Start NICHT end */
               currentvertex = *reverseedge->end;
              /* Speicherung des aktuellen Walks */
-             /* Kante vorher duplizieren */  
-              gt_scaffolder_walk_addegde(currentwalk, *reverseedge);              
+             /* Kante vorher duplizieren */
+              gt_scaffolder_walk_addegde(currentwalk, *reverseedge);
             }
-            
+
             /* Ermittelung Contig-Gesamtlaenge des aktuellen Walks  */
             lengthcwalk = gt_scaffolder_walk_getlength(currentwalk);
             if ( lengthcwalk > lengthbestwalk){
@@ -524,7 +450,7 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
                 edgemap[nextendvertex.id] = nextedge;
                 updatepair->edge = nextedge;
                 updatepair->dist = distance;
-                gt_queue_add(wqueue, updatepair); 
+                gt_queue_add(wqueue, updatepair);
               }
             }
           }

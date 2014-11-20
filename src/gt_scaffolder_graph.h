@@ -3,19 +3,91 @@
    <stefan.dang@studium.uni-hamburg.de>
    Encoding: UTF-8
 */
+#include <stdio.h>
 #include "core/types_api.h"
 
 
 #ifndef GT_SCAFFOLDER_GRAPH_H
 #define GT_SCAFFOLDER_GRAPH_H
 
-typedef struct GtScaffoldGraph GtScaffoldGraph;
-typedef struct GtScaffoldGraphVertex GtScaffoldGraphVertex;
-typedef struct GtScaffoldGraphEdge GtScaffoldGraphEdge;
+typedef enum { GS_UNVISITED, GS_REPEAT, GS_POLYMORPHIC, GS_INCONSISTENT,
+               GS_VISITED, GS_PROCESSED } GraphState;
+
+/* Knoten */
+typedef struct GtScaffoldGraphVertex{
+  /* eindeutige ID fuer den Knoten */
+  GtUword id;
+  /* Laenge der Sequenz, die der Contig darstellt */
+  GtUword seqlen;
+  /* Wert der A-Statistik, um Contigs als REPEAT oder UNIQUE
+     klassifizieren zu koennen;
+     in Genom-Tools vom Typ float */
+  float astat;
+  /* abgeschaetzte Anzahl an Vorkommen des Contigs im Genom */
+  float copynum;
+  GtUword nofedges;
+  /* Sammlung von Kanten, die von dem Contig abgehen */
+  /* Speicherung der ID der Kanten statt Ptr auf Kanten? */
+  struct GtScaffoldGraphEdge **edges;
+  /* Zustand des Knotens */
+  GraphState state;
+} GtScaffoldGraphVertex;
+
+/* Kante */
+typedef struct GtScaffoldGraphEdge{
+  /* eindeutige ID fuer die Kante */
+  GtUword id;
+  /* Pointer zu dem Knoten, zu dem die Kante fuehrt */
+  struct GtScaffoldGraphVertex *end;
+  /* Pointer zu dem Knoten, von dem die Kante kommt */
+  struct GtScaffoldGraphVertex *start;
+  /* Abschaetzung der Entfernung der verbundenen Contigs */
+  GtWord dist;
+  /* Standardabweichung von der abgeschaetzten Entfernung */
+  float stddev;
+  /* Zustand der Kante */
+  GraphState state;
+  /* Anzahl der Distanzinformationen, die ein Anzeichen fuer die
+  Verbindung der Contigs geben */
+  GtUword numpairs;
+  /* enthaelt die Richtung (Sense, Antisense) und welche
+     Straenge die paired-Information enthalten (die gleiche
+     Richtung oder das Reverse) */
+  bool dir;
+  bool comp;
+} GtScaffoldGraphEdge;
+
+/* Graph */
+typedef struct GtScaffoldGraph{
+  struct GtScaffoldGraphVertex *vertices;
+  GtUword nofvertices;
+  struct GtScaffoldGraphEdge *edges;
+  GtUword nofedges;
+} GtScaffoldGraph;
+
+/* Datenstruktur fuer Queue-Element */
+/* SD: Benötigt? */
+typedef struct Pair{
+  float dist;
+  struct GtScaffoldGraphEdge *edge;
+} Pair;
+
+/* Datenstruktur fuer Walk */
+typedef struct Walk{
+  GtUword nofedges;
+  GtUword size;
+  GtUword totalcontiglen;
+  struct GtScaffoldGraphEdge *edges;
+} Walk;
+
+/* Datenstruktur fuer DistanceMap */
+/* Datenstruktur fuer EdgeMap */
 
 
-/* Testfunktionen fuer Graph-Datenstruktur */
+/* Grundlegende Graphfunktionen */
 GtScaffoldGraph *new_graph(void);
+
+/* Darstellung des Graphen */
 int write_graph(struct GtScaffoldGraph *g, char *filename);
 void print_graph(struct GtScaffoldGraph *g, FILE *f);
 
