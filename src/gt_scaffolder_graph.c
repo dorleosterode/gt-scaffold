@@ -227,7 +227,7 @@ void print_graph(struct GtScaffoldGraph *g, FILE *f) {
       color = "black";
     }
 
-    fprintf(f, "%d [color=\"%s\"];\n", v->id, color);
+    fprintf(f, "%lu [color=\"%s\"];\n", v->id, color);
   }
 
   /* alle Kanten durchgehen und schreiben */
@@ -244,7 +244,7 @@ void print_graph(struct GtScaffoldGraph *g, FILE *f) {
       color = "black";
     }
 
-    fprintf(f, "%d -- %d [color=\"%s\" label=\"%d\"];\n", e->start->id, e->end->id, color, e->dist);
+    fprintf(f, "%lu -- %lu [color=\"%s\" label=\"%lu\"];\n", e->start->id, e->end->id, color, e->dist);
   }
 
   /* die letzte Zeile schreiben */
