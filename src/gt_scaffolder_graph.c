@@ -20,6 +20,7 @@
 #define SENSE 0
 #define REVERSE 1
 #define SAME 0
+#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
 
 GtScaffoldGraph *new_graph(const GtUword nofvertices, const GtUword nofedges){
   GtScaffoldGraph *graph;
@@ -301,9 +302,11 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
     float cncutoff, GtUword ocutoff){
   GtScaffoldGraphVertex *vertex, *polymorphic_vertex;
   GtScaffoldGraphEdge *edge1, *edge2;
-  GtUword vid, eid_1, eid_2, eid_3, maxoverlap;
+  GtUword vid, eid_1, eid_2, eid_3, overlap;
+  GtUword maxoverlap = 0;
   float sum_copynum;
   unsigned int dir; /* int statt bool, weil Iteration bislang nicht möglich */
+  GtWord intersect_start, intersect_end;
   int had_err = 0;
 
   /* Iteration ueber alle Knoten */
@@ -349,8 +352,16 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
           if (edge1->dir == dir && edge2->dir == dir &&
               edge1->state != GS_POLYMORPHIC && edge2->state != GS_POLYMORPHIC){
             /* TODO: calculate overlapp*/
+	    if (edge2->dist > (edge1->end->seqlen - 1) ||
+		edge1->dist > (edge2->end->seqlen - 1)){
+	      intersect_start = MAX(edge1->dist, edge2->dist);
+	      intersect_end = MAX(edge1->end->seqlen - 1, edge2->end->seqlen - 1);
+	      overlap = intersect_end - intersect_start + 1;
+	      if (overlap > maxoverlap) {
+		maxoverlap = overlap;
+	      }
+	    }
           }
-          maxoverlap = 10; /* Compiler meckert sonst über unbenutzte Variable */
         }
       }
 
