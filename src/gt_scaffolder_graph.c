@@ -295,7 +295,7 @@ static bool gt_scaffolder_graph_ambiguousorder(const GtScaffoldGraphEdge edge1,
 int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
     float cncutoff, GtUword ocutoff){
   GtScaffoldGraphVertex vertex, polymorphic_vertex;
-  GtScaffoldGraphEdge edge1, edge2;
+  GtScaffoldGraphEdge *edge1, *edge2;
   GtUword vid, eid_1, eid_2, eid_3, maxoverlap;
   float sum_copynum;
   unsigned int dir; /* int statt bool, weil Iteration bislang nicht möglich */
@@ -311,20 +311,20 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
         for (eid_2 = eid_1+1; eid_2 < vertex.nofedges; eid_2++){
           edge1 = vertex.edges[eid_1];
           edge2 = vertex.edges[eid_2];
-          if (edge1.dir == dir && edge2.dir == dir){
+          if (edge1->dir == dir && edge2->dir == dir){
             /* Pruefung des Kantenpaares edge1, edge2 auf polymorphe Merkmale */  
-            sum_copynum = edge1.end.copynum + edge2.end.copynum;       
-            if (gt_scaffolder_graph_ambiguousorder(edge1, edge2, pcutoff) &&
+            sum_copynum = edge1->end->copynum + edge2->end->copynum;       
+            if (gt_scaffolder_graph_ambiguousorder(*edge1, *edge2, pcutoff) &&
                 sum_copynum < cncutoff){
               /* Markierung Endknoten mit kleinerer estCopyNum als polymorph */
-              if (edge1.end.copynum < edge2.end.copynum)
-                polymorphic_vertex = edge1.end;
+              if (edge1->end->copynum < edge2->end->copynum)
+                polymorphic_vertex = *edge1->end;
               else
-                polymorphic_vertex = edge2.end;
+                polymorphic_vertex = *edge2->end;
               /* Markierung aller Sense- /Antisensekanten des polymorphen Knoten
                  als polymorph */   
               for (eid_3 = 0; eid_3 < polymorphic_vertex.nofedges; eid_3++)
-                polymorphic_vertex.edges[eid_3].state = GS_POLYMORPHIC;
+                polymorphic_vertex.edges[eid_3]->state = GS_POLYMORPHIC;
               polymorphic_vertex.state = GS_POLYMORPHIC;
             }
             /* SD: Nur das erste Paar polymoprh markieren? */
@@ -341,8 +341,8 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
         for (eid_2 = eid_1+1; eid_2 < vertex.nofedges; eid_2++){
           edge1 = vertex.edges[eid_1];
           edge2 = vertex.edges[eid_2]; 
-          if (edge1.dir == dir && edge2.dir == dir &&
-              edge1.state != GS_POLYMORPHIC && edge2.state != GS_POLYMORPHIC){
+          if (edge1->dir == dir && edge2->dir == dir &&
+              edge1->state != GS_POLYMORPHIC && edge2->state != GS_POLYMORPHIC){
             /* TODO: calculate overlapp*/               
           }
           maxoverlap = 10; /* Compiler meckert sonst über unbenutzte Variable */
@@ -352,7 +352,7 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
      /* Pruefung aller Kantenpaare auf maximale Ueberlappung > ocutoff */
       if (maxoverlap > ocutoff){
         for (eid_1 = 0; eid_1 < vertex.nofedges; eid_1++)
-         vertex.edges[eid_1].state = GS_INCONSISTENT;
+         vertex.edges[eid_1]->state = GS_INCONSISTENT;
       }
     }
   }
