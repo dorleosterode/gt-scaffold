@@ -79,7 +79,7 @@ struct GtScaffoldGraph{
 /* SD: Benötigt? */
 typedef struct Pair{
   float dist;
-  struct GtScaffoldGraphEdge edge;
+  struct GtScaffoldGraphEdge *edge;
 } Pair;
 
 /* Datenstruktur fuer Walk */
@@ -419,7 +419,7 @@ static void gt_scaffolder_walk_addegde(Walk *walk, GtScaffoldGraphEdge edge){
 void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
   GtScaffoldGraphVertex vertex, currentvertex, nextvertex, nextendvertex,
                         endvertex;
-  GtScaffoldGraphEdge edge, nextedge, reverseedge, *edgemap;
+  GtScaffoldGraphEdge *edge, *nextedge, *reverseedge, **edgemap;
   GtUword vid, eid, ccnumber, lengthcwalk, lengthbestwalk;
   GtQueue *vqueue, *wqueue;
   float distance, *distancemap;
@@ -468,14 +468,14 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
       wqueue = gt_queue_new(); 
 
       if (gt_scaffolder_graph_isterminal(vertex)){
-        dir = vertex.edges[0].dir;
+        dir = vertex.edges[0]->dir;
         for (eid = 0; eid < vertex.nofedges; eid++){
           edge = vertex.edges[eid];
-          endvertex = edge.end;
+          endvertex = *edge->end;
           pair->edge = edge;
-          pair->dist = edge.dist;
+          pair->dist = edge->dist;
         
-          distancemap[endvertex.id] = edge.dist;
+          distancemap[endvertex.id] = edge->dist;
           edgemap[endvertex.id] = edge;
 
           gt_queue_add(wqueue, pair);
@@ -483,7 +483,7 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
         while(gt_queue_size(wqueue) != 0){
           pair = (Pair*)gt_queue_get(wqueue);
           edge = pair->edge;
-          endvertex = edge.end;
+          endvertex = *edge->end;
 
           /* Ruecktraversierung durch EdgeMap wenn terminaler Knoten erreicht,
              Konstruktion des Walks  */
@@ -494,10 +494,10 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
             while (currentvertex.id != vertex.id){
               reverseedge = edgemap[currentvertex.id];
              /* Start NICHT end */
-              currentvertex = reverseedge.end;
+              currentvertex = *reverseedge->end;
              /* Speicherung des aktuellen Walks */
              /* Kante vorher duplizieren */  
-              gt_scaffolder_walk_addegde(currentwalk, reverseedge);              
+              gt_scaffolder_walk_addegde(currentwalk, *reverseedge);              
             }
             
             /* Ermittelung Contig-Gesamtlaenge des aktuellen Walks  */
@@ -514,9 +514,9 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
           /* SD: Terminal Set implementieren, bestWalk über Rücktraversierung */
           for (eid = 0; eid < endvertex.nofedges; eid++){
             nextedge = endvertex.edges[eid];
-            if (nextedge.dir == dir){
-              nextendvertex = nextedge.end;
-              distance = pair->dist + nextedge.dist;
+            if (nextedge->dir == dir){
+              nextendvertex = *nextedge->end;
+              distance = pair->dist + nextedge->dist;
 
               if (distancemap[nextendvertex.id] == 0 ||
                   distancemap[nextendvertex.id] > distance){
@@ -535,7 +535,7 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
       currentvertex.state = GS_VISITED;
       for (eid = 0; eid < currentvertex.nofedges; eid++){
         edge = currentvertex.edges[eid];
-        nextvertex = edge.end;
+        nextvertex = *edge->end;
         if (vertex.state == GS_REPEAT || vertex.state == GS_POLYMORPHIC)
           continue;
         if (nextvertex.state == GS_UNVISITED){
