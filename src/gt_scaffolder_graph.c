@@ -170,18 +170,18 @@ GtScaffoldGraph *new_graph(void){
   graph->edges[4].start = &graph->vertices[4];
   graph->edges[5].start = &graph->vertices[4];
 
-  graph->vertices[4].edges[0].end = &graph->vertices[3];
-  graph->vertices[4].edges[1].end = &graph->vertices[4];
-  graph->vertices[3].edges[0].end = &graph->vertices[1];
-  graph->vertices[3].edges[1].end = &graph->vertices[3];
-  graph->vertices[3].edges[2].end = &graph->vertices[3];
-  graph->vertices[2].edges[0].end = &graph->vertices[3];
-  graph->vertices[2].edges[1].end = &graph->vertices[2];
-  graph->vertices[1].edges[0].end = &graph->vertices[0];
-  graph->vertices[1].edges[1].end = &graph->vertices[1];
-  graph->vertices[1].edges[2].end = &graph->vertices[4];
-  graph->vertices[0].edges[0].end = &graph->vertices[2];
-  graph->vertices[0].edges[1].end = &graph->vertices[0];
+  graph->vertices[4].edges[0]->end = &graph->vertices[3];
+  graph->vertices[4].edges[1]->end = &graph->vertices[4];
+  graph->vertices[3].edges[0]->end = &graph->vertices[1];
+  graph->vertices[3].edges[1]->end = &graph->vertices[3];
+  graph->vertices[3].edges[2]->end = &graph->vertices[3];
+  graph->vertices[2].edges[0]->end = &graph->vertices[3];
+  graph->vertices[2].edges[1]->end = &graph->vertices[2];
+  graph->vertices[1].edges[0]->end = &graph->vertices[0];
+  graph->vertices[1].edges[1]->end = &graph->vertices[1];
+  graph->vertices[1].edges[2]->end = &graph->vertices[4];
+  graph->vertices[0].edges[0]->end = &graph->vertices[2];
+  graph->vertices[0].edges[1]->end = &graph->vertices[0];
 
   return graph;
 }
