@@ -410,10 +410,8 @@ static void gt_scaffolder_walk_addegde(Walk *walk, GtScaffoldGraphEdge edge){
     walk->size += 10;
     walk->edges = realloc(walk->edges, walk->size*sizeof(*walk->edges));
   }
-  //twin mit NULL initialisieren, wegen realloc 
-  edge.twin = NULL;
   walk->edges[walk->nofedges] = edge;
-  walk->totalcontiglen += edge.end.seqlen;
+  walk->totalcontiglen += edge.end->seqlen;
   walk->nofedges++;
 }
 
