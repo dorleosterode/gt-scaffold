@@ -46,10 +46,10 @@ struct GtScaffoldGraphVertex{
 struct GtScaffoldGraphEdge{
   /* eindeutige ID fuer die Kante */
   GtUword id;
-  /*  Knoten, zu dem die Kante fuehrt */
-  struct GtScaffoldGraphVertex end;
-  /* Kante, die genau in die andere Richtung fuehrt, SD: entfernen, Startknoten merken */
-  struct GtScaffoldGraphEdge *twin;
+  /* Pointer zu dem Knoten, zu dem die Kante fuehrt */
+  struct GtScaffoldGraphVertex *end;
+  /* Pointer zu dem Knoten, von dem die Kante kommt */
+  struct GtScaffoldGraphVertex *start;
   /* Abschaetzung der Entfernung der verbundenen Contigs */
   GtWord dist;
   /* Standardabweichung von der abgeschaetzten Entfernung */
