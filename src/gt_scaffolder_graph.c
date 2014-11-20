@@ -288,12 +288,12 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
 
 /* Ueberpruefung ob Knoten terminal ist, d.h. nur sense oder antisense-Kanten
    vorliegen */
-static bool gt_scaffolder_graph_isterminal(const GtScaffoldGraphVertex vertex){
+static bool gt_scaffolder_graph_isterminal(const GtScaffoldGraphVertex *vertex){
   GtUword sense = 0, antisense = 0, eid;
   GtScaffoldGraphEdge *edge;
 
-  for (eid = 0; eid < vertex.nofedges; eid++){
-    edge = vertex.edges[eid];
+  for (eid = 0; eid < vertex->nofedges; eid++){
+    edge = vertex->edges[eid];
     if (edge->dir == SENSE)
       sense++;
     else
@@ -393,7 +393,7 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
       bestwalk = gt_scaffolder_walk_new();
       wqueue = gt_queue_new();
 
-      if (gt_scaffolder_graph_isterminal(vertex)){
+      if (gt_scaffolder_graph_isterminal(&vertex)){
         dir = vertex.edges[0]->dir;
         for (eid = 0; eid < vertex.nofedges; eid++){
           edge = vertex.edges[eid];
@@ -413,7 +413,7 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
 
           /* Ruecktraversierung durch EdgeMap wenn terminaler Knoten erreicht,
              Konstruktion des Walks  */
-          if (gt_scaffolder_graph_isterminal(endvertex)){
+          if (gt_scaffolder_graph_isterminal(&endvertex)){
 
             currentwalk = gt_scaffolder_walk_new();
             currentvertex = endvertex;
