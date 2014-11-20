@@ -77,7 +77,7 @@ typedef struct Walk{
   GtUword nofedges;
   GtUword size;
   GtUword totalcontiglen;
-  struct GtScaffoldGraphEdge *edges;
+  struct GtScaffoldGraphEdge **edges;
 } Walk;
 
 /* Datenstruktur fuer DistanceMap */
