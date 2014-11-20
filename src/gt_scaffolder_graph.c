@@ -343,8 +343,8 @@ static void gt_scaffolder_walk_addegde(Walk *walk, GtScaffoldGraphEdge *edge){
 
 /* Konstruktion des Scaffolds mit groesster Contig-Gesamtlaenge */
 void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
-  GtScaffoldGraphVertex vertex, currentvertex, nextvertex, nextendvertex,
-                        endvertex;
+  GtScaffoldGraphVertex *vertex, *currentvertex, *nextvertex, *nextendvertex,
+                        *endvertex;
   GtScaffoldGraphEdge *edge, *nextedge, *reverseedge, **edgemap;
   GtUword vid, eid, ccnumber, lengthcwalk, lengthbestwalk;
   GtQueue *vqueue, *wqueue;
@@ -358,11 +358,11 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
 
   /* Iteration ueber alle Knoten, Makierung aller Knoten als unbesucht */
   for (vid = 0; vid < graph->nofvertices; vid++){
-    vertex = graph->vertices[vid];
+    vertex = &graph->vertices[vid];
     /* SD: Existieren Repeat-Knoten, nach Prozessierung der AStatistik? */
-    if (vertex.state == GS_REPEAT || vertex.state == GS_POLYMORPHIC)
+    if (vertex->state == GS_REPEAT || vertex->state == GS_POLYMORPHIC)
       continue;
-    vertex.state = GS_UNVISITED;
+    vertex->state = GS_UNVISITED;
   }
 
  /* BFS-Traversierung durch Zusammenhangskomponenten des Graphen,
@@ -375,16 +375,16 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
   edgemap = malloc(sizeof(*edgemap)*graph->nofvertices);
 
   for (vid = 0; vid < graph->nofvertices; vid++){
-    vertex = graph->vertices[vid];
-    if (vertex.state == GS_REPEAT || vertex.state == GS_POLYMORPHIC ||
-        vertex.state == GS_VISITED)
+    vertex = &graph->vertices[vid];
+    if (vertex->state == GS_REPEAT || vertex->state == GS_POLYMORPHIC ||
+        vertex->state == GS_VISITED)
       continue;
     ccnumber += 1;
-    vertex.state = GS_PROCESSED;
-    gt_queue_add(vqueue, &vertex);
+    vertex->state = GS_PROCESSED;
+    gt_queue_add(vqueue, vertex); // TODO: hier moechte evtl nicht die adresse von dem pointer uebergeben werden
 
     while (gt_queue_size(vqueue) != 0){
-      currentvertex = *(GtScaffoldGraphVertex*)gt_queue_get(vqueue);
+      currentvertex = (GtScaffoldGraphVertex*)gt_queue_get(vqueue);
       //currentvertex.cc = ccnumber;
 
       /* BFS-Traversierung innerhalb aktueller Zusammenhangskomponente
@@ -393,34 +393,34 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
       bestwalk = gt_scaffolder_walk_new();
       wqueue = gt_queue_new();
 
-      if (gt_scaffolder_graph_isterminal(&vertex)){
-        dir = vertex.edges[0]->dir;
-        for (eid = 0; eid < vertex.nofedges; eid++){
-          edge = vertex.edges[eid];
-          endvertex = *edge->end;
+      if (gt_scaffolder_graph_isterminal(vertex)){
+        dir = vertex->edges[0]->dir;
+        for (eid = 0; eid < vertex->nofedges; eid++){
+          edge = vertex->edges[eid];
+          endvertex = edge->end;
           pair->edge = edge;
           pair->dist = edge->dist;
 
-          distancemap[endvertex.id] = edge->dist;
-          edgemap[endvertex.id] = edge;
+          distancemap[endvertex->id] = edge->dist;
+          edgemap[endvertex->id] = edge;
 
           gt_queue_add(wqueue, pair);
         }
         while(gt_queue_size(wqueue) != 0){
           pair = (Pair*)gt_queue_get(wqueue);
           edge = pair->edge;
-          endvertex = *edge->end;
+          endvertex = edge->end;
 
           /* Ruecktraversierung durch EdgeMap wenn terminaler Knoten erreicht,
              Konstruktion des Walks  */
-          if (gt_scaffolder_graph_isterminal(&endvertex)){
+          if (gt_scaffolder_graph_isterminal(endvertex)){
 
             currentwalk = gt_scaffolder_walk_new();
             currentvertex = endvertex;
-            while (currentvertex.id != vertex.id){
-              reverseedge = edgemap[currentvertex.id];
+            while (currentvertex->id != vertex->id){
+              reverseedge = edgemap[currentvertex->id];
              /* Start NICHT end */
-              currentvertex = *reverseedge->end;
+              currentvertex = reverseedge->end;
              /* Speicherung des aktuellen Walks */
              /* Kante vorher duplizieren */
               gt_scaffolder_walk_addegde(currentwalk, reverseedge);
@@ -438,16 +438,16 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
           }
 
           /* SD: Terminal Set implementieren, bestWalk über Rücktraversierung */
-          for (eid = 0; eid < endvertex.nofedges; eid++){
-            nextedge = endvertex.edges[eid];
+          for (eid = 0; eid < endvertex->nofedges; eid++){
+            nextedge = endvertex->edges[eid];
             if (nextedge->dir == dir){
-              nextendvertex = *nextedge->end;
+              nextendvertex = nextedge->end;
               distance = pair->dist + nextedge->dist;
 
-              if (distancemap[nextendvertex.id] == 0 ||
-                  distancemap[nextendvertex.id] > distance){
-                distancemap[nextendvertex.id] = distance;
-                edgemap[nextendvertex.id] = nextedge;
+              if (distancemap[nextendvertex->id] == 0 ||
+                  distancemap[nextendvertex->id] > distance){
+                distancemap[nextendvertex->id] = distance;
+                edgemap[nextendvertex->id] = nextedge;
                 updatepair->edge = nextedge;
                 updatepair->dist = distance;
                 gt_queue_add(wqueue, updatepair);
@@ -458,15 +458,15 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph){
       }
 
 
-      currentvertex.state = GS_VISITED;
-      for (eid = 0; eid < currentvertex.nofedges; eid++){
-        edge = currentvertex.edges[eid];
-        nextvertex = *edge->end;
-        if (vertex.state == GS_REPEAT || vertex.state == GS_POLYMORPHIC)
+      currentvertex->state = GS_VISITED;
+      for (eid = 0; eid < currentvertex->nofedges; eid++){
+        edge = currentvertex->edges[eid];
+        nextvertex = edge->end;
+        if (vertex->state == GS_REPEAT || vertex->state == GS_POLYMORPHIC)
           continue;
-        if (nextvertex.state == GS_UNVISITED){
-          nextvertex.state = GS_PROCESSED;
-          gt_queue_add(vqueue, &nextvertex);
+        if (nextvertex->state == GS_UNVISITED){
+          nextvertex->state = GS_PROCESSED;
+          gt_queue_add(vqueue, nextvertex);
         }
       }
     }
