@@ -17,6 +17,8 @@ typedef enum { GS_UNVISITED, GS_REPEAT, GS_POLYMORPHIC, GS_INCONSISTENT,
 typedef struct GtScaffoldGraphVertex{
   /* eindeutige ID fuer den Knoten */
   GtUword id;
+  /* Headersequenz des zugehoerigen Contigs */
+  char *header;
   /* Laenge der Sequenz, die der Contig darstellt */
   GtUword seqlen;
   /* Wert der A-Statistik, um Contigs als REPEAT oder UNIQUE
@@ -99,7 +101,8 @@ int write_graph(struct GtScaffoldGraph *g, char *filename);
 void print_graph(struct GtScaffoldGraph *g, FILE *f);
 
 /* the scaffolder_graph tool */
-GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *filename, int *had_err);
+GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctgfilename,
+              GtUword minctglen);
 int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
     float cncutoff, GtUword ocutoff);
 void gt_scaffolder_makescaffold(GtScaffoldGraph *graph);

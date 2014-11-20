@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <math.h>
@@ -164,26 +165,98 @@ void print_graph(struct GtScaffoldGraph *g, FILE *f) {
   fprintf(f, "}\n");
 }
 
-
-/* SD: Noch nicht funktionstüchtig */
-GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *filename,
-  int *had_err)
-{
+/* Einlesen der Contigs im FASTA-Format und Speicherung der Contigs
+   mit deren Header und Laenge als Knoten des Scaffold Graphen */
+static void read_contigs(const char *filename, GtScaffoldGraph *graph,
+                         GtUword minctglen){
+  GtUword num_of_sequences = 0, entryid;
+  char currentchar = '\0';
   FILE *infile;
-  char buffer[BUFSIZ];
+  bool firstseq = true, firstline = true;
+  char buffer[BUFSIZ], itembuf[BUFSIZ];
+
+  infile = fopen(filename, "rb");
+  if (infile == NULL){
+     fprintf(stderr,"ERROR: Can not open file %s !\n",filename);
+     exit(EXIT_FAILURE);
+  }
+  /* Zaehlen der Sequenzen */
+  while (EOF != (currentchar = fgetc(infile))) {
+    if (currentchar == '>')
+    num_of_sequences++;
+  }
+  
+  if (num_of_sequences == 0){
+     fprintf(stderr,"ERROR: No sequences !\n");
+     exit(EXIT_FAILURE);
+  }
+
+  entryid = 0;
+  graph->nofvertices = num_of_sequences;
+  graph->vertices = malloc(sizeof(*graph->vertices) * num_of_sequences);
+
+  /* Lesen der Datei zeilenweise */
+  rewind(infile);
+  while (fgets(buffer, BUFSIZ, infile) != NULL) {
+    if (sscanf(buffer, ">%s", itembuf) == 1) {
+      /* Lesen des Header */
+      if (!firstseq) {
+        /* Wenn Laenge des aktuellen Contigs unter Schwellenwert minctglen,
+           zugehoerigen Header loeschen, ansonsten Contig-Zaehler erhoehen */
+        if (graph->vertices[entryid].seqlen < minctglen)
+          free(graph->vertices[entryid].header);
+        else
+          entryid++;
+
+        firstline = true;
+      }
+      else
+        firstseq = false;
+      /* Speicherung neuen Header */
+      graph->vertices[entryid].header = malloc(sizeof
+            (*graph->vertices[entryid].header) * strlen(itembuf) + 1);
+      strncpy(graph->vertices[entryid].header, itembuf, strlen(itembuf));
+    }
+    else if (sscanf(buffer, "%s", itembuf) == 1) {
+      /* Lesen eines Kommentars */
+      if (itembuf[0] == ';')
+        continue;
+      /* Lesen einer Sequenz */
+      if (firstline) {
+        /* erste Zeile der Sequenz */
+        graph->vertices[entryid].seqlen = strlen(itembuf);
+        firstline = false;
+      }
+      else
+        graph->vertices[entryid].seqlen += strlen(itembuf);
+    }
+  }
+
+  fclose(infile);
+}
+
+
+/* Erzeugung des Scaffold Graphen */
+GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctgfilename,
+                 GtUword minctglen){
   GtScaffoldGraph *graph;
 
   graph = malloc(sizeof(*graph));
-  infile = fopen(filename, "r");
-  rewind(infile);
-  while (fgets(buffer, BUFSIZ, infile) != NULL) {
-    printf("%s\n",buffer);
+  if (graph == NULL){
+     fprintf(stderr,"ERROR: Memory allocation failed!\n");
+     exit(EXIT_FAILURE);
   }
-  fclose(infile);
+  /* Einlesen der Contigs im FASTA-Format und Speicherung der Contigs
+     mit deren Header und Laenge als Knoten des Scaffold Graphen */
+  read_contigs(ctgfilename, graph, minctglen);
+  /* Einlesen der Distanzinformationen der Contigs im Abyss-Dist-Format
+     und Speicherung als Kanten des Scaffold Graphen */
+  //read_distances(distfilename, graph);
 
-  *had_err = 0;
   return graph;
 }
+
+
 
 /* Pruefung auf eindeutige Ordnung der Kanten edge1, edge 2 mit Wahrscheinlichkeit
    cutoff */
