@@ -174,22 +174,70 @@ GtScaffoldGraph *new_graph(void){
   return graph;
 }
 
-/* SD: dotfile ausgeben */
-void graph_show(GtScaffoldGraph *graph){
-  GtUword vid, eid_1, eid_2;
-  GtScaffoldGraphEdge edge1, edge2;
+/* dotfile in datei filename ausgeben */
+int write_graph(struct GtScaffoldGraph *g, char *filename) {
+  int err = 0;
 
-  for (vid = 0; vid < graph->nofvertices; vid++){
-    printf("ID: %lu\n",graph->vertices[vid].id);
-    for (eid_1 = 0; eid_1 < graph->vertices[vid].nofedges; eid_1++){
-      for (eid_2 = eid_1+1; eid_2 < graph->vertices[vid].nofedges; eid_2++){
-        edge1 = graph->vertices[vid].edges[eid_1];
-        edge2 = graph->vertices[vid].edges[eid_2];
-        printf("Kante %lu und %lu:\n ", edge1.id, edge2.id);
-      }  
-    }
-  }
+  FILE *f = fopen(filename, "w");
+  if (f == NULL)
+    return errno;
+  
+  /* TODO: errorhandling einfuehren */
+  print_graph(g, f);
+
+  fclose(f);
+
+  return err;
 }
+
+/* dotfile ausgeben */
+void print_graph(struct GtScaffoldGraph *g, FILE *f) {
+  int i;
+  struct GtScaffoldGraphVertex *v;
+  struct GtScaffoldGraphEdge *e;
+  char *color;
+
+  /* die erste Zeile in der Dot-Datei schreiben */
+  fprintf(f, "graph {\n");
+
+  /* alle Knoten durchgehen und schreiben */
+  for (i = 0; i < g->nofvertices; i++) {
+    v = &g->vertices[i];
+
+    if (v->state == GS_REPEAT || v->state == GS_POLYMORPHIC || v->state == GS_INCONSISTENT) {
+      color = "gray";
+    } else if (v->state == GS_VISITED) {
+      color = "red";
+    } else if (v->state == GS_PROCESSED) {
+      color = "green";
+    } else {
+      color = "black";
+    }
+
+    fprintf(f, "%d [color=\"%s\"];\n", v->id, color);
+  }
+
+  /* alle Kanten durchgehen und schreiben */
+  for (i = 0; i < g->nofedges; i++) {
+    e = &g->edges[i];
+
+    if (e->state == GS_REPEAT || e->state == GS_POLYMORPHIC || e->state == GS_INCONSISTENT) {
+      color = "gray";
+    } else if (e->state == GS_VISITED) {
+      color = "red";
+    } else if (e->state == GS_PROCESSED) {
+      color = "green";
+    } else {
+      color = "black";
+    }
+
+    fprintf(f, "%d -- %d [color=\"%s\" label=\"%d\"];\n", e->start->id, e->end->id, color, e->dist);
+  }
+
+  /* die letzte Zeile schreiben */
+  fprintf(f, "}\n");
+}
+
 
 /* SD: Noch nicht funktionstüchtig */
 GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *filename,

@@ -16,8 +16,8 @@ typedef struct GtScaffoldGraphEdge GtScaffoldGraphEdge;
 
 /* Testfunktionen fuer Graph-Datenstruktur */
 GtScaffoldGraph *new_graph(void);
-void graph_show(GtScaffoldGraph *graph);
-
+int write_graph(struct GtScaffoldGraph *g, char *filename);
+void print_graph(struct GtScaffoldGraph *g, FILE *f);
 
 /* the scaffolder_graph tool */
 GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *filename, int *had_err);
