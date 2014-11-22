@@ -256,93 +256,130 @@ void print_graph(const struct GtScaffoldGraph *g, FILE *f) {
   fprintf(f, "}\n");
 }
 
-/* Einlesen der Contigs im FASTA-Format und Speicherung der Contigs
-   mit deren Header und Laenge als Knoten des Scaffold Graphen */
+/* parse contigs in FASTA-format and save them as vertices of
+   scaffold graph */
 static void read_contigs(const char *filename, GtScaffoldGraph *graph,
                          GtUword minctglen) {
-  GtUword num_of_sequences = 0, entryid;
-  char currentchar = '\0';
+}
+
+/* parse distance information of contigs in abyss-dist-format and
+   save them as edges of scaffold graph */
+/* check for "mate-flag", composition is missing! */
+static int read_distances(const char *filename, GtScaffoldGraph *graph,
+                           bool ismatepair){
   FILE *infile;
-  bool firstseq = true, firstline = true;
-  char buffer[BUFSIZ], itembuf[BUFSIZ];
+  char *buffer, *c, *field;
+  GtUword pos, bufferlen, result, numpairs, num5, fielsize = 64;
+  GtWord dist;
+  float stddev;
+  bool firstfield, nextfirstfield, curdir;
 
-  infile = fopen(filename, "rb");
-  if (infile == NULL) {
-     fprintf(stderr,"ERROR: Can not open file %s !\n",filename);
-     exit(EXIT_FAILURE);
-  }
-  /* Zaehlen der Sequenzen */
-  while (EOF != (currentchar = fgetc(infile))) {
-    if (currentchar == '>')
-    num_of_sequences++;
-  }
+  infile = fopen(argv[1], "rb");
+  if (infile == NULL){
+    return -1;
 
-  if (num_of_sequences == 0) {
-     fprintf(stderr,"ERROR: No sequences !\n");
-     exit(EXIT_FAILURE);
-  }
+  /* determine size of file */
+  fseek(infile , 0 , SEEK_END);
+  bufferlen = ftell (infile);
+  rewind (infile);
+  /* save content of file */
+  buffer = gt_malloc(sizeof(*buffer) * bufferlen);
+  result = fread(buffer, 1, bufferlen, infile);
 
-  entryid = 0;
-  graph->nofvertices = num_of_sequences;
-  graph->vertices = gt_malloc(sizeof(*graph->vertices) * num_of_sequences);
+  field = gt_malloc(sizeof(*field)*fieldsize);
 
-  /* Lesen der Datei zeilenweise */
-  rewind(infile);
-  while (fgets(buffer, BUFSIZ, infile) != NULL) {
-    if (sscanf(buffer, ">%s", itembuf) == 1) {
-      /* Lesen des Header */
-      if (!firstseq) {
-        /* Wenn Laenge des aktuellen Contigs unter Schwellenwert minctglen,
-           zugehoerigen Header loeschen, ansonsten Contig-Zaehler erhoehen */
-        if (graph->vertices[entryid].seqlen < minctglen)
-          free(graph->vertices[entryid].header);
-        else
-          entryid++;
+  if (result != bufferlen){
+    return -1;
 
-        firstline = true;
-      }
-      else
-        firstseq = false;
-      /* Speicherung neuen Header */
-      graph->vertices[entryid].header = gt_malloc(sizeof
-            (*graph->vertices[entryid].header) * strlen(itembuf) + 1);
-      strncpy(graph->vertices[entryid].header, itembuf, strlen(itembuf));
+  pos = 0;
+  firstfield = true;
+  nextfirstfield = true;
+  /* sense direction as default */
+  curdir = true;
+
+  for (c = buffer; c != buffer + bufferlen; c++){
+    field[pos] = *c;
+    pos++;
+
+    if (fieldsize == pos){
+      fieldsize *= 2;
+      field = gt_realloc(field, sizeof(*field)*fieldsize);
     }
-    else if (sscanf(buffer, "%s", itembuf) == 1) {
-      /* Lesen eines Kommentars */
-      if (itembuf[0] == ';')
-        continue;
-      /* Lesen einer Sequenz */
-      if (firstline) {
-        /* erste Zeile der Sequenz */
-        graph->vertices[entryid].seqlen = strlen(itembuf);
-        firstline = false;
+
+    if (*c == ' ' || *c == '\n'){
+      field[pos-1] = '\0';
+      pos = 0;
+
+      /* parse root contig ID */
+      if (firstfield){
+        firstfield = false;
+        rootctgid = gt_scaffolder_get_vertex_id(graph, field);
+        /* Debbuging:
+          printf("rootctgid: %s\n",field);*/
       }
-      else
-        graph->vertices[entryid].seqlen += strlen(itembuf);
+      else{
+        /* parse contig-record with attributes distance, number of pairs,
+           standard deviation of distance */
+        if (sscanf(field,"%ld,%lu,%f,%lu",&dist,&numpairs,&stddev,&num5) == 4) {
+
+          /* check if edge between vertices already exixts */
+          edge = gt_scaffolder_find_edge(rootctgid, ctgid);
+          if (edge != NULL) {
+            if (ismatepair == false && edge->endvertex->stddev < stddev){
+              gt_scaffolder_delete_edge(edge);
+              gt_scaffolder_add_edge(graph, rootctgid, ctgid, dist, stddev, numpairs,
+                                     curdir, comp);
+            }
+            else {
+            /*Conflicting-Flag?*/
+            }
+          }
+          else
+            gt_scaffolder_add_edge(graph, rootctgid, ctgid, dist, stddev, numpairs,
+                                   curdir, comp);
+          /* Debbuging:
+             printf("dist: %ld\n numpairs: %lu\n stddev:"
+                 "%f\n num5: %lu\n curdir: %d\n\n",dist, numpairs, stddev,
+                 num5,curdir);*/
+           }
+        }
+        /* switch direction if semicolon occurs */
+        else if (*field == ';')
+          curdir = !curdir;
+        nextfirstfield = true;
+      }
+    }
+    /* parse contig ID */
+    else if (*c == ',' && nextfirstfield){
+      nextfirstfield = false;
+      field[pos-1] = '\0';
+      pos = 0;
+      ctgid = gt_scaffolder_get_vertex_id(graph, field);
+      /* Debbuging:
+         printf("ctgid: %s\n",field);*/
+    }
+    if (*c == '\n'){
+      firstfield = true;
+      /* sense direction as default */
+      curdir = true;
     }
   }
-
-  fclose(infile);
 }
 
 
-/* Erzeugung des Scaffold Graphen */
+
+/* creation of scaffold graph */
 GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctgfilename,
-                 GtUword minctglen) {
+                 GtUword minctglen, const char *distfilename, GtError *err) {
   GtScaffoldGraph *graph;
 
   graph = gt_malloc(sizeof(*graph));
-  if (graph == NULL) {
-     fprintf(stderr,"ERROR: Memory allocation failed!\n");
-     exit(EXIT_FAILURE);
-  }
-  /* Einlesen der Contigs im FASTA-Format und Speicherung der Contigs
-     mit deren Header und Laenge als Knoten des Scaffold Graphen */
+  /* parse contigs in FASTA-format and save them as vertices of
+     scaffold graph */
   read_contigs(ctgfilename, graph, minctglen);
-  /* Einlesen der Distanzinformationen der Contigs im Abyss-Dist-Format
-     und Speicherung als Kanten des Scaffold Graphen */
-  //read_distances(distfilename, graph);
+  /* parse distance information of contigs in abyss-dist-format and
+     save them as edges of scaffold graph */
+  read_distances(distfilename, graph);
 
   return graph;
 }
@@ -473,7 +510,7 @@ static void gt_scaffolder_removecycles(GtScaffoldGraph *graph) {
 
 /* Erstellung eines neuen Walks */
 static Walk *gt_scaffolder_walk_new(void) {
-  Walk *walk;
+  GtScaffoldGraphWalk *walk;
 
   walk = gt_malloc(sizeof(*walk));
   walk->totalcontiglen = 0;
@@ -483,19 +520,19 @@ static Walk *gt_scaffolder_walk_new(void) {
 }
 
 /* Loeschen eines Walks */
-static void gt_scaffolder_walk_delete(Walk *walk) {
+static void gt_scaffolder_walk_delete(GtScaffoldGraphWalk *walk) {
   if (walk != NULL)
-    free(walk->edges);
-  free(walk);
+    gt_free(walk->edges);
+  gt_free(walk);
 }
 
 /* Ausgabe der Contig-Gesamtlaenge eines Walks */
-static GtUword gt_scaffolder_walk_getlength(Walk *walk) {
+static GtUword gt_scaffolder_walk_getlength(GtScaffoldGraphWalk *walk) {
   return walk->totalcontiglen;
 }
 
 /* Hinzufuegen einer Kante zum Walk */
-static void gt_scaffolder_walk_addegde(Walk *walk, GtScaffoldGraphEdge *edge) {
+static void gt_scaffolder_walk_addegde(GtScaffoldGraphWalk *walk, GtScaffoldGraphEdge *edge) {
   if (walk->size == walk->nofedges) {
     /* SK: 10 als Konstante definieren, const unsigned long increment_size 2er Potenz */
     walk->size += 10;
@@ -516,7 +553,7 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
   float distance, *distancemap;
   Pair *pair, *updatepair;
   bool dir;
-  Walk *bestwalk, *currentwalk;
+  GtScaffoldGraphWalk *bestwalk, *currentwalk;
 
   /* Entfernung von Zyklen
      gt_scaffolder_removecycles(graph); */

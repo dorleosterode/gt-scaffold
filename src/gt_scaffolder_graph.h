@@ -24,10 +24,9 @@
 
 typedef struct GtScaffoldGraph GtScaffoldGraph;
 
-/* Grundlegende Graphfunktionen
-SK: gt_scaffold_graph_new, const auf nicht-Pointer entfernen */
-GtScaffoldGraph *new_graph(const GtUword nofvertices, const GtUword nofedges);
-/* SK: gt_scaffold_graph_delete */
+/* basic scaffold graph functions */
+GtScaffoldGraph *gt_scaffolder_graph_new(GtUword nofvertices, GtUword nofedges);
+void gt_scaffolder_graph_delete(GtScaffoldGraph *graph);
 
 /* Darstellung des Graphen
 SK: gt_file benutzen, print_graph_generic / print_graph
@@ -35,7 +34,7 @@ SK: sga Format unterstützen asgq (?) */
 int write_graph(const GtScaffoldGraph *g, const char *filename);
 void print_graph(const GtScaffoldGraph *g, FILE *f);
 
-/* the scaffolder_graph tool
+/* extended scaffold graph functions
 SK: Fasta-Iterator (core/fastareaderseqiterator) */
 GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctgfilename,
               GtUword minctglen); /* SK: GtError Objekt */
