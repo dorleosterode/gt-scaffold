@@ -28,6 +28,77 @@
 #include "core/minmax.h"
 #include "core/ma_api.h"
 
+/* SK: Gt-Namenskonvention für Zustände einhalten (docs/ oder manuals/developermanual)
+       Automatische Prüfung durch scripts/src_check */
+typedef enum { GIS_UNVISITED, GIS_POLYMORPHIC, GIS_INCONSISTENT,
+               GIS_VISITED, GIS_PROCESSED } GraphItemState;
+
+/* vertex of scaffold graph (describes one contig) */
+typedef struct GtScaffoldGraphVertex {
+  /* unique vertex ID */
+  GtUword id;
+  /* header sequence of corresponding contig */
+  char *headerseq;
+  /* sequence length of corresponding contig */
+  GtUword seqlen;
+  /* a-statistics value for classifying contig as repeat or unique contig */
+  float astat;
+  /* estimated copy number of corresponding contig */
+  float copynum;
+  GtUword nofedges;
+  struct GtScaffoldGraphEdge **edges;
+  /* vertex state (vertex can adapt every state except GS_INCONSISTENT) */
+  GraphItemState state;
+} GtScaffoldGraphVertex;
+
+/* edge of scaffold graph (describes orientation of two contigs) */
+typedef struct GtScaffoldGraphEdge {
+  /* unique edge ID */
+  GtUword id;
+  /* pointer to end vertex of edge */
+  struct GtScaffoldGraphVertex *end;
+  /* pointer to start vertex of edge */
+  struct GtScaffoldGraphVertex *start;
+  /* estimated distance between contigs of start and end vertex */
+  GtWord dist;
+  /* standard deviation of estimated distance */
+  float stddev;
+  /* number of read pairs resulting that distance */
+  GtUword numpairs;
+  /* edge state */
+  GraphItemState state;
+  /* describes direction of corresponding contigs
+     sense = true & same = true: ctg1 & ctg2 in sense direction
+     sense = true & same = false: ctg1 in sense & ctg2 in antisense direction 
+     sense = false & same = true: ctg1 & ctg2 in antisense direction
+     sense = false & same = false: ctg1 in antisense & ctg2 in sense direction */
+  bool sense;
+  bool same;
+} GtScaffoldGraphEdge;
+
+/* scaffold graph */
+struct GtScaffoldGraph {
+  struct GtScaffoldGraphVertex *vertices;
+  GtUword nofvertices;
+  GtUword maxnofvertices;
+  struct GtScaffoldGraphEdge *edges;
+  GtUword nofedges;
+  GtUword maxnofedges;
+};
+
+
+/* linear scaffold */
+typedef struct GtScaffoldGraphWalk {
+  GtUword nofedges;
+  GtUword size;
+  GtUword totalcontiglen;
+  struct GtScaffoldGraphEdge **edges;
+}GtScaffoldGraphWalk;
+
+/* DistanceMap */
+/* EdgeMap */
+
+
 /* data structure of the scaffolder graph */
 
 GtScaffoldGraph *new_graph(GtUword nofvertices, GtUword nofedges) {
@@ -48,8 +119,8 @@ GtScaffoldGraph *new_graph(GtUword nofvertices, GtUword nofedges) {
   return graph;
 }
 
-void graph_add_vertex(GtScaffoldGraph *graph, const GtUword seqlen,
-  const float astat, const float copynum) {
+static void graph_add_vertex(GtScaffoldGraph *graph, GtUword seqlen, float astat,
+  float copynum) {
   gt_assert(graph != NULL);
   gt_assert(graph->nofvertices < graph->maxnofvertices);
 
@@ -66,9 +137,8 @@ void graph_add_vertex(GtScaffoldGraph *graph, const GtUword seqlen,
   graph->nofvertices++;
 }
 
-void graph_add_edge(GtScaffoldGraph *graph, const GtUword vstartID,
-  const GtUword vendID, const GtWord dist, const float stddev,
-  const GtUword numpairs, const bool dir, const bool comp) {
+static void graph_add_edge(GtScaffoldGraph *graph, GtUword vstartID, GtUword vendID,
+  GtWord dist, float stddev, GtUword numpairs, bool dir, bool comp) {
 
   gt_assert(graph != NULL);
   gt_assert(graph->nofedges < graph->maxnofedges);
