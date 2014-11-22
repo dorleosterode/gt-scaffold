@@ -1,7 +1,18 @@
-/* Gt-Scaffolder auf Basis des SGA-Algorithmus
-   written by Dorle Osterode, Lukas Goetz, Stefan Dang
-   <stefan.dang@studium.uni-hamburg.de>
-   Encoding: UTF-8
+/*
+  Copyright (c) 2014 Dorle Osterode, Stefan Dang, Lukas Götz
+  Copyright (c) 2014 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <stdio.h>
@@ -10,34 +21,25 @@
 #include <errno.h> /* SK: gt_file*/
 #include <stdbool.h>
 #include <math.h>
-#include <assert.h> /* SK: gt_assert */
 #include "gt_scaffolder_graph.h"
+#include <core/assert_api.h>
 #include "core/queue_api.h"
 #include "core/types_api.h"
-// #include "core/ma_api.h"
+#include "core/minmax.h"
+#include "core/ma_api.h"
 
-/* Datenstruktur Scaffold-Graph */
+/* data structure of the scaffolder graph */
 
-/* SK: Konstanten entfernen, siehe Header */
-#define ANTISENSE 1
-#define SENSE 0
-#define REVERSE 1
-#define SAME 0
-#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y)) /* minmax.h */
-
-GtScaffoldGraph *new_graph(const GtUword nofvertices, const GtUword nofedges) {
+GtScaffoldGraph *new_graph(GtUword nofvertices, GtUword nofedges) {
   GtScaffoldGraph *graph;
 
-  assert(nofvertices > 0);
-  assert(nofedges > 0);
+  gt_assert(nofvertices > 0);
+  gt_assert(nofedges > 0);
 
-  /* SK: gt_malloc etc verwenden, Parameter besser benennen */
-  graph = malloc(sizeof(*graph));
-  assert(graph != NULL);
-  graph->vertices = malloc(sizeof(*graph->vertices) * nofvertices);
-  assert(graph->vertices != NULL);
-  graph->edges = malloc(sizeof(*graph->edges) * nofedges);
-  assert(graph->edges != NULL);
+  /* SK: Parameter besser benennen */
+  graph = gt_malloc(sizeof(*graph));
+  graph->vertices = gt_malloc(sizeof(*graph->vertices) * nofvertices);
+  graph->edges = gt_malloc(sizeof(*graph->edges) * nofedges);
   graph->nofvertices = 0;
   graph->maxnofvertices = nofvertices;
   graph->nofedges = 0;
@@ -48,8 +50,8 @@ GtScaffoldGraph *new_graph(const GtUword nofvertices, const GtUword nofedges) {
 
 void graph_add_vertex(GtScaffoldGraph *graph, const GtUword seqlen,
   const float astat, const float copynum) {
-  assert(graph != NULL);
-  assert(graph->nofvertices < graph->maxnofvertices);
+  gt_assert(graph != NULL);
+  gt_assert(graph->nofvertices < graph->maxnofvertices);
 
   /* Knoten erstellen */
   /* SK: ID redundant */
@@ -68,8 +70,8 @@ void graph_add_edge(GtScaffoldGraph *graph, const GtUword vstartID,
   const GtUword vendID, const GtWord dist, const float stddev,
   const GtUword numpairs, const bool dir, const bool comp) {
 
-  assert(graph != NULL);
-  assert(graph->nofedges < graph->maxnofedges);
+  gt_assert(graph != NULL);
+  gt_assert(graph->nofedges < graph->maxnofedges);
 
   /* Kante erstellen */
   /* SK: ID redundant */
@@ -83,14 +85,14 @@ void graph_add_edge(GtScaffoldGraph *graph, const GtUword vstartID,
   graph->edges[graph->nofedges].comp = comp;
 
   /* Kante im Startknoten eintragen */
-  assert(vstartID < graph->nofvertices && vendID < graph->nofvertices);
+  gt_assert(vstartID < graph->nofvertices && vendID < graph->nofvertices);
   /* SK: Erstes Malloc auslagern */
   if(graph->vertices[vstartID].nofedges == 0) {
-    graph->vertices[vstartID].edges = malloc( sizeof(*graph->edges) );
+    graph->vertices[vstartID].edges = gt_malloc( sizeof(*graph->edges) );
   }
   /* SK: realloc zu teuer? Besser: DistEst parsen und gezielt allokieren */
   else {
-    graph->vertices[vstartID].edges = realloc(graph->vertices[vstartID].edges,
+    graph->vertices[vstartID].edges = gt_realloc(graph->vertices[vstartID].edges,
                                               sizeof(*graph->edges) *
                                               (graph->vertices[vstartID].nofedges + 1));
   }
@@ -195,7 +197,7 @@ static void read_contigs(const char *filename, GtScaffoldGraph *graph,
 
   entryid = 0;
   graph->nofvertices = num_of_sequences;
-  graph->vertices = malloc(sizeof(*graph->vertices) * num_of_sequences);
+  graph->vertices = gt_malloc(sizeof(*graph->vertices) * num_of_sequences);
 
   /* Lesen der Datei zeilenweise */
   rewind(infile);
@@ -215,7 +217,7 @@ static void read_contigs(const char *filename, GtScaffoldGraph *graph,
       else
         firstseq = false;
       /* Speicherung neuen Header */
-      graph->vertices[entryid].header = malloc(sizeof
+      graph->vertices[entryid].header = gt_malloc(sizeof
             (*graph->vertices[entryid].header) * strlen(itembuf) + 1);
       strncpy(graph->vertices[entryid].header, itembuf, strlen(itembuf));
     }
@@ -243,7 +245,7 @@ GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctgfilename,
                  GtUword minctglen) {
   GtScaffoldGraph *graph;
 
-  graph = malloc(sizeof(*graph));
+  graph = gt_malloc(sizeof(*graph));
   if (graph == NULL) {
      fprintf(stderr,"ERROR: Memory allocation failed!\n");
      exit(EXIT_FAILURE);
@@ -386,7 +388,7 @@ static void gt_scaffolder_removecycles(GtScaffoldGraph *graph) {
 static Walk *gt_scaffolder_walk_new(void) {
   Walk *walk;
 
-  walk = malloc(sizeof(*walk));
+  walk = gt_malloc(sizeof(*walk));
   walk->totalcontiglen = 0;
   walk->size = 0;
   walk->nofedges = 0;
@@ -410,7 +412,7 @@ static void gt_scaffolder_walk_addegde(Walk *walk, GtScaffoldGraphEdge *edge) {
   if (walk->size == walk->nofedges) {
     /* SK: 10 als Konstante definieren, const unsigned long increment_size 2er Potenz */
     walk->size += 10;
-    walk->edges = realloc(walk->edges, walk->size*sizeof(*walk->edges));
+    walk->edges = gt_realloc(walk->edges, walk->size*sizeof(*walk->edges));
   }
   walk->edges[walk->nofedges] = edge;
   walk->totalcontiglen += edge->end->seqlen;
@@ -445,11 +447,11 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
     siehe GraphSearchTree.h */
   ccnumber = 0;
   vqueue = gt_queue_new();
-  pair = malloc(sizeof(*pair));
-  updatepair = malloc(sizeof(*updatepair));
+  pair = gt_malloc(sizeof(*pair));
+  updatepair = gt_malloc(sizeof(*updatepair));
   /* SK: Mit GtWord_Min / erwarteter Genomlaenge statt 0 initialisieren */
   distancemap = calloc(graph->nofvertices, sizeof(*distancemap));
-  edgemap = malloc(sizeof(*edgemap)*graph->nofvertices);
+  edgemap = gt_malloc(sizeof(*edgemap)*graph->nofvertices);
 
   for (vid = 0; vid < graph->nofvertices; vid++) {
     vertex = &graph->vertices[vid];
