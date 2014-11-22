@@ -119,6 +119,23 @@ GtScaffoldGraph *new_graph(GtUword nofvertices, GtUword nofedges) {
   return graph;
 }
 
+void gt_scaffolder_graph_delete(GtScaffoldGraph *graph){
+  gt_assert(graph != NULL);
+
+  if (graph->vertices != NULL){
+    gt_free(graph->vertices->headerseq);
+    gt_free(graph->vertices->edges[0]);
+    gt_free(graph->vertices->edges);
+  }
+  if (graph->edges != NULL){
+    gt_free(graph->edges->end);
+    gt_free(graph->edges->start);
+  }
+  gt_free(graph->edges);
+  gt_free(graph->vertices);
+  gt_free(graph);
+}
+
 static void graph_add_vertex(GtScaffoldGraph *graph, GtUword seqlen, float astat,
   float copynum) {
   gt_assert(graph != NULL);
