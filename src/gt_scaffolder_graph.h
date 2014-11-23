@@ -37,7 +37,7 @@ void print_graph(const GtScaffoldGraph *g, FILE *f);
 /* extended scaffold graph functions
 SK: Fasta-Iterator (core/fastareaderseqiterator) */
 GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctgfilename,
-              GtUword minctglen); /* SK: GtError Objekt */
+                 GtUword minctglen, const char *distfilename, GtError *err);
 int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
     float cncutoff, GtUword ocutoff); /* SK: GtError Objekt; nicht benötigt */
 void gt_scaffolder_makescaffold(GtScaffoldGraph *graph); /* SK: nicht-öffentlich? */
