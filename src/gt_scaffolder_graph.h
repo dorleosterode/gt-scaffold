@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 #include "core/types_api.h"
-
+#include "core/error.h"
 
 #ifndef GT_SCAFFOLDER_GRAPH_H
 #define GT_SCAFFOLDER_GRAPH_H

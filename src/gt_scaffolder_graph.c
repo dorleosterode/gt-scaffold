@@ -202,6 +202,22 @@ static void graph_add_edge(GtScaffoldGraph *graph, GtUword vstartID, GtUword ven
   graph->nofedges++;
 }
 
+static GtScaffoldGraphEdge *graph_find_edge(GtScaffoldGraph *graph,
+  GtUword vertexid_1, GtUword vertexid_2)
+{
+  GtUword eid;
+  GtScaffoldGraphEdge *edge;
+
+  for (eid = 0; eid < graph->vertices[vertexid_1].nofedges; eid++)
+  {
+    if (graph->vertices[vertexid_1].edges[eid]->end->id != vertexid_2)
+      edge = NULL;
+    else
+      edge = graph->vertices[vertexid_1].edges[eid];
+  }
+  return edge;
+}
+
 /* dotfile in datei filename ausgeben */
 int write_graph(const struct GtScaffoldGraph *g, const char *filename) {
   int err = 0;
@@ -345,10 +361,10 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
         if (sscanf(field,"%ld,%lu,%f,%lu",&dist,&numpairs,&stddev,&num5) == 4)
         {
           /* check if edge between vertices already exixts */
-          edge = gt_scaffolder_find_edge(rootctgid, ctgid);
+          edge = graph_find_edge(graph, rootctgid, ctgid);
           if (edge != NULL)
           {
-            if (ismatepair == false && edge->end->stddev < stddev)
+            if (ismatepair == false && edge->stddev < stddev)
             {
               graph_delete_edge(edge);
               graph_add_edge(graph, rootctgid, ctgid, dist, stddev, numpairs,
@@ -402,7 +418,7 @@ static int gt_scaffolder_graph_count_ctg(GtUword length, void *data, GtError* er
   GtScaffoldValidCtg *validctg = (GtScaffoldValidCtg*) data;
 
   had_err = 0;  
-  if (length > validctg->minctglen)
+  if (length >= validctg->minctglen)
     validctg->nof++;
   if (length == 0)
   {
@@ -617,7 +633,7 @@ static void gt_scaffolder_removecycles(GtScaffoldGraph *graph) {
 }*/
 
 /* Erstellung eines neuen Walks */
-static Walk *gt_scaffolder_walk_new(void) {
+static GtScaffoldGraphWalk *gt_scaffolder_walk_new(void) {
   GtScaffoldGraphWalk *walk;
 
   walk = gt_malloc(sizeof(*walk));
@@ -659,7 +675,6 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
   GtUword vid, eid, ccnumber, lengthcwalk, lengthbestwalk;
   GtQueue *vqueue, *wqueue;
   float distance, *distancemap;
-  Pair *pair, *updatepair;
   bool dir;
   GtScaffoldGraphWalk *bestwalk, *currentwalk;
 
@@ -678,8 +693,6 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
     siehe GraphSearchTree.h */
   ccnumber = 0;
   vqueue = gt_queue_new();
-  pair = gt_malloc(sizeof(*pair));
-  updatepair = gt_malloc(sizeof(*updatepair));
   /* SK: Mit GtWord_Min / erwarteter Genomlaenge statt 0 initialisieren */
   distancemap = calloc(graph->nofvertices, sizeof(*distancemap));
   edgemap = gt_malloc(sizeof(*edgemap)*graph->nofvertices);
@@ -708,19 +721,16 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
         for (eid = 0; eid < vertex->nofedges; eid++) {
           edge = vertex->edges[eid];
           endvertex = edge->end;
-          pair->edge = edge;
-          pair->dist = edge->dist;
 
           /* SK: genometools hashes verwenden, Dichte evaluieren
              SK: DistEst beim Einlesen prüfen */
           distancemap[endvertex->id] = edge->dist;
           edgemap[endvertex->id] = edge;
 
-          gt_queue_add(wqueue, pair);
+          gt_queue_add(wqueue, edge);
         }
         while(gt_queue_size(wqueue) != 0) {
-          pair = (Pair*)gt_queue_get(wqueue);
-          edge = pair->edge;
+          edge = (GtScaffoldGraphEdge*)gt_queue_get(wqueue);
           endvertex = edge->end;
 
           /* Ruecktraversierung durch EdgeMap wenn terminaler Knoten erreicht,
@@ -754,15 +764,13 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
             nextedge = endvertex->edges[eid];
             if (nextedge->sense == dir) {
               nextendvertex = nextedge->end;
-              distance = pair->dist + nextedge->dist;
+              distance = edge->dist + nextedge->dist;
 
               if (distancemap[nextendvertex->id] == 0 ||
                   distancemap[nextendvertex->id] > distance) {
                 distancemap[nextendvertex->id] = distance;
                 edgemap[nextendvertex->id] = nextedge;
-                updatepair->edge = nextedge;
-                updatepair->dist = distance;
-                gt_queue_add(wqueue, updatepair);
+                gt_queue_add(wqueue, nextedge);
               }
             }
           }
