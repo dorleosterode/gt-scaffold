@@ -28,6 +28,7 @@
 #include "core/minmax.h"
 #include "core/ma_api.h"
 #include "core/fasta_reader_rec.h"
+#include "core/error.h"
 #include "genometools.h"
 
 /* SK: Gt-Namenskonvention für Zustände einhalten (docs/ oder manuals/developermanual)
@@ -49,7 +50,7 @@ typedef struct GtScaffoldGraphVertex {
   float copynum;
   GtUword nofedges;
   struct GtScaffoldGraphEdge **edges;
-  /* vertex state (vertex can adapt every state except GS_INCONSISTENT) */
+  /* vertex state (vertex can adapt every state except GIS_INCONSISTENT) */
   GraphItemState state;
 } GtScaffoldGraphVertex;
 
@@ -111,7 +112,7 @@ typedef struct GtScaffoldValidCtg {
 
 /* data structure of the scaffolder graph */
 
-GtScaffoldGraph *new_graph(GtUword nofvertices, GtUword nofedges) {
+GtScaffoldGraph *gt_scaffolder_graph_new(GtUword nofvertices, GtUword nofedges) {
   GtScaffoldGraph *graph;
 
   gt_assert(nofvertices > 0);
@@ -159,7 +160,7 @@ static void graph_add_vertex(GtScaffoldGraph *graph, GtUword seqlen, float astat
   graph->vertices[graph->nofvertices].copynum = copynum;
   graph->vertices[graph->nofvertices].nofedges = 0;
   /* SD: Standardstatus einfügen? Spart evtl einen Initialisierungs-Durchlauf.
-  graph->vertices[graph->nofvertices].state = GS_UNVISITED; */
+  graph->vertices[graph->nofvertices].state = GIS_UNVISITED; */
 
   graph->nofvertices++;
 }
@@ -178,8 +179,8 @@ static void graph_add_edge(GtScaffoldGraph *graph, GtUword vstartID, GtUword ven
   graph->edges[graph->nofedges].dist = dist;
   graph->edges[graph->nofedges].stddev = stddev;
   graph->edges[graph->nofedges].numpairs = numpairs;
-  graph->edges[graph->nofedges].dir = dir;
-  graph->edges[graph->nofedges].comp = comp;
+  graph->edges[graph->nofedges].sense = dir;
+  graph->edges[graph->nofedges].same = comp;
 
   /* Kante im Startknoten eintragen */
   gt_assert(vstartID < graph->nofvertices && vendID < graph->nofvertices);
@@ -232,11 +233,11 @@ void print_graph(const struct GtScaffoldGraph *g, FILE *f) {
     v = &g->vertices[i];
 
     /* SK: const char Array für Farben verwenden, enum als Indizes */
-    if (v->state == GS_REPEAT || v->state == GS_POLYMORPHIC || v->state == GS_INCONSISTENT) {
+    if (v->state == GIS_POLYMORPHIC || v->state == GIS_INCONSISTENT) {
       color = "gray";
-    } else if (v->state == GS_VISITED) {
+    } else if (v->state == GIS_VISITED) {
       color = "red";
-    } else if (v->state == GS_PROCESSED) {
+    } else if (v->state == GIS_PROCESSED) {
       color = "green";
     } else {
       color = "black";
@@ -249,11 +250,11 @@ void print_graph(const struct GtScaffoldGraph *g, FILE *f) {
   for (i = 0; i < g->nofedges; i++) {
     e = &g->edges[i];
 
-    if (e->state == GS_REPEAT || e->state == GS_POLYMORPHIC || e->state == GS_INCONSISTENT) {
+    if (e->state == GIS_POLYMORPHIC || e->state == GIS_INCONSISTENT) {
       color = "gray";
-    } else if (e->state == GS_VISITED) {
+    } else if (e->state == GIS_VISITED) {
       color = "red";
-    } else if (e->state == GS_PROCESSED) {
+    } else if (e->state == GIS_PROCESSED) {
       color = "green";
     } else {
       color = "black";
@@ -276,6 +277,8 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   FILE *infile;
   char *buffer, *c, *field;
   GtUword pos, bufferlen, result, numpairs, num5, fieldsize;
+  GtUword rootctgid, ctgid;
+  GtScaffoldGraphEdge *edge;
   GtWord dist;
   float stddev;
   bool firstfield, nextfirstfield, curdir;
@@ -345,11 +348,11 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
           edge = gt_scaffolder_find_edge(rootctgid, ctgid);
           if (edge != NULL)
           {
-            if (ismatepair == false && edge->endvertex->stddev < stddev)
+            if (ismatepair == false && edge->end->stddev < stddev)
             {
-              gt_scaffolder_delete_edge(edge);
-              gt_scaffolder_add_edge(graph, rootctgid, ctgid, dist, stddev, numpairs,
-                                     curdir, comp);
+              graph_delete_edge(edge);
+              graph_add_edge(graph, rootctgid, ctgid, dist, stddev, numpairs,
+                                     curdir, true);
             }
             else
             {
@@ -357,8 +360,8 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
             }
           }
           else
-            gt_scaffolder_add_edge(graph, rootctgid, ctgid, dist, stddev, numpairs,
-                                   curdir, comp);
+            graph_add_edge(graph, rootctgid, ctgid, dist, stddev, numpairs,
+                                   curdir, true);
           /* Debbuging:
              printf("dist: %ld\n numpairs: %lu\n stddev:"
                  "%f\n num5: %lu\n curdir: %d\n\n",dist, numpairs, stddev,
@@ -484,6 +487,8 @@ GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctgfilename,
      save them as edges of scaffold graph */
   had_err = gt_scaffolder_graph_read_distances(distfilename, graph, false, err);
 
+  gt_error_check(err);
+
   return graph;
 }
 
@@ -530,7 +535,7 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
         for (eid_2 = eid_1+1; eid_2 < vertex->nofedges; eid_2++) {
           edge1 = vertex->edges[eid_1];
           edge2 = vertex->edges[eid_2];
-          if (edge1->dir == dir && edge2->dir == dir) {
+          if (edge1->sense == dir && edge2->sense == dir) {
             /* Pruefung des Kantenpaares edge1, edge2 auf polymorphe Merkmale */
             sum_copynum = edge1->end->copynum + edge2->end->copynum;
             if (gt_scaffolder_graph_ambiguousorder(edge1, edge2, pcutoff) &&
@@ -544,8 +549,8 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
                  als polymorph
               SK: Prüfen ob Knoten polymorph ist */
               for (eid_3 = 0; eid_3 < polymorphic_vertex->nofedges; eid_3++)
-                polymorphic_vertex->edges[eid_3]->state = GS_POLYMORPHIC;
-              polymorphic_vertex->state = GS_POLYMORPHIC;
+                polymorphic_vertex->edges[eid_3]->state = GIS_POLYMORPHIC;
+              polymorphic_vertex->state = GIS_POLYMORPHIC;
             }
             /* SD: Nur das erste Paar polymoprh markieren? */
           }
@@ -554,15 +559,15 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
 
       /* keine Pruefung auf inkonsistente Kanten fuer polymorphe Knoten
          notwendig */
-      if (vertex->state == GS_POLYMORPHIC)
+      if (vertex->state == GIS_POLYMORPHIC)
         break;
       /* Iteration ueber alle nicht-polymorphen Kantenpaare in derselben Richtung */
       for (eid_1 = 0; eid_1 < vertex->nofedges; eid_1++) {
         for (eid_2 = eid_1+1; eid_2 < vertex->nofedges; eid_2++) {
           edge1 = vertex->edges[eid_1];
           edge2 = vertex->edges[eid_2];
-          if (edge1->dir == dir && edge2->dir == dir &&
-            edge1->state != GS_POLYMORPHIC && edge2->state != GS_POLYMORPHIC) {
+          if (edge1->sense == dir && edge2->sense == dir &&
+            edge1->state != GIS_POLYMORPHIC && edge2->state != GIS_POLYMORPHIC) {
             /* TODO: calculate overlapp
             SK: In eigene Funktion auslagern */
             if (edge2->dist > (edge1->end->seqlen - 1) ||
@@ -581,7 +586,7 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
      /* Pruefung aller Kantenpaare auf maximale Ueberlappung > ocutoff */
       if (maxoverlap > ocutoff) {
         for (eid_1 = 0; eid_1 < vertex->nofedges; eid_1++)
-         vertex->edges[eid_1]->state = GS_INCONSISTENT;
+         vertex->edges[eid_1]->state = GIS_INCONSISTENT;
       }
     }
   }
@@ -598,7 +603,7 @@ static bool gt_scaffolder_graph_isterminal(const GtScaffoldGraphVertex *vertex) 
   /* Nicht zählen, Schleife abbrechen ueber != prev_sense */
   for (eid = 0; eid < vertex->nofedges; eid++) {
     edge = vertex->edges[eid];
-    if (edge->dir == SENSE)
+    if (edge->sense)
       sense++;
     else
       antisense++;
@@ -664,10 +669,9 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
   /* Iteration ueber alle Knoten, Makierung aller Knoten als unbesucht */
   for (vid = 0; vid < graph->nofvertices; vid++) {
     vertex = &graph->vertices[vid];
-    /* SD: Existieren Repeat-Knoten, nach Prozessierung der AStatistik? */
-    if (vertex->state == GS_REPEAT || vertex->state == GS_POLYMORPHIC)
+    if (vertex->state == GIS_POLYMORPHIC)
       continue; /* SK: negieren statt continue */
-    vertex->state = GS_UNVISITED;
+    vertex->state = GIS_UNVISITED;
   }
 
  /* BFS-Traversierung durch Zusammenhangskomponenten des Graphen,
@@ -682,11 +686,10 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
 
   for (vid = 0; vid < graph->nofvertices; vid++) {
     vertex = &graph->vertices[vid];
-    if (vertex->state == GS_REPEAT || vertex->state == GS_POLYMORPHIC ||
-        vertex->state == GS_VISITED)
+    if (vertex->state == GIS_POLYMORPHIC || vertex->state == GIS_VISITED)
       continue;
     ccnumber += 1;
-    vertex->state = GS_PROCESSED;
+    vertex->state = GIS_PROCESSED;
     gt_queue_add(vqueue, vertex); // TODO: hier moechte evtl nicht die adresse von dem pointer uebergeben werden
 
     while (gt_queue_size(vqueue) != 0) {
@@ -701,7 +704,7 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
       wqueue = gt_queue_new();
 
       if (gt_scaffolder_graph_isterminal(vertex)) {
-        dir = vertex->edges[0]->dir;
+        dir = vertex->edges[0]->sense;
         for (eid = 0; eid < vertex->nofedges; eid++) {
           edge = vertex->edges[eid];
           endvertex = edge->end;
@@ -749,7 +752,7 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
           /* SD: Terminal Set implementieren, bestWalk über Rücktraversierung */
           for (eid = 0; eid < endvertex->nofedges; eid++) {
             nextedge = endvertex->edges[eid];
-            if (nextedge->dir == dir) {
+            if (nextedge->sense == dir) {
               nextendvertex = nextedge->end;
               distance = pair->dist + nextedge->dist;
 
@@ -767,14 +770,14 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
       }
 
 
-      currentvertex->state = GS_VISITED;
+      currentvertex->state = GIS_VISITED;
       for (eid = 0; eid < currentvertex->nofedges; eid++) {
         edge = currentvertex->edges[eid];
         nextvertex = edge->end;
-        if (vertex->state == GS_REPEAT || vertex->state == GS_POLYMORPHIC)
+        if (vertex->state == GIS_POLYMORPHIC)
           continue;
-        if (nextvertex->state == GS_UNVISITED) {
-          nextvertex->state = GS_PROCESSED;
+        if (nextvertex->state == GIS_UNVISITED) {
+          nextvertex->state = GIS_PROCESSED;
           gt_queue_add(vqueue, nextvertex);
         }
       }
