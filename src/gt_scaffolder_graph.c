@@ -283,6 +283,22 @@ void print_graph(const struct GtScaffoldGraph *g, FILE *f) {
   fprintf(f, "}\n");
 }
 
+/* TODO: this is a dummy function with no functionality yet.
+   please implement me!*/
+static GtUword gt_scaffolder_get_vertex_id(const GtScaffoldGraph *graph,
+					   const char *field) {
+  if (graph != NULL || field != NULL)
+    return 0;
+  return 0;
+}
+
+/* TODO: this is a dummy function with no functionality yet.
+   please implement me!*/
+static GtUword graph_delete_edge(GtScaffoldGraphEdge *edge) {
+  if (edge != NULL)
+    return 0;
+  return 0;
+}
 
 /* parse distance information of contigs in abyss-dist-format and
    save them as edges of scaffold graph */
