@@ -615,8 +615,8 @@ static bool gt_scaffolder_graph_isterminal(const GtScaffoldGraphVertex *vertex) 
   GtScaffoldGraphEdge *edge;
   bool dir;
 
-  dir = vertex->edges->sense;
-  for (edge = vertex->edges + 1; edge < (vertex->edges + vertex->nofedges);
+  dir = vertex->edges[0]->sense;
+  for (edge = (vertex->edges[0] + 1); edge < (vertex->edges[0] + vertex->nofedges);
        edge++) {
     if (edge->sense != dir)
       return false;
