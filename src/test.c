@@ -14,8 +14,16 @@
 
 int main(void){
   GtScaffoldGraph *graph;
-  GtError *err = gt_error_new();
+  GtError *err;
   char outfile[] = "foo.dot";
+
+  /* initialize */
+  gt_lib_init();
+  /* create error object */
+  err = gt_error_new();
+
+
+
 
   /* Baue das Haus vom Nikolaus, 5 Knoten, 8 Kanten: */
   graph = gt_scaffolder_graph_new(5, 8);
@@ -36,6 +44,6 @@ int main(void){
   graph_add_edge(graph, 3, 4, 2, 1.5, 4, SENSE, SAME);
 
   gt_scaffolder_graph_print(graph, outfile, err);
-
+  gt_error_delete(err);
   return EXIT_SUCCESS;
 }

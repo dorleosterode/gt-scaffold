@@ -28,7 +28,6 @@
 #include "core/ma_api.h"
 #include "core/fasta_reader_rec.h"
 #include "core/error.h"
-#include "genometools.h"
 
 /* SK: Gt-Namenskonvention für Zustände einhalten (docs/ oder manuals/developermanual)
        Automatische Prüfung durch scripts/src_check */
@@ -472,7 +471,6 @@ GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctgfilename,
   GtScaffoldValidCtg *validctg;
 
   had_err = 0;
-  gt_lib_init();
   str_filename = gt_str_new();
   gt_str_set(str_filename, ctgfilename);
   validctg = gt_malloc(sizeof(*validctg));
