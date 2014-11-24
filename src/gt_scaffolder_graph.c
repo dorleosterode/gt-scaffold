@@ -610,22 +610,19 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
   return had_err;
 }
 
-/* Ueberpruefung ob Knoten terminal ist, d.h. nur sense oder antisense-Kanten
-   vorliegen */
+/* check if vertex holds just sense or antisense edges */
 static bool gt_scaffolder_graph_isterminal(const GtScaffoldGraphVertex *vertex) {
-  GtUword sense = 0, antisense = 0, eid;
   GtScaffoldGraphEdge *edge;
+  bool dir;
 
-  /* Nicht zählen, Schleife abbrechen ueber != prev_sense */
-  for (eid = 0; eid < vertex->nofedges; eid++) {
-    edge = vertex->edges[eid];
-    if (edge->sense)
-      sense++;
-    else
-      antisense++;
+  dir = vertex->edges->sense;
+  for (edge = vertex->edges + 1; edge < (vertex->edges + vertex->nofedges);
+       edge++) {
+    if (edge->sense != dir)
+      return false;
   }
 
-  return ((sense == 0 && antisense != 0) || (sense != 0 && antisense == 0));
+  return true;
 }
 
 /* Entfernung von Zyklen
