@@ -523,6 +523,19 @@ static bool gt_scaffolder_graph_ambiguousorder(const GtScaffoldGraphEdge *edge1,
   return (prob12 <= cutoff && prob21 <= cutoff);
 }
 
+static GtUword calculate_overlap (GtScaffoldGraphEdge *edge1,
+				  GtScaffoldGraphEdge *edge2) {
+  GtUword overlap = 0;
+  GtWord intersect_start, intersect_end;
+  if (edge2->dist > (edge1->end->seqlen - 1) ||
+      edge1->dist > (edge2->end->seqlen - 1)) {
+    intersect_start = MAX(edge1->dist, edge2->dist);
+    intersect_end = MAX(edge1->end->seqlen - 1, edge2->end->seqlen - 1);
+    overlap = intersect_end - intersect_start + 1;
+  }
+  return overlap;
+}
+
 /* Makierung polymorpher Kanten/Knoten und inkonsistenter Kanten im
    Scaffold Graphen */
 int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
@@ -533,7 +546,6 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
   GtUword maxoverlap = 0;
   float sum_copynum;
   unsigned int dir; /* int statt bool, weil Iteration bislang nicht möglich */
-  GtWord intersect_start, intersect_end;
   int had_err = 0;
 
   /* Iteration ueber alle Knoten */
@@ -579,17 +591,10 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
           edge2 = vertex->edges[eid_2];
           if (edge1->sense == dir && edge2->sense == dir &&
             edge1->state != GIS_POLYMORPHIC && edge2->state != GIS_POLYMORPHIC) {
-            /* TODO: calculate overlapp
-            SK: In eigene Funktion auslagern */
-            if (edge2->dist > (edge1->end->seqlen - 1) ||
-            edge1->dist > (edge2->end->seqlen - 1)) {
-              intersect_start = MAX(edge1->dist, edge2->dist);
-              intersect_end = MAX(edge1->end->seqlen - 1, edge2->end->seqlen - 1);
-              overlap = intersect_end - intersect_start + 1;
-              if (overlap > maxoverlap) {
-                maxoverlap = overlap;
-              }
-            }
+
+	    overlap = calculate_overlap(edge1, edge2);
+	    if (overlap > maxoverlap)
+	      maxoverlap = overlap;
           }
         }
       }
