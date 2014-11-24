@@ -147,7 +147,7 @@ void gt_scaffolder_graph_delete(GtScaffoldGraph *graph){
   gt_free(graph);
 }
 
-static void graph_add_vertex(GtScaffoldGraph *graph, GtUword seqlen, float astat,
+void graph_add_vertex(GtScaffoldGraph *graph, GtUword seqlen, float astat,
   float copynum) {
   gt_assert(graph != NULL);
   gt_assert(graph->nofvertices < graph->maxnofvertices);
@@ -165,7 +165,7 @@ static void graph_add_vertex(GtScaffoldGraph *graph, GtUword seqlen, float astat
   graph->nofvertices++;
 }
 
-static void graph_add_edge(GtScaffoldGraph *graph, GtUword vstartID, GtUword vendID,
+void graph_add_edge(GtScaffoldGraph *graph, GtUword vstartID, GtUword vendID,
   GtWord dist, float stddev, GtUword numpairs, bool dir, bool comp) {
 
   gt_assert(graph != NULL);
@@ -206,7 +206,7 @@ static GtScaffoldGraphEdge *graph_find_edge(GtScaffoldGraph *graph,
   GtUword vertexid_1, GtUword vertexid_2)
 {
   GtUword eid;
-  GtScaffoldGraphEdge *edge;
+  GtScaffoldGraphEdge *edge = NULL;
 
   for (eid = 0; eid < graph->vertices[vertexid_1].nofedges; eid++)
   {
@@ -216,6 +216,18 @@ static GtScaffoldGraphEdge *graph_find_edge(GtScaffoldGraph *graph,
       edge = graph->vertices[vertexid_1].edges[eid];
   }
   return edge;
+}
+
+static GtUword graph_get_vertex_id(GtScaffoldGraph *graph, const char* headerseq){
+  GtUword vid;
+
+  for (vid = 0; vid < graph->nofvertices; vid++){
+    if (graph->vertices[vid].headerseq == headerseq)
+      break;      
+  }
+  
+  return vid;
+
 }
 
 /* dotfile in datei filename ausgeben */
@@ -291,7 +303,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   char *buffer, *c, *field;
   GtUword pos, bufferlen, result, numpairs, num5, fieldsize;
   GtUword rootctgid, ctgid;
-  GtScaffoldGraphEdge *edge;
+  GtScaffoldGraphEdge *edge = NULL;
   GtWord dist;
   float stddev;
   bool firstfield, nextfirstfield, curdir;
@@ -347,7 +359,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
       if (firstfield)
       {
         firstfield = false;
-        rootctgid = gt_scaffolder_get_vertex_id(graph, field);
+        rootctgid = graph_get_vertex_id(graph, field);
         /* Debbuging:
           printf("rootctgid: %s\n",field);*/
       }
@@ -363,7 +375,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
           {
             if (ismatepair == false && edge->stddev < stddev)
             {
-              graph_delete_edge(edge);
+              //graph_delete_edge(edge);
               graph_add_edge(graph, rootctgid, ctgid, dist, stddev, numpairs,
                                      curdir, true);
             }
@@ -393,7 +405,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
       nextfirstfield = false;
       field[pos-1] = '\0';
       pos = 0;
-      ctgid = gt_scaffolder_get_vertex_id(graph, field);
+      ctgid = graph_get_vertex_id(graph, field);
       /* Debbuging:
          printf("ctgid: %s\n",field);*/
     }
@@ -454,7 +466,8 @@ static int gt_scaffolder_graph_save_ctg(GtUword length, void *data, GtError* err
     gt_malloc(sizeof(char) * validctg->headerlen);
     strncpy(validctg->graph->vertices[validctg->graph->nofvertices].headerseq,
     validctg->headerseq, validctg->headerlen);
-    validctg->graph->vertices[validctg->graph->nofvertices].seqlen = length;
+    graph_add_vertex(validctg->graph, length,0.0,0.0);
+    /*validctg->graph->vertices[validctg->graph->nofvertices].seqlen = length;*/
     validctg->graph->nofvertices++;
   }
   if (length == 0)
@@ -479,6 +492,7 @@ GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctgfilename,
   gt_lib_init();
   str_filename = gt_str_new();
   gt_str_set(str_filename, ctgfilename);
+  validctg = gt_malloc(sizeof(*validctg));
   validctg->nof = 0;
   validctg->minctglen = minctglen;
   /* parse contigs in FASTA-format and save them as vertices of
@@ -500,7 +514,8 @@ GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctgfilename,
      save them as edges of scaffold graph */
   had_err = gt_scaffolder_graph_read_distances(distfilename, graph, false, err);
 
-  gt_error_check(err);
+  if (had_err != 0)
+    printf("error");
 
   return graph;
 }
