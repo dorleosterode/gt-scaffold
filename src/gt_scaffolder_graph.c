@@ -223,9 +223,9 @@ static GtUword graph_get_vertex_id(GtScaffoldGraph *graph, const char* headerseq
 
   for (vid = 0; vid < graph->nofvertices; vid++){
     if (graph->vertices[vid].headerseq == headerseq)
-      break;      
+      break;
   }
-  
+
   return vid;
 
 }
@@ -274,23 +274,6 @@ void gt_scaffolder_graph_print_generic(const struct GtScaffoldGraph *g,
 
   /* print the last line into f */
   gt_file_xprintf(f, "}\n");
-}
-
-/* TODO: this is a dummy function with no functionality yet.
-   please implement me!*/
-static GtUword gt_scaffolder_get_vertex_id(const GtScaffoldGraph *graph,
-					   const char *field) {
-  if (graph != NULL || field != NULL)
-    return 0;
-  return 0;
-}
-
-/* TODO: this is a dummy function with no functionality yet.
-   please implement me!*/
-static GtUword graph_delete_edge(GtScaffoldGraphEdge *edge) {
-  if (edge != NULL)
-    return 0;
-  return 0;
 }
 
 /* parse distance information of contigs in abyss-dist-format and
