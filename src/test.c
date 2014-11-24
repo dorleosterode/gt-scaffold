@@ -17,7 +17,7 @@ int main(void){
   char outfile[] = "foo.dot";
 
   /* Baue das Haus vom Nikolaus, 5 Knoten, 8 Kanten: */
-  graph = new_graph(5, 8);
+  graph = gt_scaffolder_graph_new(5, 8);
 
   graph_add_vertex(graph, 100, 20, 40);
   graph_add_vertex(graph, 100, 20, 40);
