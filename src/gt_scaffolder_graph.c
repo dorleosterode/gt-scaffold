@@ -231,7 +231,7 @@ static GtUword graph_get_vertex_id(GtScaffoldGraph *graph, const char* headerseq
 
 /* print graphrepresentation in dot-format into file filename */
 int gt_scaffolder_graph_print(const GtScaffoldGraph *g,
-			      const char *filename, GtError *err) {
+                              const char *filename, GtError *err) {
   int had_err = 0;
 
   GtFile *f = gt_file_new(filename, "w", err);
@@ -248,7 +248,7 @@ int gt_scaffolder_graph_print(const GtScaffoldGraph *g,
 
 /* print graphrepresentation in dot-format into gt-filestream f */
 void gt_scaffolder_graph_print_generic(const GtScaffoldGraph *g,
-				       GtFile *f) {
+                                       GtFile *f) {
   GtScaffoldGraphVertex *v;
   GtScaffoldGraphEdge *e;
   /* 0: GIS_UNVISITED, 1: GIS_POLYMORPHIC, 2: GIS_INCONSISTENT,
@@ -268,8 +268,8 @@ void gt_scaffolder_graph_print_generic(const GtScaffoldGraph *g,
      the current state and label the edge with the distance*/
   for (e = g->edges; e < (g->edges + g->nofedges); e++) {
     gt_file_xprintf(f, "%lu -- %lu [color=\"%s\" label=\"%ld\"];\n",
-		    e->start->id, e->end->id,
-		    color_array[e->state], e->dist);
+                    e->start->id, e->end->id,
+                    color_array[e->state], e->dist);
   }
 
   /* print the last line into f */
@@ -524,7 +524,7 @@ static bool gt_scaffolder_graph_ambiguousorder(const GtScaffoldGraphEdge *edge1,
 }
 
 static GtUword calculate_overlap (GtScaffoldGraphEdge *edge1,
-				  GtScaffoldGraphEdge *edge2) {
+                                  GtScaffoldGraphEdge *edge2) {
   GtUword overlap = 0;
   GtWord intersect_start, intersect_end;
   if (edge2->dist > (edge1->end->seqlen - 1) ||
@@ -542,49 +542,48 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
     float cncutoff, GtUword ocutoff) {
   GtScaffoldGraphVertex *vertex, *polymorphic_vertex;
   GtScaffoldGraphEdge *edge1, *edge2;
-  GtUword vid, eid_1, eid_2, eid_3, overlap;
+  GtUword eid_1, eid_2, eid_3, overlap;
   GtUword maxoverlap = 0;
   float sum_copynum;
   unsigned int dir; /* int statt bool, weil Iteration bislang nicht möglich */
   int had_err = 0;
 
-  /* Iteration ueber alle Knoten */
-  for (vid = 0; vid < graph->nofvertices; vid++) {
-    vertex = &graph->vertices[vid];
-    /* Iteration ueber alle Richtungen (Sense/Antisense) */
+  /* iterate over all vertices */
+  for (vertex = graph->vertices;
+       vertex < (graph->vertices + graph->nofvertices); vertex++) {
+    /* iterate over directions (sense/antisense) */
     for (dir = 0; dir < 2; dir++) {
-      /* Iteration ueber alle Kantenpaare */
+      /* iterate over all pairs of edges */
       for (eid_1 = 0; eid_1 < vertex->nofedges; eid_1++) {
         for (eid_2 = eid_1+1; eid_2 < vertex->nofedges; eid_2++) {
           edge1 = vertex->edges[eid_1];
           edge2 = vertex->edges[eid_2];
           if (edge1->sense == dir && edge2->sense == dir) {
-            /* Pruefung des Kantenpaares edge1, edge2 auf polymorphe Merkmale */
+            /* check if edge1->end and edge2->end are polymorphic */
             sum_copynum = edge1->end->copynum + edge2->end->copynum;
             if (gt_scaffolder_graph_ambiguousorder(edge1, edge2, pcutoff) &&
                 sum_copynum < cncutoff) {
-              /* Markierung Endknoten mit kleinerer estCopyNum als polymorph */
+              /* mark vertex with lower copynumber as polymorphic */
               if (edge1->end->copynum < edge2->end->copynum)
                 polymorphic_vertex = edge1->end;
               else
                 polymorphic_vertex = edge2->end;
-              /* Markierung aller Sense- /Antisensekanten des polymorphen Knoten
-                 als polymorph
-              SK: Prüfen ob Knoten polymorph ist */
-              for (eid_3 = 0; eid_3 < polymorphic_vertex->nofedges; eid_3++)
-                polymorphic_vertex->edges[eid_3]->state = GIS_POLYMORPHIC;
-              polymorphic_vertex->state = GIS_POLYMORPHIC;
+              /* mark all edges of the polymorphic vertex as polymorphic */
+              if (polymorphic_vertex->state != GIS_POLYMORPHIC) {
+                for (eid_3 = 0; eid_3 < polymorphic_vertex->nofedges; eid_3++)
+                  polymorphic_vertex->edges[eid_3]->state = GIS_POLYMORPHIC;
+                polymorphic_vertex->state = GIS_POLYMORPHIC;
+              }
             }
             /* SD: Nur das erste Paar polymoprh markieren? */
           }
         }
       }
 
-      /* keine Pruefung auf inkonsistente Kanten fuer polymorphe Knoten
-         notwendig */
+      /* no need to check inconsistent edges for polymorphic vertices */
       if (vertex->state == GIS_POLYMORPHIC)
         break;
-      /* Iteration ueber alle nicht-polymorphen Kantenpaare in derselben Richtung */
+      /* iterate over all pairs of edges, that are not polymorphic */
       for (eid_1 = 0; eid_1 < vertex->nofedges; eid_1++) {
         for (eid_2 = eid_1+1; eid_2 < vertex->nofedges; eid_2++) {
           edge1 = vertex->edges[eid_1];
@@ -592,14 +591,15 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
           if (edge1->sense == dir && edge2->sense == dir &&
             edge1->state != GIS_POLYMORPHIC && edge2->state != GIS_POLYMORPHIC) {
 
-	    overlap = calculate_overlap(edge1, edge2);
-	    if (overlap > maxoverlap)
-	      maxoverlap = overlap;
+            overlap = calculate_overlap(edge1, edge2);
+            if (overlap > maxoverlap)
+              maxoverlap = overlap;
           }
         }
       }
 
-     /* Pruefung aller Kantenpaare auf maximale Ueberlappung > ocutoff */
+     /* check if maxoverlap is larger than ocutoff and mark edges
+        as inconsistent */
       if (maxoverlap > ocutoff) {
         for (eid_1 = 0; eid_1 < vertex->nofedges; eid_1++)
          vertex->edges[eid_1]->state = GIS_INCONSISTENT;
