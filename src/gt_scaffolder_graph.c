@@ -234,53 +234,34 @@ int write_graph(const struct GtScaffoldGraph *g, const char *filename) {
   return err;
 }
 
-/* dotfile ausgeben */
-void print_graph(const struct GtScaffoldGraph *g, FILE *f) {
-  GtUword i;
-  struct GtScaffoldGraphVertex *v;
-  struct GtScaffoldGraphEdge *e;
-  char *color;
+/* print graphrepresentation in dot-format into gt-filestream f */
+void gt_scaffolder_graph_print_generic(const struct GtScaffoldGraph *g,
+				       GtFile *f) {
+  GtScaffoldGraphVertex *v;
+  GtScaffoldGraphEdge *e;
+  /* 0: GIS_UNVISITED, 1: GIS_POLYMORPHIC, 2: GIS_INCONSISTENT,
+     3: GIS_VISITED, 4: GIS_PROCESSED */
+  const char *color_array[5] = {"black", "gray", "gray", "red", "green"};
 
-  /* die erste Zeile in der Dot-Datei schreiben */
-  fprintf(f, "graph {\n");
+  /* print first line into f */
+  gt_file_xprintf(f, "graph {\n");
 
-  /* alle Knoten durchgehen und schreiben */
-  for (i = 0; i < g->nofvertices; i++) {
-    v = &g->vertices[i];
-
-    /* SK: const char Array für Farben verwenden, enum als Indizes */
-    if (v->state == GIS_POLYMORPHIC || v->state == GIS_INCONSISTENT) {
-      color = "gray";
-    } else if (v->state == GIS_VISITED) {
-      color = "red";
-    } else if (v->state == GIS_PROCESSED) {
-      color = "green";
-    } else {
-      color = "black";
-    }
-
-    fprintf(f, "%lu [color=\"%s\"];\n", v->id, color);
+  /* iterate over all vertices and print them. add attribute color according
+     to the current state */
+  for (v = g->vertices; v < (g->vertices + g->nofvertices); v++) {
+    gt_file_xprintf(f, "%lu [color=\"%s\"];\n", v->id, color_array[v->state]);
   }
 
-  /* alle Kanten durchgehen und schreiben */
-  for (i = 0; i < g->nofedges; i++) {
-    e = &g->edges[i];
-
-    if (e->state == GIS_POLYMORPHIC || e->state == GIS_INCONSISTENT) {
-      color = "gray";
-    } else if (e->state == GIS_VISITED) {
-      color = "red";
-    } else if (e->state == GIS_PROCESSED) {
-      color = "green";
-    } else {
-      color = "black";
-    }
-
-    fprintf(f, "%lu -- %lu [color=\"%s\" label=\"%lu\"];\n", e->start->id, e->end->id, color, e->dist);
+  /* iterate over all edges and print them. add attribute color according to
+     the current state and label the edge with the distance*/
+  for (e = g->edges; e < (g->edges + g->nofedges); e++) {
+    gt_file_xprintf(f, "%lu -- %lu [color=\"%s\" label=\"%ld\"];\n",
+		    e->start->id, e->end->id,
+		    color_array[e->state], e->dist);
   }
 
-  /* die letzte Zeile schreiben */
-  fprintf(f, "}\n");
+  /* print the last line into f */
+  gt_file_xprintf(f, "}\n");
 }
 
 /* TODO: this is a dummy function with no functionality yet.
