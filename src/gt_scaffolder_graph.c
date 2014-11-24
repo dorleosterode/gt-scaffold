@@ -230,20 +230,21 @@ static GtUword graph_get_vertex_id(GtScaffoldGraph *graph, const char* headerseq
 
 }
 
-/* dotfile in datei filename ausgeben */
-int write_graph(const struct GtScaffoldGraph *g, const char *filename) {
-  int err = 0;
+/* print graphrepresentation in dot-format into file filename */
+int gt_scaffolder_graph_print(const struct GtScaffoldGraph *g,
+			      const char *filename, GtError *err) {
+  int had_err = 0;
 
-  FILE *f = fopen(filename, "w");
+  GtFile *f = gt_file_new(filename, "w", err);
   if (f == NULL)
-    return errno;
+    had_err = 1;
 
-  /* TODO: errorhandling einfuehren */
-  print_graph(g, f);
+  if (!had_err) {
+    gt_scaffolder_graph_print_generic(g, f);
+    gt_file_delete(f);
+  }
 
-  fclose(f);
-
-  return err;
+  return had_err;
 }
 
 /* print graphrepresentation in dot-format into gt-filestream f */

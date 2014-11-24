@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include "core/types_api.h"
 #include "core/error.h"
+#include "genometools.h"
 
 #ifndef GT_SCAFFOLDER_GRAPH_H
 #define GT_SCAFFOLDER_GRAPH_H
@@ -33,10 +34,11 @@ void graph_add_edge(GtScaffoldGraph *graph, GtUword vstartID, GtUword vendID,
 void gt_scaffolder_graph_delete(GtScaffoldGraph *graph);
 
 /* Darstellung des Graphen
-SK: gt_file benutzen, print_graph_generic / print_graph
 SK: sga Format unterstützen asgq (?) */
-int write_graph(const GtScaffoldGraph *g, const char *filename);
-void print_graph(const GtScaffoldGraph *g, FILE *f);
+int gt_scaffolder_graph_print(const struct GtScaffoldGraph *g,
+			      const char *filename, GtError *err);
+void gt_scaffolder_graph_print_generic(const struct GtScaffoldGraph *g,
+				       GtFile *f);
 
 /* extended scaffold graph functions
 SK: Fasta-Iterator (core/fastareaderseqiterator) */
