@@ -35,9 +35,9 @@ void gt_scaffolder_graph_delete(GtScaffoldGraph *graph);
 
 /* Darstellung des Graphen
 SK: sga Format unterstützen asgq (?) */
-int gt_scaffolder_graph_print(const struct GtScaffoldGraph *g,
+int gt_scaffolder_graph_print(const GtScaffoldGraph *g,
 			      const char *filename, GtError *err);
-void gt_scaffolder_graph_print_generic(const struct GtScaffoldGraph *g,
+void gt_scaffolder_graph_print_generic(const GtScaffoldGraph *g,
 				       GtFile *f);
 
 /* extended scaffold graph functions

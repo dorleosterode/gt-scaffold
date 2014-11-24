@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h> /* SK: gt_file*/
 #include <stdbool.h>
 #include <math.h>
 #include "gt_scaffolder_graph.h"
@@ -59,9 +58,9 @@ typedef struct GtScaffoldGraphEdge {
   /* unique edge ID */
   GtUword id;
   /* pointer to end vertex of edge */
-  struct GtScaffoldGraphVertex *end;
+  GtScaffoldGraphVertex *end;
   /* pointer to start vertex of edge */
-  struct GtScaffoldGraphVertex *start;
+  GtScaffoldGraphVertex *start;
   /* estimated distance between contigs of start and end vertex */
   GtWord dist;
   /* standard deviation of estimated distance */
@@ -81,10 +80,10 @@ typedef struct GtScaffoldGraphEdge {
 
 /* scaffold graph */
 struct GtScaffoldGraph {
-  struct GtScaffoldGraphVertex *vertices;
+  GtScaffoldGraphVertex *vertices;
   GtUword nofvertices;
   GtUword maxnofvertices;
-  struct GtScaffoldGraphEdge *edges;
+  GtScaffoldGraphEdge *edges;
   GtUword nofedges;
   GtUword maxnofedges;
 };
@@ -94,7 +93,7 @@ typedef struct GtScaffoldGraphWalk {
   GtUword nofedges;
   GtUword size;
   GtUword totalcontiglen;
-  struct GtScaffoldGraphEdge **edges;
+  GtScaffoldGraphEdge **edges;
 }GtScaffoldGraphWalk;
 
 /* for parsing valid contigs */
@@ -103,7 +102,7 @@ typedef struct GtScaffoldValidCtg {
   GtUword minctglen;
   GtUword headerlen;
   const char *headerseq;
-  struct GtScaffoldGraph *graph;
+  GtScaffoldGraph *graph;
 }GtScaffoldValidCtg;
 
 /* DistanceMap */
@@ -231,7 +230,7 @@ static GtUword graph_get_vertex_id(GtScaffoldGraph *graph, const char* headerseq
 }
 
 /* print graphrepresentation in dot-format into file filename */
-int gt_scaffolder_graph_print(const struct GtScaffoldGraph *g,
+int gt_scaffolder_graph_print(const GtScaffoldGraph *g,
 			      const char *filename, GtError *err) {
   int had_err = 0;
 
@@ -248,7 +247,7 @@ int gt_scaffolder_graph_print(const struct GtScaffoldGraph *g,
 }
 
 /* print graphrepresentation in dot-format into gt-filestream f */
-void gt_scaffolder_graph_print_generic(const struct GtScaffoldGraph *g,
+void gt_scaffolder_graph_print_generic(const GtScaffoldGraph *g,
 				       GtFile *f) {
   GtScaffoldGraphVertex *v;
   GtScaffoldGraphEdge *e;
