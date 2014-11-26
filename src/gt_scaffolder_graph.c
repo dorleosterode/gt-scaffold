@@ -104,24 +104,45 @@ typedef struct GtScaffoldValidCtg {
 /* DistanceMap */
 /* EdgeMap */
 
-/* TODO: Funktionen gt_scaffolder_graph_create_vertices,
-         gt_scaffolder_graph_create_edges erstellen */
-/* Return pointer to data structure <*GtScaffoldGraph>. Allocate space for
-   <totalnofvertices> vertices and <totalnofedges> edges. Initialize current
-   number of vertices and edges with 0. */
-GtScaffoldGraph *gt_scaffolder_graph_new(GtUword totalnofvertices, GtUword totalnofedges) {
+/* Initialize vertex portion inside <*graph>. Allocate memory for
+   <maxnofvertices> vertices. */
+void gt_scaffolder_graph_create_vertices(GtScaffoldGraph *graph,
+                                         GtUword maxnofvertices)
+{
+  gt_assert(graph != 0);
+  gt_assert(graph->vertices == NULL);
+  gt_assert(maxnofvertices > 0);
+  graph->vertices = gt_malloc(sizeof(*graph->vertices) * maxnofvertices);
+  graph->nofvertices = 0;
+  graph->maxnofvertices = maxnofvertices;
+}
+
+/* Initialize edge portion inside <*graph>. Allocate memory for
+   <maxnofedges> edges. */
+void gt_scaffolder_graph_create_edges(GtScaffoldGraph *graph,
+                                      GtUword maxnofedges)
+{
+  gt_assert(graph != 0);
+  gt_assert(graph->edges == NULL);
+  gt_assert(maxnofedges > 0);
+  graph->edges = gt_malloc(sizeof(*graph->edges) * maxnofedges);
+  graph->nofedges = 0;
+  graph->maxnofedges = maxnofedges;
+}
+
+/* Construct graph data structure <*GtScaffoldGraph>. Wraps around two seperate
+   constructor functions, which allocate memory for <maxnofedges> edges and
+   <maxnoefvertices> vertices. */
+GtScaffoldGraph *gt_scaffolder_graph_new(GtUword maxnofvertices,
+                                         GtUword maxnofedges)
+{
   GtScaffoldGraph *graph;
 
-  gt_assert(totalnofvertices > 0);
-  gt_assert(totalnofedges > 0);
+  gt_assert(maxnofedges > 0);
 
   graph = gt_malloc(sizeof(*graph));
-  graph->vertices = gt_malloc(sizeof(*graph->vertices) * totalnofvertices);
-  graph->edges = gt_malloc(sizeof(*graph->edges) * totalnofedges);
-  graph->nofvertices = 0;
-  graph->maxnofvertices = totalnofvertices;
-  graph->nofedges = 0;
-  graph->maxnofedges = totalnofedges;
+  gt_scaffolder_graph_create_vertices(graph, maxnofvertices);
+  gt_scaffolder_graph_create_edges(graph, maxnofedges);
 
   return graph;
 }
@@ -167,9 +188,10 @@ void graph_add_vertex(GtScaffoldGraph *graph, GtUword seqlen, float astat,
   graph->nofvertices++;
 }
 
-/* Initialize a new, directed edge in <*graph>. Each edge represents a contig
-   and contains information about the sequence length <seqlen>, A-statistics
-   <astat> and estimated copy number <copynum> */
+/* Initialize a new, directed edge in <*graph>. Each edge between two contig
+   vertices <vstartID> and <vendID> contains information about the distance
+   <dist>, standard deviation <stddev>, number of pairs <numpairs> and the
+   direction of <vstartID> <dir> and corresponding <vendID> <same> */
 void graph_add_edge(GtScaffoldGraph *graph, GtUword vstartID, GtUword vendID,
   GtWord dist, float stddev, GtUword numpairs, bool dir, bool same) {
 
