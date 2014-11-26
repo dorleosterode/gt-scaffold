@@ -28,10 +28,8 @@
 #include "core/fasta_reader_rec.h"
 #include "core/error.h"
 
-const unsigned long INCREMENT_SIZE = 32;
+const GtUword INCREMENT_SIZE = 32;
 
-/* SK: Gt-Namenskonvention für Zustände einhalten (docs/ oder manuals/developermanual)
-       Automatische Prüfung durch scripts/src_check */
 typedef enum { GIS_UNVISITED, GIS_POLYMORPHIC, GIS_INCONSISTENT,
                GIS_VISITED, GIS_PROCESSED } GraphItemState;
 
@@ -408,7 +406,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
 
     if (fieldsize == pos) {
       fieldsize *= 2;
-      field = gt_realloc(field, sizeof(*field)*fieldsize);
+      field = gt_realloc(field, sizeof(*field) * fieldsize);
     }
 
     if (*c == ' ' || *c == '\n') {
@@ -590,7 +588,6 @@ GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
 
   return graph;
 }
-
 
 /* check if unique order of edges <*edge1>, <*edge2> with probability
    <cutoff> exists */
@@ -856,7 +853,6 @@ GtScaffoldGraphWalk *gt_scaffolder_create_walk(GtScaffoldGraph *graph,
   return bestwalk;
 }
 
-
 /* Konstruktion des Scaffolds mit groesster Contig-Gesamtlaenge */
 void gt_scaffolder_makescaffold(GtScaffoldGraph *graph)
 {
@@ -929,6 +925,3 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph)
   gt_array_delete(cc_walks);
   gt_queue_delete(vqueue);
 }
-
-
-
