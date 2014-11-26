@@ -29,7 +29,7 @@ typedef struct GtScaffoldGraph GtScaffoldGraph;
 GtScaffoldGraph *gt_scaffolder_graph_new(GtUword nofvertices, GtUword nofedges);
 void gt_scaffolder_graph_add_vertex(GtScaffoldGraph *graph, GtUword seqlen,
   float astat, float copynum);
-void graph_add_edge(GtScaffoldGraph *graph, GtUword vstartID, GtUword vendID,
+void gt_scaffolder_graph_add_edge(GtScaffoldGraph *graph, GtUword vstartID, GtUword vendID,
   GtWord dist, float stddev, GtUword numpairs, bool dir, bool comp);
 void gt_scaffolder_graph_delete(GtScaffoldGraph *graph);
 

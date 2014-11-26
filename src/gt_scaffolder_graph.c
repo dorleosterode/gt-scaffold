@@ -170,9 +170,9 @@ void gt_scaffolder_graph_delete(GtScaffoldGraph *graph){
    contains information about the sequence length <seqlen>, A-statistics
    <astat> and estimated copy number <copynum> */
 void gt_scaffolder_graph_add_vertex(GtScaffoldGraph *graph,
-                      GtUword seqlen,
-                      float astat,
-                      float copynum)
+                                    GtUword seqlen,
+                                    float astat,
+                                    float copynum)
 {
   gt_assert(graph != NULL);
   gt_assert(graph->nofvertices < graph->maxnofvertices);
@@ -197,8 +197,15 @@ void gt_scaffolder_graph_add_vertex(GtScaffoldGraph *graph,
    vertices <vstartID> and <vendID> contains information about the distance
    <dist>, standard deviation <stddev>, number of pairs <numpairs> and the
    direction of <vstartID> <dir> and corresponding <vendID> <same> */
-void graph_add_edge(GtScaffoldGraph *graph, GtUword vstartID, GtUword vendID,
-  GtWord dist, float stddev, GtUword numpairs, bool dir, bool same) {
+void gt_scaffolder_graph_add_edge(GtScaffoldGraph *graph,
+                                  GtUword vstartID,
+                                  GtUword vendID,
+                                  GtWord dist,
+                                  float stddev,
+                                  GtUword numpairs,
+                                  bool dir,
+                                  bool same)
+{
 
   gt_assert(graph != NULL);
   gt_assert(graph->nofedges < graph->maxnofedges);
@@ -414,7 +421,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
             }
           }
           else
-            graph_add_edge(graph, rootctgid, ctgid, dist, stddev, numpairs,
+            gt_scaffolder_graph_add_edge(graph, rootctgid, ctgid, dist, stddev, numpairs,
                                    sense, same);
           /* Debbuging:
              printf("dist: %ld\n numpairs: %lu\n stddev:"
