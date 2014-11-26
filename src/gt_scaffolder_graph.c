@@ -272,9 +272,13 @@ static GtUword graph_get_vertex_id(GtScaffoldGraph *graph, const char* headerseq
 
 }
 
-/* assign edge new attributes */
+/* assign edge <*edge> new attributes */
 static void gt_scaffolder_graph_alter_edge(GtScaffoldGraphEdge *edge,
- GtWord dist, float std_dev, GtUword num_pairs, bool sense, bool same)
+                                           GtWord dist,
+                                           float std_dev,
+                                           GtUword num_pairs,
+                                           bool sense,
+                                           bool same)
 {
   /* check if edge exists */
   gt_assert(edge != NULL);
@@ -410,7 +414,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
            standard deviation of distance */
         if (sscanf(field,"%ld,%lu,%f",&dist,&numpairs,&stddev) == 3)
         {
-          /* check if edge between vertices already exixts */
+          /* check if edge between vertices already exists */
           edge = graph_find_edge(graph, rootctgid, ctgid);
           if (edge != NULL)
           {
@@ -565,12 +569,12 @@ GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
 }
 
 
-
-/* Pruefung auf eindeutige Ordnung der Kanten edge1, edge 2 mit Wahrscheinlichkeit
-   cutoff */
+/* check if unique order of edges <*edge1>, <*edge2> with probability
+   <cutoff> exists */
 static bool gt_scaffolder_graph_ambiguousorder(const GtScaffoldGraphEdge *edge1,
-      const GtScaffoldGraphEdge *edge2, float cutoff) {
-
+                                               const GtScaffoldGraphEdge *edge2,
+                                               float cutoff)
+{
   float expval, variance, interval, prob12, prob21;
 
   expval = edge1->dist - edge2->dist;
@@ -600,7 +604,8 @@ static GtUword calculate_overlap (GtScaffoldGraphEdge *edge1,
 static void gt_scaffolder_graph_check_mark_polymorphic(GtScaffoldGraphEdge *edge1,
                                                        GtScaffoldGraphEdge *edge2,
                                                        float pcutoff,
-                                                       float cncutoff) {
+                                                       float cncutoff)
+{
   GtScaffoldGraphVertex *poly_vertex;
   GtScaffoldGraphEdge *edge;
 
@@ -621,10 +626,12 @@ static void gt_scaffolder_graph_check_mark_polymorphic(GtScaffoldGraphEdge *edge
   }
 }
 
-/* Makierung polymorpher Kanten/Knoten und inkonsistenter Kanten im
-   Scaffold Graphen */
-int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
-    float cncutoff, GtUword ocutoff) {
+/* mark polymorphic edges/vertices and inconsistent edges in scaffold graph */
+int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph,
+                                  float pcutoff,
+                                  float cncutoff,
+                                  GtUword ocutoff)
+{
   GtScaffoldGraphVertex *vertex;
   GtScaffoldGraphEdge *edge1, *edge2;
   GtUword overlap;
