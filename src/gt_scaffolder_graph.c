@@ -612,7 +612,7 @@ gt_scaffolder_graph_ambiguousorder(const GtScaffolderGraphEdge *edge1,
   return (prob12 <= cutoff && prob21 <= cutoff);
 }
 
-static GtUword calculate_overlap (GtScaffolderGraphEdge *edge1,
+static GtUword gt_scaffolder_calculate_overlap (GtScaffolderGraphEdge *edge1,
                                   GtScaffolderGraphEdge *edge2)
 {
   GtUword overlap = 0;
@@ -695,7 +695,7 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
           if (edge1->sense == dir && edge2->sense == dir &&
               edge1->state != GIS_POLYMORPHIC &&
               edge2->state != GIS_POLYMORPHIC) {
-            overlap = calculate_overlap(edge1, edge2);
+            overlap = gt_scaffolder_calculate_overlap(edge1, edge2);
             if (overlap > maxoverlap)
               maxoverlap = overlap;
           }
