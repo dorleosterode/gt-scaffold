@@ -823,12 +823,13 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
     vertex->state = GIS_PROCESSED;
     gt_queue_add(vqueue, vertex);
     gt_array_reset(terminal_vertices);
+    gt_array_reset(cc_walks);
 
     while (gt_queue_size(vqueue) != 0) {
       currentvertex = (GtScaffoldGraphVertex*)gt_queue_get(vqueue);
       //currentvertex.cc = ccnumber;
 
-      /* alle terminalen knoten speichern und dann alle pfade berechnen */
+      /* store all terminal vertices to calculate all paths between them */
       if (gt_scaffolder_graph_isterminal(currentvertex))
 	gt_array_add(terminal_vertices, currentvertex);
 
@@ -854,7 +855,6 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
     }
 
     /* TODO: the best walk in this cc has to be chosen */
-    gt_array_reset(cc_walks);
   }
 
   gt_array_delete(terminal_vertices);
