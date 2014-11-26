@@ -697,16 +697,107 @@ static void gt_scaffolder_walk_addegde(GtScaffoldGraphWalk *walk, GtScaffoldGrap
   walk->nofedges++;
 }
 
-/* Konstruktion des Scaffolds mit groesster Contig-Gesamtlaenge */
-void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
-  GtScaffoldGraphVertex *vertex, *currentvertex, *nextvertex, *nextendvertex,
-                        *endvertex;
-  GtScaffoldGraphEdge *edge, *nextedge, *reverseedge, **edgemap;
-  GtUword ccnumber, lengthcwalk, lengthbestwalk;
-  GtQueue *vqueue, *wqueue;
+
+GtScaffoldGraphWalk *gt_scaffolder_create_walk(GtScaffoldGraph *graph,
+					       GtScaffoldGraphVertex *start) {
+  /* BFS-Traversierung innerhalb aktueller Zusammenhangskomponente
+     ausgehend von terminalen Knoten zu terminalen Knoten */
+  GtQueue *wqueue;
+  GtArray *terminal_vertices;
+  GtScaffoldGraphEdge *edge, *reverseedge, *nextedge, **edgemap;
+  GtScaffoldGraphVertex *endvertex, *currentvertex, *nextendvertex;
+  GtUword lengthbestwalk, lengthcwalk;
+  GtScaffoldGraphWalk *bestwalk, *currentwalk;
   float distance, *distancemap;
   bool dir;
-  GtScaffoldGraphWalk *bestwalk, *currentwalk;
+  lengthbestwalk = 0;
+  bestwalk = gt_scaffolder_walk_new();
+
+  wqueue = gt_queue_new();
+  terminal_vertices = gt_array_new(sizeof(start));
+
+  /* SK: Mit GtWord_Min / erwarteter Genomlaenge statt 0 initialisieren */
+  distancemap = calloc(graph->nofvertices, sizeof(*distancemap));
+  edgemap = gt_malloc(sizeof(*edgemap)*graph->nofvertices);
+
+  dir = start->edges[0]->sense;
+  for (edge = start->edges[0];
+       edge < (start->edges[0] + start->nofedges); edge++) {
+    endvertex = edge->end;
+
+    /* SK: genometools hashes verwenden, Dichte evaluieren
+       SK: DistEst beim Einlesen prüfen */
+    distancemap[endvertex->id] = edge->dist;
+    edgemap[endvertex->id] = edge;
+
+    gt_queue_add(wqueue, edge);
+  }
+
+  while(gt_queue_size(wqueue) != 0) {
+    edge = (GtScaffoldGraphEdge*)gt_queue_get(wqueue);
+    endvertex = edge->end;
+
+    /* store all terminal vertices */
+    if (gt_scaffolder_graph_isterminal(endvertex))
+      gt_array_add(terminal_vertices, endvertex);
+
+    for (nextedge = endvertex->edges[0];
+	 nextedge < (endvertex->edges[0] + endvertex->nofedges);
+	 nextedge++) {
+      if (nextedge->sense == dir) {
+	nextendvertex = nextedge->end;
+	distance = edge->dist + nextedge->dist;
+
+	if (distancemap[nextendvertex->id] == 0 ||
+	    distancemap[nextendvertex->id] > distance) {
+	  distancemap[nextendvertex->id] = distance;
+	  edgemap[nextendvertex->id] = nextedge;
+	  gt_queue_add(wqueue, nextedge);
+	}
+      }
+    }
+  }
+
+  /* Ruecktraversierung durch EdgeMap für alle terminalen Knoten
+     Konstruktion des Walks  */
+  while (gt_array_size(terminal_vertices) != 0) {
+    currentvertex = gt_array_pop(terminal_vertices);
+
+    currentwalk = gt_scaffolder_walk_new();
+    while (currentvertex->id != start->id) {
+      reverseedge = edgemap[currentvertex->id];
+      /* Start NICHT end */
+      currentvertex = reverseedge->start;
+      /* Speicherung des aktuellen Walks */
+      gt_scaffolder_walk_addegde(currentwalk, reverseedge);
+    }
+
+    /* Ermittelung Contig-Gesamtlaenge des aktuellen Walks  */
+    lengthcwalk = gt_scaffolder_walk_getlength(currentwalk);
+    if (lengthcwalk > lengthbestwalk) {
+      gt_scaffolder_walk_delete(bestwalk);
+      bestwalk = currentwalk;
+      lengthbestwalk = lengthcwalk;
+    }
+    else
+      gt_scaffolder_walk_delete(currentwalk);
+  }
+
+  gt_array_delete(terminal_vertices);
+  gt_queue_delete(wqueue);
+
+  return bestwalk;
+}
+
+
+/* Konstruktion des Scaffolds mit groesster Contig-Gesamtlaenge */
+void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
+  GtScaffoldGraphVertex *vertex, *currentvertex, *nextvertex, *start;
+  GtScaffoldGraphEdge *edge;
+  GtScaffoldGraphWalk *walk;
+  GtUword ccnumber;
+  GtQueue *vqueue;
+  GtArray *terminal_vertices, *cc_walks;
 
   /* Entfernung von Zyklen
      gt_scaffolder_removecycles(graph); */
@@ -722,90 +813,24 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
     siehe GraphSearchTree.h */
   ccnumber = 0;
   vqueue = gt_queue_new();
-  /* SK: Mit GtWord_Min / erwarteter Genomlaenge statt 0 initialisieren */
-  distancemap = calloc(graph->nofvertices, sizeof(*distancemap));
-  edgemap = gt_malloc(sizeof(*edgemap)*graph->nofvertices);
+  terminal_vertices = gt_array_new(sizeof(vertex));
+  cc_walks = gt_array_new(sizeof(walk));
 
   for (vertex = graph->vertices; vertex < (graph->vertices + graph->nofvertices); vertex++) {
     if (vertex->state == GIS_POLYMORPHIC || vertex->state == GIS_VISITED)
       continue;
     ccnumber += 1;
     vertex->state = GIS_PROCESSED;
-    gt_queue_add(vqueue, vertex); // TODO: hier moechte evtl nicht die adresse von dem pointer uebergeben werden
+    gt_queue_add(vqueue, vertex);
+    gt_array_reset(terminal_vertices);
 
     while (gt_queue_size(vqueue) != 0) {
       currentvertex = (GtScaffoldGraphVertex*)gt_queue_get(vqueue);
       //currentvertex.cc = ccnumber;
 
-      /* BFS-Traversierung innerhalb aktueller Zusammenhangskomponente
-         ausgehend von terminalen Knoten zu terminalen Knoten */
-      lengthbestwalk = 0;
-      bestwalk = gt_scaffolder_walk_new();
-      /* SK: In weitere Funktion mit eigener Queue auslagern */
-      wqueue = gt_queue_new();
-
-      if (gt_scaffolder_graph_isterminal(vertex)) {
-        dir = vertex->edges[0]->sense;
-        for (edge = vertex->edges[0];
-             edge < (vertex->edges[0] + vertex->nofedges); edge++) {
-          endvertex = edge->end;
-
-          /* SK: genometools hashes verwenden, Dichte evaluieren
-             SK: DistEst beim Einlesen prüfen */
-          distancemap[endvertex->id] = edge->dist;
-          edgemap[endvertex->id] = edge;
-
-          gt_queue_add(wqueue, edge);
-        }
-        while(gt_queue_size(wqueue) != 0) {
-          edge = (GtScaffoldGraphEdge*)gt_queue_get(wqueue);
-          endvertex = edge->end;
-
-          /* Ruecktraversierung durch EdgeMap wenn terminaler Knoten erreicht,
-             Konstruktion des Walks  */
-          if (gt_scaffolder_graph_isterminal(endvertex)) {
-
-            currentwalk = gt_scaffolder_walk_new();
-            currentvertex = endvertex;
-            while (currentvertex->id != vertex->id) {
-              reverseedge = edgemap[currentvertex->id];
-             /* Start NICHT end */
-              currentvertex = reverseedge->end;
-             /* Speicherung des aktuellen Walks */
-             /* Kante vorher duplizieren */
-              gt_scaffolder_walk_addegde(currentwalk, reverseedge);
-            }
-
-            /* Ermittelung Contig-Gesamtlaenge des aktuellen Walks  */
-            lengthcwalk = gt_scaffolder_walk_getlength(currentwalk);
-            if ( lengthcwalk > lengthbestwalk) {
-              gt_scaffolder_walk_delete(bestwalk);
-              bestwalk = currentwalk;
-              lengthbestwalk = lengthcwalk;
-            }
-            else
-              gt_scaffolder_walk_delete(currentwalk);
-          }
-
-          /* SD: Terminal Set implementieren, bestWalk über Rücktraversierung */
-          for (nextedge = endvertex->edges[0];
-               nextedge < (endvertex->edges[0] + endvertex->nofedges);
-               nextedge++) {
-            if (nextedge->sense == dir) {
-              nextendvertex = nextedge->end;
-              distance = edge->dist + nextedge->dist;
-
-              if (distancemap[nextendvertex->id] == 0 ||
-                  distancemap[nextendvertex->id] > distance) {
-                distancemap[nextendvertex->id] = distance;
-                edgemap[nextendvertex->id] = nextedge;
-                gt_queue_add(wqueue, nextedge);
-              }
-            }
-          }
-        }
-      }
-
+      /* alle terminalen knoten speichern und dann alle pfade berechnen */
+      if (gt_scaffolder_graph_isterminal(currentvertex))
+	gt_array_add(terminal_vertices, currentvertex);
 
       currentvertex->state = GIS_VISITED;
       for (edge = currentvertex->edges[0];
@@ -820,7 +845,21 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
         }
       }
     }
+
+    /* calculate all paths between terminal vertices in this cc */
+    while (gt_array_size(terminal_vertices) != 0) {
+      start = gt_array_pop(terminal_vertices);
+      walk = gt_scaffolder_create_walk(graph, start);
+      gt_array_add(cc_walks, walk);
+    }
+
+    /* TODO: the best walk in this cc has to be chosen */
+    gt_array_reset(cc_walks);
   }
+
+  gt_array_delete(terminal_vertices);
+  gt_array_delete(cc_walks);
+  gt_queue_delete(vqueue);
 }
 
 
