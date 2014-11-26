@@ -208,17 +208,15 @@ void graph_add_edge(GtScaffoldGraph *graph, GtUword vstartID, GtUword vendID,
 static GtScaffoldGraphEdge *graph_find_edge(GtScaffoldGraph *graph,
   GtUword vertexid_1, GtUword vertexid_2)
 {
-  GtUword eid;
-  GtScaffoldGraphEdge *edge = NULL;
+  GtScaffoldGraphEdge *edge;
 
-  for (eid = 0; eid < graph->vertices[vertexid_1].nofedges; eid++)
-  {
-    if (graph->vertices[vertexid_1].edges[eid]->end->id != vertexid_2)
-      edge = NULL;
-    else
-      edge = graph->vertices[vertexid_1].edges[eid];
+  for (edge = (graph->vertices + vertexid_1)->edges[0];
+       edge < ((graph->vertices + vertexid_1)->edges[0] +
+	       (graph->vertices + vertexid_1)->nofedges); edge++) {
+    if (edge->end->id == vertexid_2)
+      return edge;
   }
-  return edge;
+  return NULL;
 }
 
 static GtUword graph_get_vertex_id(GtScaffoldGraph *graph, const char* headerseq){
