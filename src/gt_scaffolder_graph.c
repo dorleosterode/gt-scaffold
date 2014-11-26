@@ -169,8 +169,11 @@ void gt_scaffolder_graph_delete(GtScaffoldGraph *graph){
 /* Initialize a new vertex in <*graph>. Each vertex represents a contig and
    contains information about the sequence length <seqlen>, A-statistics
    <astat> and estimated copy number <copynum> */
-void graph_add_vertex(GtScaffoldGraph *graph, GtUword seqlen, float astat,
-  float copynum) {
+void gt_scaffolder_graph_add_vertex(GtScaffoldGraph *graph,
+                      GtUword seqlen,
+                      float astat,
+                      float copynum)
+{
   gt_assert(graph != NULL);
   gt_assert(graph->nofvertices < graph->maxnofvertices);
 
@@ -496,7 +499,7 @@ static int gt_scaffolder_graph_save_ctg(GtUword length, void *data, GtError* err
     gt_malloc(sizeof(char) * callback_data->header_len);
     strncpy(callback_data->graph->vertices[callback_data->graph->nofvertices].headerseq,
     callback_data->header_seq, callback_data->header_len);
-    graph_add_vertex(callback_data->graph, length,0.0,0.0);
+    gt_scaffolder_graph_add_vertex(callback_data->graph, length,0.0,0.0);
     /*callback_data->graph->vertices[callback_data->graph->nofvertices].seqlen = length;*/
     callback_data->graph->nofvertices++;
   }
