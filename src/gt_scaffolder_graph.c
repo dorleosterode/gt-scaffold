@@ -234,6 +234,21 @@ static GtUword graph_get_vertex_id(GtScaffoldGraph *graph, const char* headerseq
 
 }
 
+/* assign edge new attributes */
+static void gt_scaffolder_graph_alter_edge(GtScaffoldGraphEdge *edge,
+ GtWord dist, float std_dev, GtUword num_pairs, bool sense, bool same)
+{
+  /* check if edge exists */
+  gt_assert(edge != NULL);
+
+  /* assign edge new attributes */
+  edge->dist = dist;
+  edge->stddev = std_dev;
+  edge->numpairs = num_pairs;
+  edge->sense = sense;
+  edge->same = same;
+}
+
 /* print graphrepresentation in dot-format into file filename */
 int gt_scaffolder_graph_print(const GtScaffoldGraph *g,
                               const char *filename, GtError *err) {
@@ -364,10 +379,9 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
             /*  LG: laut SGA edge->stddev < stddev,  korrekt? */
             if (ismatepair == false && edge->stddev < stddev)
             {
-              /* TODO alter_edge einfuegen*/
               /* LG: Ueberpruefung Kantenrichtung notwendig? */
-              graph_add_edge(graph, rootctgid, ctgid, dist, stddev, numpairs,
-                                     curdir, true);
+              gt_scaffolder_graph_alter_edge(edge, dist, stddev, numpairs,
+              curdir, true);
             }
             else
             {
