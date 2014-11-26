@@ -212,7 +212,7 @@ static GtScaffoldGraphEdge *graph_find_edge(GtScaffoldGraph *graph,
 
   for (edge = (graph->vertices + vertexid_1)->edges[0];
        edge < ((graph->vertices + vertexid_1)->edges[0] +
-	       (graph->vertices + vertexid_1)->nofedges); edge++) {
+               (graph->vertices + vertexid_1)->nofedges); edge++) {
     if (edge->end->id == vertexid_2)
       return edge;
   }
@@ -549,7 +549,7 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
     float cncutoff, GtUword ocutoff) {
   GtScaffoldGraphVertex *vertex, *polymorphic_vertex;
   GtScaffoldGraphEdge *edge1, *edge2;
-  GtUword eid_1, eid_2, eid_3, overlap;
+  GtUword eid_3, overlap;
   GtUword maxoverlap = 0;
   float sum_copynum;
   unsigned int dir; /* int statt bool, weil Iteration bislang nicht möglich */
@@ -561,10 +561,10 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
     /* iterate over directions (sense/antisense) */
     for (dir = 0; dir < 2; dir++) {
       /* iterate over all pairs of edges */
-      for (eid_1 = 0; eid_1 < vertex->nofedges; eid_1++) {
-        for (eid_2 = eid_1+1; eid_2 < vertex->nofedges; eid_2++) {
-          edge1 = vertex->edges[eid_1];
-          edge2 = vertex->edges[eid_2];
+      for (edge1 = vertex->edges[0];
+           edge1 < (vertex->edges[0] + vertex->nofedges); edge1++) {
+        for (edge2 = edge1 + 1; edge2 < (vertex->edges[0] + vertex->nofedges);
+             edge2++) {
           if (edge1->sense == dir && edge2->sense == dir) {
             /* check if edge1->end and edge2->end are polymorphic */
             sum_copynum = edge1->end->copynum + edge2->end->copynum;
@@ -591,12 +591,12 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
       if (vertex->state == GIS_POLYMORPHIC)
         break;
       /* iterate over all pairs of edges, that are not polymorphic */
-      for (eid_1 = 0; eid_1 < vertex->nofedges; eid_1++) {
-        for (eid_2 = eid_1+1; eid_2 < vertex->nofedges; eid_2++) {
-          edge1 = vertex->edges[eid_1];
-          edge2 = vertex->edges[eid_2];
+      for (edge1 = vertex->edges[0];
+           edge1 < (vertex->edges[0] + vertex->nofedges); edge1++) {
+        for (edge2 = edge1 + 1; edge2 < (vertex->edges[0] + vertex->nofedges);
+             edge2++) {
           if (edge1->sense == dir && edge2->sense == dir &&
-            edge1->state != GIS_POLYMORPHIC && edge2->state != GIS_POLYMORPHIC) {
+              edge1->state != GIS_POLYMORPHIC && edge2->state != GIS_POLYMORPHIC) {
 
             overlap = calculate_overlap(edge1, edge2);
             if (overlap > maxoverlap)
@@ -608,8 +608,9 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
      /* check if maxoverlap is larger than ocutoff and mark edges
         as inconsistent */
       if (maxoverlap > ocutoff) {
-        for (eid_1 = 0; eid_1 < vertex->nofedges; eid_1++)
-         vertex->edges[eid_1]->state = GIS_INCONSISTENT;
+        for (edge1 = vertex->edges[0];
+             edge1 < (vertex->edges[0] + vertex->nofedges); edge1++)
+          edge1->state = GIS_INCONSISTENT;
       }
     }
   }
