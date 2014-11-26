@@ -246,7 +246,8 @@ void gt_scaffolder_graph_add_edge(GtScaffoldGraph *graph,
 }
 
 static GtScaffoldGraphEdge *graph_find_edge(GtScaffoldGraph *graph,
-  GtUword vertexid_1, GtUword vertexid_2)
+                                            GtUword vertexid_1,
+                                            GtUword vertexid_2)
 {
   GtScaffoldGraphEdge *edge;
 
@@ -259,7 +260,9 @@ static GtScaffoldGraphEdge *graph_find_edge(GtScaffoldGraph *graph,
   return NULL;
 }
 
-static GtUword graph_get_vertex_id(GtScaffoldGraph *graph, const char* headerseq){
+static GtUword graph_get_vertex_id(GtScaffoldGraph *graph,
+                                   const char* headerseq)
+{
   GtUword vid;
 
   for (vid = 0; vid < graph->nofvertices; vid++){
@@ -293,7 +296,9 @@ static void gt_scaffolder_graph_alter_edge(GtScaffoldGraphEdge *edge,
 
 /* print graphrepresentation in dot-format into file filename */
 int gt_scaffolder_graph_print(const GtScaffoldGraph *g,
-                              const char *filename, GtError *err) {
+                              const char *filename,
+                              GtError *err)
+{
   int had_err = 0;
 
   GtFile *f = gt_file_new(filename, "w", err);
@@ -310,7 +315,8 @@ int gt_scaffolder_graph_print(const GtScaffoldGraph *g,
 
 /* print graphrepresentation in dot-format into gt-filestream f */
 void gt_scaffolder_graph_print_generic(const GtScaffoldGraph *g,
-                                       GtFile *f) {
+                                       GtFile *f)
+{
   GtScaffoldGraphVertex *v;
   GtScaffoldGraphEdge *e;
   /* 0: GIS_UNVISITED, 1: GIS_POLYMORPHIC, 2: GIS_INCONSISTENT,
@@ -342,7 +348,9 @@ void gt_scaffolder_graph_print_generic(const GtScaffoldGraph *g,
    save them as edges of scaffold graph */
 /* LG: check for "mate-flag"? */
 static int gt_scaffolder_graph_read_distances(const char *filename,
-  GtScaffoldGraph *graph, bool ismatepair, GtError *err)
+                                              GtScaffoldGraph *graph,
+                                              bool ismatepair,
+                                              GtError *err)
 {
   FILE *infile;
   char *buffer, *c, *field;
@@ -384,6 +392,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   /* sense direction as default */
   sense = true;
 
+  /* iterate over file character by character */
   for (c = buffer; c != buffer + bufferlen; c++)
   {
     field[pos] = *c;
@@ -468,6 +477,9 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   return had_err;
 }
 
+/* counts contigs with minimum length in callback data
+   (fasta reader callback function, gets called after fasta entry
+   has been read) */
 static int gt_scaffolder_graph_count_ctg(GtUword length,
                                          void *data,
                                          GtError* err)
@@ -487,6 +499,9 @@ static int gt_scaffolder_graph_count_ctg(GtUword length,
   return had_err;
 }
 
+/* saves header to callback data
+   (fasta reader callback function, gets called for each description
+    of fasta entry) */
 static int gt_scaffolder_graph_save_header(const char *description,
                                            GtUword length,
                                            void *data, GtError *err)
@@ -506,6 +521,9 @@ static int gt_scaffolder_graph_save_header(const char *description,
   return had_err;
 }
 
+/* saves header, sequence length of contig to scaffolder graph
+   (fasta reader callback function, gets called after fasta entry
+   has been read) */
 static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
                                         void *data,
                                         GtError* err)
@@ -527,9 +545,11 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
   return had_err;
 }
 
-/* creation of scaffold graph */
+/* create scaffold graph from file */
 GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
-                 GtUword min_ctg_len, const char *dist_filename, GtError *err)
+                                                   GtUword min_ctg_len,
+                                                   const char *dist_filename,
+                                                   GtError *err)
 {
   GtScaffoldGraph *graph;
   GtFastaReader* reader;
@@ -708,7 +728,8 @@ static void gt_scaffolder_removecycles(GtScaffoldGraph *graph) {
 }*/
 
 /* Erstellung eines neuen Walks */
-static GtScaffoldGraphWalk *gt_scaffolder_walk_new(void) {
+static GtScaffoldGraphWalk *gt_scaffolder_walk_new(void)
+{
   GtScaffoldGraphWalk *walk;
 
   walk = gt_malloc(sizeof(*walk));
@@ -719,19 +740,23 @@ static GtScaffoldGraphWalk *gt_scaffolder_walk_new(void) {
 }
 
 /* Loeschen eines Walks */
-static void gt_scaffolder_walk_delete(GtScaffoldGraphWalk *walk) {
+static void gt_scaffolder_walk_delete(GtScaffoldGraphWalk *walk)
+{
   if (walk != NULL)
     gt_free(walk->edges);
   gt_free(walk);
 }
 
 /* Ausgabe der Contig-Gesamtlaenge eines Walks */
-static GtUword gt_scaffolder_walk_getlength(GtScaffoldGraphWalk *walk) {
+static GtUword gt_scaffolder_walk_getlength(GtScaffoldGraphWalk *walk)
+{
   return walk->totalcontiglen;
 }
 
 /* Hinzufuegen einer Kante zum Walk */
-static void gt_scaffolder_walk_addegde(GtScaffoldGraphWalk *walk, GtScaffoldGraphEdge *edge) {
+static void gt_scaffolder_walk_addegde(GtScaffoldGraphWalk *walk,
+                                       GtScaffoldGraphEdge *edge)
+{
   if (walk->size == walk->nofedges) {
     /* SK: 10 als Konstante definieren, const unsigned long increment_size 2er Potenz */
     walk->size += 10;
@@ -744,7 +769,8 @@ static void gt_scaffolder_walk_addegde(GtScaffoldGraphWalk *walk, GtScaffoldGrap
 
 
 GtScaffoldGraphWalk *gt_scaffolder_create_walk(GtScaffoldGraph *graph,
-					       GtScaffoldGraphVertex *start) {
+					       GtScaffoldGraphVertex *start)
+{
   /* BFS-Traversierung innerhalb aktueller Zusammenhangskomponente
      ausgehend von terminalen Knoten zu terminalen Knoten */
   GtQueue *wqueue;
@@ -836,7 +862,8 @@ GtScaffoldGraphWalk *gt_scaffolder_create_walk(GtScaffoldGraph *graph,
 
 
 /* Konstruktion des Scaffolds mit groesster Contig-Gesamtlaenge */
-void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
+void gt_scaffolder_makescaffold(GtScaffoldGraph *graph)
+{
   GtScaffoldGraphVertex *vertex, *currentvertex, *nextvertex, *start;
   GtScaffoldGraphEdge *edge;
   GtScaffoldGraphWalk *walk;
