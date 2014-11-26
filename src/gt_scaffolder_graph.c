@@ -104,7 +104,8 @@ typedef struct GtScaffoldValidCtg {
 /* DistanceMap */
 /* EdgeMap */
 
-
+/* TODO: Funktionen gt_scaffolder_graph_create_vertices,
+         gt_scaffolder_graph_create_edges erstellen */
 /* Return pointer to data structure <*GtScaffoldGraph>. Allocate space for
    <totalnofvertices> vertices and <totalnofedges> edges. Initialize current
    number of vertices and edges with 0. */
@@ -224,6 +225,7 @@ static GtUword graph_get_vertex_id(GtScaffoldGraph *graph, const char* headerseq
   GtUword vid;
 
   for (vid = 0; vid < graph->nofvertices; vid++){
+    /*TODO: buchstabeweisen Vergleich einfuegen!!*/
     if (graph->vertices[vid].headerseq == headerseq)
       break;
   }
@@ -359,9 +361,11 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
           edge = graph_find_edge(graph, rootctgid, ctgid);
           if (edge != NULL)
           {
+            /*  LG: laut SGA edge->stddev < stddev,  korrekt? */
             if (ismatepair == false && edge->stddev < stddev)
             {
-              //graph_delete_edge(edge);
+              /* TODO alter_edge einfuegen*/
+              /* LG: Ueberpruefung Kantenrichtung notwendig? */
               graph_add_edge(graph, rootctgid, ctgid, dist, stddev, numpairs,
                                      curdir, true);
             }
@@ -391,6 +395,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
       nextfirstfield = false;
       field[pos-1] = '\0';
       pos = 0;
+      /* TODO parsing composition */
       ctgid = graph_get_vertex_id(graph, field);
       /* Debbuging:
          printf("ctgid: %s\n",field);*/
@@ -477,6 +482,7 @@ GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctgfilename,
   had_err = 0;
   str_filename = gt_str_new();
   gt_str_set(str_filename, ctgfilename);
+  /*TODO andere Name fuer validctg? callback_data*/
   validctg = gt_malloc(sizeof(*validctg));
   validctg->nof = 0;
   validctg->minctglen = minctglen;
@@ -485,6 +491,7 @@ GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctgfilename,
   reader = gt_fasta_reader_rec_new(str_filename);
   had_err = gt_fasta_reader_run(reader, NULL, NULL,
             gt_scaffolder_graph_count_ctg, validctg, err);
+  /*TODO graph_new Funktion einfuegen */
   graph = gt_malloc(sizeof(*graph));
   graph->nofvertices = 0;
   graph->maxnofvertices = validctg->nof;
