@@ -897,7 +897,7 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph)
 
     while (gt_queue_size(vqueue) != 0) {
       currentvertex = (GtScaffoldGraphVertex*)gt_queue_get(vqueue);
-      //currentvertex.cc = ccnumber;
+      /*currentvertex.cc = ccnumber;*/
 
       /* store all terminal vertices to calculate all paths between them */
       if (gt_scaffolder_graph_isterminal(currentvertex))
