@@ -171,7 +171,7 @@ void graph_add_vertex(GtScaffoldGraph *graph, GtUword seqlen, float astat,
    and contains information about the sequence length <seqlen>, A-statistics
    <astat> and estimated copy number <copynum> */
 void graph_add_edge(GtScaffoldGraph *graph, GtUword vstartID, GtUword vendID,
-  GtWord dist, float stddev, GtUword numpairs, bool dir, bool comp) {
+  GtWord dist, float stddev, GtUword numpairs, bool dir, bool same) {
 
   gt_assert(graph != NULL);
   gt_assert(graph->nofedges < graph->maxnofedges);
@@ -185,7 +185,7 @@ void graph_add_edge(GtScaffoldGraph *graph, GtUword vstartID, GtUword vendID,
   graph->edges[nextfree].stddev = stddev;
   graph->edges[nextfree].numpairs = numpairs;
   graph->edges[nextfree].sense = dir;
-  graph->edges[nextfree].same = comp;
+  graph->edges[nextfree].same = same;
 
   /* Assign edge to start vertice */
   gt_assert(vstartID < graph->nofvertices && vendID < graph->nofvertices);
@@ -298,21 +298,21 @@ void gt_scaffolder_graph_print_generic(const GtScaffoldGraph *g,
 
 /* parse distance information of contigs in abyss-dist-format and
    save them as edges of scaffold graph */
-/* check for "mate-flag", composition is missing! */
+/* LG: check for "mate-flag"? */
 static int gt_scaffolder_graph_read_distances(const char *filename,
   GtScaffoldGraph *graph, bool ismatepair, GtError *err)
 {
   FILE *infile;
   char *buffer, *c, *field;
-  GtUword pos, bufferlen, result, numpairs, num5, fieldsize;
-  GtUword rootctgid, ctgid;
-  GtScaffoldGraphEdge *edge = NULL;
+  GtUword pos, bufferlen, result, numpairs, fieldsize, rootctgid, ctgid;
+  GtScaffoldGraphEdge *edge;
   GtWord dist;
   float stddev;
-  bool firstfield, nextfirstfield, curdir;
+  bool firstfield, nextfirstfield, sense, same;
   int had_err;
 
   had_err = 0;
+  edge = NULL;
   infile = fopen(filename, "rb");
   if (infile == NULL)
   {
@@ -340,7 +340,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   firstfield = true;
   nextfirstfield = true;
   /* sense direction as default */
-  curdir = true;
+  sense = true;
 
   for (c = buffer; c != buffer + bufferlen; c++)
   {
@@ -370,7 +370,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
       {
         /* parse contig-record with attributes distance, number of pairs,
            standard deviation of distance */
-        if (sscanf(field,"%ld,%lu,%f,%lu",&dist,&numpairs,&stddev,&num5) == 4)
+        if (sscanf(field,"%ld,%lu,%f",&dist,&numpairs,&stddev) == 3)
         {
           /* check if edge between vertices already exixts */
           edge = graph_find_edge(graph, rootctgid, ctgid);
@@ -381,7 +381,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
             {
               /* LG: Ueberpruefung Kantenrichtung notwendig? */
               gt_scaffolder_graph_alter_edge(edge, dist, stddev, numpairs,
-              curdir, true);
+              sense, same);
             }
             else
             {
@@ -390,16 +390,16 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
           }
           else
             graph_add_edge(graph, rootctgid, ctgid, dist, stddev, numpairs,
-                                   curdir, true);
+                                   sense, same);
           /* Debbuging:
              printf("dist: %ld\n numpairs: %lu\n stddev:"
-                 "%f\n num5: %lu\n curdir: %d\n\n",dist, numpairs, stddev,
-                 num5,curdir);*/
+                 "%f\n num5: %lu\n sense: %d\n\n",dist, numpairs, stddev,
+                 num5,sense);*/
 
         }
         /* switch direction if semicolon occurs */
         else if (*field == ';')
-          curdir = !curdir;
+          sense = !sense;
         nextfirstfield = true;
       }
     }
@@ -409,7 +409,9 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
       nextfirstfield = false;
       field[pos-1] = '\0';
       pos = 0;
-      /* TODO parsing composition */
+      /* parsing composition,
+         '+' indicates same strand and '-' reverse strand */
+      same = field[pos-2] == '+' ? true : false;
       ctgid = graph_get_vertex_id(graph, field);
       /* Debbuging:
          printf("ctgid: %s\n",field);*/
@@ -418,7 +420,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
     {
       firstfield = true;
       /* sense direction as default */
-      curdir = true;
+      sense = true;
     }
   }
   return had_err;
