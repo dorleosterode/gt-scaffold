@@ -28,6 +28,7 @@
 #include "core/ma_api.h"
 #include "core/fasta_reader_rec.h"
 #include "core/error.h"
+#include "genometools.h"
 
 /* SK: Gt-Namenskonvention für Zustände einhalten (docs/ oder manuals/developermanual)
        Automatische Prüfung durch scripts/src_check */
@@ -54,8 +55,6 @@ typedef struct GtScaffoldGraphVertex {
 
 /* edge of scaffold graph (describes orientation of two contigs) */
 typedef struct GtScaffoldGraphEdge {
-  /* unique edge ID */
-  GtUword id;
   /* pointer to end vertex of edge */
   GtScaffoldGraphVertex *end;
   /* pointer to start vertex of edge */
@@ -70,7 +69,7 @@ typedef struct GtScaffoldGraphEdge {
   GraphItemState state;
   /* describes direction of corresponding contigs
      sense = true & same = true: ctg1 & ctg2 in sense direction
-     sense = true & same = false: ctg1 in sense & ctg2 in antisense direction 
+     sense = true & same = false: ctg1 in sense & ctg2 in antisense direction
      sense = false & same = true: ctg1 & ctg2 in antisense direction
      sense = false & same = false: ctg1 in antisense & ctg2 in sense direction */
   bool sense;
@@ -108,22 +107,22 @@ typedef struct GtScaffoldValidCtg {
 /* EdgeMap */
 
 
-/* data structure of the scaffolder graph */
-
-GtScaffoldGraph *gt_scaffolder_graph_new(GtUword nofvertices, GtUword nofedges) {
+/* Return pointer to data structure <*GtScaffoldGraph>. Allocate space for
+   <totalnofvertices> vertices and <totalnofedges> edges. Initialize current
+   number of vertices and edges with 0. */
+GtScaffoldGraph *gt_scaffolder_graph_new(GtUword totalnofvertices, GtUword totalnofedges) {
   GtScaffoldGraph *graph;
 
-  gt_assert(nofvertices > 0);
-  gt_assert(nofedges > 0);
+  gt_assert(totalnofvertices > 0);
+  gt_assert(totalnofedges > 0);
 
-  /* SK: Parameter besser benennen */
   graph = gt_malloc(sizeof(*graph));
-  graph->vertices = gt_malloc(sizeof(*graph->vertices) * nofvertices);
-  graph->edges = gt_malloc(sizeof(*graph->edges) * nofedges);
+  graph->vertices = gt_malloc(sizeof(*graph->vertices) * totalnofvertices);
+  graph->edges = gt_malloc(sizeof(*graph->edges) * totalnofedges);
   graph->nofvertices = 0;
-  graph->maxnofvertices = nofvertices;
+  graph->maxnofvertices = totalnofvertices;
   graph->nofedges = 0;
-  graph->maxnofedges = nofedges;
+  graph->maxnofedges = totalnofedges;
 
   return graph;
 }
@@ -145,55 +144,62 @@ void gt_scaffolder_graph_delete(GtScaffoldGraph *graph){
   gt_free(graph);
 }
 
+/* Initialize a new vertex in <*graph>. Each vertex represents a contig and
+   contains information about the sequence length <seqlen>, A-statistics
+   <astat> and estimated copy number <copynum> */
 void graph_add_vertex(GtScaffoldGraph *graph, GtUword seqlen, float astat,
   float copynum) {
   gt_assert(graph != NULL);
   gt_assert(graph->nofvertices < graph->maxnofvertices);
 
-  /* Knoten erstellen */
-  /* SK: ID redundant */
-  graph->vertices[graph->nofvertices].id = graph->nofvertices;
-  graph->vertices[graph->nofvertices].seqlen = seqlen;
-  graph->vertices[graph->nofvertices].astat = astat;
-  graph->vertices[graph->nofvertices].copynum = copynum;
-  graph->vertices[graph->nofvertices].nofedges = 0;
-  /* SD: Standardstatus einfügen? Spart evtl einen Initialisierungs-Durchlauf.
-  graph->vertices[graph->nofvertices].state = GIS_UNVISITED; */
+  GtUword nextfree = graph->nofvertices;
+
+  /* Initialize vertex */
+  graph->vertices[nextfree].id = nextfree; /* SD: redundant, needed for compiling */
+  graph->vertices[nextfree].seqlen = seqlen;
+  graph->vertices[nextfree].astat = astat;
+  graph->vertices[nextfree].copynum = copynum;
+  graph->vertices[nextfree].nofedges = 0;
+  /* SD: Initialize state? graph->vertices[nextfree].state = GIS_UNVISITED; */
+
+  /* Allocate initial space for pointer to outgoing edges */
+  graph->vertices[nextfree].edges = gt_malloc(sizeof(*graph->edges));
 
   graph->nofvertices++;
 }
 
+/* Initialize a new, directed edge in <*graph>. Each edge represents a contig
+   and contains information about the sequence length <seqlen>, A-statistics
+   <astat> and estimated copy number <copynum> */
 void graph_add_edge(GtScaffoldGraph *graph, GtUword vstartID, GtUword vendID,
   GtWord dist, float stddev, GtUword numpairs, bool dir, bool comp) {
 
   gt_assert(graph != NULL);
   gt_assert(graph->nofedges < graph->maxnofedges);
 
-  /* Kante erstellen */
-  /* SK: ID redundant */
-  graph->edges[graph->nofedges].id = graph->nofedges;
-  graph->edges[graph->nofedges].start = graph->vertices + vstartID;
-  graph->edges[graph->nofedges].end = graph->vertices + vendID;
-  graph->edges[graph->nofedges].dist = dist;
-  graph->edges[graph->nofedges].stddev = stddev;
-  graph->edges[graph->nofedges].numpairs = numpairs;
-  graph->edges[graph->nofedges].sense = dir;
-  graph->edges[graph->nofedges].same = comp;
+  GtUword nextfree = graph->nofedges;
 
-  /* Kante im Startknoten eintragen */
+  /* Inititalize edge */
+  graph->edges[nextfree].start = graph->vertices + vstartID;
+  graph->edges[nextfree].end = graph->vertices + vendID;
+  graph->edges[nextfree].dist = dist;
+  graph->edges[nextfree].stddev = stddev;
+  graph->edges[nextfree].numpairs = numpairs;
+  graph->edges[nextfree].sense = dir;
+  graph->edges[nextfree].same = comp;
+
+  /* Assign edge to start vertice */
   gt_assert(vstartID < graph->nofvertices && vendID < graph->nofvertices);
-  /* SK: Erstes Malloc auslagern */
-  if(graph->vertices[vstartID].nofedges == 0) {
-    graph->vertices[vstartID].edges = gt_malloc( sizeof(*graph->edges) );
+  /* Allocate new space for pointer to this edge */
+  if(graph->vertices[vstartID].nofedges > 0) {
+    graph->vertices[vstartID].edges =
+      /* SK: realloc zu teuer? Besser: DistEst parsen und gezielt allokieren */
+      gt_realloc( graph->vertices[vstartID].edges, sizeof(*graph->edges) *
+                  (graph->vertices[vstartID].nofedges + 1) );
   }
-  /* SK: realloc zu teuer? Besser: DistEst parsen und gezielt allokieren */
-  else {
-    graph->vertices[vstartID].edges = gt_realloc(graph->vertices[vstartID].edges,
-                                              sizeof(*graph->edges) *
-                                              (graph->vertices[vstartID].nofedges + 1));
-  }
+  /* Assign adress of this edge to the pointer */
   graph->vertices[vstartID].edges[graph->vertices[vstartID].nofedges] =
-    &graph->edges[graph->nofedges];
+    &graph->edges[nextfree];
 
   graph->vertices[vstartID].nofedges++;
 
@@ -408,7 +414,7 @@ static int gt_scaffolder_graph_count_ctg(GtUword length, void *data, GtError* er
   int had_err;
   GtScaffoldValidCtg *validctg = (GtScaffoldValidCtg*) data;
 
-  had_err = 0;  
+  had_err = 0;
   if (length >= validctg->minctglen)
     validctg->nof++;
   if (length == 0)
@@ -440,7 +446,7 @@ static int gt_scaffolder_graph_save_ctg(GtUword length, void *data, GtError* err
 {
   int had_err;
   GtScaffoldValidCtg *validctg = (GtScaffoldValidCtg*) data;
-  
+
   had_err = 0;
   if (length > validctg->minctglen)
   {
@@ -471,6 +477,7 @@ GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctgfilename,
   GtScaffoldValidCtg *validctg;
 
   had_err = 0;
+  gt_lib_init();
   str_filename = gt_str_new();
   gt_str_set(str_filename, ctgfilename);
   validctg = gt_malloc(sizeof(*validctg));
@@ -608,19 +615,22 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
   return had_err;
 }
 
-/* check if vertex holds just sense or antisense edges */
+/* Ueberpruefung ob Knoten terminal ist, d.h. nur sense oder antisense-Kanten
+   vorliegen */
 static bool gt_scaffolder_graph_isterminal(const GtScaffoldGraphVertex *vertex) {
+  GtUword sense = 0, antisense = 0, eid;
   GtScaffoldGraphEdge *edge;
-  bool dir;
 
-  dir = vertex->edges[0]->sense;
-  for (edge = (vertex->edges[0] + 1); edge < (vertex->edges[0] + vertex->nofedges);
-       edge++) {
-    if (edge->sense != dir)
-      return false;
+  /* Nicht zählen, Schleife abbrechen ueber != prev_sense */
+  for (eid = 0; eid < vertex->nofedges; eid++) {
+    edge = vertex->edges[eid];
+    if (edge->sense)
+      sense++;
+    else
+      antisense++;
   }
 
-  return true;
+  return ((sense == 0 && antisense != 0) || (sense != 0 && antisense == 0));
 }
 
 /* Entfernung von Zyklen
