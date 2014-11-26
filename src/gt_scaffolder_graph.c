@@ -262,19 +262,30 @@ static GtScaffoldGraphEdge *graph_find_edge(GtScaffoldGraph *graph,
   return NULL;
 }
 
-static GtUword graph_get_vertex_id(GtScaffoldGraph *graph,
-                                   const char* headerseq)
+/* determines corresponding vertex id to contig header */
+static GtUword gt_scaffolder_graph_get_vertex_id(GtScaffoldGraph *graph,
+                                             const char* header_seq,
+                                             GtError *err)
 {
-  GtUword vid;
+  GtScaffoldGraphVertex *vertex;
+  GtUword had_err;
 
-  for (vid = 0; vid < graph->nofvertices; vid++){
-    /*TODO: buchstabeweisen Vergleich einfuegen!!*/
-    if (graph->vertices[vid].headerseq == headerseq)
+  had_err = -1;
+  for (vertex = graph->vertices;
+       vertex < (graph->vertices + graph->nofvertices); vertex++)
+  {
+    if (strcmp(vertex->headerseq, header_seq) == 0)
+    {
+      had_err = 0;
       break;
+    }
   }
 
-  return vid;
+  /* contig header was not found */
+  if (had_err == -1)
+    gt_error_set(err, " distance and contig file inconsistent ");
 
+  return vertex->id;
 }
 
 /* assign edge <*edge> new attributes */
@@ -415,7 +426,11 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
       if (firstfield)
       {
         firstfield = false;
-        rootctgid = graph_get_vertex_id(graph, field);
+
+        rootctgid = gt_scaffolder_graph_get_vertex_id(graph, field, err);
+        /* exit if distance and contig file inconsistent */
+        gt_error_check(err);
+
         /* Debbuging:
           printf("rootctgid: %s\n",field);*/
       }
@@ -465,7 +480,11 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
       /* parsing composition,
          '+' indicates same strand and '-' reverse strand */
       same = field[pos-2] == '+' ? true : false;
-      ctgid = graph_get_vertex_id(graph, field);
+
+      ctgid = gt_scaffolder_graph_get_vertex_id(graph, field, err);
+      /* exit if distance and contig file inconsistent */
+      gt_error_check(err);
+
       /* Debbuging:
          printf("ctgid: %s\n",field);*/
     }
