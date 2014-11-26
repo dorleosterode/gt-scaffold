@@ -92,36 +92,59 @@ typedef struct GtScaffoldGraphWalk {
   GtScaffoldGraphEdge **edges;
 }GtScaffoldGraphWalk;
 
-/* for parsing valid contigs */
-typedef struct GtScaffoldValidCtg {
-  GtUword nof;
-  GtUword minctglen;
-  GtUword headerlen;
-  const char *headerseq;
+/* for parsing valid contigs,
+   e.g. contigs with minimum length <min_ctg_len> */
+typedef struct GtScaffoldGraphCallbackData
+{
+  GtUword nof_valid_ctg;
+  GtUword min_ctg_len;
+  GtUword header_len;
+  const char *header_seq;
   GtScaffoldGraph *graph;
-}GtScaffoldValidCtg;
+}GtScaffoldGraphCallbackData;
 
 /* DistanceMap */
 /* EdgeMap */
 
-/* TODO: Funktionen gt_scaffolder_graph_create_vertices,
-         gt_scaffolder_graph_create_edges erstellen */
-/* Return pointer to data structure <*GtScaffoldGraph>. Allocate space for
-   <totalnofvertices> vertices and <totalnofedges> edges. Initialize current
-   number of vertices and edges with 0. */
-GtScaffoldGraph *gt_scaffolder_graph_new(GtUword totalnofvertices, GtUword totalnofedges) {
+/* Initialize vertex portion inside <*graph>. Allocate memory for
+   <maxnofvertices> vertices. */
+void gt_scaffolder_graph_create_vertices(GtScaffoldGraph *graph,
+                                         GtUword maxnofvertices)
+{
+  gt_assert(graph != 0);
+  gt_assert(graph->vertices == NULL);
+  gt_assert(maxnofvertices > 0);
+  graph->vertices = gt_malloc(sizeof(*graph->vertices) * maxnofvertices);
+  graph->nofvertices = 0;
+  graph->maxnofvertices = maxnofvertices;
+}
+
+/* Initialize edge portion inside <*graph>. Allocate memory for
+   <maxnofedges> edges. */
+void gt_scaffolder_graph_create_edges(GtScaffoldGraph *graph,
+                                      GtUword maxnofedges)
+{
+  gt_assert(graph != 0);
+  gt_assert(graph->edges == NULL);
+  gt_assert(maxnofedges > 0);
+  graph->edges = gt_malloc(sizeof(*graph->edges) * maxnofedges);
+  graph->nofedges = 0;
+  graph->maxnofedges = maxnofedges;
+}
+
+/* Construct graph data structure <*GtScaffoldGraph>. Wraps around two seperate
+   constructor functions, which allocate memory for <maxnofedges> edges and
+   <maxnoefvertices> vertices. */
+GtScaffoldGraph *gt_scaffolder_graph_new(GtUword maxnofvertices,
+                                         GtUword maxnofedges)
+{
   GtScaffoldGraph *graph;
 
-  gt_assert(totalnofvertices > 0);
-  gt_assert(totalnofedges > 0);
+  gt_assert(maxnofedges > 0);
 
   graph = gt_malloc(sizeof(*graph));
-  graph->vertices = gt_malloc(sizeof(*graph->vertices) * totalnofvertices);
-  graph->edges = gt_malloc(sizeof(*graph->edges) * totalnofedges);
-  graph->nofvertices = 0;
-  graph->maxnofvertices = totalnofvertices;
-  graph->nofedges = 0;
-  graph->maxnofedges = totalnofedges;
+  gt_scaffolder_graph_create_vertices(graph, maxnofvertices);
+  gt_scaffolder_graph_create_edges(graph, maxnofedges);
 
   return graph;
 }
@@ -146,8 +169,11 @@ void gt_scaffolder_graph_delete(GtScaffoldGraph *graph){
 /* Initialize a new vertex in <*graph>. Each vertex represents a contig and
    contains information about the sequence length <seqlen>, A-statistics
    <astat> and estimated copy number <copynum> */
-void graph_add_vertex(GtScaffoldGraph *graph, GtUword seqlen, float astat,
-  float copynum) {
+void gt_scaffolder_graph_add_vertex(GtScaffoldGraph *graph,
+                                    GtUword seqlen,
+                                    float astat,
+                                    float copynum)
+{
   gt_assert(graph != NULL);
   gt_assert(graph->nofvertices < graph->maxnofvertices);
 
@@ -167,11 +193,19 @@ void graph_add_vertex(GtScaffoldGraph *graph, GtUword seqlen, float astat,
   graph->nofvertices++;
 }
 
-/* Initialize a new, directed edge in <*graph>. Each edge represents a contig
-   and contains information about the sequence length <seqlen>, A-statistics
-   <astat> and estimated copy number <copynum> */
-void graph_add_edge(GtScaffoldGraph *graph, GtUword vstartID, GtUword vendID,
-  GtWord dist, float stddev, GtUword numpairs, bool dir, bool same) {
+/* Initialize a new, directed edge in <*graph>. Each edge between two contig
+   vertices <vstartID> and <vendID> contains information about the distance
+   <dist>, standard deviation <stddev>, number of pairs <numpairs> and the
+   direction of <vstartID> <dir> and corresponding <vendID> <same> */
+void gt_scaffolder_graph_add_edge(GtScaffoldGraph *graph,
+                                  GtUword vstartID,
+                                  GtUword vendID,
+                                  GtWord dist,
+                                  float stddev,
+                                  GtUword numpairs,
+                                  bool dir,
+                                  bool same)
+{
 
   gt_assert(graph != NULL);
   gt_assert(graph->nofedges < graph->maxnofedges);
@@ -387,7 +421,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
             }
           }
           else
-            graph_add_edge(graph, rootctgid, ctgid, dist, stddev, numpairs,
+            gt_scaffolder_graph_add_edge(graph, rootctgid, ctgid, dist, stddev, numpairs,
                                    sense, same);
           /* Debbuging:
              printf("dist: %ld\n numpairs: %lu\n stddev:"
@@ -424,16 +458,15 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   return had_err;
 }
 
-
-
 static int gt_scaffolder_graph_count_ctg(GtUword length, void *data, GtError* err)
 {
   int had_err;
-  GtScaffoldValidCtg *validctg = (GtScaffoldValidCtg*) data;
+  GtScaffoldGraphCallbackData *callback_data =
+  (GtScaffoldGraphCallbackData*) data;
 
   had_err = 0;
-  if (length >= validctg->minctglen)
-    validctg->nof++;
+  if (length >= callback_data->min_ctg_len)
+    callback_data->nof_valid_ctg++;
   if (length == 0)
   {
     gt_error_set (err , " invalid sequence length ");
@@ -446,11 +479,12 @@ static int gt_scaffolder_graph_save_header(const char *description, GtUword leng
  void *data, GtError *err)
 {
   int had_err;
-  GtScaffoldValidCtg *validctg = (GtScaffoldValidCtg*) data;
+  GtScaffoldGraphCallbackData *callback_data =
+  (GtScaffoldGraphCallbackData*) data;
 
   had_err = 0;
-  validctg->headerseq = description;
-  validctg->headerlen = length;
+  callback_data->header_seq = description;
+  callback_data->header_len = length;
   if (length == 0)
   {
     gt_error_set (err , " invalid header length ");
@@ -462,18 +496,19 @@ static int gt_scaffolder_graph_save_header(const char *description, GtUword leng
 static int gt_scaffolder_graph_save_ctg(GtUword length, void *data, GtError* err)
 {
   int had_err;
-  GtScaffoldValidCtg *validctg = (GtScaffoldValidCtg*) data;
+  GtScaffoldGraphCallbackData *callback_data =
+  (GtScaffoldGraphCallbackData*) data;
 
   had_err = 0;
-  if (length > validctg->minctglen)
+  if (length > callback_data->min_ctg_len)
   {
-    validctg->graph->vertices[validctg->graph->nofvertices].headerseq =
-    gt_malloc(sizeof(char) * validctg->headerlen);
-    strncpy(validctg->graph->vertices[validctg->graph->nofvertices].headerseq,
-    validctg->headerseq, validctg->headerlen);
-    graph_add_vertex(validctg->graph, length,0.0,0.0);
-    /*validctg->graph->vertices[validctg->graph->nofvertices].seqlen = length;*/
-    validctg->graph->nofvertices++;
+    callback_data->graph->vertices[callback_data->graph->nofvertices].headerseq =
+    gt_malloc(sizeof(char) * callback_data->header_len);
+    strncpy(callback_data->graph->vertices[callback_data->graph->nofvertices].headerseq,
+    callback_data->header_seq, callback_data->header_len);
+    gt_scaffolder_graph_add_vertex(callback_data->graph, length,0.0,0.0);
+    /*callback_data->graph->vertices[callback_data->graph->nofvertices].seqlen = length;*/
+    callback_data->graph->nofvertices++;
   }
   if (length == 0)
   {
@@ -484,41 +519,40 @@ static int gt_scaffolder_graph_save_ctg(GtUword length, void *data, GtError* err
 }
 
 /* creation of scaffold graph */
-GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctgfilename,
-                 GtUword minctglen, const char *distfilename, GtError *err)
+GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
+                 GtUword min_ctg_len, const char *dist_filename, GtError *err)
 {
   GtScaffoldGraph *graph;
   GtFastaReader* reader;
   GtStr *str_filename;
   int had_err;
-  GtScaffoldValidCtg *validctg;
+  GtScaffoldGraphCallbackData *callback_data;
 
   had_err = 0;
   str_filename = gt_str_new();
-  gt_str_set(str_filename, ctgfilename);
-  /*TODO andere Name fuer validctg? callback_data*/
-  validctg = gt_malloc(sizeof(*validctg));
-  validctg->nof = 0;
-  validctg->minctglen = minctglen;
+  gt_str_set(str_filename, ctg_filename);
+  callback_data = gt_malloc(sizeof(*callback_data));
+  callback_data->nof_valid_ctg = 0;
+  callback_data->min_ctg_len = min_ctg_len;
   /* parse contigs in FASTA-format and save them as vertices of
      scaffold graph */
   reader = gt_fasta_reader_rec_new(str_filename);
   had_err = gt_fasta_reader_run(reader, NULL, NULL,
-            gt_scaffolder_graph_count_ctg, validctg, err);
+            gt_scaffolder_graph_count_ctg, callback_data, err);
   /*TODO graph_new Funktion einfuegen */
   graph = gt_malloc(sizeof(*graph));
   graph->nofvertices = 0;
-  graph->maxnofvertices = validctg->nof;
-  graph->vertices = gt_malloc(sizeof(*graph->vertices) * validctg->nof);
-  validctg->graph = graph;
+  graph->maxnofvertices = callback_data->nof_valid_ctg;
+  graph->vertices = gt_malloc(sizeof(*graph->vertices) * callback_data->nof_valid_ctg);
+  callback_data->graph = graph;
   had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header, NULL,
-            gt_scaffolder_graph_save_ctg, validctg, err);
+            gt_scaffolder_graph_save_ctg, callback_data, err);
   gt_fasta_reader_delete(reader);
   gt_str_delete(str_filename);
 
   /* parse distance information of contigs in abyss-dist-format and
      save them as edges of scaffold graph */
-  had_err = gt_scaffolder_graph_read_distances(distfilename, graph, false, err);
+  had_err = gt_scaffolder_graph_read_distances(dist_filename, graph, false, err);
 
   if (had_err != 0)
     printf("error");
