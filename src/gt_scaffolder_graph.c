@@ -687,11 +687,10 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
      gt_scaffolder_removecycles(graph); */
 
   /* Iteration ueber alle Knoten, Makierung aller Knoten als unbesucht */
-  for (vid = 0; vid < graph->nofvertices; vid++) {
-    vertex = &graph->vertices[vid];
-    if (vertex->state == GIS_POLYMORPHIC)
-      continue; /* SK: negieren statt continue */
-    vertex->state = GIS_UNVISITED;
+  for (vertex = graph->vertices;
+       vertex < (graph->vertices + graph->nofvertices); vertex++) {
+    if (vertex->state != GIS_POLYMORPHIC)
+      vertex->state = GIS_UNVISITED;
   }
 
  /* BFS-Traversierung durch Zusammenhangskomponenten des Graphen,
