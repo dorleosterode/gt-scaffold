@@ -167,9 +167,10 @@ void gt_scaffolder_graph_delete(GtScaffoldGraph *graph){
 }
 
 /* Initialize a new vertex in <*graph>. Each vertex represents a contig and
-   contains information about the sequence length <seqlen>, A-statistics
-   <astat> and estimated copy number <copynum> */
+   contains information about the sequence header <*header_seq>, sequence
+   length <seqlen>, A-statistics <astat> and estimated copy number <copynum> */
 void gt_scaffolder_graph_add_vertex(GtScaffoldGraph *graph,
+                                    const char *header_seq,
                                     GtUword seqlen,
                                     float astat,
                                     float copynum)
@@ -185,6 +186,11 @@ void gt_scaffolder_graph_add_vertex(GtScaffoldGraph *graph,
   graph->vertices[nextfree].astat = astat;
   graph->vertices[nextfree].copynum = copynum;
   graph->vertices[nextfree].nofedges = 0;
+  if (header_seq != NULL)
+  {
+    graph->vertices[nextfree].headerseq = gt_malloc(sizeof(char) * strlen(header_seq));
+    strncpy(graph->vertices[nextfree].headerseq, header_seq, strlen(header_seq));
+  }
   /* SD: Initialize state? graph->vertices[nextfree].state = GIS_UNVISITED; */
 
   /* Allocate initial space for pointer to outgoing edges */
@@ -458,7 +464,9 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   return had_err;
 }
 
-static int gt_scaffolder_graph_count_ctg(GtUword length, void *data, GtError* err)
+static int gt_scaffolder_graph_count_ctg(GtUword length,
+                                         void *data,
+                                         GtError* err)
 {
   int had_err;
   GtScaffoldGraphCallbackData *callback_data =
@@ -475,8 +483,9 @@ static int gt_scaffolder_graph_count_ctg(GtUword length, void *data, GtError* er
   return had_err;
 }
 
-static int gt_scaffolder_graph_save_header(const char *description, GtUword length,
- void *data, GtError *err)
+static int gt_scaffolder_graph_save_header(const char *description,
+                                           GtUword length,
+                                           void *data, GtError *err)
 {
   int had_err;
   GtScaffoldGraphCallbackData *callback_data =
@@ -493,24 +502,20 @@ static int gt_scaffolder_graph_save_header(const char *description, GtUword leng
   return had_err;
 }
 
-static int gt_scaffolder_graph_save_ctg(GtUword length, void *data, GtError* err)
+static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
+                                        void *data,
+                                        GtError* err)
 {
   int had_err;
   GtScaffoldGraphCallbackData *callback_data =
   (GtScaffoldGraphCallbackData*) data;
 
   had_err = 0;
-  if (length > callback_data->min_ctg_len)
-  {
-    callback_data->graph->vertices[callback_data->graph->nofvertices].headerseq =
-    gt_malloc(sizeof(char) * callback_data->header_len);
-    strncpy(callback_data->graph->vertices[callback_data->graph->nofvertices].headerseq,
-    callback_data->header_seq, callback_data->header_len);
-    gt_scaffolder_graph_add_vertex(callback_data->graph, length,0.0,0.0);
-    /*callback_data->graph->vertices[callback_data->graph->nofvertices].seqlen = length;*/
-    callback_data->graph->nofvertices++;
-  }
-  if (length == 0)
+  if (seq_length > callback_data->min_ctg_len)
+    gt_scaffolder_graph_add_vertex(callback_data->graph,
+    callback_data->header_seq, seq_length, 0.0, 0.0);
+
+  if (seq_length == 0)
   {
     gt_error_set (err , " invalid sequence length ");
     had_err = -1;
@@ -539,11 +544,10 @@ GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
   reader = gt_fasta_reader_rec_new(str_filename);
   had_err = gt_fasta_reader_run(reader, NULL, NULL,
             gt_scaffolder_graph_count_ctg, callback_data, err);
-  /*TODO graph_new Funktion einfuegen */
+
   graph = gt_malloc(sizeof(*graph));
-  graph->nofvertices = 0;
-  graph->maxnofvertices = callback_data->nof_valid_ctg;
-  graph->vertices = gt_malloc(sizeof(*graph->vertices) * callback_data->nof_valid_ctg);
+  gt_scaffolder_graph_create_vertices(graph, callback_data->nof_valid_ctg);
+
   callback_data->graph = graph;
   had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header, NULL,
             gt_scaffolder_graph_save_ctg, callback_data, err);

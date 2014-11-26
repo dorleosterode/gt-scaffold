@@ -28,11 +28,11 @@ int main(void){
   /* Baue das Haus vom Nikolaus, 5 Knoten, 8 Kanten: */
   graph = gt_scaffolder_graph_new(5, 8);
 
-  gt_scaffolder_graph_add_vertex(graph, 100, 20, 40);
-  gt_scaffolder_graph_add_vertex(graph, 100, 20, 40);
-  gt_scaffolder_graph_add_vertex(graph, 100, 20, 40);
-  gt_scaffolder_graph_add_vertex(graph, 100, 20, 40);
-  gt_scaffolder_graph_add_vertex(graph, 100, 20, 40);
+  gt_scaffolder_graph_add_vertex(graph, NULL, 100, 20, 40);
+  gt_scaffolder_graph_add_vertex(graph, NULL, 100, 20, 40);
+  gt_scaffolder_graph_add_vertex(graph, NULL, 100, 20, 40);
+  gt_scaffolder_graph_add_vertex(graph, NULL, 100, 20, 40);
+  gt_scaffolder_graph_add_vertex(graph, NULL, 100, 20, 40);
 
   gt_scaffolder_graph_add_edge(graph, 0, 1, 2, 1.5, 4, SENSE, SAME);
   gt_scaffolder_graph_add_edge(graph, 0, 2, 2, 1.5, 4, SENSE, SAME);
