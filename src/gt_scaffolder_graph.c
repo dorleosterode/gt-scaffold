@@ -543,15 +543,38 @@ static GtUword calculate_overlap (GtScaffoldGraphEdge *edge1,
   return overlap;
 }
 
+static void gt_scaffolder_graph_check_mark_polymorphic(GtScaffoldGraphEdge *edge1,
+                                                       GtScaffoldGraphEdge *edge2,
+                                                       float pcutoff,
+                                                       float cncutoff) {
+  GtScaffoldGraphVertex *poly_vertex;
+  GtScaffoldGraphEdge *edge;
+
+  if (gt_scaffolder_graph_ambiguousorder(edge1, edge2, pcutoff) &&
+      (edge1->end->copynum + edge2->end->copynum) < cncutoff) {
+    /* mark vertex with lower copynumber as polymorphic */
+    if (edge1->end->copynum < edge2->end->copynum)
+      poly_vertex = edge1->end;
+    else
+      poly_vertex = edge2->end;
+    /* mark all edges of the polymorphic vertex as polymorphic */
+    if (poly_vertex->state != GIS_POLYMORPHIC) {
+      for (edge = poly_vertex->edges[0];
+           edge < (poly_vertex->edges[0] + poly_vertex->nofedges); edge++)
+        edge->state = GIS_POLYMORPHIC;
+      poly_vertex->state = GIS_POLYMORPHIC;
+    }
+  }
+}
+
 /* Makierung polymorpher Kanten/Knoten und inkonsistenter Kanten im
    Scaffold Graphen */
 int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
     float cncutoff, GtUword ocutoff) {
-  GtScaffoldGraphVertex *vertex, *polymorphic_vertex;
+  GtScaffoldGraphVertex *vertex;
   GtScaffoldGraphEdge *edge1, *edge2;
-  GtUword eid_3, overlap;
+  GtUword overlap;
   GtUword maxoverlap = 0;
-  float sum_copynum;
   unsigned int dir; /* int statt bool, weil Iteration bislang nicht möglich */
   int had_err = 0;
 
@@ -567,21 +590,7 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
              edge2++) {
           if (edge1->sense == dir && edge2->sense == dir) {
             /* check if edge1->end and edge2->end are polymorphic */
-            sum_copynum = edge1->end->copynum + edge2->end->copynum;
-            if (gt_scaffolder_graph_ambiguousorder(edge1, edge2, pcutoff) &&
-                sum_copynum < cncutoff) {
-              /* mark vertex with lower copynumber as polymorphic */
-              if (edge1->end->copynum < edge2->end->copynum)
-                polymorphic_vertex = edge1->end;
-              else
-                polymorphic_vertex = edge2->end;
-              /* mark all edges of the polymorphic vertex as polymorphic */
-              if (polymorphic_vertex->state != GIS_POLYMORPHIC) {
-                for (eid_3 = 0; eid_3 < polymorphic_vertex->nofedges; eid_3++)
-                  polymorphic_vertex->edges[eid_3]->state = GIS_POLYMORPHIC;
-                polymorphic_vertex->state = GIS_POLYMORPHIC;
-              }
-            }
+            gt_scaffolder_graph_check_mark_polymorphic(edge1, edge2, pcutoff, cncutoff);
             /* SD: Nur das erste Paar polymoprh markieren? */
           }
         }
