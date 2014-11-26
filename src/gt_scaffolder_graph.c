@@ -107,7 +107,7 @@ typedef struct GtScaffolderGraphCallbackData {
 
 /* Initialize vertex portion inside <*graph>. Allocate memory for
    <max_nof_vertices> vertices. */
-void gt_scaffolder_graph_create_vertices(GtScaffolderGraph *graph,
+void gt_scaffolder_graph_init_vertices(GtScaffolderGraph *graph,
                                          GtUword max_nof_vertices)
 {
   gt_assert(graph != 0);
@@ -120,8 +120,8 @@ void gt_scaffolder_graph_create_vertices(GtScaffolderGraph *graph,
 
 /* Initialize edge portion inside <*graph>. Allocate memory for
    <max_nof_edges> edges. */
-void gt_scaffolder_graph_create_edges(GtScaffolderGraph *graph,
-                                      GtUword max_nof_edges)
+void gt_scaffolder_graph_init_edges(GtScaffolderGraph *graph,
+                                    GtUword max_nof_edges)
 {
   gt_assert(graph != 0);
   gt_assert(graph->edges == NULL);
@@ -135,13 +135,13 @@ void gt_scaffolder_graph_create_edges(GtScaffolderGraph *graph,
    seperate constructor functions, which allocate memory for <max_nof_edges>
    edges and <maxnoefvertices> vertices. */
 GtScaffolderGraph *gt_scaffolder_graph_new(GtUword max_nof_vertices,
-                                         GtUword max_nof_edges)
+                                           GtUword max_nof_edges)
 {
   GtScaffolderGraph *graph;
 
   graph = gt_malloc(sizeof(*graph));
-  gt_scaffolder_graph_create_vertices(graph, max_nof_vertices);
-  gt_scaffolder_graph_create_edges(graph, max_nof_edges);
+  gt_scaffolder_graph_init_vertices(graph, max_nof_vertices);
+  gt_scaffolder_graph_init_edges(graph, max_nof_edges);
 
   return graph;
 }
@@ -573,7 +573,7 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
             gt_scaffolder_graph_count_ctg, callback_data, err);
 
   graph = gt_malloc(sizeof(*graph));
-  gt_scaffolder_graph_create_vertices(graph, callback_data->nof_valid_ctg);
+  gt_scaffolder_graph_init_vertices(graph, callback_data->nof_valid_ctg);
 
   callback_data->graph = graph;
   had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header, NULL,
