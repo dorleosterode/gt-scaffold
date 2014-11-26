@@ -677,7 +677,7 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
   GtScaffoldGraphVertex *vertex, *currentvertex, *nextvertex, *nextendvertex,
                         *endvertex;
   GtScaffoldGraphEdge *edge, *nextedge, *reverseedge, **edgemap;
-  GtUword vid, eid, ccnumber, lengthcwalk, lengthbestwalk;
+  GtUword ccnumber, lengthcwalk, lengthbestwalk;
   GtQueue *vqueue, *wqueue;
   float distance, *distancemap;
   bool dir;
@@ -701,8 +701,7 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
   distancemap = calloc(graph->nofvertices, sizeof(*distancemap));
   edgemap = gt_malloc(sizeof(*edgemap)*graph->nofvertices);
 
-  for (vid = 0; vid < graph->nofvertices; vid++) {
-    vertex = &graph->vertices[vid];
+  for (vertex = graph->vertices; vertex < (graph->vertices + graph->nofvertices); vertex++) {
     if (vertex->state == GIS_POLYMORPHIC || vertex->state == GIS_VISITED)
       continue;
     ccnumber += 1;
@@ -722,8 +721,8 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
 
       if (gt_scaffolder_graph_isterminal(vertex)) {
         dir = vertex->edges[0]->sense;
-        for (eid = 0; eid < vertex->nofedges; eid++) {
-          edge = vertex->edges[eid];
+        for (edge = vertex->edges[0];
+             edge < (vertex->edges[0] + vertex->nofedges); edge++) {
           endvertex = edge->end;
 
           /* SK: genometools hashes verwenden, Dichte evaluieren
@@ -764,8 +763,9 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
           }
 
           /* SD: Terminal Set implementieren, bestWalk über Rücktraversierung */
-          for (eid = 0; eid < endvertex->nofedges; eid++) {
-            nextedge = endvertex->edges[eid];
+          for (nextedge = endvertex->edges[0];
+               nextedge < (endvertex->edges[0] + endvertex->nofedges);
+               nextedge++) {
             if (nextedge->sense == dir) {
               nextendvertex = nextedge->end;
               distance = edge->dist + nextedge->dist;
@@ -783,8 +783,9 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph) {
 
 
       currentvertex->state = GIS_VISITED;
-      for (eid = 0; eid < currentvertex->nofedges; eid++) {
-        edge = currentvertex->edges[eid];
+      for (edge = currentvertex->edges[0];
+           edge < (currentvertex->edges[0] + currentvertex->nofedges);
+           edge++) {
         nextvertex = edge->end;
         if (vertex->state == GIS_POLYMORPHIC)
           continue;
