@@ -188,7 +188,7 @@ void gt_scaffolder_graph_add_vertex(GtScaffoldGraph *graph,
   graph->vertices[nextfree].nof_edges = 0;
   if (header_seq != NULL) {
     graph->vertices[nextfree].header_seq =
-      gt_malloc( sizeof(char) * strlen(header_seq) );
+      gt_malloc( sizeof (char) * strlen(header_seq) );
     strncpy( graph->vertices[nextfree].header_seq, header_seq,
              strlen(header_seq) );
   }
@@ -231,10 +231,10 @@ void gt_scaffolder_graph_add_edge(GtScaffoldGraph *graph,
   /* Assign edge to start vertice */
   gt_assert(vstartID < graph->nof_vertices && vendID < graph->nof_vertices);
   /* Allocate new space for pointer to this edge */
-  if(graph->vertices[vstartID].nof_edges > 0) {
+  if (graph->vertices[vstartID].nof_edges > 0) {
     graph->vertices[vstartID].edges =
       /* SK: realloc zu teuer? Besser: DistEst parsen und gezielt allokieren */
-      gt_realloc( graph->vertices[vstartID].edges, sizeof(*graph->edges) *
+      gt_realloc( graph->vertices[vstartID].edges, sizeof (*graph->edges) *
                   (graph->vertices[vstartID].nof_edges + 1) );
   }
   /* Assign adress of this edge to the pointer */
@@ -408,7 +408,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
 
     if (fieldsize == pos) {
       fieldsize *= 2;
-      field = gt_realloc(field, sizeof(*field) * fieldsize);
+      field = gt_realloc(field, sizeof (*field) * fieldsize);
     }
 
     if (*c == ' ' || *c == '\n') {
@@ -786,8 +786,8 @@ GtScaffoldGraphWalk *gt_scaffolder_create_walk(GtScaffoldGraph *graph,
   terminal_vertices = gt_array_new(sizeof(start));
 
   /* SK: Mit GtWord_Min / erwarteter Genomlaenge statt 0 initialisieren */
-  distancemap = calloc(graph->nof_vertices, sizeof(*distancemap));
-  edgemap = gt_malloc(sizeof(*edgemap)*graph->nof_vertices);
+  distancemap = calloc(graph->nof_vertices, sizeof (*distancemap));
+  edgemap = gt_malloc(sizeof (*edgemap)*graph->nof_vertices);
 
   dir = start->edges[0]->sense;
   for (edge = start->edges[0];
@@ -802,7 +802,7 @@ GtScaffoldGraphWalk *gt_scaffolder_create_walk(GtScaffoldGraph *graph,
     gt_queue_add(wqueue, edge);
   }
 
-  while(gt_queue_size(wqueue) != 0) {
+  while (gt_queue_size(wqueue) != 0) {
     edge = (GtScaffoldGraphEdge*)gt_queue_get(wqueue);
     endvertex = edge->end;
 
