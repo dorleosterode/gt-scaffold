@@ -140,8 +140,6 @@ GtScaffoldGraph *gt_scaffolder_graph_new(GtUword maxnofvertices,
 {
   GtScaffoldGraph *graph;
 
-  gt_assert(maxnofedges > 0);
-
   graph = gt_malloc(sizeof(*graph));
   gt_scaffolder_graph_create_vertices(graph, maxnofvertices);
   gt_scaffolder_graph_create_edges(graph, maxnofedges);
@@ -223,7 +221,7 @@ void gt_scaffolder_graph_add_edge(GtScaffoldGraph *graph,
 
   /* Assign edge to start vertice */
   gt_assert(vstartID < graph->nofvertices && vendID < graph->nofvertices);
-  /* Allocate new space for pointer to this edge */
+  /* If not initial edge, allocate new space for pointer */
   if(graph->vertices[vstartID].nofedges > 0) {
     graph->vertices[vstartID].edges =
       /* SK: realloc zu teuer? Besser: DistEst parsen und gezielt allokieren */
