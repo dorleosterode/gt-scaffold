@@ -92,14 +92,16 @@ typedef struct GtScaffoldGraphWalk {
   GtScaffoldGraphEdge **edges;
 }GtScaffoldGraphWalk;
 
-/* for parsing valid contigs */
-typedef struct GtScaffoldValidCtg {
-  GtUword nof;
-  GtUword minctglen;
-  GtUword headerlen;
-  const char *headerseq;
+/* for parsing valid contigs,
+   e.g. contigs with minimum length <min_ctg_len> */
+typedef struct GtScaffoldGraphCallbackData
+{
+  GtUword nof_valid_ctg;
+  GtUword min_ctg_len;
+  GtUword header_len;
+  const char *header_seq;
   GtScaffoldGraph *graph;
-}GtScaffoldValidCtg;
+}GtScaffoldGraphCallbackData;
 
 /* DistanceMap */
 /* EdgeMap */
@@ -446,16 +448,15 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   return had_err;
 }
 
-
-
 static int gt_scaffolder_graph_count_ctg(GtUword length, void *data, GtError* err)
 {
   int had_err;
-  GtScaffoldValidCtg *validctg = (GtScaffoldValidCtg*) data;
+  GtScaffoldGraphCallbackData *callback_data =
+  (GtScaffoldGraphCallbackData*) data;
 
   had_err = 0;
-  if (length >= validctg->minctglen)
-    validctg->nof++;
+  if (length >= callback_data->min_ctg_len)
+    callback_data->nof_valid_ctg++;
   if (length == 0)
   {
     gt_error_set (err , " invalid sequence length ");
@@ -468,11 +469,12 @@ static int gt_scaffolder_graph_save_header(const char *description, GtUword leng
  void *data, GtError *err)
 {
   int had_err;
-  GtScaffoldValidCtg *validctg = (GtScaffoldValidCtg*) data;
+  GtScaffoldGraphCallbackData *callback_data =
+  (GtScaffoldGraphCallbackData*) data;
 
   had_err = 0;
-  validctg->headerseq = description;
-  validctg->headerlen = length;
+  callback_data->header_seq = description;
+  callback_data->header_len = length;
   if (length == 0)
   {
     gt_error_set (err , " invalid header length ");
@@ -484,18 +486,19 @@ static int gt_scaffolder_graph_save_header(const char *description, GtUword leng
 static int gt_scaffolder_graph_save_ctg(GtUword length, void *data, GtError* err)
 {
   int had_err;
-  GtScaffoldValidCtg *validctg = (GtScaffoldValidCtg*) data;
+  GtScaffoldGraphCallbackData *callback_data =
+  (GtScaffoldGraphCallbackData*) data;
 
   had_err = 0;
-  if (length > validctg->minctglen)
+  if (length > callback_data->min_ctg_len)
   {
-    validctg->graph->vertices[validctg->graph->nofvertices].headerseq =
-    gt_malloc(sizeof(char) * validctg->headerlen);
-    strncpy(validctg->graph->vertices[validctg->graph->nofvertices].headerseq,
-    validctg->headerseq, validctg->headerlen);
-    graph_add_vertex(validctg->graph, length,0.0,0.0);
-    /*validctg->graph->vertices[validctg->graph->nofvertices].seqlen = length;*/
-    validctg->graph->nofvertices++;
+    callback_data->graph->vertices[callback_data->graph->nofvertices].headerseq =
+    gt_malloc(sizeof(char) * callback_data->header_len);
+    strncpy(callback_data->graph->vertices[callback_data->graph->nofvertices].headerseq,
+    callback_data->header_seq, callback_data->header_len);
+    graph_add_vertex(callback_data->graph, length,0.0,0.0);
+    /*callback_data->graph->vertices[callback_data->graph->nofvertices].seqlen = length;*/
+    callback_data->graph->nofvertices++;
   }
   if (length == 0)
   {
@@ -506,41 +509,40 @@ static int gt_scaffolder_graph_save_ctg(GtUword length, void *data, GtError* err
 }
 
 /* creation of scaffold graph */
-GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctgfilename,
-                 GtUword minctglen, const char *distfilename, GtError *err)
+GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
+                 GtUword min_ctg_len, const char *dist_filename, GtError *err)
 {
   GtScaffoldGraph *graph;
   GtFastaReader* reader;
   GtStr *str_filename;
   int had_err;
-  GtScaffoldValidCtg *validctg;
+  GtScaffoldGraphCallbackData *callback_data;
 
   had_err = 0;
   str_filename = gt_str_new();
-  gt_str_set(str_filename, ctgfilename);
-  /*TODO andere Name fuer validctg? callback_data*/
-  validctg = gt_malloc(sizeof(*validctg));
-  validctg->nof = 0;
-  validctg->minctglen = minctglen;
+  gt_str_set(str_filename, ctg_filename);
+  callback_data = gt_malloc(sizeof(*callback_data));
+  callback_data->nof_valid_ctg = 0;
+  callback_data->min_ctg_len = min_ctg_len;
   /* parse contigs in FASTA-format and save them as vertices of
      scaffold graph */
   reader = gt_fasta_reader_rec_new(str_filename);
   had_err = gt_fasta_reader_run(reader, NULL, NULL,
-            gt_scaffolder_graph_count_ctg, validctg, err);
+            gt_scaffolder_graph_count_ctg, callback_data, err);
   /*TODO graph_new Funktion einfuegen */
   graph = gt_malloc(sizeof(*graph));
   graph->nofvertices = 0;
-  graph->maxnofvertices = validctg->nof;
-  graph->vertices = gt_malloc(sizeof(*graph->vertices) * validctg->nof);
-  validctg->graph = graph;
+  graph->maxnofvertices = callback_data->nof_valid_ctg;
+  graph->vertices = gt_malloc(sizeof(*graph->vertices) * callback_data->nof_valid_ctg);
+  callback_data->graph = graph;
   had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header, NULL,
-            gt_scaffolder_graph_save_ctg, validctg, err);
+            gt_scaffolder_graph_save_ctg, callback_data, err);
   gt_fasta_reader_delete(reader);
   gt_str_delete(str_filename);
 
   /* parse distance information of contigs in abyss-dist-format and
      save them as edges of scaffold graph */
-  had_err = gt_scaffolder_graph_read_distances(distfilename, graph, false, err);
+  had_err = gt_scaffolder_graph_read_distances(dist_filename, graph, false, err);
 
   if (had_err != 0)
     printf("error");
