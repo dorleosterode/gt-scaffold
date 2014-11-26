@@ -41,13 +41,11 @@ int gt_scaffolder_graph_print(const GtScaffoldGraph *g,
 void gt_scaffolder_graph_print_generic(const GtScaffoldGraph *g,
 				       GtFile *f);
 
-/* extended scaffold graph functions
-SK: Fasta-Iterator (core/fastareaderseqiterator) */
+/* extended scaffold graph functions */
 GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
                  GtUword min_ctg_len, const char *dist_filename, GtError *err);
-int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
-    float cncutoff, GtUword ocutoff); /* SK: GtError Objekt; nicht benötigt */
+int gt_scaffolder_graph_filter(GtScaffoldGraph *graph, float pcutoff,
+    float cncutoff, GtUword ocutoff);
 void gt_scaffolder_makescaffold(GtScaffoldGraph *graph); /* SK: nicht-öffentlich? */
-
 
 #endif
