@@ -131,9 +131,9 @@ void gt_scaffolder_graph_create_edges(GtScaffolderGraph *graph,
   graph->max_nof_edges = max_nof_edges;
 }
 
-/* Construct graph data structure <*GtScaffolderGraph>. Wraps around two seperate
-   constructor functions, which allocate memory for <max_nof_edges> edges and
-   <maxnoefvertices> vertices. */
+/* Constructs graph data structure <*GtScaffolderGraph>. Wraps around two
+   seperate constructor functions, which allocate memory for <max_nof_edges>
+   edges and <maxnoefvertices> vertices. */
 GtScaffolderGraph *gt_scaffolder_graph_new(GtUword max_nof_vertices,
                                          GtUword max_nof_edges)
 {
@@ -594,9 +594,10 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
 
 /* check if unique order of edges <*edge1>, <*edge2> with probability
    <cutoff> exists */
-static bool gt_scaffolder_graph_ambiguousorder(const GtScaffolderGraphEdge *edge1,
-                                               const GtScaffolderGraphEdge *edge2,
-                                               float cutoff)
+static bool
+gt_scaffolder_graph_ambiguousorder(const GtScaffolderGraphEdge *edge1,
+                                   const GtScaffolderGraphEdge *edge2,
+                                   float cutoff)
 {
   float expval, variance, interval, prob12, prob21;
 
@@ -714,7 +715,8 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
 }
 
 /* check if vertex holds just sense or antisense edges */
-static bool gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
+static bool
+gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
 {
   GtScaffolderGraphEdge *edge;
   bool dir;
