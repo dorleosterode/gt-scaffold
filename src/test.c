@@ -4,13 +4,10 @@
 #include "gt_scaffolder_graph.h"
 #include "core/types_api.h"
 
-/* Datenstruktur Scaffold-Graph */
-
 #define ANTISENSE 1
 #define SENSE 0
 #define REVERSE 1
 #define SAME 0
-
 
 int main(void){
   GtScaffoldGraph *graph;
@@ -21,9 +18,6 @@ int main(void){
   gt_lib_init();
   /* create error object */
   err = gt_error_new();
-
-
-
 
   /* Baue das Haus vom Nikolaus, 5 Knoten, 8 Kanten: */
   graph = gt_scaffolder_graph_new(5, 8);
