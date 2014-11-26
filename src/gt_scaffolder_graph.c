@@ -25,10 +25,8 @@
 #include "core/queue_api.h"
 #include "core/types_api.h"
 #include "core/minmax.h"
-#include "core/ma_api.h"
 #include "core/fasta_reader_rec.h"
 #include "core/error.h"
-#include "genometools.h"
 
 /* SK: Gt-Namenskonvention für Zustände einhalten (docs/ oder manuals/developermanual)
        Automatische Prüfung durch scripts/src_check */
@@ -477,7 +475,6 @@ GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctgfilename,
   GtScaffoldValidCtg *validctg;
 
   had_err = 0;
-  gt_lib_init();
   str_filename = gt_str_new();
   gt_str_set(str_filename, ctgfilename);
   validctg = gt_malloc(sizeof(*validctg));
@@ -615,22 +612,19 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph, float pcutoff,
   return had_err;
 }
 
-/* Ueberpruefung ob Knoten terminal ist, d.h. nur sense oder antisense-Kanten
-   vorliegen */
+/* check if vertex holds just sense or antisense edges */
 static bool gt_scaffolder_graph_isterminal(const GtScaffoldGraphVertex *vertex) {
-  GtUword sense = 0, antisense = 0, eid;
   GtScaffoldGraphEdge *edge;
+  bool dir;
 
-  /* Nicht zählen, Schleife abbrechen ueber != prev_sense */
-  for (eid = 0; eid < vertex->nofedges; eid++) {
-    edge = vertex->edges[eid];
-    if (edge->sense)
-      sense++;
-    else
-      antisense++;
+  dir = vertex->edges[0]->sense;
+  for (edge = (vertex->edges[0] + 1); edge < (vertex->edges[0] + vertex->nofedges);
+       edge++) {
+    if (edge->sense != dir)
+      return false;
   }
 
-  return ((sense == 0 && antisense != 0) || (sense != 0 && antisense == 0));
+  return true;
 }
 
 /* Entfernung von Zyklen
