@@ -69,7 +69,7 @@ typedef struct GtScaffoldGraphEdge {
      sense = true & same = true: ctg1 & ctg2 in sense direction
      sense = true & same = false: ctg1 in sense & ctg2 in antisense direction
      sense = false & same = true: ctg1 & ctg2 in antisense direction
-     sense = false & same = false: ctg1 in antisense & ctg2 in sense direction */
+     sense = false & same = false: ctg1 in antisense & ctg2 in sense direction*/
   bool sense;
   bool same;
 } GtScaffoldGraphEdge;
@@ -168,7 +168,7 @@ void gt_scaffolder_graph_delete(GtScaffoldGraph *graph)
 
 /* Initialize a new vertex in <*graph>. Each vertex represents a contig and
    contains information about the sequence header <*header_seq>, sequence
-   length <seq_len>, A-statistics <astat> and estimated copy number <copy_num> */
+   length <seq_len>, A-statistics <astat> and estimated copy number <copy_num>*/
 void gt_scaffolder_graph_add_vertex(GtScaffoldGraph *graph,
                                     const char *header_seq,
                                     GtUword seq_len,
@@ -181,14 +181,16 @@ void gt_scaffolder_graph_add_vertex(GtScaffoldGraph *graph,
   GtUword nextfree = graph->nof_vertices;
 
   /* Initialize vertex */
-  graph->vertices[nextfree].id = nextfree; /* SD: redundant, needed for compiling */
+  graph->vertices[nextfree].id = nextfree; /* SD: remove without breaking */
   graph->vertices[nextfree].seq_len = seq_len;
   graph->vertices[nextfree].astat = astat;
   graph->vertices[nextfree].copy_num = copy_num;
   graph->vertices[nextfree].nof_edges = 0;
   if (header_seq != NULL) {
-    graph->vertices[nextfree].header_seq = gt_malloc(sizeof(char) * strlen(header_seq));
-    strncpy(graph->vertices[nextfree].header_seq, header_seq, strlen(header_seq));
+    graph->vertices[nextfree].header_seq =
+      gt_malloc( sizeof(char) * strlen(header_seq) );
+    strncpy( graph->vertices[nextfree].header_seq, header_seq,
+             strlen(header_seq) );
   }
   /* SD: Initialize state? graph->vertices[nextfree].state = GIS_UNVISITED; */
 
@@ -442,8 +444,8 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
             }
           }
           else
-            gt_scaffolder_graph_add_edge(graph, rootctgid, ctgid, dist, std_dev, num_pairs,
-                                   sense, same);
+            gt_scaffolder_graph_add_edge(graph, rootctgid, ctgid, dist, std_dev,
+                                         num_pairs, sense, same);
           /* Debbuging:
              printf("dist: %ld\n num_pairs: %lu\n std_dev:"
                  "%f\n num5: %lu\n sense: %d\n\n",dist, num_pairs, std_dev,
@@ -581,7 +583,8 @@ GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
 
   /* parse distance information of contigs in abyss-dist-format and
      save them as edges of scaffold graph */
-  had_err = gt_scaffolder_graph_read_distances(dist_filename, graph, false, err);
+  had_err =
+    gt_scaffolder_graph_read_distances(dist_filename, graph, false, err);
 
   if (had_err != 0)
     gt_error_check(err);
@@ -599,7 +602,8 @@ static bool gt_scaffolder_graph_ambiguousorder(const GtScaffoldGraphEdge *edge1,
 
   expval = edge1->dist - edge2->dist;
   /* sichere Multiplikation, Division? */
-  variance = 2 * (edge1->std_dev * edge1->std_dev) - (edge2->std_dev * edge2->std_dev);
+  variance = 2 * (edge1->std_dev * edge1->std_dev) -
+             (edge2->std_dev * edge2->std_dev);
   interval = -expval / sqrt(variance);
   prob12 = 0.5 * (1 + erf(interval) );
   prob21 = 1.0 - prob12;
@@ -621,10 +625,11 @@ static GtUword calculate_overlap (GtScaffoldGraphEdge *edge1,
   return overlap;
 }
 
-static void gt_scaffolder_graph_check_mark_polymorphic(GtScaffoldGraphEdge *edge1,
-                                                       GtScaffoldGraphEdge *edge2,
-                                                       float pcutoff,
-                                                       float cncutoff)
+static void
+gt_scaffolder_graph_check_mark_polymorphic(GtScaffoldGraphEdge *edge1,
+                                           GtScaffoldGraphEdge *edge2,
+                                           float pcutoff,
+                                           float cncutoff)
 {
   GtScaffoldGraphVertex *poly_vertex;
   GtScaffoldGraphEdge *edge;
@@ -671,7 +676,8 @@ int gt_scaffolder_graph_filter(GtScaffoldGraph *graph,
              edge2++) {
           if (edge1->sense == dir && edge2->sense == dir) {
             /* check if edge1->end and edge2->end are polymorphic */
-            gt_scaffolder_graph_check_mark_polymorphic(edge1, edge2, pcutoff, cncutoff);
+            gt_scaffolder_graph_check_mark_polymorphic(edge1, edge2,
+                                                       pcutoff, cncutoff);
             /* SD: Nur das erste Paar polymoprh markieren? */
           }
         }
@@ -686,8 +692,8 @@ int gt_scaffolder_graph_filter(GtScaffoldGraph *graph,
         for (edge2 = edge1 + 1; edge2 < (vertex->edges[0] + vertex->nof_edges);
              edge2++) {
           if (edge1->sense == dir && edge2->sense == dir &&
-              edge1->state != GIS_POLYMORPHIC && edge2->state != GIS_POLYMORPHIC) {
-
+              edge1->state != GIS_POLYMORPHIC &&
+              edge2->state != GIS_POLYMORPHIC) {
             overlap = calculate_overlap(edge1, edge2);
             if (overlap > maxoverlap)
               maxoverlap = overlap;
@@ -704,7 +710,6 @@ int gt_scaffolder_graph_filter(GtScaffoldGraph *graph,
       }
     }
   }
-  /* SD: Knoten & Kanten werden nicht gelöscht, sondern der Einfachheit halber später geprüft*/
   return had_err;
 }
 
@@ -715,8 +720,8 @@ static bool gt_scaffolder_graph_isterminal(const GtScaffoldGraphVertex *vertex)
   bool dir;
 
   dir = vertex->edges[0]->sense;
-  for (edge = (vertex->edges[0] + 1); edge < (vertex->edges[0] + vertex->nof_edges);
-       edge++) {
+  for (edge = (vertex->edges[0] + 1); edge < (vertex->edges[0] +
+       vertex->nof_edges); edge++) {
     if (edge->sense != dir)
       return false;
   }
@@ -880,7 +885,8 @@ void gt_scaffolder_makescaffold(GtScaffoldGraph *graph)
   terminal_vertices = gt_array_new(sizeof(vertex));
   cc_walks = gt_array_new(sizeof(walk));
 
-  for (vertex = graph->vertices; vertex < (graph->vertices + graph->nof_vertices); vertex++) {
+  for (vertex = graph->vertices; vertex <
+       (graph->vertices + graph->nof_vertices); vertex++) {
     if (vertex->state == GIS_POLYMORPHIC || vertex->state == GIS_VISITED)
       continue;
     ccnumber += 1;
