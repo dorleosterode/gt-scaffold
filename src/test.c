@@ -10,7 +10,7 @@
 #define SAME 0
 
 int main(void){
-  GtScaffoldGraph *graph;
+  GtScaffolderGraph *graph;
   GtError *err;
   char outfile[] = "foo.dot";
 

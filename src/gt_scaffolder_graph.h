@@ -23,20 +23,20 @@
 #ifndef GT_SCAFFOLDER_GRAPH_H
 #define GT_SCAFFOLDER_GRAPH_H
 
-typedef struct GtScaffoldGraph GtScaffoldGraph;
+typedef struct GtScaffolderGraph GtScaffolderGraph;
 
 /* basic scaffold graph functions */
-GtScaffoldGraph *gt_scaffolder_graph_new(GtUword nofvertices,
+GtScaffolderGraph *gt_scaffolder_graph_new(GtUword nofvertices,
                                          GtUword nofedges);
-void gt_scaffolder_graph_delete(GtScaffoldGraph *graph);
+void gt_scaffolder_graph_delete(GtScaffolderGraph *graph);
 
 /* for test purposes: low level graph functions */
-void gt_scaffolder_graph_add_vertex(GtScaffoldGraph *graph,
+void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
                                     const char *header_seq,
                                     GtUword seqlen,
                                     float astat,
                                     float copynum);
-void gt_scaffolder_graph_add_edge(GtScaffoldGraph *graph,
+void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
                                   GtUword vstartID,
                                   GtUword vendID,
                                   GtWord dist,
@@ -47,22 +47,22 @@ void gt_scaffolder_graph_add_edge(GtScaffoldGraph *graph,
 
 /* graph display functions
 SK: sga Format unterstützen asgq (?) */
-int gt_scaffolder_graph_print(const GtScaffoldGraph *g,
+int gt_scaffolder_graph_print(const GtScaffolderGraph *g,
 			                        const char *filename,
                               GtError *err);
-void gt_scaffolder_graph_print_generic(const GtScaffoldGraph *g,
+void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
 				                               GtFile *f);
 
 /* extended scaffold graph functions */
-GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
+GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
                                                    GtUword min_ctg_len,
                                                    const char *dist_filename,
                                                    GtError *err);
-int gt_scaffolder_graph_filter(GtScaffoldGraph *graph,
+int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
                                float pcutoff,
                                float cncutoff,
                                GtUword ocutoff);
 /* SK: nicht-öffentlich? */
-void gt_scaffolder_makescaffold(GtScaffoldGraph *graph);
+void gt_scaffolder_makescaffold(GtScaffolderGraph *graph);
 
 #endif
