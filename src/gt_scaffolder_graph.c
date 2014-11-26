@@ -247,9 +247,10 @@ void gt_scaffolder_graph_add_edge(GtScaffoldGraph *graph,
   graph->nofedges++;
 }
 
-static GtScaffoldGraphEdge *graph_find_edge(GtScaffoldGraph *graph,
-                                            GtUword vertexid_1,
-                                            GtUword vertexid_2)
+static GtScaffoldGraphEdge *gt_scaffolder_graph_find_edge(
+                                    GtScaffoldGraph *graph,
+                                    GtUword vertexid_1,
+                                    GtUword vertexid_2)
 {
   GtScaffoldGraphEdge *edge;
 
@@ -441,7 +442,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
         if (sscanf(field,"%ld,%lu,%f",&dist,&numpairs,&stddev) == 3)
         {
           /* check if edge between vertices already exists */
-          edge = graph_find_edge(graph, rootctgid, ctgid);
+          edge = gt_scaffolder_graph_find_edge(graph, rootctgid, ctgid);
           if (edge != NULL)
           {
             /*  LG: laut SGA edge->stddev < stddev,  korrekt? */
@@ -604,7 +605,7 @@ GtScaffoldGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
   had_err = gt_scaffolder_graph_read_distances(dist_filename, graph, false, err);
 
   if (had_err != 0)
-    printf("error");
+    gt_error_check(err);
 
   return graph;
 }
@@ -619,9 +620,8 @@ static bool gt_scaffolder_graph_ambiguousorder(const GtScaffoldGraphEdge *edge1,
   float expval, variance, interval, prob12, prob21;
 
   expval = edge1->dist - edge2->dist;
-  /* sichere Multiplikation, Division */
-  /* SK: pow nicht verwenden, stattdessen mit sich selbst multiplizieren */
-  variance = 2 * pow(edge1->stddev,2) - pow(edge2->stddev,2);
+  /* sichere Multiplikation, Division? */
+  variance = 2 * (edge1->stddev * edge1->stddev) - (edge2->stddev * edge2->stddev);
   interval = -expval / sqrt(variance);
   prob12 = 0.5 * (1 + erf(interval) );
   prob21 = 1.0 - prob12;
@@ -630,7 +630,8 @@ static bool gt_scaffolder_graph_ambiguousorder(const GtScaffoldGraphEdge *edge1,
 }
 
 static GtUword calculate_overlap (GtScaffoldGraphEdge *edge1,
-                                  GtScaffoldGraphEdge *edge2) {
+                                  GtScaffoldGraphEdge *edge2)
+{
   GtUword overlap = 0;
   GtWord intersect_start, intersect_end;
   if (edge2->dist > (edge1->end->seqlen - 1) ||
@@ -668,10 +669,10 @@ static void gt_scaffolder_graph_check_mark_polymorphic(GtScaffoldGraphEdge *edge
 }
 
 /* mark polymorphic edges/vertices and inconsistent edges in scaffold graph */
-int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph,
-                                  float pcutoff,
-                                  float cncutoff,
-                                  GtUword ocutoff)
+int gt_scaffolder_graph_filter(GtScaffoldGraph *graph,
+                               float pcutoff,
+                               float cncutoff,
+                               GtUword ocutoff)
 {
   GtScaffoldGraphVertex *vertex;
   GtScaffoldGraphEdge *edge1, *edge2;
@@ -770,12 +771,6 @@ static void gt_scaffolder_walk_delete(GtScaffoldGraphWalk *walk)
   gt_free(walk);
 }
 
-/* return total contig length of walk <*walk> */
-static GtUword gt_scaffolder_walk_getlength(GtScaffoldGraphWalk *walk)
-{
-  return walk->totalcontiglen;
-}
-
 /* add edge <*edge> to walk <*walk> */
 static void gt_scaffolder_walk_addegde(GtScaffoldGraphWalk *walk,
                                        GtScaffoldGraphEdge *edge)
@@ -789,7 +784,6 @@ static void gt_scaffolder_walk_addegde(GtScaffoldGraphWalk *walk,
   walk->totalcontiglen += edge->end->seqlen;
   walk->nofedges++;
 }
-
 
 GtScaffoldGraphWalk *gt_scaffolder_create_walk(GtScaffoldGraph *graph,
 					       GtScaffoldGraphVertex *start)
@@ -867,7 +861,8 @@ GtScaffoldGraphWalk *gt_scaffolder_create_walk(GtScaffoldGraph *graph,
     }
 
     /* Ermittelung Contig-Gesamtlaenge des aktuellen Walks  */
-    lengthcwalk = gt_scaffolder_walk_getlength(currentwalk);
+    lengthcwalk = currentwalk->totalcontiglen;
+
     if (lengthcwalk > lengthbestwalk) {
       gt_scaffolder_walk_delete(bestwalk);
       bestwalk = currentwalk;
