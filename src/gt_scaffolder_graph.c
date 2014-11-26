@@ -28,6 +28,8 @@
 #include "core/fasta_reader_rec.h"
 #include "core/error.h"
 
+const unsigned long INCREMENT_SIZE = 32;
+
 /* SK: Gt-Namenskonvention für Zustände einhalten (docs/ oder manuals/developermanual)
        Automatische Prüfung durch scripts/src_check */
 typedef enum { GIS_UNVISITED, GIS_POLYMORPHIC, GIS_INCONSISTENT,
@@ -709,13 +711,15 @@ int gt_scaffolder_graph_filtering(GtScaffoldGraph *graph,
 }
 
 /* check if vertex holds just sense or antisense edges */
-static bool gt_scaffolder_graph_isterminal(const GtScaffoldGraphVertex *vertex) {
+static bool gt_scaffolder_graph_isterminal(const GtScaffoldGraphVertex *vertex)
+{
   GtScaffoldGraphEdge *edge;
   bool dir;
 
   dir = vertex->edges[0]->sense;
   for (edge = (vertex->edges[0] + 1); edge < (vertex->edges[0] + vertex->nofedges);
-       edge++) {
+       edge++)
+  {
     if (edge->sense != dir)
       return false;
   }
@@ -723,11 +727,11 @@ static bool gt_scaffolder_graph_isterminal(const GtScaffoldGraphVertex *vertex) 
   return true;
 }
 
-/* Entfernung von Zyklen
+/* remove cycles
 static void gt_scaffolder_removecycles(GtScaffoldGraph *graph) {
 }*/
 
-/* Erstellung eines neuen Walks */
+/* create new walk */
 static GtScaffoldGraphWalk *gt_scaffolder_walk_new(void)
 {
   GtScaffoldGraphWalk *walk;
@@ -739,7 +743,7 @@ static GtScaffoldGraphWalk *gt_scaffolder_walk_new(void)
   return walk;
 }
 
-/* Loeschen eines Walks */
+/* remove walk <*walk> */
 static void gt_scaffolder_walk_delete(GtScaffoldGraphWalk *walk)
 {
   if (walk != NULL)
@@ -747,19 +751,19 @@ static void gt_scaffolder_walk_delete(GtScaffoldGraphWalk *walk)
   gt_free(walk);
 }
 
-/* Ausgabe der Contig-Gesamtlaenge eines Walks */
+/* return total contig length of walk <*walk> */
 static GtUword gt_scaffolder_walk_getlength(GtScaffoldGraphWalk *walk)
 {
   return walk->totalcontiglen;
 }
 
-/* Hinzufuegen einer Kante zum Walk */
+/* add edge <*edge> to walk <*walk> */
 static void gt_scaffolder_walk_addegde(GtScaffoldGraphWalk *walk,
                                        GtScaffoldGraphEdge *edge)
 {
-  if (walk->size == walk->nofedges) {
-    /* SK: 10 als Konstante definieren, const unsigned long increment_size 2er Potenz */
-    walk->size += 10;
+  if (walk->size == walk->nofedges)
+  {
+    walk->size += INCREMENT_SIZE;
     walk->edges = gt_realloc(walk->edges, walk->size*sizeof(*walk->edges));
   }
   walk->edges[walk->nofedges] = edge;
