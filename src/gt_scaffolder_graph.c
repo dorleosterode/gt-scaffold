@@ -260,15 +260,12 @@ static GtScaffolderGraphEdge *gt_scaffolder_graph_find_edge(
                                     GtUword vertexid_1,
                                     GtUword vertexid_2)
 {
-  GtScaffolderGraphEdge *edge;
-  /* SK: Temp. Variable fuer graph->vertices + vertexid_1 verwenden
-         [0] Index entfernen, nur Pointer verwenden */
+  GtScaffolderGraphEdge **edge;
+  GtScaffolderGraphVertex *v1 = graph->vertices + vertexid_1;
 
-  for (edge = (graph->vertices + vertexid_1)->edges[0];
-       edge < ((graph->vertices + vertexid_1)->edges[0] +
-          (graph->vertices + vertexid_1)->nof_edges); edge++) {
-    if (edge->end->id == vertexid_2)
-      return edge;
+  for (edge = v1->edges; edge < (v1->edges + v1->nof_edges); edge++) {
+    if ((*edge)->end->id == vertexid_2)
+      return *edge;
   }
   return NULL;
 }
@@ -660,7 +657,6 @@ gt_scaffolder_graph_check_mark_polymorphic(GtScaffolderGraphEdge *edge1,
                                            float cncutoff)
 {
   GtScaffolderGraphVertex *poly_vertex;
-  GtScaffolderGraphEdge *edge;
 
   if (gt_scaffolder_graph_ambiguousorder(edge1, edge2, pcutoff) &&
       (edge1->end->copy_num + edge2->end->copy_num) < cncutoff) {
@@ -672,9 +668,9 @@ gt_scaffolder_graph_check_mark_polymorphic(GtScaffolderGraphEdge *edge1,
     /* mark all edges of the polymorphic vertex as polymorphic */
     if (poly_vertex->state != GIS_POLYMORPHIC) {
       /* SK: Ueber korrekten Pointer iterieren */
-      for (edge = poly_vertex->edges[0];
-           edge < (poly_vertex->edges[0] + poly_vertex->nof_edges); edge++)
-        edge->state = GIS_POLYMORPHIC;
+      GtUword eid;
+      for (eid = 0; eid < poly_vertex->nof_edges; eid++)
+        poly_vertex->edges[eid]->state = GIS_POLYMORPHIC;
       poly_vertex->state = GIS_POLYMORPHIC;
     }
   }
@@ -688,7 +684,7 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
 {
   GtScaffolderGraphVertex *vertex;
   GtScaffolderGraphEdge *edge1, *edge2;
-  GtUword overlap;
+  GtUword overlap, eid1, eid2;
   GtUword maxoverlap = 0;
   unsigned int dir; /* int statt bool, weil Iteration bislang nicht möglich */
   int had_err = 0;
@@ -699,10 +695,10 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
     /* iterate over directions (sense/antisense) */
     for (dir = 0; dir < 2; dir++) {
       /* iterate over all pairs of edges */
-      for (edge1 = vertex->edges[0];
-           edge1 < (vertex->edges[0] + vertex->nof_edges); edge1++) {
-        for (edge2 = edge1 + 1; edge2 < (vertex->edges[0] + vertex->nof_edges);
-             edge2++) {
+      for (eid1 = 0; eid1 < vertex->nof_edges; eid1++) {
+        for (eid2 = eid1 + 1; eid2 < vertex->nof_edges; eid2++) {
+	  edge1 = vertex->edges[eid1];
+	  edge2 = vertex->edges[eid2];
           /* SK: edge->sense == edge->sense pruefen? */
           if (edge1->sense == dir && edge2->sense == dir) {
             /* check if edge1->end and edge2->end are polymorphic */
@@ -717,10 +713,10 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
       if (vertex->state == GIS_POLYMORPHIC)
         break;
       /* iterate over all pairs of edges, that are not polymorphic */
-      for (edge1 = vertex->edges[0];
-           edge1 < (vertex->edges[0] + vertex->nof_edges); edge1++) {
-        for (edge2 = edge1 + 1; edge2 < (vertex->edges[0] + vertex->nof_edges);
-             edge2++) {
+      for (eid1 = 0; eid1 < vertex->nof_edges; eid1++) {
+        for (eid2 = eid1 + 1; eid2 < vertex->nof_edges; eid2++) {
+	  edge1 = vertex->edges[eid1];
+	  edge2 = vertex->edges[eid2];
           if (edge1->sense == dir && edge2->sense == dir &&
               edge1->state != GIS_POLYMORPHIC &&
               edge2->state != GIS_POLYMORPHIC) {
@@ -734,9 +730,8 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
      /* check if maxoverlap is larger than ocutoff and mark edges
         as inconsistent */
       if (maxoverlap > ocutoff) {
-        for (edge1 = vertex->edges[0];
-             edge1 < (vertex->edges[0] + vertex->nof_edges); edge1++)
-          edge1->state = GIS_INCONSISTENT;
+        for (eid1 = 0; eid1 < vertex->nof_edges; eid1++)
+          vertex->edges[eid1]->state = GIS_INCONSISTENT;
       }
     }
   }
@@ -747,13 +742,12 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
 static bool
 gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
 {
-  GtScaffolderGraphEdge *edge;
   bool dir;
+  GtUword eid;
 
   dir = vertex->edges[0]->sense;
-  for (edge = (vertex->edges[0] + 1); edge < (vertex->edges[0] +
-       vertex->nof_edges); edge++) {
-    if (edge->sense != dir)
+  for (eid = 1; eid < vertex->nof_edges; eid++) {
+    if (vertex->edges[eid]->sense != dir)
       return false;
   }
 
@@ -806,7 +800,7 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
   GtArray *terminal_vertices;
   GtScaffolderGraphEdge *edge, *reverseedge, *nextedge, **edgemap;
   GtScaffolderGraphVertex *endvertex, *currentvertex, *nextendvertex;
-  GtUword lengthbestwalk, lengthcwalk;
+  GtUword lengthbestwalk, lengthcwalk, eid;
   GtScaffolderGraphWalk *bestwalk, *currentwalk;
   float distance, *distancemap;
   bool dir;
@@ -821,8 +815,8 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
   edgemap = gt_malloc(sizeof (*edgemap)*graph->nof_vertices);
 
   dir = start->edges[0]->sense;
-  for (edge = start->edges[0];
-       edge < (start->edges[0] + start->nof_edges); edge++) {
+  for (eid = 0; eid < start->nof_edges; eid++) {
+    edge = start->edges[eid];
     endvertex = edge->end;
 
     /* SK: genometools hashes verwenden, Dichte evaluieren
@@ -841,8 +835,8 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
     if (gt_scaffolder_graph_isterminal(endvertex))
       gt_array_add(terminal_vertices, endvertex);
 
-    for (nextedge = endvertex->edges[0];
-    nextedge < (endvertex->edges[0] + endvertex->nof_edges); nextedge++) {
+    for (eid = 0; eid < endvertex->nof_edges; eid++) {
+      nextedge = endvertex->edges[eid];
       if (nextedge->sense == dir) {
         nextendvertex = nextedge->end;
         distance = edge->dist + nextedge->dist;
@@ -894,7 +888,7 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
 void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
 {
   GtScaffolderGraphVertex *vertex, *currentvertex, *nextvertex, *start;
-  GtScaffolderGraphEdge *edge;
+  GtUword eid;
   GtScaffolderGraphWalk *walk;
   GtUword ccnumber;
   GtQueue *vqueue;
@@ -937,10 +931,8 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
        gt_array_add(terminal_vertices, currentvertex);
 
       currentvertex->state = GIS_VISITED;
-      for (edge = currentvertex->edges[0];
-           edge < (currentvertex->edges[0] + currentvertex->nof_edges);
-           edge++) {
-        nextvertex = edge->end;
+      for (eid = 0; eid < currentvertex->nof_edges; eid++) {
+        nextvertex = currentvertex->edges[eid]->end;
         if (vertex->state == GIS_POLYMORPHIC)
           continue;
         if (nextvertex->state == GIS_UNVISITED) {
