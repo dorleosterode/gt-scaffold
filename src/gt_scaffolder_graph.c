@@ -113,7 +113,7 @@ void gt_scaffolder_graph_init_vertices(GtScaffolderGraph *graph,
   gt_assert(graph != 0);
   gt_assert(graph->vertices == NULL);
   gt_assert(max_nof_vertices > 0);
-  graph->vertices = gt_malloc(sizeof(*graph->vertices) * max_nof_vertices);
+  graph->vertices = gt_malloc(sizeof (*graph->vertices) * max_nof_vertices);
   graph->nof_vertices = 0;
   graph->max_nof_vertices = max_nof_vertices;
 }
@@ -126,7 +126,7 @@ void gt_scaffolder_graph_init_edges(GtScaffolderGraph *graph,
   gt_assert(graph != 0);
   gt_assert(graph->edges == NULL);
   gt_assert(max_nof_edges > 0);
-  graph->edges = gt_malloc(sizeof(*graph->edges) * max_nof_edges);
+  graph->edges = gt_malloc(sizeof (*graph->edges) * max_nof_edges);
   graph->nof_edges = 0;
   graph->max_nof_edges = max_nof_edges;
 }
@@ -139,7 +139,7 @@ GtScaffolderGraph *gt_scaffolder_graph_new(GtUword max_nof_vertices,
 {
   GtScaffolderGraph *graph;
 
-  graph = gt_malloc(sizeof(*graph));
+  graph = gt_malloc(sizeof (*graph));
   graph->vertices = NULL;
   graph->edges = NULL;
   gt_scaffolder_graph_init_vertices(graph, max_nof_vertices);
@@ -198,7 +198,7 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
   graph->vertices[nextfree].state = GIS_UNVISITED;
 
   /* Allocate initial space for pointer to outgoing edges */
-  graph->vertices[nextfree].edges = gt_malloc(sizeof(*graph->edges));
+  graph->vertices[nextfree].edges = gt_malloc(sizeof (*graph->edges));
 
   graph->nof_vertices++;
 }
@@ -389,10 +389,10 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   bufferlen = ftell (infile);
   rewind (infile);
   /* save content of file */
-  buffer = gt_malloc(sizeof(*buffer) * bufferlen);
+  buffer = gt_malloc(sizeof (*buffer) * bufferlen);
   result = fread(buffer, 1, bufferlen, infile);
   fieldsize = 64;
-  field = gt_malloc(sizeof(*field)*fieldsize);
+  field = gt_malloc(sizeof (*field)*fieldsize);
 
   if (result != bufferlen) {
     gt_error_set (err , " incomplete read of file %s ", filename);
@@ -567,7 +567,7 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
   had_err = 0;
   str_filename = gt_str_new();
   gt_str_set(str_filename, ctg_filename);
-  callback_data = gt_malloc(sizeof(*callback_data));
+  callback_data = gt_malloc(sizeof (*callback_data));
   callback_data->nof_valid_ctg = 0;
   callback_data->min_ctg_len = min_ctg_len;
   /* parse contigs in FASTA-format and save them as vertices of
@@ -577,7 +577,7 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
             gt_scaffolder_graph_count_ctg, callback_data, err);
   gt_fasta_reader_delete(reader);
 
-  graph = gt_malloc(sizeof(*graph));
+  graph = gt_malloc(sizeof (*graph));
   gt_scaffolder_graph_init_vertices(graph, callback_data->nof_valid_ctg);
 
   callback_data->graph = graph;
@@ -746,7 +746,7 @@ static GtScaffolderGraphWalk *gt_scaffolder_walk_new(void)
 {
   GtScaffolderGraphWalk *walk;
 
-  walk = gt_malloc(sizeof(*walk));
+  walk = gt_malloc(sizeof (*walk));
   walk->total_contig_len = 0;
   walk->size = 0;
   walk->nof_edges = 0;
@@ -767,7 +767,7 @@ static void gt_scaffolder_walk_addegde(GtScaffolderGraphWalk *walk,
 {
   if (walk->size == walk->nof_edges) {
     walk->size += INCREMENT_SIZE;
-    walk->edges = gt_realloc(walk->edges, walk->size*sizeof(*walk->edges));
+    walk->edges = gt_realloc(walk->edges, walk->size*sizeof (*walk->edges));
   }
   walk->edges[walk->nof_edges] = edge;
   walk->total_contig_len += edge->end->seq_len;
@@ -791,7 +791,7 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
   bestwalk = gt_scaffolder_walk_new();
 
   wqueue = gt_queue_new();
-  terminal_vertices = gt_array_new(sizeof(start));
+  terminal_vertices = gt_array_new(sizeof (start));
 
   /* SK: Mit GtWord_Min / erwarteter Genomlaenge statt 0 initialisieren */
   distancemap = calloc(graph->nof_vertices, sizeof (*distancemap));
@@ -890,8 +890,8 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
     siehe GraphSearchTree.h */
   ccnumber = 0;
   vqueue = gt_queue_new();
-  terminal_vertices = gt_array_new(sizeof(vertex));
-  cc_walks = gt_array_new(sizeof(walk));
+  terminal_vertices = gt_array_new(sizeof (vertex));
+  cc_walks = gt_array_new(sizeof (walk));
 
   for (vertex = graph->vertices; vertex <
        (graph->vertices + graph->nof_vertices); vertex++) {
