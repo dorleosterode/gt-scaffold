@@ -575,8 +575,6 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
   had_err = gt_fasta_reader_run(reader, NULL, NULL,
             gt_scaffolder_graph_count_ctg, callback_data, err);
   gt_fasta_reader_delete(reader);
-  gt_str_delete(str_filename);
-
 
   graph = gt_malloc(sizeof(*graph));
   gt_scaffolder_graph_create_vertices(graph, callback_data->nof_valid_ctg);
