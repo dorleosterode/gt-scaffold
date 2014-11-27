@@ -142,8 +142,8 @@ GtScaffolderGraph *gt_scaffolder_graph_new(GtUword max_nof_vertices,
   graph = gt_malloc(sizeof(*graph));
   graph->vertices = NULL;
   graph->edges = NULL;
-  gt_scaffolder_graph_create_vertices(graph, max_nof_vertices);
-  gt_scaffolder_graph_create_edges(graph, max_nof_edges);
+  gt_scaffolder_graph_init_vertices(graph, max_nof_vertices);
+  gt_scaffolder_graph_init_edges(graph, max_nof_edges);
 
   return graph;
 }
