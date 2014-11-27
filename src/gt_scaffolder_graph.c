@@ -697,8 +697,8 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
       /* iterate over all pairs of edges */
       for (eid1 = 0; eid1 < vertex->nof_edges; eid1++) {
         for (eid2 = eid1 + 1; eid2 < vertex->nof_edges; eid2++) {
-	  edge1 = vertex->edges[eid1];
-	  edge2 = vertex->edges[eid2];
+          edge1 = vertex->edges[eid1];
+          edge2 = vertex->edges[eid2];
           /* SK: edge->sense == edge->sense pruefen? */
           if (edge1->sense == dir && edge2->sense == dir) {
             /* check if edge1->end and edge2->end are polymorphic */
@@ -715,8 +715,8 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
       /* iterate over all pairs of edges, that are not polymorphic */
       for (eid1 = 0; eid1 < vertex->nof_edges; eid1++) {
         for (eid2 = eid1 + 1; eid2 < vertex->nof_edges; eid2++) {
-	  edge1 = vertex->edges[eid1];
-	  edge2 = vertex->edges[eid2];
+          edge1 = vertex->edges[eid1];
+          edge2 = vertex->edges[eid2];
           if (edge1->sense == dir && edge2->sense == dir &&
               edge1->state != GIS_POLYMORPHIC &&
               edge2->state != GIS_POLYMORPHIC) {
@@ -931,12 +931,12 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
 
       /* store all terminal vertices to calculate all paths between them */
       if (gt_scaffolder_graph_isterminal(currentvertex))
-	gt_array_add(terminal_vertices, currentvertex);
+        gt_array_add(terminal_vertices, currentvertex);
 
       currentvertex->state = GIS_VISITED;
       for (eid = 0; eid < currentvertex->nof_edges; eid++) {
         nextvertex = currentvertex->edges[eid]->end;
-	/* why vertex->state? */
+        /* why vertex->state? */
         if (vertex->state == GIS_POLYMORPHIC)
           continue;
         if (nextvertex->state == GIS_UNVISITED) {
