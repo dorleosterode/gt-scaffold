@@ -140,8 +140,10 @@ GtScaffolderGraph *gt_scaffolder_graph_new(GtUword max_nof_vertices,
   GtScaffolderGraph *graph;
 
   graph = gt_malloc(sizeof(*graph));
-  gt_scaffolder_graph_init_vertices(graph, max_nof_vertices);
-  gt_scaffolder_graph_init_edges(graph, max_nof_edges);
+  graph->vertices = NULL;
+  graph->edges = NULL;
+  gt_scaffolder_graph_create_vertices(graph, max_nof_vertices);
+  gt_scaffolder_graph_create_edges(graph, max_nof_edges);
 
   return graph;
 }
@@ -192,7 +194,7 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
     strncpy( graph->vertices[nextfree].header_seq, header_seq,
              strlen(header_seq) );
   }
-  /* SD: Initialize state? graph->vertices[nextfree].state = GIS_UNVISITED; */
+  graph->vertices[nextfree].state = GIS_UNVISITED;
 
   /* Allocate initial space for pointer to outgoing edges */
   graph->vertices[nextfree].edges = gt_malloc(sizeof(*graph->edges));
@@ -358,6 +360,7 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
 /* parse distance information of contigs in abyss-dist-format and
    save them as edges of scaffold graph */
 /* LG: check for "mate-flag"? */
+/* Bsp.: Ctg1 Ctg2+,15,10,5.1 ; Ctg3-,65,10,5.1 */
 static int gt_scaffolder_graph_read_distances(const char *filename,
                                               GtScaffolderGraph *graph,
                                               bool ismatepair,
@@ -369,7 +372,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   GtScaffolderGraphEdge *edge;
   GtWord dist;
   float std_dev;
-  bool firstfield, nextfirstfield, sense, same;
+  bool first_field_line, first_field_record, sense, same;
   int had_err;
 
   had_err = 0;
@@ -396,8 +399,8 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   }
 
   pos = 0;
-  firstfield = true;
-  nextfirstfield = true;
+  first_field_line = true;
+  first_field_record = true;
   /* sense direction as default */
   sense = true;
 
@@ -416,8 +419,8 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
       pos = 0;
 
       /* parse root contig ID */
-      if (firstfield) {
-        firstfield = false;
+      if (first_field_line) {
+        first_field_line = false;
 
         rootctgid = gt_scaffolder_graph_get_vertex_id(graph, field, err);
         /* exit if distance and contig file inconsistent */
@@ -455,12 +458,12 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
         /* switch direction if semicolon occurs */
         else if (*field == ';')
           sense = !sense;
-        nextfirstfield = true;
+        first_field_record = true;
       }
     }
     /* parse contig ID */
-    else if (*c == ',' && nextfirstfield) {
-      nextfirstfield = false;
+    else if (*c == ',' && first_field_record) {
+      first_field_record = false;
       field[pos-1] = '\0';
       pos = 0;
       /* parsing composition,
@@ -475,7 +478,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
          printf("ctgid: %s\n",field);*/
     }
     if (*c == '\n') {
-      firstfield = true;
+      first_field_line = true;
       /* sense direction as default */
       sense = true;
     }
@@ -571,11 +574,13 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
   reader = gt_fasta_reader_rec_new(str_filename);
   had_err = gt_fasta_reader_run(reader, NULL, NULL,
             gt_scaffolder_graph_count_ctg, callback_data, err);
+  gt_fasta_reader_delete(reader);
 
   graph = gt_malloc(sizeof(*graph));
   gt_scaffolder_graph_init_vertices(graph, callback_data->nof_valid_ctg);
 
   callback_data->graph = graph;
+  reader = gt_fasta_reader_rec_new(str_filename);
   had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header, NULL,
             gt_scaffolder_graph_save_ctg, callback_data, err);
   gt_fasta_reader_delete(reader);

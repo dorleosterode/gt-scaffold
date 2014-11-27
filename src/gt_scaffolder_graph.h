@@ -46,7 +46,7 @@ void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
                                   bool comp);
 
 /* graph display functions
-SK: sga Format unterstützen asgq (?) */
+SK: sga Format unterstützen (asqg) */
 int gt_scaffolder_graph_print(const GtScaffolderGraph *g,
 			                        const char *filename,
                               GtError *err);
