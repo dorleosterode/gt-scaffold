@@ -28,6 +28,7 @@
 #include "core/fasta_reader_rec.h"
 #include "core/error.h"
 
+/* SK: Verwendung eintragen, evtl Faktor verwenden */
 const GtUword INCREMENT_SIZE = 32;
 
 typedef enum { GIS_UNVISITED, GIS_POLYMORPHIC, GIS_INCONSISTENT,
@@ -94,7 +95,8 @@ typedef struct GtScaffolderGraphWalk {
 
 /* for parsing valid contigs,
    e.g. contigs with minimum length <min_ctg_len> */
-typedef struct GtScaffolderGraphCallbackData {
+/* SK: callback data umbenennen, zB scaffold_fasta_reader_data */
+typedef struct {
   GtUword nof_valid_ctg;
   GtUword min_ctg_len;
   GtUword header_len;
@@ -110,7 +112,7 @@ typedef struct GtScaffolderGraphCallbackData {
 void gt_scaffolder_graph_init_vertices(GtScaffolderGraph *graph,
                                          GtUword max_nof_vertices)
 {
-  gt_assert(graph != 0);
+  gt_assert(graph != NULL);
   gt_assert(graph->vertices == NULL);
   gt_assert(max_nof_vertices > 0);
   graph->vertices = gt_malloc(sizeof (*graph->vertices) * max_nof_vertices);
@@ -123,7 +125,7 @@ void gt_scaffolder_graph_init_vertices(GtScaffolderGraph *graph,
 void gt_scaffolder_graph_init_edges(GtScaffolderGraph *graph,
                                     GtUword max_nof_edges)
 {
-  gt_assert(graph != 0);
+  gt_assert(graph != NULL);
   gt_assert(graph->edges == NULL);
   gt_assert(max_nof_edges > 0);
   graph->edges = gt_malloc(sizeof (*graph->edges) * max_nof_edges);
@@ -154,15 +156,17 @@ void gt_scaffolder_graph_delete(GtScaffolderGraph *graph)
   gt_assert(graph != NULL);
 
   if (graph->vertices != NULL) {
+    /* For Schleife über nof_vertices, separates free*/
     gt_free(graph->vertices->header_seq);
-    gt_free(graph->vertices->edges[0]);
+    /* gt_free(graph->vertices->edges[0]); */
     gt_free(graph->vertices->edges);
   }
 
-  if (graph->edges != NULL) {
-    gt_free(graph->edges->end);
-    gt_free(graph->edges->start);
-  }
+  /* if (graph->edges != NULL) {
+        For Schleife über nof_edges, separates free
+       gt_free(graph->edges->end);
+       gt_free(graph->edges->start);
+     } */
 
   gt_free(graph->edges);
   gt_free(graph->vertices);
@@ -178,10 +182,11 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
                                     float astat,
                                     float copy_num)
 {
+  GtUword nextfree;
   gt_assert(graph != NULL);
   gt_assert(graph->nof_vertices < graph->max_nof_vertices);
 
-  GtUword nextfree = graph->nof_vertices;
+  nextfree = graph->nof_vertices;
 
   /* Initialize vertex */
   graph->vertices[nextfree].id = nextfree; /* SD: remove without breaking */
@@ -192,13 +197,14 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
   if (header_seq != NULL) {
     graph->vertices[nextfree].header_seq =
       gt_malloc( sizeof (char) * strlen(header_seq) );
+    /* SK: gt_str_new_cstr (str_api.h) verwenden? */
     strncpy( graph->vertices[nextfree].header_seq, header_seq,
              strlen(header_seq) );
   }
   graph->vertices[nextfree].state = GIS_UNVISITED;
 
   /* Allocate initial space for pointer to outgoing edges */
-  graph->vertices[nextfree].edges = gt_malloc(sizeof (*graph->edges));
+  graph->vertices[nextfree].edges = gt_malloc(sizeof (*graph->vertices->edges));
 
   graph->nof_vertices++;
 }
@@ -255,6 +261,8 @@ static GtScaffolderGraphEdge *gt_scaffolder_graph_find_edge(
                                     GtUword vertexid_2)
 {
   GtScaffolderGraphEdge *edge;
+  /* SK: Temp. Variable fuer graph->vertices + vertexid_1 verwenden
+         [0] Index entfernen, nur Pointer verwenden */
 
   for (edge = (graph->vertices + vertexid_1)->edges[0];
        edge < ((graph->vertices + vertexid_1)->edges[0] +
@@ -266,14 +274,17 @@ static GtScaffolderGraphEdge *gt_scaffolder_graph_find_edge(
 }
 
 /* determines corresponding vertex id to contig header */
+/* SK: graph ist const */
 static GtUword gt_scaffolder_graph_get_vertex_id(GtScaffolderGraph *graph,
-                                             const char* header_seq,
-                                             GtError *err)
+                                                 const char* header_seq,
+                                                 GtError *err)
 {
   GtScaffolderGraphVertex *vertex;
-  GtUword had_err;
+  int had_err;
 
+  /* SK: found verwenden */
   had_err = -1;
+  /* SK: Knoten lexikographisch sortieren, Binaersuche? */
   for (vertex = graph->vertices;
        vertex < (graph->vertices + graph->nof_vertices); vertex++) {
     if (strcmp(vertex->header_seq, header_seq) == 0) {
@@ -286,6 +297,7 @@ static GtUword gt_scaffolder_graph_get_vertex_id(GtScaffolderGraph *graph,
   if (had_err == -1)
     gt_error_set(err, " distance and contig file inconsistent ");
 
+  /* SK: Funktion sollte Fehler kommunizieren koennen */
   return vertex->id;
 }
 
@@ -317,7 +329,7 @@ int gt_scaffolder_graph_print(const GtScaffolderGraph *g,
 
   GtFile *f = gt_file_new(filename, "w", err);
   if (f == NULL)
-    had_err = 1;
+    had_err = -1;
 
   if (!had_err) {
     gt_scaffolder_graph_print_generic(g, f);
@@ -335,7 +347,7 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
   GtScaffolderGraphEdge *e;
   /* 0: GIS_UNVISITED, 1: GIS_POLYMORPHIC, 2: GIS_INCONSISTENT,
      3: GIS_VISITED, 4: GIS_PROCESSED */
-  const char *color_array[5] = {"black", "gray", "gray", "red", "green"};
+  const char *color_array[] = {"black", "gray", "gray", "red", "green"};
 
   /* print first line into f */
   gt_file_xprintf(f, "graph {\n");
@@ -361,6 +373,7 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
 /* parse distance information of contigs in abyss-dist-format and
    save them as edges of scaffold graph */
 /* LG: check for "mate-flag"? */
+/* SK: DistParser in eigenes Modul auslagern? */
 /* Bsp.: Ctg1 Ctg2+,15,10,5.1 ; Ctg3-,65,10,5.1 */
 static int gt_scaffolder_graph_read_distances(const char *filename,
                                               GtScaffolderGraph *graph,
@@ -389,6 +402,8 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   bufferlen = ftell (infile);
   rewind (infile);
   /* save content of file */
+  /* SK: readline verwenden, um zeilenweise einzulesen, dann mit strchr
+         Leerzeichen suchen, Parser testen */
   buffer = gt_malloc(sizeof (*buffer) * bufferlen);
   result = fread(buffer, 1, bufferlen, infile);
   fieldsize = 64;
@@ -521,7 +536,7 @@ static int gt_scaffolder_graph_save_header(const char *description,
 
   had_err = 0;
   callback_data->header_seq = description;
-  callback_data->header_len = length;
+  /* SK: loeschen: callback_data->header_len = length;*/
   if (length == 0) {
     gt_error_set (err , " invalid header length ");
     had_err = -1;
@@ -554,9 +569,9 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
 
 /* create scaffold graph from file */
 GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
-                                                   GtUword min_ctg_len,
-                                                   const char *dist_filename,
-                                                   GtError *err)
+                                                     GtUword min_ctg_len,
+                                                     const char *dist_filename,
+                                                     GtError *err)
 {
   GtScaffolderGraph *graph;
   GtFastaReader* reader;
@@ -567,6 +582,7 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
   had_err = 0;
   str_filename = gt_str_new();
   gt_str_set(str_filename, ctg_filename);
+  /* SK: in 590 pointer uebergeben */
   callback_data = gt_malloc(sizeof (*callback_data));
   callback_data->nof_valid_ctg = 0;
   callback_data->min_ctg_len = min_ctg_len;
@@ -577,11 +593,13 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
             gt_scaffolder_graph_count_ctg, callback_data, err);
   gt_fasta_reader_delete(reader);
 
+  /* SK: if (!had_err) */
   graph = gt_malloc(sizeof (*graph));
   gt_scaffolder_graph_init_vertices(graph, callback_data->nof_valid_ctg);
 
   callback_data->graph = graph;
   reader = gt_fasta_reader_rec_new(str_filename);
+  /* SK: had_err auch behandeln, nicht ueberschreiben */
   had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header, NULL,
             gt_scaffolder_graph_save_ctg, callback_data, err);
   gt_fasta_reader_delete(reader);
@@ -589,11 +607,14 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
 
   /* parse distance information of contigs in abyss-dist-format and
      save them as edges of scaffold graph */
+  /* SK: if (!had_err) */
   had_err =
     gt_scaffolder_graph_read_distances(dist_filename, graph, false, err);
 
-  if (had_err != 0)
-    gt_error_check(err);
+  if (had_err != 0) {
+    /* SK: loeschen: gt_error_check(err);*/
+    /* SK: graph / callback loeschen und auf NULL setzen */
+  }
 
   return graph;
 }
@@ -608,26 +629,26 @@ gt_scaffolder_graph_ambiguousorder(const GtScaffolderGraphEdge *edge1,
   float expval, variance, interval, prob12, prob21;
 
   expval = edge1->dist - edge2->dist;
-  /* sichere Multiplikation, Division? */
   variance = 2 * (edge1->std_dev * edge1->std_dev) -
              (edge2->std_dev * edge2->std_dev);
   interval = -expval / sqrt(variance);
   prob12 = 0.5 * (1 + erf(interval) );
   prob21 = 1.0 - prob12;
 
-  return (prob12 <= cutoff && prob21 <= cutoff);
+  return (prob12 <= cutoff && prob21 <= cutoff) ? true : false;
 }
 
-static GtUword gt_scaffolder_calculate_overlap (GtScaffolderGraphEdge *edge1,
-                                  GtScaffolderGraphEdge *edge2)
+static GtUword gt_scaffolder_calculate_overlap(GtScaffolderGraphEdge *edge1,
+                                               GtScaffolderGraphEdge *edge2)
 {
+  /* SK: assertions, dass edge1/2 nicht NULL sind */
   GtUword overlap = 0;
-  GtWord intersect_start, intersect_end;
+
   if (edge2->dist > (edge1->end->seq_len - 1) ||
       edge1->dist > (edge2->end->seq_len - 1)) {
-    intersect_start = MAX(edge1->dist, edge2->dist);
-    intersect_end = MAX(edge1->end->seq_len - 1, edge2->end->seq_len - 1);
-    overlap = intersect_end - intersect_start + 1;
+    GtWord intersect_start = MAX(edge1->dist, edge2->dist);
+    GtWord intersect_end = MAX(edge1->end->seq_len, edge2->end->seq_len);
+    overlap = intersect_end - intersect_start;
   }
   return overlap;
 }
@@ -650,6 +671,7 @@ gt_scaffolder_graph_check_mark_polymorphic(GtScaffolderGraphEdge *edge1,
       poly_vertex = edge2->end;
     /* mark all edges of the polymorphic vertex as polymorphic */
     if (poly_vertex->state != GIS_POLYMORPHIC) {
+      /* SK: Ueber korrekten Pointer iterieren */
       for (edge = poly_vertex->edges[0];
            edge < (poly_vertex->edges[0] + poly_vertex->nof_edges); edge++)
         edge->state = GIS_POLYMORPHIC;
@@ -681,6 +703,7 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
            edge1 < (vertex->edges[0] + vertex->nof_edges); edge1++) {
         for (edge2 = edge1 + 1; edge2 < (vertex->edges[0] + vertex->nof_edges);
              edge2++) {
+          /* SK: edge->sense == edge->sense pruefen? */
           if (edge1->sense == dir && edge2->sense == dir) {
             /* check if edge1->end and edge2->end are polymorphic */
             gt_scaffolder_graph_check_mark_polymorphic(edge1, edge2,
@@ -824,6 +847,7 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
         nextendvertex = nextedge->end;
         distance = edge->dist + nextedge->dist;
 
+        /* SK: 0 steht fuer unitialisiert*/
         if (distancemap[nextendvertex->id] == 0 ||
         distancemap[nextendvertex->id] > distance) {
           distancemap[nextendvertex->id] = distance;
@@ -880,6 +904,7 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
      gt_scaffolder_removecycles(graph); */
 
   /* Iteration ueber alle Knoten, Makierung aller Knoten als unbesucht */
+  /* SK: Schleife evtl nich mehr benoetigt, da vor-initialisiert */
   for (vertex = graph->vertices;
        vertex < (graph->vertices + graph->nof_vertices); vertex++) {
     if (vertex->state != GIS_POLYMORPHIC)
@@ -909,7 +934,7 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
 
       /* store all terminal vertices to calculate all paths between them */
       if (gt_scaffolder_graph_isterminal(currentvertex))
-  gt_array_add(terminal_vertices, currentvertex);
+       gt_array_add(terminal_vertices, currentvertex);
 
       currentvertex->state = GIS_VISITED;
       for (edge = currentvertex->edges[0];
