@@ -110,7 +110,7 @@ typedef struct {
 /* Initialize vertex portion inside <*graph>. Allocate memory for
    <max_nof_vertices> vertices. */
 void gt_scaffolder_graph_init_vertices(GtScaffolderGraph *graph,
-                                         GtUword max_nof_vertices)
+                                       GtUword max_nof_vertices)
 {
   gt_assert(graph != NULL);
   gt_assert(graph->vertices == NULL);
