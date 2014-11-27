@@ -131,9 +131,9 @@ void gt_scaffolder_graph_init_edges(GtScaffolderGraph *graph,
   graph->max_nof_edges = max_nof_edges;
 }
 
-/* Constructs graph data structure <*GtScaffolderGraph>. Wraps around two
+/* Construct graph data structure <*GtScaffolderGraph>. Wrap around two
    seperate constructor functions, which allocate memory for <max_nof_edges>
-   edges and <maxnoefvertices> vertices. */
+   edges and <max_nof_vertices> vertices. */
 GtScaffolderGraph *gt_scaffolder_graph_new(GtUword max_nof_vertices,
                                            GtUword max_nof_edges)
 {
@@ -148,6 +148,7 @@ GtScaffolderGraph *gt_scaffolder_graph_new(GtUword max_nof_vertices,
   return graph;
 }
 
+/* Free all memory allocated for <*graph> including vertices and edges */
 void gt_scaffolder_graph_delete(GtScaffolderGraph *graph)
 {
   gt_assert(graph != NULL);
