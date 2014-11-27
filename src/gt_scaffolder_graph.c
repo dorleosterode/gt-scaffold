@@ -745,6 +745,9 @@ gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
   bool dir;
   GtUword eid;
 
+  if (vertex->nof_edges == 0)
+    return true;
+
   dir = vertex->edges[0]->sense;
   for (eid = 1; eid < vertex->nof_edges; eid++) {
     if (vertex->edges[eid]->sense != dir)
@@ -928,11 +931,12 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
 
       /* store all terminal vertices to calculate all paths between them */
       if (gt_scaffolder_graph_isterminal(currentvertex))
-       gt_array_add(terminal_vertices, currentvertex);
+	gt_array_add(terminal_vertices, currentvertex);
 
       currentvertex->state = GIS_VISITED;
       for (eid = 0; eid < currentvertex->nof_edges; eid++) {
         nextvertex = currentvertex->edges[eid]->end;
+	/* why vertex->state? */
         if (vertex->state == GIS_POLYMORPHIC)
           continue;
         if (nextvertex->state == GIS_UNVISITED) {
