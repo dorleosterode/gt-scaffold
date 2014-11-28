@@ -374,7 +374,8 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
 }
 
 /* parse distance information of contigs in abyss-dist-format and
-   save them as edges of scaffold graph */
+   save them as edges of scaffold graph, PRECONDITION: header contains
+   no commas and spaces */
 /* LG: check for "mate-flag"? */
 /* SK: DistParser in eigenes Modul auslagern? */
 /* Bsp.: Ctg1 Ctg2+,15,10,5.1 ; Ctg3-,65,10,5.1 */
@@ -383,128 +384,91 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
                                               bool ismatepair,
                                               GtError *err)
 {
-  FILE *infile;
-  char *buffer, *c, *field;
-  GtUword pos, bufferlen, result, num_pairs, fieldsize, rootctgid, ctgid;
-  GtScaffolderGraphEdge *edge;
+  FILE *file;
+  char line[1024], *field, ctg_header[1024];
+  GtUword num_pairs, root_ctg_id, ctg_id;
   GtWord dist;
   float std_dev;
-  bool first_field_line, first_field_record, sense, same;
+  bool same, sense;
+  GtScaffolderGraphEdge *edge;
   int had_err;
 
-  had_err = 0;
-  edge = NULL;
-  infile = fopen(filename, "rb");
-  if (infile == NULL) {
-    gt_error_set (err , " invalid file %s ", filename);
+  file = fopen(filename, "rb");
+  if (file == NULL){
     had_err = -1;
+    gt_error_set(err, " can not read file %s ",filename);
   }
 
-  /* determine size of file */
-  fseek(infile , 0 , SEEK_END);
-  bufferlen = ftell (infile);
-  rewind (infile);
-  /* save content of file */
-  /* SK: readline verwenden, um zeilenweise einzulesen, dann mit strchr
-         Leerzeichen suchen, Parser testen */
-  buffer = gt_malloc(sizeof (*buffer) * bufferlen);
-  result = fread(buffer, 1, bufferlen, infile);
-  fieldsize = 64;
-  field = gt_malloc(sizeof (*field)*fieldsize);
+  /* iterate over each line of file until eof (contig record) */
+  while (fgets(line, 1024, file) != NULL)
+  {
+    /* remove '\n' from end of line */
+    line[strlen(line)-1] = '\0';
+    /* set sense direction as default */
+    sense = true;
+    /* split line by first space delimiter */
+    field = strtok(line," ");
 
-  if (result != bufferlen) {
-    gt_error_set (err , " incomplete read of file %s ", filename);
-    had_err = -1;
-  }
+    /* get vertex id corresponding to root contig header */
+    root_ctg_id = gt_scaffolder_graph_get_vertex_id(graph, field, err);
+    /* exit if distance and contig file inconsistent */
+    gt_error_check(err);
+    /* Debbuging: printf("rootctgid: %s\n",field);*/
 
-  pos = 0;
-  first_field_line = true;
-  first_field_record = true;
-  /* sense direction as default */
-  sense = true;
-
-  /* iterate over file character by character */
-  for (c = buffer; c != buffer + bufferlen; c++) {
-    field[pos] = *c;
-    pos++;
-
-    if (fieldsize == pos) {
-      fieldsize *= 2;
-      field = gt_realloc(field, sizeof (*field) * fieldsize);
-    }
-
-    if (*c == ' ' || *c == '\n') {
-      field[pos-1] = '\0';
-      pos = 0;
-
-      /* parse root contig ID */
-      if (first_field_line) {
-        first_field_line = false;
-
-        rootctgid = gt_scaffolder_graph_get_vertex_id(graph, field, err);
+    /* iterate over space delimited records */
+    while (field != NULL)
+    {
+      /* parse record consisting of contig header, distance,
+         number of pairs, std. dev. */
+      if (sscanf(field,"%[^<,],%ld,%lu,%f", ctg_header, &dist, &num_pairs,
+          &std_dev) == 4)
+      {
+        /* get vertex id corresponding to contig header */
+        ctg_id = gt_scaffolder_graph_get_vertex_id(graph, ctg_header, err);
         /* exit if distance and contig file inconsistent */
         gt_error_check(err);
 
-        /* Debbuging:
-          printf("rootctgid: %s\n",field);*/
-      }
-      else {
-        /* parse contig-record with attributes distance, number of pairs,
-           standard deviation of distance */
-        if ( sscanf(field,"" GT_WD "," GT_WU ",%f",&dist,&num_pairs,&std_dev)
-             == 3)
+        /* parsing composition,
+         '+' indicates same strand and '-' reverse strand */ 
+        same = ctg_header[strlen(ctg_header) - 1] == '+' ? true : false;
+        /* check if edge between vertices already exists */
+
+        edge = gt_scaffolder_graph_find_edge(graph, root_ctg_id, ctg_id);
+        if (edge != NULL)
         {
-          /* check if edge between vertices already exists */
-          edge = gt_scaffolder_graph_find_edge(graph, rootctgid, ctgid);
-          if (edge != NULL) {
-            /*  LG: laut SGA edge->std_dev < std_dev,  korrekt? */
-            if (ismatepair == false && edge->std_dev < std_dev) {
-              /* LG: Ueberpruefung Kantenrichtung notwendig? */
-              gt_scaffolder_graph_alter_edge(edge, dist, std_dev, num_pairs,
-              sense, same);
-            }
-            else {
-              /*Conflicting-Flag?*/
-            }
+          /*  LG: laut SGA edge->std_dev < std_dev,  korrekt? */
+          if (ismatepair == false && edge->std_dev < std_dev)
+          {
+            /* LG: Ueberpruefung Kantenrichtung notwendig? */
+            gt_scaffolder_graph_alter_edge(edge, dist, std_dev, num_pairs,
+            sense, same);
           }
           else
-            gt_scaffolder_graph_add_edge(graph, rootctgid, ctgid, dist, std_dev,
-                                         num_pairs, sense, same);
-          /* Debbuging:
-             printf("dist: " GT_WD "\n num_pairs: " GT_WU "\n std_dev:"
-                "%f\n num5: " GT_WU "\n sense: %d\n\n",dist, num_pairs, std_dev,
-                num5,sense);
-          */
-
+          {
+            /*Conflicting-Flag?*/
+          }
         }
-        /* switch direction if semicolon occurs */
-        else if (*field == ';')
-          sense = !sense;
-        first_field_record = true;
+        else
+          gt_scaffolder_graph_add_edge(graph, root_ctg_id, ctg_id, dist, std_dev,
+                                       num_pairs, sense, same);
+        /* Debbuging:
+           printf("ctgid: %s\n",field);
+           printf("dist: " GT_WD "\n num_pairs: " GT_WU "\n std_dev:"
+              "%f\n num5: " GT_WU "\n sense: %d\n\n",dist, num_pairs, std_dev,
+              num5,sense);
+        */
       }
-    }
-    /* parse contig ID */
-    else if (*c == ',' && first_field_record) {
-      first_field_record = false;
-      field[pos-1] = '\0';
-      pos = 0;
-      /* parsing composition,
-         '+' indicates same strand and '-' reverse strand */
-      same = field[pos-2] == '+' ? true : false;
+      /* switch direction */
+      else if (*field == ';')
+        sense = !sense;
 
-      ctgid = gt_scaffolder_graph_get_vertex_id(graph, field, err);
-      /* exit if distance and contig file inconsistent */
-      gt_error_check(err);
-
-      /* Debbuging:
-         printf("ctgid: %s\n",field);*/
+      /* split line by next space delimiter */
+      field = strtok(NULL," ");
     }
-    if (*c == '\n') {
-      first_field_line = true;
-      /* sense direction as default */
-      sense = true;
-    }
+    
   }
+
+  fclose(file);
   return had_err;
 }
 
@@ -1006,7 +970,9 @@ int gt_scaffolder_test_graph(GtUword max_nof_vertices,
     gt_scaffolder_graph_init_vertices(graph, max_nof_vertices);
     if (graph->vertices == NULL)
       had_err = -1;
-    for (unsigned i = 0; i < nof_vertices; i++) {
+
+    unsigned i;
+    for (i = 0; i < nof_vertices; i++) {
       gt_scaffolder_graph_add_vertex(graph, "foobar", 100, 20, 40);
     }
   }
@@ -1022,7 +988,8 @@ int gt_scaffolder_test_graph(GtUword max_nof_vertices,
       had_err = -1;
 
     /* Connect 1st vertex with every other vertex, then 2nd one, etc */
-    for (unsigned i = 0; i < nof_edges; i++) {
+    unsigned i;
+    for (i = 0; i < nof_edges; i++) {
       if (vertex2 < nof_vertices - 1)
         vertex2++;
       else if (vertex1 < nof_vertices - 2) {
