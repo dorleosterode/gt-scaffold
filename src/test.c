@@ -4,40 +4,29 @@
 #include "gt_scaffolder_graph.h"
 #include "core/types_api.h"
 
-#define ANTISENSE 1
-#define SENSE 0
-#define REVERSE 1
-#define SAME 0
-
 int main(void){
-  GtScaffolderGraph *graph;
   GtError *err;
-  char outfile[] = "foo.dot";
 
   /* initialize */
   gt_lib_init();
   /* create error object */
   err = gt_error_new();
 
-  /* Baue das Haus vom Nikolaus, 5 Knoten, 8 Kanten: */
-  graph = gt_scaffolder_graph_new(5, 8);
+  /* Create graph and delete it */
+  gt_scaffolder_test_graph(5, 8, false, 0, false, 0, false);
 
-  gt_scaffolder_graph_add_vertex(graph, NULL, 100, 20, 40);
-  gt_scaffolder_graph_add_vertex(graph, NULL, 100, 20, 40);
-  gt_scaffolder_graph_add_vertex(graph, NULL, 100, 20, 40);
-  gt_scaffolder_graph_add_vertex(graph, NULL, 100, 20, 40);
-  gt_scaffolder_graph_add_vertex(graph, NULL, 100, 20, 40);
+  /* Create graph, only initialize vertices, delete it */
+  gt_scaffolder_test_graph(5, 8, true, 0, false, 0, false);
 
-  gt_scaffolder_graph_add_edge(graph, 0, 1, 2, 1.5, 4, SENSE, SAME);
-  gt_scaffolder_graph_add_edge(graph, 0, 2, 2, 1.5, 4, SENSE, SAME);
-  gt_scaffolder_graph_add_edge(graph, 0, 3, 2, 1.5, 4, SENSE, SAME);
-  gt_scaffolder_graph_add_edge(graph, 1, 2, 2, 1.5, 4, SENSE, SAME);
-  gt_scaffolder_graph_add_edge(graph, 1, 3, 2, 1.5, 4, SENSE, SAME);
-  gt_scaffolder_graph_add_edge(graph, 2, 3, 2, 1.5, 4, SENSE, SAME);
-  gt_scaffolder_graph_add_edge(graph, 2, 4, 2, 1.5, 4, SENSE, SAME);
-  gt_scaffolder_graph_add_edge(graph, 3, 4, 2, 1.5, 4, SENSE, SAME);
+  /* Create graph, initialize and create vertices, delete it */
+  gt_scaffolder_test_graph(5, 8, true, 5, false, 0, false);
 
-  gt_scaffolder_graph_print(graph, outfile, err);
+  /* Create graph, initialize vertices and edges, create vertices, delete it */
+  gt_scaffolder_test_graph(5, 8, true, 5, true, 0, false);
+
+  /* Create graph, initialize and create vertices and edges, delete it */
+  gt_scaffolder_test_graph(5, 8, true, 5, true, 8, true);
+
   gt_error_delete(err);
   return EXIT_SUCCESS;
 }

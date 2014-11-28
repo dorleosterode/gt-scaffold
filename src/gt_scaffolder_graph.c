@@ -153,23 +153,27 @@ GtScaffolderGraph *gt_scaffolder_graph_new(GtUword max_nof_vertices,
 /* Free all memory allocated for <*graph> including vertices and edges */
 void gt_scaffolder_graph_delete(GtScaffolderGraph *graph)
 {
+  GtScaffolderGraphVertex *vertex;
   gt_assert(graph != NULL);
 
   if (graph->vertices != NULL) {
-    /* For Schleife über nof_vertices, separates free*/
-    gt_free(graph->vertices->header_seq);
-    /* gt_free(graph->vertices->edges[0]); */
-    gt_free(graph->vertices->edges);
+    /* If existent, free header_seq and pointer to outgoing edges first */
+    for ( vertex = graph->vertices;
+          vertex < (graph->vertices + graph->nof_vertices);
+          vertex++
+        )
+    {
+      if (vertex->header_seq != NULL)
+        gt_free(vertex->header_seq);
+      if (vertex->edges != NULL)
+        gt_free(vertex->edges);
+    }
+    gt_free(graph->vertices);
   }
 
-  /* if (graph->edges != NULL) {
-        For Schleife über nof_edges, separates free
-       gt_free(graph->edges->end);
-       gt_free(graph->edges->start);
-     } */
+  if (graph->edges != NULL)
+    gt_free(graph->edges);
 
-  gt_free(graph->edges);
-  gt_free(graph->vertices);
   gt_free(graph);
 }
 
@@ -959,4 +963,85 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
   gt_array_delete(terminal_vertices);
   gt_array_delete(cc_walks);
   gt_queue_delete(vqueue);
+}
+
+
+/* Function to test basic graph functionality on different scenarios:
+- Create graph and allocate space for <max_nof_vertices> vertices and
+  <max_nof_edges> edges.
+- Initialize vertices if <init_vertices> is true and create <nof_vertices>
+  vertices.
+- Initialize edges if <init_edges> is true and create <nof_edges> edges.
+- Delete graph. */
+int gt_scaffolder_test_graph(GtUword max_nof_vertices,
+                             GtUword max_nof_edges,
+                             bool init_vertices,
+                             GtUword nof_vertices,
+                             bool init_edges,
+                             GtUword nof_edges,
+                             bool print_graph)
+{
+  int had_err = 0;
+  GtScaffolderGraph *graph;
+
+  /* Construct graph and init vertices / edges */
+  if (!init_vertices && !init_edges )
+    graph = gt_scaffolder_graph_new(max_nof_vertices, max_nof_edges);
+  /* Construct graph, don't init as this will be done later */
+  else {
+    graph = gt_malloc(sizeof (*graph));
+    graph->vertices = NULL;
+    graph->edges = NULL;
+  }
+
+  if (graph == NULL)
+    had_err = -1;
+
+  /* Init vertex portion of graph. <nof_vertices> Create vertices. */
+  if (init_vertices) {
+    gt_scaffolder_graph_init_vertices(graph, max_nof_vertices);
+    if (graph->vertices == NULL)
+      had_err = -1;
+    for (unsigned i = 0; i < nof_vertices; i++) {
+      gt_scaffolder_graph_add_vertex(graph, "foobar", 100, 20, 40);
+    }
+  }
+
+  /* Init edge portion of graph. Connect every vertex with another vertex until
+  <nof_edges> is reached. */
+  if (init_edges) {
+    unsigned vertex1 = 0, vertex2 = 0;
+
+    gt_scaffolder_graph_init_edges(graph, max_nof_edges);
+
+    if (graph->edges == NULL)
+      had_err = -1;
+
+    /* Connect 1st vertex with every other vertex, then 2nd one, etc */
+    for (unsigned i = 0; i < nof_edges; i++) {
+      if (vertex2 < nof_vertices - 1)
+        vertex2++;
+      else if (vertex1 < nof_vertices - 2) {
+        vertex1++;
+        vertex2 = vertex1 + 1;
+      }
+      gt_scaffolder_graph_add_edge(graph, vertex1, vertex2, 2, 1.5, 4, true,
+                                   true);
+    }
+  }
+
+  /* Print the graph for diff comparison */
+  /* SD: Ask Dorle about error object and (!ma) assertion */
+  if(print_graph) {
+    GtError *err;
+    char outfile[] = "gt_scaffolder_test.dot";
+    err = gt_error_new();
+    gt_scaffolder_graph_print(graph, outfile, err);
+  }
+
+  gt_scaffolder_graph_delete(graph);
+  if (graph != NULL)
+    had_err = -1;
+
+  return had_err;
 }

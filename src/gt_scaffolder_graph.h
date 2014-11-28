@@ -44,6 +44,14 @@ void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
                                   GtUword numpairs,
                                   bool dir,
                                   bool comp);
+int gt_scaffolder_test_graph(GtUword max_nof_vertices,
+                             GtUword max_nof_edges,
+                             bool init_vertices,
+                             GtUword nof_vertices,
+                             bool init_edges,
+                             GtUword nof_edges,
+                             bool print_graph);
+
 
 /* graph display functions
 SK: sga Format unterstützen (asqg) */
