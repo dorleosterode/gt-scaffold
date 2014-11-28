@@ -965,7 +965,6 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
   gt_queue_delete(vqueue);
 }
 
-
 /* Function to test basic graph functionality on different scenarios:
 - Create graph and allocate space for <max_nof_vertices> vertices and
   <max_nof_edges> edges.
@@ -1032,7 +1031,7 @@ int gt_scaffolder_test_graph(GtUword max_nof_vertices,
 
   /* Print the graph for diff comparison */
   /* SD: Ask Dorle about error object and (!ma) assertion */
-  if(print_graph) {
+  if (print_graph) {
     GtError *err;
     char outfile[] = "gt_scaffolder_test.dot";
     err = gt_error_new();
