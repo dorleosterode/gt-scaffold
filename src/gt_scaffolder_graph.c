@@ -356,13 +356,15 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
   /* iterate over all vertices and print them. add attribute color according
      to the current state */
   for (v = g->vertices; v < (g->vertices + g->nof_vertices); v++) {
-    gt_file_xprintf(f, "%lu [color=\"%s\"];\n", v->id, color_array[v->state]);
+    gt_file_xprintf(f, GT_WU " [color=\"%s\"];\n", v->id,
+                    color_array[v->state]);
   }
 
   /* iterate over all edges and print them. add attribute color according to
      the current state and label the edge with the distance*/
   for (e = g->edges; e < (g->edges + g->nof_edges); e++) {
-    gt_file_xprintf(f, "%lu -- %lu [color=\"%s\" label=\"%ld\"];\n",
+    gt_file_xprintf(f,
+                    GT_WU " -- " GT_WU " [color=\"%s\" label=\"" GT_WD "\"];\n",
                     e->start->id, e->end->id,
                     color_array[e->state], e->dist);
   }
@@ -449,7 +451,9 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
       else {
         /* parse contig-record with attributes distance, number of pairs,
            standard deviation of distance */
-        if (sscanf(field,"%ld,%lu,%f",&dist,&num_pairs,&std_dev) == 3) {
+        if ( sscanf(field,"" GT_WD "," GT_WU ",%f",&dist,&num_pairs,&std_dev)
+             == 3)
+        {
           /* check if edge between vertices already exists */
           edge = gt_scaffolder_graph_find_edge(graph, rootctgid, ctgid);
           if (edge != NULL) {
@@ -467,9 +471,10 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
             gt_scaffolder_graph_add_edge(graph, rootctgid, ctgid, dist, std_dev,
                                          num_pairs, sense, same);
           /* Debbuging:
-             printf("dist: %ld\n num_pairs: %lu\n std_dev:"
-                 "%f\n num5: %lu\n sense: %d\n\n",dist, num_pairs, std_dev,
-                 num5,sense);*/
+             printf("dist: " GT_WD "\n num_pairs: " GT_WU "\n std_dev:"
+                "%f\n num5: " GT_WU "\n sense: %d\n\n",dist, num_pairs, std_dev,
+                num5,sense);
+          */
 
         }
         /* switch direction if semicolon occurs */

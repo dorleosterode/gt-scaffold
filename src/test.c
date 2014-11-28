@@ -4,7 +4,7 @@
 #include "gt_scaffolder_graph.h"
 #include "core/types_api.h"
 
-int main(void){
+int main(void) {
   GtError *err;
 
   /* initialize */
