@@ -12,7 +12,7 @@ int main(void){
   /* create error object */
   err = gt_error_new();
 
-  /* Create graph and delete it */
+  /* Create graph with wrapper construction function and delete it */
   gt_scaffolder_test_graph(5, 8, false, 0, false, 0, false);
 
   /* Create graph, only initialize vertices, delete it */
@@ -25,6 +25,10 @@ int main(void){
   gt_scaffolder_test_graph(5, 8, true, 5, true, 0, false);
 
   /* Create graph, initialize and create vertices and edges, delete it */
+  gt_scaffolder_test_graph(5, 8, true, 5, true, 8, false);
+
+  /* Create graph, initialize and create vertices and edges, print it,
+     delete it */
   gt_scaffolder_test_graph(5, 8, true, 5, true, 8, true);
 
   gt_error_delete(err);

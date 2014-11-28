@@ -11,12 +11,18 @@ OBJ=gt_scaffolder_graph.o test.o
 
 all:test.x
 
-gt_scaffolder_graph.o: gt_scaffolder_graph.h 
+gt_scaffolder_graph.o: gt_scaffolder_graph.h
 
 test.o: gt_scaffolder_graph.h
 
 test.x:${OBJ}
 	${LD} ${OBJ} -o $@ ${LDFLAGS} $(LIBS)
 
+src_check:
+	${GTDIR}/scripts/src_check *.c
+
+test: test.x
+	../testsuite/gt_scaffolder.sh
+
 clean:
-	${RM} *.x *.o *~
+	${RM} *.x *.o *~ *.dot
