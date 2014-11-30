@@ -565,45 +565,48 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
   GtFastaReader* reader;
   GtStr *str_filename;
   int had_err;
-  GtScaffolderGraphCallbackData *callback_data;
+  GtScaffolderGraphCallbackData callback_data;
 
   had_err = 0;
-  str_filename = gt_str_new();
-  gt_str_set(str_filename, ctg_filename);
-  /* SK: in 590 pointer uebergeben */
-  callback_data = gt_malloc(sizeof (*callback_data));
-  callback_data->nof_valid_ctg = 0;
-  callback_data->min_ctg_len = min_ctg_len;
+  str_filename = gt_str_new_cstr(ctg_filename);
+  callback_data.nof_valid_ctg = 0;
+  callback_data.min_ctg_len = min_ctg_len;
   /* parse contigs in FASTA-format and save them as vertices of
      scaffold graph */
   reader = gt_fasta_reader_rec_new(str_filename);
   had_err = gt_fasta_reader_run(reader, NULL, NULL,
-            gt_scaffolder_graph_count_ctg, callback_data, err);
+            gt_scaffolder_graph_count_ctg, &callback_data, err);
   gt_fasta_reader_delete(reader);
 
-  /* SK: if (!had_err) */
   graph = gt_malloc(sizeof (*graph));
-  gt_scaffolder_graph_init_vertices(graph, callback_data->nof_valid_ctg);
+  if (had_err == 0)
+  {
+    gt_scaffolder_graph_init_vertices(graph, callback_data.nof_valid_ctg);
 
-  callback_data->graph = graph;
-  reader = gt_fasta_reader_rec_new(str_filename);
-  /* SK: had_err auch behandeln, nicht ueberschreiben */
-  had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header, NULL,
-            gt_scaffolder_graph_save_ctg, callback_data, err);
-  gt_fasta_reader_delete(reader);
-  gt_str_delete(str_filename);
+    callback_data.graph = graph;
+    reader = gt_fasta_reader_rec_new(str_filename);
+    had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header, NULL,
+            gt_scaffolder_graph_save_ctg, &callback_data, err);
+    gt_fasta_reader_delete(reader);
 
-  /* parse distance information of contigs in abyss-dist-format and
-     save them as edges of scaffold graph */
-  /* SK: if (!had_err) */
-  had_err =
-    gt_scaffolder_graph_read_distances(dist_filename, graph, false, err);
-
-  if (had_err != 0) {
-    /* SK: loeschen: gt_error_check(err);*/
-    /* SK: graph / callback loeschen und auf NULL setzen */
+    if (had_err == 0)
+    {
+      /* parse distance information of contigs in abyss-dist-format and
+         save them as edges of scaffold graph */
+      had_err =
+        gt_scaffolder_graph_read_distances(dist_filename, graph, false, err);
+    }
   }
 
+  /* SK: loeschen: gt_error_check(err);*/
+  /* SK: graph / callback loeschen und auf NULL setzen */
+
+  if (had_err != 0)
+  {
+    gt_scaffolder_graph_delete(graph);
+  }
+
+  gt_free(str_filename);
   return graph;
 }
 
