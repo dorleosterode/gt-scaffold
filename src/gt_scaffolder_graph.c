@@ -236,6 +236,7 @@ void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
   graph->edges[nextfree].num_pairs = num_pairs;
   graph->edges[nextfree].sense = dir;
   graph->edges[nextfree].same = same;
+  graph->edges[nextfree].state = GIS_UNVISITED;
 
   /* Assign edge to start vertice */
   gt_assert(vstartID < graph->nof_vertices && vendID < graph->nof_vertices);
