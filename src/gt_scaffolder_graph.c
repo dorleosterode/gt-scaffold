@@ -23,6 +23,7 @@
 #include "gt_scaffolder_graph.h"
 #include <core/assert_api.h>
 #include "core/queue_api.h"
+#include "core/str_api.h"
 #include "core/types_api.h"
 #include "core/minmax.h"
 #include "core/fasta_reader_rec.h"
@@ -39,7 +40,7 @@ typedef struct GtScaffolderGraphVertex {
   /* unique vertex ID */
   GtUword id;
   /* header sequence of corresponding contig */
-  char *header_seq;
+  GtStr *header_seq;
   /* sequence length of corresponding contig */
   GtUword seq_len;
   /* a-statistics value for classifying contig as repeat or unique contig */
@@ -99,7 +100,6 @@ typedef struct GtScaffolderGraphWalk {
 typedef struct {
   GtUword nof_valid_ctg;
   GtUword min_ctg_len;
-  GtUword header_len;
   const char *header_seq;
   GtScaffolderGraph *graph;
 } GtScaffolderGraphCallbackData;
@@ -164,7 +164,7 @@ void gt_scaffolder_graph_delete(GtScaffolderGraph *graph)
         )
     {
       if (vertex->header_seq != NULL)
-        gt_free(vertex->header_seq);
+        gt_str_delete(vertex->header_seq);
       if (vertex->edges != NULL)
         gt_free(vertex->edges);
     }
@@ -187,6 +187,8 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
                                     float copy_num)
 {
   GtUword nextfree;
+  GtStr *gt_str_header_seq;
+
   gt_assert(graph != NULL);
   gt_assert(graph->nof_vertices < graph->max_nof_vertices);
 
@@ -199,11 +201,9 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
   graph->vertices[nextfree].copy_num = copy_num;
   graph->vertices[nextfree].nof_edges = 0;
   if (header_seq != NULL) {
-    graph->vertices[nextfree].header_seq =
-      gt_malloc( sizeof (char) * strlen(header_seq) );
-    /* SK: gt_str_new_cstr (str_api.h) verwenden? */
-    strncpy( graph->vertices[nextfree].header_seq, header_seq,
-             strlen(header_seq) );
+    gt_str_header_seq =  gt_str_new_cstr(header_seq);
+    graph->vertices[nextfree].header_seq = gt_str_clone(gt_str_header_seq);
+    gt_str_delete(gt_str_header_seq);
   }
   graph->vertices[nextfree].state = GIS_UNVISITED;
 
@@ -281,18 +281,24 @@ static GtUword gt_scaffolder_graph_get_vertex_id(GtScaffolderGraph *graph,
                                                  GtError *err)
 {
   GtScaffolderGraphVertex *vertex;
+  GtStr *gt_str_header_seq;
   int had_err;
 
   /* SK: found verwenden */
   had_err = -1;
+  /* create GtStr object */
+  gt_str_header_seq = gt_str_new_cstr(header_seq);
   /* SK: Knoten lexikographisch sortieren, Binaersuche? */
   for (vertex = graph->vertices;
        vertex < (graph->vertices + graph->nof_vertices); vertex++) {
-    if (strcmp(vertex->header_seq, header_seq) == 0) {
+    if (gt_str_cmp(vertex->header_seq, gt_str_header_seq) == 0) {
       had_err = 0;
       break;
     }
   }
+
+  /* delete GtStr object */
+  gt_str_delete(gt_str_header_seq);
 
   /* contig header was not found */
   if (had_err == -1)
@@ -506,7 +512,6 @@ static int gt_scaffolder_graph_save_header(const char *description,
 
   had_err = 0;
   callback_data->header_seq = description;
-  /* SK: loeschen: callback_data->header_len = length;*/
   if (length == 0) {
     gt_error_set (err , " invalid header length ");
     had_err = -1;

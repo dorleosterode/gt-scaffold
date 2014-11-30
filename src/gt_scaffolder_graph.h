@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include "core/types_api.h"
 #include "core/error.h"
+#include "core/str_api.h"
 #include "genometools.h"
 
 #ifndef GT_SCAFFOLDER_GRAPH_H
