@@ -99,7 +99,7 @@ typedef struct GtScaffolderGraphWalk {
 typedef struct {
   GtUword nof_valid_ctg;
   GtUword min_ctg_len;
-  const char *header_seq;
+  GtStr *header_seq;
   GtScaffolderGraph *graph;
 } GtScaffolderGraphFastaReaderData; 
 
@@ -180,13 +180,12 @@ void gt_scaffolder_graph_delete(GtScaffolderGraph *graph)
    contains information about the sequence header <*header_seq>, sequence
    length <seq_len>, A-statistics <astat> and estimated copy number <copy_num>*/
 void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
-                                    const char *header_seq,
+                                    const GtStr *header_seq,
                                     GtUword seq_len,
                                     float astat,
                                     float copy_num)
 {
   GtUword nextfree;
-  GtStr *gt_str_header_seq;
 
   gt_assert(graph != NULL);
   gt_assert(graph->nof_vertices < graph->max_nof_vertices);
@@ -200,9 +199,7 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
   graph->vertices[nextfree].copy_num = copy_num;
   graph->vertices[nextfree].nof_edges = 0;
   if (header_seq != NULL) {
-    gt_str_header_seq =  gt_str_new_cstr(header_seq);
-    graph->vertices[nextfree].header_seq = gt_str_clone(gt_str_header_seq);
-    gt_str_delete(gt_str_header_seq);
+    graph->vertices[nextfree].header_seq = gt_str_clone(header_seq);
   }
   graph->vertices[nextfree].state = GIS_UNVISITED;
 
@@ -405,6 +402,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   GtScaffolderGraphEdge *edge;
   int had_err;
 
+  had_err = 0;
   root_ctg_id = 0;
   ctg_id = 0;
 
@@ -521,9 +519,19 @@ static int gt_scaffolder_graph_save_header(const char *description,
   int had_err;
   GtScaffolderGraphFastaReaderData *fasta_reader_data =
   (GtScaffolderGraphFastaReaderData*) data;
+  GtStr *gt_str_description;
+  char *new_description, *space_ptr;
 
   had_err = 0;
-  fasta_reader_data->header_seq = description;
+
+  gt_str_description = gt_str_new_cstr(description);
+  new_description = gt_str_get(gt_str_description);
+  /* cut header sequence after first space */
+  space_ptr = strchr(new_description, ' ');
+  if (space_ptr != NULL)
+    *space_ptr = '\0';
+
+  fasta_reader_data->header_seq = gt_str_description;
   if (length == 0) {
     gt_error_set (err , " invalid header length ");
     had_err = -1;
@@ -544,8 +552,13 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
 
   had_err = 0;
   if (seq_length > fasta_reader_data->min_ctg_len)
+  {    
     gt_scaffolder_graph_add_vertex(fasta_reader_data->graph,
     fasta_reader_data->header_seq, seq_length, 0.0, 0.0);
+
+    gt_str_delete(fasta_reader_data->header_seq);
+  }
+
 
   if (seq_length == 0) {
     gt_error_set (err , " invalid sequence length ");
@@ -993,7 +1006,7 @@ int gt_scaffolder_test_graph(GtUword max_nof_vertices,
 
     unsigned i;
     for (i = 0; i < nof_vertices; i++) {
-      gt_scaffolder_graph_add_vertex(graph, "foobar", 100, 20, 40);
+      gt_scaffolder_graph_add_vertex(graph, gt_str_new_cstr("foobar"), 100, 20, 40);
     }
   }
 

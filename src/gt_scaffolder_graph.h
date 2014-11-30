@@ -33,7 +33,7 @@ void gt_scaffolder_graph_delete(GtScaffolderGraph *graph);
 
 /* for test purposes: low level graph functions */
 void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
-                                    const char *header_seq,
+                                    const GtStr *header_seq,
                                     GtUword seqlen,
                                     float astat,
                                     float copynum);
