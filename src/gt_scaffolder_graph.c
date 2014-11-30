@@ -376,6 +376,55 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
   gt_file_xprintf(f, "}\n");
 }
 
+
+/* count records */
+static int gt_scaffolder_graph_count_distances(const char *file_name,
+                                              GtUword *nof_distances,
+                                              GtError *err)
+{
+  FILE *file;
+  char line[1024], *field, ctg_header[1024];
+  GtUword num_pairs, record_counter;
+  GtWord dist;
+  float std_dev;
+  int had_err;
+
+  had_err = 0;
+  record_counter = 0;
+  file = fopen(file_name, "rb");
+  if (file == NULL){
+    had_err = -1;
+    gt_error_set(err, " can not read file %s ",file_name);
+  }
+
+  if (had_err != -1)
+  {
+    /* iterate over each line of file until eof (contig record) */
+    while (fgets(line, 1024, file) != NULL)
+    {
+      /* split line by first space delimiter */
+      field = strtok(line," ");
+
+      /* iterate over space delimited records */
+      while (field != NULL)
+      {
+        /* count records */
+        if (sscanf(field,"%[^<,],%ld,%lu,%f", ctg_header, &dist, &num_pairs,
+            &std_dev) == 4)
+          record_counter++;
+
+        /* split line by next space delimiter */
+        field = strtok(NULL," ");
+      }
+    }
+  }
+  *nof_distances = record_counter;
+
+  fclose(file);
+  return had_err;
+}
+
+
 /* parse distance information of contigs in abyss-dist-format and
    save them as edges of scaffold graph, PRECONDITION: header contains
    no commas and spaces */
@@ -584,38 +633,49 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
   GtStr *str_filename;
   int had_err;
   GtScaffolderGraphFastaReaderData fasta_reader_data;
+  GtUword nof_distances;
 
   had_err = 0;
+  graph = NULL;
   str_filename = gt_str_new_cstr(ctg_filename);
   fasta_reader_data.nof_valid_ctg = 0;
   fasta_reader_data.min_ctg_len = min_ctg_len;
-  /* parse contigs in FASTA-format and save them as vertices of
-     scaffold graph */
+  /* count contigs */
   reader = gt_fasta_reader_rec_new(str_filename);
   had_err = gt_fasta_reader_run(reader, NULL, NULL,
             gt_scaffolder_graph_count_ctg, &fasta_reader_data, err);
   gt_fasta_reader_delete(reader);
 
-  graph = gt_malloc(sizeof (*graph));
   if (had_err == 0)
   {
-    gt_scaffolder_graph_init_vertices(graph, fasta_reader_data.nof_valid_ctg);
-
-    fasta_reader_data.graph = graph;
-    reader = gt_fasta_reader_rec_new(str_filename);
-    had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header,
-              NULL, gt_scaffolder_graph_save_ctg, &fasta_reader_data, err);
-    gt_fasta_reader_delete(reader);
+    /* count distance information */
+    nof_distances = 0;
+    had_err = gt_scaffolder_graph_count_distances(dist_filename,
+              &nof_distances, err);
 
     if (had_err == 0)
     {
-      /* parse distance information of contigs in abyss-dist-format and
-         save them as edges of scaffold graph */
-      had_err =
-        gt_scaffolder_graph_read_distances(dist_filename, graph, false, err);
+      /* allocate memory for scaffolder graph */
+      graph = gt_scaffolder_graph_new(fasta_reader_data.nof_valid_ctg,
+              nof_distances);
+
+      fasta_reader_data.graph = graph;
+      /* parse contigs in FASTA-format and save them as vertices of
+         scaffold graph */
+      reader = gt_fasta_reader_rec_new(str_filename);
+      had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header,
+                NULL, gt_scaffolder_graph_save_ctg, &fasta_reader_data, err);
+      gt_fasta_reader_delete(reader);
+
+      if (had_err == 0)
+      {
+        /* parse distance information of contigs in abyss-dist-format and
+           save them as edges of scaffold graph */
+        had_err =
+          gt_scaffolder_graph_read_distances(dist_filename, graph, false, err);
+      }
     }
   }
-
   /* SK: loeschen: gt_error_check(err);*/
   /* SK: graph / callback loeschen und auf NULL setzen */
 
