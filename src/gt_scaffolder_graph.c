@@ -276,23 +276,26 @@ static GtScaffolderGraphEdge *gt_scaffolder_graph_find_edge(
 
 /* determines corresponding vertex id to contig header */
 /* SK: graph ist const */
-static GtUword gt_scaffolder_graph_get_vertex_id(GtScaffolderGraph *graph,
-                                                 const char* header_seq,
-                                                 GtError *err)
+static int gt_scaffolder_graph_get_vertex_id(GtScaffolderGraph *graph,
+                                             GtUword *vertex_id,
+                                             const char *header_seq,
+                                             GtError *err)
 {
   GtScaffolderGraphVertex *vertex;
   GtStr *gt_str_header_seq;
   int had_err;
+  bool found;
 
-  /* SK: found verwenden */
-  had_err = -1;
+  had_err = 0;
+  found = false;
   /* create GtStr object */
   gt_str_header_seq = gt_str_new_cstr(header_seq);
+
   /* SK: Knoten lexikographisch sortieren, Binaersuche? */
   for (vertex = graph->vertices;
        vertex < (graph->vertices + graph->nof_vertices); vertex++) {
     if (gt_str_cmp(vertex->header_seq, gt_str_header_seq) == 0) {
-      had_err = 0;
+      found = true;
       break;
     }
   }
@@ -301,11 +304,15 @@ static GtUword gt_scaffolder_graph_get_vertex_id(GtScaffolderGraph *graph,
   gt_free(gt_str_header_seq);
 
   /* contig header was not found */
-  if (had_err == -1)
+  if (found == false)
+  {
+    had_err = -1;
     gt_error_set(err, " distance and contig file inconsistent ");
+  }
+  else
+    *vertex_id = vertex->id;
 
-  /* SK: Funktion sollte Fehler kommunizieren koennen */
-  return vertex->id;
+  return had_err;
 }
 
 /* assign edge <*edge> new attributes */
@@ -399,81 +406,86 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   GtScaffolderGraphEdge *edge;
   int had_err;
 
+  root_ctg_id = 0;
+  ctg_id = 0;
+
   file = fopen(filename, "rb");
   if (file == NULL){
     had_err = -1;
     gt_error_set(err, " can not read file %s ",filename);
   }
 
-  /* iterate over each line of file until eof (contig record) */
-  while (fgets(line, 1024, file) != NULL)
+  if (had_err != -1)
   {
-    /* remove '\n' from end of line */
-    line[strlen(line)-1] = '\0';
-    /* set sense direction as default */
-    sense = true;
-    /* split line by first space delimiter */
-    field = strtok(line," ");
-
-    /* get vertex id corresponding to root contig header */
-    root_ctg_id = gt_scaffolder_graph_get_vertex_id(graph, field, err);
-    /* exit if distance and contig file inconsistent */
-    gt_error_check(err);
-    /* Debbuging: printf("rootctgid: %s\n",field);*/
-
-    /* iterate over space delimited records */
-    while (field != NULL)
+    /* iterate over each line of file until eof (contig record) */
+    while (fgets(line, 1024, file) != NULL)
     {
-      /* parse record consisting of contig header, distance,
-         number of pairs, std. dev. */
-      if (sscanf(field,"%[^<,],%ld,%lu,%f", ctg_header, &dist, &num_pairs,
-          &std_dev) == 4)
+      /* remove '\n' from end of line */
+      line[strlen(line)-1] = '\0';
+      /* set sense direction as default */
+      sense = true;
+      /* split line by first space delimiter */
+      field = strtok(line," ");
+
+      /* get vertex id corresponding to root contig header */
+      had_err = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id, field, err);
+      /* exit if distance and contig file inconsistent */
+      gt_error_check(err);
+      /* Debbuging: printf("rootctgid: %s\n",field);*/
+
+      /* iterate over space delimited records */
+      while (field != NULL)
       {
-        /* get vertex id corresponding to contig header */
-        ctg_id = gt_scaffolder_graph_get_vertex_id(graph, ctg_header, err);
-
-        /* exit if distance and contig file inconsistent */
-        gt_error_check(err);
-
-        /* parsing composition,
-         '+' indicates same strand and '-' reverse strand */ 
-        same = ctg_header[strlen(ctg_header) - 1] == '+' ? true : false;
-        /* check if edge between vertices already exists */
-
-        edge = gt_scaffolder_graph_find_edge(graph, root_ctg_id, ctg_id);
-        if (edge != NULL)
+        /* parse record consisting of contig header, distance,
+           number of pairs, std. dev. */
+        if (sscanf(field,"%[^<,],%ld,%lu,%f", ctg_header, &dist, &num_pairs,
+            &std_dev) == 4)
         {
-          /*  LG: laut SGA edge->std_dev < std_dev,  korrekt? */
-          if (ismatepair == false && edge->std_dev < std_dev)
+          /* get vertex id corresponding to contig header */
+          had_err = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id, ctg_header, err);
+
+          /* exit if distance and contig file inconsistent */
+          gt_error_check(err);
+
+          /* parsing composition,
+           '+' indicates same strand and '-' reverse strand */ 
+          same = ctg_header[strlen(ctg_header) - 1] == '+' ? true : false;
+          /* check if edge between vertices already exists */
+
+          edge = gt_scaffolder_graph_find_edge(graph, root_ctg_id, ctg_id);
+          if (edge != NULL)
           {
-            /* LG: Ueberpruefung Kantenrichtung notwendig? */
-            gt_scaffolder_graph_alter_edge(edge, dist, std_dev, num_pairs,
-            sense, same);
+            /*  LG: laut SGA edge->std_dev < std_dev,  korrekt? */
+            if (ismatepair == false && edge->std_dev < std_dev)
+            {
+              /* LG: Ueberpruefung Kantenrichtung notwendig? */
+              gt_scaffolder_graph_alter_edge(edge, dist, std_dev, num_pairs,
+              sense, same);
+            }
+            else
+            {
+              /*Conflicting-Flag?*/
+            }
           }
           else
-          {
-            /*Conflicting-Flag?*/
-          }
-        }
-        else
-          gt_scaffolder_graph_add_edge(graph, root_ctg_id, ctg_id, dist, std_dev,
+            gt_scaffolder_graph_add_edge(graph, root_ctg_id, ctg_id, dist, std_dev,
                                        num_pairs, sense, same);
-        /* Debbuging:
-           printf("ctgid: %s\n",field);
-           printf("dist: " GT_WD "\n num_pairs: " GT_WU "\n std_dev:"
-              "%f\n num5: " GT_WU "\n sense: %d\n\n",dist, num_pairs, std_dev,
-              num5,sense);
-        */
-      }
-      /* switch direction */
-      else if (*field == ';')
-        sense = !sense;
+          /* Debbuging:
+             printf("ctgid: %s\n",field);
+             printf("dist: " GT_WD "\n num_pairs: " GT_WU "\n std_dev:"
+                "%f\n num5: " GT_WU "\n sense: %d\n\n",dist, num_pairs, std_dev,
+                num5,sense);
+          */
+        }
+        /* switch direction */
+        else if (*field == ';')
+          sense = !sense;
 
-      /* split line by next space delimiter */
-      field = strtok(NULL," ");
+        /* split line by next space delimiter */
+        field = strtok(NULL," ");
+      }    
     }
-    
-  }
+  }  
 
   fclose(file);
   return had_err;
