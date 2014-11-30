@@ -298,7 +298,7 @@ static GtUword gt_scaffolder_graph_get_vertex_id(GtScaffolderGraph *graph,
   }
 
   /* delete GtStr object */
-  gt_str_delete(gt_str_header_seq);
+  gt_free(gt_str_header_seq);
 
   /* contig header was not found */
   if (had_err == -1)
@@ -431,6 +431,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
       {
         /* get vertex id corresponding to contig header */
         ctg_id = gt_scaffolder_graph_get_vertex_id(graph, ctg_header, err);
+
         /* exit if distance and contig file inconsistent */
         gt_error_check(err);
 
