@@ -96,13 +96,12 @@ typedef struct GtScaffolderGraphWalk {
 
 /* for parsing valid contigs,
    e.g. contigs with minimum length <min_ctg_len> */
-/* SK: callback data umbenennen, zB scaffold_fasta_reader_data */
 typedef struct {
   GtUword nof_valid_ctg;
   GtUword min_ctg_len;
   const char *header_seq;
   GtScaffolderGraph *graph;
-} GtScaffolderGraphCallbackData;
+} GtScaffolderGraphFastaReaderData; 
 
 /* DistanceMap */
 /* EdgeMap */
@@ -499,12 +498,12 @@ static int gt_scaffolder_graph_count_ctg(GtUword length,
                                          GtError* err)
 {
   int had_err;
-  GtScaffolderGraphCallbackData *callback_data =
-  (GtScaffolderGraphCallbackData*) data;
+  GtScaffolderGraphFastaReaderData *fasta_reader_data =
+  (GtScaffolderGraphFastaReaderData*) data;
 
   had_err = 0;
-  if (length >= callback_data->min_ctg_len)
-    callback_data->nof_valid_ctg++;
+  if (length >= fasta_reader_data->min_ctg_len)
+    fasta_reader_data->nof_valid_ctg++;
   if (length == 0) {
     gt_error_set (err , " invalid sequence length ");
     had_err = -1;
@@ -520,11 +519,11 @@ static int gt_scaffolder_graph_save_header(const char *description,
                                            void *data, GtError *err)
 {
   int had_err;
-  GtScaffolderGraphCallbackData *callback_data =
-  (GtScaffolderGraphCallbackData*) data;
+  GtScaffolderGraphFastaReaderData *fasta_reader_data =
+  (GtScaffolderGraphFastaReaderData*) data;
 
   had_err = 0;
-  callback_data->header_seq = description;
+  fasta_reader_data->header_seq = description;
   if (length == 0) {
     gt_error_set (err , " invalid header length ");
     had_err = -1;
@@ -540,13 +539,13 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
                                         GtError* err)
 {
   int had_err;
-  GtScaffolderGraphCallbackData *callback_data =
-  (GtScaffolderGraphCallbackData*) data;
+  GtScaffolderGraphFastaReaderData *fasta_reader_data =
+  (GtScaffolderGraphFastaReaderData*) data;
 
   had_err = 0;
-  if (seq_length > callback_data->min_ctg_len)
-    gt_scaffolder_graph_add_vertex(callback_data->graph,
-    callback_data->header_seq, seq_length, 0.0, 0.0);
+  if (seq_length > fasta_reader_data->min_ctg_len)
+    gt_scaffolder_graph_add_vertex(fasta_reader_data->graph,
+    fasta_reader_data->header_seq, seq_length, 0.0, 0.0);
 
   if (seq_length == 0) {
     gt_error_set (err , " invalid sequence length ");
@@ -565,28 +564,28 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
   GtFastaReader* reader;
   GtStr *str_filename;
   int had_err;
-  GtScaffolderGraphCallbackData callback_data;
+  GtScaffolderGraphFastaReaderData fasta_reader_data;
 
   had_err = 0;
   str_filename = gt_str_new_cstr(ctg_filename);
-  callback_data.nof_valid_ctg = 0;
-  callback_data.min_ctg_len = min_ctg_len;
+  fasta_reader_data.nof_valid_ctg = 0;
+  fasta_reader_data.min_ctg_len = min_ctg_len;
   /* parse contigs in FASTA-format and save them as vertices of
      scaffold graph */
   reader = gt_fasta_reader_rec_new(str_filename);
   had_err = gt_fasta_reader_run(reader, NULL, NULL,
-            gt_scaffolder_graph_count_ctg, &callback_data, err);
+            gt_scaffolder_graph_count_ctg, &fasta_reader_data, err);
   gt_fasta_reader_delete(reader);
 
   graph = gt_malloc(sizeof (*graph));
   if (had_err == 0)
   {
-    gt_scaffolder_graph_init_vertices(graph, callback_data.nof_valid_ctg);
+    gt_scaffolder_graph_init_vertices(graph, fasta_reader_data.nof_valid_ctg);
 
-    callback_data.graph = graph;
+    fasta_reader_data.graph = graph;
     reader = gt_fasta_reader_rec_new(str_filename);
-    had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header, NULL,
-            gt_scaffolder_graph_save_ctg, &callback_data, err);
+    had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header,
+              NULL, gt_scaffolder_graph_save_ctg, &fasta_reader_data, err);
     gt_fasta_reader_delete(reader);
 
     if (had_err == 0)
