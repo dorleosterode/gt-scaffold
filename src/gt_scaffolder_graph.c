@@ -389,7 +389,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
 {
   FILE *file;
   char line[1024], *field, ctg_header[1024];
-  GtUword num_pairs, root_ctg_id, ctg_id;
+  GtUword num_pairs, root_ctg_id, ctg_id, ctg_header_len;
   GtWord dist;
   float std_dev;
   bool same, sense;
@@ -437,8 +437,15 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
         if (sscanf(field,"%[^<,],%ld,%lu,%f", ctg_header, &dist, &num_pairs,
             &std_dev) == 4)
         {
-          /* get vertex id corresponding to contig header */
+          /* parsing composition,
+           '+' indicates same strand and '-' reverse strand */
+          ctg_header_len = strlen(ctg_header);
+          same = ctg_header[ctg_header_len - 1] == '+' ? true : false;
+
+          /* cut composition sign */
+          ctg_header[ctg_header_len - 1] = '\0';
           gt_str_ctg_header = gt_str_new_cstr(ctg_header);
+          /* get vertex id corresponding to contig header */
           had_err = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id,
                     gt_str_ctg_header, err);
           gt_str_delete(gt_str_ctg_header);
@@ -446,11 +453,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
           /* exit if distance and contig file inconsistent */
           gt_error_check(err);
 
-          /* parsing composition,
-           '+' indicates same strand and '-' reverse strand */ 
-          same = ctg_header[strlen(ctg_header) - 1] == '+' ? true : false;
           /* check if edge between vertices already exists */
-
           edge = gt_scaffolder_graph_find_edge(graph, root_ctg_id, ctg_id);
           if (edge != NULL)
           {
