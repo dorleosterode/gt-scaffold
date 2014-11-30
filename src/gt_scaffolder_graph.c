@@ -274,30 +274,24 @@ static GtScaffolderGraphEdge *gt_scaffolder_graph_find_edge(
 /* SK: graph ist const */
 static int gt_scaffolder_graph_get_vertex_id(GtScaffolderGraph *graph,
                                              GtUword *vertex_id,
-                                             const char *header_seq,
+                                             const GtStr *header_seq,
                                              GtError *err)
 {
   GtScaffolderGraphVertex *vertex;
-  GtStr *gt_str_header_seq;
   int had_err;
   bool found;
 
   had_err = 0;
   found = false;
-  /* create GtStr object */
-  gt_str_header_seq = gt_str_new_cstr(header_seq);
 
   /* SK: Knoten lexikographisch sortieren, Binaersuche? */
   for (vertex = graph->vertices;
        vertex < (graph->vertices + graph->nof_vertices); vertex++) {
-    if (gt_str_cmp(vertex->header_seq, gt_str_header_seq) == 0) {
+    if (gt_str_cmp(vertex->header_seq, header_seq) == 0) {
       found = true;
       break;
     }
   }
-
-  /* delete GtStr object */
-  gt_free(gt_str_header_seq);
 
   /* contig header was not found */
   if (found == false)
@@ -401,6 +395,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   bool same, sense;
   GtScaffolderGraphEdge *edge;
   int had_err;
+  GtStr *gt_str_ctg_header, *gt_str_field;
 
   had_err = 0;
   root_ctg_id = 0;
@@ -425,7 +420,11 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
       field = strtok(line," ");
 
       /* get vertex id corresponding to root contig header */
-      had_err = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id, field, err);
+      gt_str_field = gt_str_new_cstr(field);
+      had_err = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id,
+                gt_str_field, err);
+      gt_str_delete(gt_str_field);
+
       /* exit if distance and contig file inconsistent */
       gt_error_check(err);
       /* Debbuging: printf("rootctgid: %s\n",field);*/
@@ -439,7 +438,10 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
             &std_dev) == 4)
         {
           /* get vertex id corresponding to contig header */
-          had_err = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id, ctg_header, err);
+          gt_str_ctg_header = gt_str_new_cstr(ctg_header);
+          had_err = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id,
+                    gt_str_ctg_header, err);
+          gt_str_delete(gt_str_ctg_header);
 
           /* exit if distance and contig file inconsistent */
           gt_error_check(err);
@@ -530,6 +532,7 @@ static int gt_scaffolder_graph_save_header(const char *description,
   space_ptr = strchr(new_description, ' ');
   if (space_ptr != NULL)
     *space_ptr = '\0';
+  gt_str_set(gt_str_description, new_description);  
 
   fasta_reader_data->header_seq = gt_str_description;
   if (length == 0) {
