@@ -271,6 +271,17 @@ static GtScaffolderGraphEdge *gt_scaffolder_graph_find_edge(
   return NULL;
 }
 
+/* sort by lexicographic ascending order */
+static int gt_scaffolder_graph_vertices_compare(const void *a, const void *b)
+{
+  GtScaffolderGraphVertex *vertex_a =
+  (GtScaffolderGraphVertex*) a;
+  GtScaffolderGraphVertex *vertex_b =
+  (GtScaffolderGraphVertex*) b;
+  return gt_str_cmp(vertex_a->header_seq, vertex_b->header_seq);
+}
+
+
 /* determines corresponding vertex id to contig header */
 /* SK: graph ist const */
 static int gt_scaffolder_graph_get_vertex_id(GtScaffolderGraph *graph,
@@ -278,21 +289,36 @@ static int gt_scaffolder_graph_get_vertex_id(GtScaffolderGraph *graph,
                                              const GtStr *header_seq,
                                              GtError *err)
 {
-  GtScaffolderGraphVertex *vertex;
-  int had_err;
+  GtScaffolderGraphVertex *min_vertex, *max_vertex, *mid_vertex;
+  int had_err, cmp;
   bool found;
 
   had_err = 0;
   found = false;
 
-  /* SK: Knoten lexikographisch sortieren, Binaersuche? */
-  for (vertex = graph->vertices;
-       vertex < (graph->vertices + graph->nof_vertices); vertex++) {
-    if (gt_str_cmp(vertex->header_seq, header_seq) == 0) {
-      found = true;
-      break;
+  /* sort by lexicographic ascending order */
+  qsort(graph->vertices, graph->nof_vertices, sizeof(*graph->vertices),
+       gt_scaffolder_graph_vertices_compare);
+
+  /* binary search */
+  min_vertex = graph->vertices;
+  max_vertex = graph->vertices + graph->nof_vertices - 1;
+  while (max_vertex >= min_vertex)
+    {
+      /* calculate midpoint */
+      mid_vertex = min_vertex + ((max_vertex - min_vertex) / 2);
+      cmp = gt_str_cmp(mid_vertex->header_seq, header_seq);
+      if (cmp == 0)
+      {
+        found = true;
+        *vertex_id = mid_vertex->id;
+        break;
+      }
+      else if (cmp < 0)
+        min_vertex = mid_vertex + 1;
+      else         
+        max_vertex = mid_vertex - 1;
     }
-  }
 
   /* contig header was not found */
   if (found == false)
@@ -300,10 +326,7 @@ static int gt_scaffolder_graph_get_vertex_id(GtScaffolderGraph *graph,
     had_err = -1;
     gt_error_set(err, " distance and contig file inconsistent ");
   }
-  else
-    *vertex_id = vertex->id;
-
-  return had_err;
+  return had_err; 
 }
 
 /* assign edge <*edge> new attributes */
@@ -658,7 +681,7 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
     {
       /* allocate memory for scaffolder graph */
       graph = gt_scaffolder_graph_new(fasta_reader_data.nof_valid_ctg,
-              nof_distances);
+              nof_distances);      
 
       fasta_reader_data.graph = graph;
       /* parse contigs in FASTA-format and save them as vertices of
