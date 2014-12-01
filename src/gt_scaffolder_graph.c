@@ -876,6 +876,35 @@ gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
 static void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
 }*/
 
+/* DFS to detect Cycles given a starting vertex */
+static GtScaffolderGraphEdge *gt_scaffolder_detect_cycle(GtScaffolderGraphVertex *v,
+							 bool dir) {
+  GtUword eid;
+  GtScaffolderGraphVertex *end;
+  GtScaffolderGraphEdge *back;
+
+  gt_assert(v != NULL);
+
+  v->state = GIS_VISITED;
+  for (eid = 0; eid < v->nof_edges; eid++) {
+    if (v->edges[eid]->sense == dir) {
+      /* maybe we want just to mark the corresponding vertices at this
+	 point and return a boolean or something like that */
+      end = v->edges[eid]->end;
+      if (end->state == GIS_VISITED)
+	return v->edges[eid];
+      if (end->state == GIS_UNVISITED) {
+	back = gt_scaffolder_detect_cycle(end, dir);
+	if (back != NULL)
+	  return back;
+      }
+    }
+  }
+
+  end->state = GIS_PROCESSED;
+  return NULL;
+}
+
 /* create new walk */
 static GtScaffolderGraphWalk *gt_scaffolder_walk_new(void)
 {
