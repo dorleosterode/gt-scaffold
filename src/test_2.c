@@ -26,11 +26,10 @@ int main(int argc, char **argv)
   else
     printf("Usage:<FASTA-file with contigs> <distance-file with"
            " est. distances between contigs>\n");
-
-  if (graph != NULL)
-    gt_scaffolder_graph_delete(graph);
-
+  
+  gt_scaffolder_graph_delete(graph);
   gt_error_delete(err);
+  gt_lib_clean();
 
   return 0;
 }

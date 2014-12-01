@@ -153,7 +153,8 @@ GtScaffolderGraph *gt_scaffolder_graph_new(GtUword max_nof_vertices,
 void gt_scaffolder_graph_delete(GtScaffolderGraph *graph)
 {
   GtScaffolderGraphVertex *vertex;
-  gt_assert(graph != NULL);
+  /*LG: NULL pointer has to be freed !?
+    gt_assert(graph != NULL);*/
 
   if (graph->vertices != NULL) {
     /* If existent, free header_seq and pointer to outgoing edges first */
@@ -713,9 +714,10 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
   if (had_err != 0)
   {
     gt_scaffolder_graph_delete(graph);
+    graph = NULL;
   }
 
-  gt_free(str_filename);
+  gt_str_delete(str_filename);
   return graph;
 }
 
