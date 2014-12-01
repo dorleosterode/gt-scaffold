@@ -882,6 +882,7 @@ static GtScaffolderGraphWalk *gt_scaffolder_walk_new(void)
   walk->total_contig_len = 0;
   walk->size = 0;
   walk->nof_edges = 0;
+  walk->edges = NULL;
   return walk;
 }
 
@@ -897,6 +898,9 @@ static void gt_scaffolder_walk_delete(GtScaffolderGraphWalk *walk)
 static void gt_scaffolder_walk_addegde(GtScaffolderGraphWalk *walk,
                                        GtScaffolderGraphEdge *edge)
 {
+  gt_assert(walk != NULL);
+  gt_assert(edge != NULL);
+
   if (walk->size == walk->nof_edges) {
     walk->size += INCREMENT_SIZE;
     walk->edges = gt_realloc(walk->edges, walk->size*sizeof (*walk->edges));
@@ -909,7 +913,6 @@ static void gt_scaffolder_walk_addegde(GtScaffolderGraphWalk *walk,
 GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
                  GtScaffolderGraphVertex *start)
 {
-
   gt_assert(graph != NULL);
   gt_assert(start != NULL);
 
@@ -935,7 +938,6 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
 
   /* check if node has edges */
   if (start->nof_edges == 0) {
-    printf("no edges\n");
     return NULL;
   }
 
@@ -980,7 +982,9 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
   /* Ruecktraversierung durch EdgeMap für alle terminalen Knoten
      Konstruktion des Walks  */
   while (gt_array_size(terminal_vertices) != 0) {
-    currentvertex = gt_array_pop(terminal_vertices);
+    currentvertex = *(GtScaffolderGraphVertex **) gt_array_pop(terminal_vertices);
+    gt_assert(currentvertex < graph->vertices + graph->nof_vertices);
+    gt_assert(currentvertex >= graph->vertices);
 
     currentwalk = gt_scaffolder_walk_new();
     while (currentvertex->id != start->id) {
@@ -1054,14 +1058,18 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
       /*currentvertex.cc = ccnumber;*/
 
       /* store all terminal vertices to calculate all paths between them */
-      if (gt_scaffolder_graph_isterminal(currentvertex))
+      if (gt_scaffolder_graph_isterminal(currentvertex)) {
+	gt_assert(currentvertex >= graph->vertices);
+	gt_assert(currentvertex < graph->vertices + graph->nof_vertices);
         gt_array_add(terminal_vertices, currentvertex);
+	gt_assert((*(GtScaffolderGraphVertex **)gt_array_get_last(terminal_vertices)) == currentvertex);
+      }
 
       currentvertex->state = GIS_VISITED;
       for (eid = 0; eid < currentvertex->nof_edges; eid++) {
         nextvertex = currentvertex->edges[eid]->end;
         /* why vertex->state? */
-        if (vertex->state == GIS_POLYMORPHIC)
+        if (nextvertex->state == GIS_POLYMORPHIC)
           continue;
         if (nextvertex->state == GIS_UNVISITED) {
           nextvertex->state = GIS_PROCESSED;
@@ -1072,7 +1080,9 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
 
     /* calculate all paths between terminal vertices in this cc */
     while (gt_array_size(terminal_vertices) != 0) {
-      start = gt_array_pop(terminal_vertices);
+      start = *(GtScaffolderGraphVertex **) gt_array_pop(terminal_vertices);
+      gt_assert(start >= graph->vertices);
+      gt_assert(start < graph->vertices + graph->nof_vertices);
       walk = gt_scaffolder_create_walk(graph, start);
       gt_array_add(cc_walks, walk);
     }
