@@ -872,11 +872,22 @@ gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
   return true;
 }
 
-/* remove cycles
-static void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
-}*/
+/*  remove cycles */
+/* static void gt_scaffolder_removecycles(GtScaffolderGraph *graph) { */
+
+/*     /\* found one cc first remove all cycles starting at terminal */
+/*        vertices. keep the array with terminal vertices clean. *\/ */
+/*     while (gt_array_size(terminal_vertices) != 0) { */
+/*       /\* search for cycles starting at every terminal vertex. if a */
+/* 	 backedge is found, mark both vertices connected with this */
+/* 	 backedge. *\/ */
+/*     } */
+
+/* } */
 
 /* DFS to detect Cycles given a starting vertex */
+/* TODO: remember all visited vertices to change the state to
+   GIS_UNVISITED before search with the next starting vertex. */
 static GtScaffolderGraphEdge *gt_scaffolder_detect_cycle(GtScaffolderGraphVertex *v,
 							 bool dir) {
   GtUword eid;
