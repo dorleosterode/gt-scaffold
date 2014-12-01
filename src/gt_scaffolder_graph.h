@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include "core/types_api.h"
 #include "core/error.h"
+#include "core/str_api.h"
 #include "genometools.h"
 
 #ifndef GT_SCAFFOLDER_GRAPH_H
@@ -32,7 +33,7 @@ void gt_scaffolder_graph_delete(GtScaffolderGraph *graph);
 
 /* for test purposes: low level graph functions */
 void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
-                                    const char *header_seq,
+                                    const GtStr *header_seq,
                                     GtUword seqlen,
                                     float astat,
                                     float copynum);
@@ -44,6 +45,14 @@ void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
                                   GtUword numpairs,
                                   bool dir,
                                   bool comp);
+int gt_scaffolder_test_graph(GtUword max_nof_vertices,
+                             GtUword max_nof_edges,
+                             bool init_vertices,
+                             GtUword nof_vertices,
+                             bool init_edges,
+                             GtUword nof_edges,
+                             bool print_graph);
+
 
 /* graph display functions
 SK: sga Format unterstützen (asqg) */
