@@ -57,10 +57,10 @@ int gt_scaffolder_test_graph(GtUword max_nof_vertices,
 /* graph display functions
 SK: sga Format unterstützen (asqg) */
 int gt_scaffolder_graph_print(const GtScaffolderGraph *g,
-			                        const char *filename,
+			      const char *filename,
                               GtError *err);
 void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
-				                               GtFile *f);
+				       GtFile *f);
 
 /* extended scaffold graph functions */
 GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,

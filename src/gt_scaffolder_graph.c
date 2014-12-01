@@ -655,6 +655,7 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
 }
 
 /* create scaffold graph from file */
+/* TODO: include a-statistics, copy number */
 GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
                                                      GtUword min_ctg_len,
                                                      const char *dist_filename,

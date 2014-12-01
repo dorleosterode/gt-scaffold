@@ -3,6 +3,9 @@
 #include "core/error.h"
 #include "gt_scaffolder_graph.h"
 
+/* adapted from SGA examples */
+const MIN_CONTIG_LEN = 200;
+
 int main(int argc, char **argv)
 {
   GtError *err;
@@ -19,7 +22,7 @@ int main(int argc, char **argv)
   if (argc == 3)
   {
     /* load contigs and distance information from file */
-    graph = gt_scaffolder_graph_new_from_file(argv[1], min_ctg_len,
+    graph = gt_scaffolder_graph_new_from_file(argv[1], MIN_CONTIG_LEN,
             argv[2], err);
     gt_scaffolder_graph_print(graph, "output.dot", err);
   }
