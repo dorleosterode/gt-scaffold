@@ -316,7 +316,7 @@ static int gt_scaffolder_graph_get_vertex_id(GtScaffolderGraph *graph,
       }
       else if (cmp < 0)
         min_vertex = mid_vertex + 1;
-      else         
+      else
         max_vertex = mid_vertex - 1;
     }
 
@@ -326,7 +326,7 @@ static int gt_scaffolder_graph_get_vertex_id(GtScaffolderGraph *graph,
     had_err = -1;
     gt_error_set(err, " distance and contig file inconsistent ");
   }
-  return had_err; 
+  return had_err;
 }
 
 /* assign edge <*edge> new attributes */
@@ -353,6 +353,8 @@ int gt_scaffolder_graph_print(const GtScaffolderGraph *g,
                               const char *filename,
                               GtError *err)
 {
+  gt_assert(g != NULL);
+
   int had_err = 0;
 
   GtFile *f = gt_file_new(filename, "w", err);
@@ -371,6 +373,8 @@ int gt_scaffolder_graph_print(const GtScaffolderGraph *g,
 void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
                                        GtFile *f)
 {
+  gt_assert(g != NULL);
+
   GtScaffolderGraphVertex *v;
   GtScaffolderGraphEdge *e;
   /* 0: GIS_UNVISITED, 1: GIS_POLYMORPHIC, 2: GIS_INCONSISTENT,
@@ -719,6 +723,9 @@ gt_scaffolder_graph_ambiguousorder(const GtScaffolderGraphEdge *edge1,
                                    const GtScaffolderGraphEdge *edge2,
                                    float cutoff)
 {
+  gt_assert(edge1 != NULL);
+  gt_assert(edge2 != NULL);
+
   float expval, variance, interval, prob12, prob21;
 
   expval = edge1->dist - edge2->dist;
@@ -734,7 +741,9 @@ gt_scaffolder_graph_ambiguousorder(const GtScaffolderGraphEdge *edge1,
 static GtUword gt_scaffolder_calculate_overlap(GtScaffolderGraphEdge *edge1,
                                                GtScaffolderGraphEdge *edge2)
 {
-  /* SK: assertions, dass edge1/2 nicht NULL sind */
+  gt_assert(edge1 != NULL);
+  gt_assert(edge2 != NULL);
+
   GtUword overlap = 0;
 
   if (edge2->dist > (edge1->end->seq_len - 1) ||
@@ -752,6 +761,9 @@ gt_scaffolder_graph_check_mark_polymorphic(GtScaffolderGraphEdge *edge1,
                                            float pcutoff,
                                            float cncutoff)
 {
+  gt_assert(edge1 != NULL);
+  gt_assert(edge2 != NULL);
+
   GtScaffolderGraphVertex *poly_vertex;
 
   if (gt_scaffolder_graph_ambiguousorder(edge1, edge2, pcutoff) &&
@@ -778,6 +790,8 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
                                float cncutoff,
                                GtUword ocutoff)
 {
+  gt_assert(graph != NULL);
+
   GtScaffolderGraphVertex *vertex;
   GtScaffolderGraphEdge *edge1, *edge2;
   GtUword overlap, eid1, eid2;
@@ -838,6 +852,8 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
 static bool
 gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
 {
+  gt_assert(vertex != NULL);
+
   bool dir;
   GtUword eid;
 
@@ -893,6 +909,9 @@ static void gt_scaffolder_walk_addegde(GtScaffolderGraphWalk *walk,
 GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
                  GtScaffolderGraphVertex *start)
 {
+
+  gt_assert(graph != NULL);
+  gt_assert(start != NULL);
 
   /* BFS-Traversierung innerhalb aktueller Zusammenhangskomponente
      ausgehend von terminalen Knoten zu terminalen Knoten */
@@ -993,6 +1012,8 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
 /* Konstruktion des Scaffolds mit groesster Contig-Gesamtlaenge */
 void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
 {
+  gt_assert(graph != NULL);
+
   GtScaffolderGraphVertex *vertex, *currentvertex, *nextvertex, *start;
   GtUword eid;
   GtScaffolderGraphWalk *walk;
