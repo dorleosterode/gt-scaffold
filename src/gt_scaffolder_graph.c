@@ -797,6 +797,7 @@ static void gt_scaffolder_walk_addegde(GtScaffolderGraphWalk *walk,
 GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
                  GtScaffolderGraphVertex *start)
 {
+
   /* BFS-Traversierung innerhalb aktueller Zusammenhangskomponente
      ausgehend von terminalen Knoten zu terminalen Knoten */
   GtQueue *wqueue;
@@ -816,6 +817,12 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
   /* SK: Mit GtWord_Min / erwarteter Genomlaenge statt 0 initialisieren */
   distancemap = calloc(graph->nof_vertices, sizeof (*distancemap));
   edgemap = gt_malloc(sizeof (*edgemap)*graph->nof_vertices);
+
+  /* check if node has edges */
+  if (start->nof_edges == 0) {
+    printf("no edges\n");
+    return NULL;
+  }
 
   dir = start->edges[0]->sense;
   for (eid = 0; eid < start->nof_edges; eid++) {
