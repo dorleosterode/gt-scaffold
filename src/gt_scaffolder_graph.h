@@ -67,6 +67,11 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
                                                    GtUword min_ctg_len,
                                                    const char *dist_filename,
                                                    GtError *err);
+int gt_scaffolder_graph_mark_repeats(const char *filename,
+                                     GtScaffolderGraph *graph,
+                                     float copy_num_cutoff,
+                                     float astat_cutoff,
+                                     GtError *err);
 int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
                                float pcutoff,
                                float cncutoff,

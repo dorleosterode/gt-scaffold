@@ -29,11 +29,11 @@
 #include "core/fasta_reader_rec.h"
 #include "core/error.h"
 
-/* SK: Verwendung eintragen, evtl Faktor verwenden */
-const GtUword INCREMENT_SIZE = 32;
+/* increment size for realloc of walk */
+#define INCREMENT_SIZE 32
 
 typedef enum { GIS_UNVISITED, GIS_POLYMORPHIC, GIS_INCONSISTENT,
-               GIS_VISITED, GIS_PROCESSED } GraphItemState;
+               GIS_REPEAT, GIS_VISITED, GIS_PROCESSED } GraphItemState;
 
 /* vertex of scaffold graph (describes one contig) */
 typedef struct GtScaffolderGraphVertex {
@@ -651,6 +651,93 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
     gt_error_set (err , " invalid sequence length ");
     had_err = -1;
   }
+  return had_err;
+}
+
+
+/* load astatics and copy number of every contig and mark repeated contigs */
+int gt_scaffolder_graph_mark_repeats(const char *filename,
+                                     GtScaffolderGraph *graph,
+                                     float copy_num_cutoff,
+                                     float astat_cutoff,
+                                     GtError *err)
+{
+  FILE *file;
+  char line[1024], *field;
+  GtUword root_ctg_id, field_counter;
+  float astat, copy_num;
+  bool astat_found, copy_num_found;
+  int had_err;
+  GtStr *gt_str_field;
+  GtScaffolderGraphVertex *vertex;
+
+  file = fopen(filename, "rb");
+  if (file == NULL){
+    had_err = -1;
+    gt_error_set(err, " can not read file %s ", filename);
+  }
+
+  if (had_err != -1)
+  {
+    /* iterate over each line of file until eof (contig record) */
+    while (fgets(line, 1024, file) != NULL)
+    {
+      /* remove '\n' from end of line */
+      line[strlen(line)-1] = '\0';
+
+      /* split line by first tab delimiter */
+      field = strtok(line,"\t");
+
+      /* get vertex id corresponding to root contig header */
+      gt_str_field = gt_str_new_cstr(field);
+      had_err = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id,
+                gt_str_field, err);
+      gt_str_delete(gt_str_field);
+      /* exit if distance and contig file inconsistent */
+      gt_error_check(err);
+
+      field_counter = 0;
+      copy_num = 0.0;
+      astat = 0.0;
+      copy_num_found = false;
+      astat_found = false;
+      /* iterate over tab delimited records */
+      while (field != NULL)
+      {
+
+        /* parse record consisting of a-statistics and copy number */
+        if (field_counter == 4 && sscanf(field,"%f", &copy_num) == 1)
+          copy_num_found = true;
+        if (field_counter == 5 && sscanf(field,"%f", &astat) == 1)
+          astat_found = true;
+
+        /* split line by next tab delimiter */
+        field = strtok(NULL,"\t");
+        field_counter++;
+      }
+
+      /* save a-statistics and copy number */
+      if (copy_num_found && astat_found)
+      {
+        graph->vertices[root_ctg_id].astat = astat;
+        graph->vertices[root_ctg_id].copy_num = copy_num;
+      }
+      else
+        had_err = -1;
+    }
+  }
+  fclose(file);
+
+  if (had_err != -1)
+  {
+    /* iterate over all vertices */
+    for (vertex = graph->vertices;
+      vertex < (graph->vertices + graph->nof_vertices); vertex++) {
+      if (vertex->astat <= astat_cutoff || vertex->copy_num < copy_num_cutoff)
+        vertex->state = GIS_REPEAT;
+    }
+  }
+
   return had_err;
 }
 
