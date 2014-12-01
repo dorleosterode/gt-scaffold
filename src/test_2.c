@@ -4,16 +4,14 @@
 #include "gt_scaffolder_graph.h"
 
 /* adapted from SGA examples */
-const MIN_CONTIG_LEN = 200;
+const GtUword MIN_CONTIG_LEN = 200;
 
 int main(int argc, char **argv)
 {
   GtError *err;
   GtScaffolderGraph *graph;
-  GtUword min_ctg_len;
 
   graph = NULL;
-  min_ctg_len = 10;
   /* initialize */
   gt_lib_init();
   /* create error object */
