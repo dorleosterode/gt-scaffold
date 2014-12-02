@@ -777,27 +777,31 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
 
   if (had_err == 0)
   {
-    /* count distance information */
-    nof_distances = 0;
-    had_err = gt_scaffolder_graph_count_distances(dist_filename,
-              &nof_distances, err);
+    /* allocate memory for vertices of scaffolder graph */
+    graph = gt_malloc(sizeof(*graph));
+    graph->vertices = NULL;
+    graph->edges = NULL;
+    gt_scaffolder_graph_init_vertices(graph, fasta_reader_data.nof_valid_ctg);
+
+    fasta_reader_data.graph = graph;
+    /* parse contigs in FASTA-format and save them as vertices of
+       scaffold graph */
+    reader = gt_fasta_reader_rec_new(str_filename);
+    had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header,
+              NULL, gt_scaffolder_graph_save_ctg, &fasta_reader_data, err);
+    gt_fasta_reader_delete(reader);
 
     if (had_err == 0)
     {
-      /* allocate memory for scaffolder graph */
-      graph = gt_scaffolder_graph_new(fasta_reader_data.nof_valid_ctg,
-              nof_distances);
-
-      fasta_reader_data.graph = graph;
-      /* parse contigs in FASTA-format and save them as vertices of
-         scaffold graph */
-      reader = gt_fasta_reader_rec_new(str_filename);
-      had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header,
-                NULL, gt_scaffolder_graph_save_ctg, &fasta_reader_data, err);
-      gt_fasta_reader_delete(reader);
+      /* count distance information */
+      nof_distances = 0;
+      had_err = gt_scaffolder_graph_count_distances(dist_filename,
+              &nof_distances, err);
 
       if (had_err == 0)
       {
+        /* allocate memory for edges of scaffolder graph */
+        gt_scaffolder_graph_init_edges(graph, nof_distances);
         /* parse distance information of contigs in abyss-dist-format and
            save them as edges of scaffold graph */
         had_err =
