@@ -101,7 +101,7 @@ typedef struct {
   GtUword min_ctg_len;
   GtStr *header_seq;
   GtScaffolderGraph *graph;
-} GtScaffolderGraphFastaReaderData; 
+} GtScaffolderGraphFastaReaderData;
 
 /* DistanceMap */
 /* EdgeMap */
@@ -210,6 +210,24 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
   graph->nof_vertices++;
 }
 
+void gt_scaffolder_graph_add_edge_ptr_to_vertex(GtScaffolderGraph *graph,
+                                                GtUword edgeID,
+                                                GtUword vertexID)
+{
+  /* Allocate new space for pointer to this edge */
+  if (graph->vertices[vertexID].nof_edges > 0) {
+    graph->vertices[vertexID].edges =
+      /* SK: realloc zu teuer? Besser: DistEst parsen und gezielt allokieren */
+      gt_realloc( graph->vertices[vertexID].edges, sizeof (*graph->edges) *
+                  (graph->vertices[vertexID].nof_edges + 1) );
+  }
+  /* Assign adress of this edge to the pointer */
+  graph->vertices[vertexID].edges[graph->vertices[vertexID].nof_edges] =
+    &graph->edges[edgeID];
+
+  graph->vertices[vertexID].nof_edges++;
+}
+
 /* Initialize a new, directed edge in <*graph>. Each edge between two contig
    vertices <vstartID> and <vendID> contains information about the distance
    <dist>, standard deviation <std_dev>, number of pairs <num_pairs> and the
@@ -239,20 +257,8 @@ void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
   graph->edges[nextfree].same = same;
   graph->edges[nextfree].state = GIS_UNVISITED;
 
-  /* Assign edge to start vertice */
-  gt_assert(vstartID < graph->nof_vertices && vendID < graph->nof_vertices);
-  /* Allocate new space for pointer to this edge */
-  if (graph->vertices[vstartID].nof_edges > 0) {
-    graph->vertices[vstartID].edges =
-      /* SK: realloc zu teuer? Besser: DistEst parsen und gezielt allokieren */
-      gt_realloc( graph->vertices[vstartID].edges, sizeof (*graph->edges) *
-                  (graph->vertices[vstartID].nof_edges + 1) );
-  }
-  /* Assign adress of this edge to the pointer */
-  graph->vertices[vstartID].edges[graph->vertices[vstartID].nof_edges] =
-    &graph->edges[nextfree];
-
-  graph->vertices[vstartID].nof_edges++;
+  gt_scaffolder_graph_add_edge_ptr_to_vertex(graph, nextfree, vstartID);
+  gt_scaffolder_graph_add_edge_ptr_to_vertex(graph, nextfree, vendID);
 
   graph->nof_edges++;
 }
@@ -483,7 +489,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   /* sort by lexicographic ascending order */
   qsort(graph->vertices, graph->nof_vertices, sizeof(*graph->vertices),
        gt_scaffolder_graph_vertices_compare);
-  /* update vertex ID 
+  /* update vertex ID
      LG: Knoten ID eigentlich redundant? */
   for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++)
     v->id = v - graph->vertices;
@@ -566,9 +572,9 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
 
         /* split line by next space delimiter */
         field = strtok(NULL," ");
-      }    
+      }
     }
-  }  
+  }
 
   fclose(file);
   return had_err;
@@ -616,7 +622,7 @@ static int gt_scaffolder_graph_save_header(const char *description,
   space_ptr = strchr(new_description, ' ');
   if (space_ptr != NULL)
     *space_ptr = '\0';
-  gt_str_set(gt_str_description, new_description);  
+  gt_str_set(gt_str_description, new_description);
 
   fasta_reader_data->header_seq = gt_str_description;
   if (length == 0) {
@@ -639,7 +645,7 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
 
   had_err = 0;
   if (seq_length > fasta_reader_data->min_ctg_len)
-  {    
+  {
     gt_scaffolder_graph_add_vertex(fasta_reader_data->graph,
     fasta_reader_data->header_seq, seq_length, 0.0, 0.0);
 
@@ -667,7 +673,7 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
   GtUword root_ctg_id, field_counter;
   float astat, copy_num;
   bool astat_found, copy_num_found;
-  int had_err;
+  int had_err = 0;
   GtStr *gt_str_field;
   GtScaffolderGraphVertex *vertex;
 
@@ -978,7 +984,7 @@ gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
 /* DFS to detect Cycles given a starting vertex */
 /* TODO: remember all visited vertices to change the state to
    GIS_UNVISITED before search with the next starting vertex. */
-static GtScaffolderGraphEdge *gt_scaffolder_detect_cycle(GtScaffolderGraphVertex *v,
+/*static GtScaffolderGraphEdge *gt_scaffolder_detect_cycle(GtScaffolderGraphVertex *v,
 							 bool dir) {
   GtUword eid;
   GtScaffolderGraphVertex *end;
@@ -988,9 +994,9 @@ static GtScaffolderGraphEdge *gt_scaffolder_detect_cycle(GtScaffolderGraphVertex
 
   v->state = GIS_VISITED;
   for (eid = 0; eid < v->nof_edges; eid++) {
-    if (v->edges[eid]->sense == dir) {
+    if (v->edges[eid]->sense == dir) {*/
       /* maybe we want just to mark the corresponding vertices at this
-	 point and return a boolean or something like that */
+	 point and return a boolean or something like that *//*
       end = v->edges[eid]->end;
       if (end->state == GIS_VISITED)
 	return v->edges[eid];
@@ -1004,7 +1010,7 @@ static GtScaffolderGraphEdge *gt_scaffolder_detect_cycle(GtScaffolderGraphVertex
 
   end->state = GIS_PROCESSED;
   return NULL;
-}
+}*/
 
 /* create new walk */
 static GtScaffolderGraphWalk *gt_scaffolder_walk_new(void)
