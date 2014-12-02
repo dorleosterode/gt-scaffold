@@ -394,6 +394,15 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
   gt_file_xprintf(f, "}\n");
 }
 
+/* sort by lexicographic ascending order */
+static int gt_scaffolder_graph_vertices_compare(const void *a, const void *b)
+{
+  GtScaffolderGraphVertex *vertex_a =
+  (GtScaffolderGraphVertex*) a;
+  GtScaffolderGraphVertex *vertex_b =
+  (GtScaffolderGraphVertex*) b;
+  return gt_str_cmp(vertex_a->header_seq, vertex_b->header_seq);
+}
 
 /* count records */
 static int gt_scaffolder_graph_count_distances(const GtScaffolderGraph *graph,
@@ -408,10 +417,20 @@ static int gt_scaffolder_graph_count_distances(const GtScaffolderGraph *graph,
   float std_dev;
   int had_err, had_err_2;
   GtStr *gt_str_ctg_header, *gt_str_field;
+  GtScaffolderGraphVertex *v;
 
   had_err = 0;
   had_err_2 = 0;
   record_counter = 0;
+
+  /* sort by lexicographic ascending order */
+  qsort(graph->vertices, graph->nof_vertices, sizeof(*graph->vertices),
+       gt_scaffolder_graph_vertices_compare);
+  /* update vertex ID
+     LG: Knoten ID eigentlich redundant? SD: Ja. */
+  for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++)
+    v->id = v - graph->vertices;
+
   file = fopen(file_name, "rb");
   if (file == NULL){
     had_err = -1;
@@ -462,17 +481,6 @@ static int gt_scaffolder_graph_count_distances(const GtScaffolderGraph *graph,
   return had_err;
 }
 
-/* sort by lexicographic ascending order */
-static int gt_scaffolder_graph_vertices_compare(const void *a, const void *b)
-{
-  GtScaffolderGraphVertex *vertex_a =
-  (GtScaffolderGraphVertex*) a;
-  GtScaffolderGraphVertex *vertex_b =
-  (GtScaffolderGraphVertex*) b;
-  return gt_str_cmp(vertex_a->header_seq, vertex_b->header_seq);
-}
-
-
 /* parse distance information of contigs in abyss-dist-format and
    save them as edges of scaffold graph, PRECONDITION: header contains
    no commas and spaces */
@@ -494,7 +502,6 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   GtScaffolderGraphEdge *edge;
   int had_err, had_err_2;
   GtStr *gt_str_ctg_header, *gt_str_field;
-  GtScaffolderGraphVertex *v;
 
   had_err = 0;
   had_err_2 = 0;
@@ -506,14 +513,6 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
     had_err = -1;
     gt_error_set(err, " can not read file %s ",filename);
   }
-
-  /* sort by lexicographic ascending order */
-  qsort(graph->vertices, graph->nof_vertices, sizeof(*graph->vertices),
-       gt_scaffolder_graph_vertices_compare);
-  /* update vertex ID
-     LG: Knoten ID eigentlich redundant? SD: Ja. */
-  for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++)
-    v->id = v - graph->vertices;
 
   if (had_err != -1)
   {
