@@ -984,8 +984,12 @@ gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
 /* DFS to detect Cycles given a starting vertex */
 /* TODO: remember all visited vertices to change the state to
    GIS_UNVISITED before search with the next starting vertex. */
-/*static GtScaffolderGraphEdge *gt_scaffolder_detect_cycle(GtScaffolderGraphVertex *v,
-							 bool dir) {
+
+/* SD: Commented this function because compiler complaines about it being unused */
+
+/*static GtScaffolderGraphEdge
+*gt_scaffolder_detect_cycle(GtScaffolderGraphVertex *v,
+							              bool dir) {
   GtUword eid;
   GtScaffolderGraphVertex *end;
   GtScaffolderGraphEdge *back;
