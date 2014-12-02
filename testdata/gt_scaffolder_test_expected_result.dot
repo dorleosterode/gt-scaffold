@@ -1,9 +1,9 @@
 graph {
-0 [color="black"];
-1 [color="black"];
-2 [color="black"];
-3 [color="black"];
-4 [color="black"];
+0 [color="black" label="foobar"];
+1 [color="black" label="foobar"];
+2 [color="black" label="foobar"];
+3 [color="black" label="foobar"];
+4 [color="black" label="foobar"];
 0 -- 1 [color="black" label="2"];
 0 -- 2 [color="black" label="2"];
 0 -- 3 [color="black" label="2"];

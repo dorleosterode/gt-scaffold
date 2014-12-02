@@ -257,6 +257,7 @@ void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
   graph->edges[nextfree].same = same;
   graph->edges[nextfree].state = GIS_UNVISITED;
 
+  /* Add ptr to edge to start and end vertex */
   gt_scaffolder_graph_add_edge_ptr_to_vertex(graph, nextfree, vstartID);
   gt_scaffolder_graph_add_edge_ptr_to_vertex(graph, nextfree, vendID);
 
@@ -279,6 +280,7 @@ static GtScaffolderGraphEdge *gt_scaffolder_graph_find_edge(
 }
 
 /* determines corresponding vertex id to contig header */
+/* SD: Binaersuche separat testen */
 static int gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
                                              GtUword *vertex_id,
                                              const GtStr *header_seq,
@@ -466,6 +468,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
                                               GtError *err)
 {
   FILE *file;
+  /* SD: Konstante setzen? */
   char line[1024], *field, ctg_header[1024];
   GtUword num_pairs, root_ctg_id, ctg_id, ctg_header_len;
   GtWord dist;
@@ -490,7 +493,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   qsort(graph->vertices, graph->nof_vertices, sizeof(*graph->vertices),
        gt_scaffolder_graph_vertices_compare);
   /* update vertex ID
-     LG: Knoten ID eigentlich redundant? */
+     LG: Knoten ID eigentlich redundant? SD: Ja. */
   for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++)
     v->id = v - graph->vertices;
 
@@ -521,6 +524,9 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
       {
         /* parse record consisting of contig header, distance,
            number of pairs, std. dev. */
+        /* SD: %[^<,] ist eine negierte Zeichenklasse (Workaround weil %s nicht
+               funktioniert
+        */
         if (sscanf(field,"%[^<,],%ld,%lu,%f", ctg_header, &dist, &num_pairs,
             &std_dev) == 4)
         {
@@ -551,10 +557,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
               gt_scaffolder_graph_alter_edge(edge, dist, std_dev, num_pairs,
               sense, same);
             }
-            else
-            {
-              /*Conflicting-Flag?*/
-            }
+            /*else { Conflicting-Flag? }*/
           }
           else
             gt_scaffolder_graph_add_edge(graph, root_ctg_id, ctg_id, dist, std_dev,
@@ -1262,6 +1265,7 @@ int gt_scaffolder_test_graph(GtUword max_nof_vertices,
   /* Construct graph, don't init as this will be done later */
   else {
     graph = gt_malloc(sizeof (*graph));
+    /* SD: Muss dennoch gefreed werden */
     graph->vertices = NULL;
     graph->edges = NULL;
   }
