@@ -431,7 +431,7 @@ static int gt_scaffolder_graph_count_distances(const GtScaffolderGraph *graph,
     v->index = v - graph->vertices;
 
   file = fopen(file_name, "rb");
-  if (file == NULL){
+  if (file == NULL) {
     had_err = -1;
     gt_error_set(err, " can not read file %s ",file_name);
   }
@@ -508,7 +508,7 @@ static int gt_scaffolder_graph_read_distances(const char *filename,
   ctg_id = 0;
 
   file = fopen(filename, "rb");
-  if (file == NULL){
+  if (file == NULL) {
     had_err = -1;
     gt_error_set(err, " can not read file %s ",filename);
   }
@@ -706,7 +706,7 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
   if (had_err == 0)
   {
     /* allocate memory for vertices of scaffolder graph */
-    graph = gt_malloc(sizeof(*graph));
+    graph = gt_malloc(sizeof (*graph));
     graph->vertices = NULL;
     graph->edges = NULL;
     gt_scaffolder_graph_init_vertices(graph, fasta_reader_data.nof_valid_ctg);
@@ -769,7 +769,7 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
   had_err = 0;
   had_err_2 = 0;
   file = fopen(filename, "rb");
-  if (file == NULL){
+  if (file == NULL) {
     had_err = -1;
     gt_error_set(err, " can not read file %s ", filename);
   }
