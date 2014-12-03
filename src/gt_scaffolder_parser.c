@@ -24,8 +24,17 @@
 #include "gt_scaffolder_graph.h"
 #include "gt_scaffolder_parser.h"
 
+/* for parsing valid contigs,
+   e.g. contigs with minimum length <min_ctg_len> */
+typedef struct {
+  GtUword nof_valid_ctg;
+  GtUword min_ctg_len;
+  GtStr *header_seq;
+  GtScaffolderGraph *graph;
+} GtScaffolderGraphFastaReaderData;
+
 /* sort by lexicographic ascending order */
-int gt_scaffolder_graph_vertices_compare(const void *a, const void *b)
+static int gt_scaffolder_graph_vertices_compare(const void *a, const void *b)
 {
   GtScaffolderGraphVertex *vertex_a =
   (GtScaffolderGraphVertex*) a;
@@ -232,7 +241,7 @@ int gt_scaffolder_graph_read_distances(const char *filename,
 /* counts contigs with minimum length in callback data
    (fasta reader callback function, gets called after fasta entry
    has been read) */
-int gt_scaffolder_graph_count_ctg(GtUword length,
+static int gt_scaffolder_graph_count_ctg(GtUword length,
                                          void *data,
                                          GtError* err)
 {
@@ -253,7 +262,7 @@ int gt_scaffolder_graph_count_ctg(GtUword length,
 /* saves header to callback data
    (fasta reader callback function, gets called for each description
     of fasta entry) */
-int gt_scaffolder_graph_save_header(const char *description,
+static int gt_scaffolder_graph_save_header(const char *description,
                                            GtUword length,
                                            void *data, GtError *err)
 {
@@ -284,7 +293,7 @@ int gt_scaffolder_graph_save_header(const char *description,
 /* saves header, sequence length of contig to scaffolder graph
    (fasta reader callback function, gets called after fasta entry
    has been read) */
-int gt_scaffolder_graph_save_ctg(GtUword seq_length,
+static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
                                         void *data,
                                         GtError* err)
 {
@@ -306,5 +315,59 @@ int gt_scaffolder_graph_save_ctg(GtUword seq_length,
     gt_error_set (err , " invalid sequence length ");
     had_err = -1;
   }
+  return had_err;
+}
+
+/* count contigs */
+int gt_scaffolder_parser_count_contigs(const char *filename,
+                                       GtUword min_ctg_len,
+                                       GtUword *nof_contigs,
+                                       GtError *err)
+{
+  GtFastaReader* reader;
+  GtStr *str_filename;
+  GtScaffolderGraphFastaReaderData fasta_reader_data;
+  int had_err;
+
+  had_err = 0;
+  str_filename = gt_str_new_cstr(filename);
+  fasta_reader_data.nof_valid_ctg = 0;
+  fasta_reader_data.min_ctg_len = min_ctg_len;
+
+  reader = gt_fasta_reader_rec_new(str_filename);
+  had_err = gt_fasta_reader_run(reader, NULL, NULL,
+            gt_scaffolder_graph_count_ctg, &fasta_reader_data, err);
+  gt_fasta_reader_delete(reader);
+  gt_str_delete(str_filename);
+
+  *nof_contigs = fasta_reader_data.nof_valid_ctg;
+
+  return had_err;
+}
+
+/* parse contigs in FASTA-format and save them as vertices of
+   scaffold graph */
+int gt_scaffolder_parser_read_contigs(GtScaffolderGraph *graph,
+                                      const char *filename,
+                                      GtUword min_ctg_len,
+                                      GtError *err)
+{
+  GtFastaReader* reader;
+  GtStr *str_filename;
+  GtScaffolderGraphFastaReaderData fasta_reader_data;
+  int had_err;
+
+  had_err = 0;
+  str_filename = gt_str_new_cstr(filename);
+  fasta_reader_data.nof_valid_ctg = 0;
+  fasta_reader_data.min_ctg_len = min_ctg_len;
+  fasta_reader_data.graph = graph;
+
+  reader = gt_fasta_reader_rec_new(str_filename);
+  had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header,
+            NULL, gt_scaffolder_graph_save_ctg, &fasta_reader_data, err);
+  gt_fasta_reader_delete(reader);
+  gt_str_delete(str_filename);
+
   return had_err;
 }

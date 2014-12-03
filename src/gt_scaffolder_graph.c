@@ -25,7 +25,6 @@
 #include "core/str_api.h"
 #include "core/types_api.h"
 #include "core/error.h"
-#include "core/fasta_reader_rec.h"
 #include "gt_scaffolder_graph.h"
 #include "gt_scaffolder_parser.h"
 
@@ -324,22 +323,17 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
                                                      GtError *err)
 {
   GtScaffolderGraph *graph;
-  GtFastaReader* reader;
-  GtStr *str_filename;
   int had_err;
-  GtScaffolderGraphFastaReaderData fasta_reader_data;
-  GtUword nof_distances;
+  GtUword nof_distances, nof_contigs;
 
-  had_err = 0;
   graph = NULL;
-  str_filename = gt_str_new_cstr(ctg_filename);
-  fasta_reader_data.nof_valid_ctg = 0;
-  fasta_reader_data.min_ctg_len = min_ctg_len;
+  had_err = 0;
+  nof_contigs = 0;
+  nof_distances = 0;
+
   /* count contigs */
-  reader = gt_fasta_reader_rec_new(str_filename);
-  had_err = gt_fasta_reader_run(reader, NULL, NULL,
-            gt_scaffolder_graph_count_ctg, &fasta_reader_data, err);
-  gt_fasta_reader_delete(reader);
+  had_err = gt_scaffolder_parser_count_contigs(ctg_filename, min_ctg_len,
+            &nof_contigs, err);
 
   if (had_err == 0)
   {
@@ -347,15 +341,11 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
     graph = gt_malloc(sizeof (*graph));
     graph->vertices = NULL;
     graph->edges = NULL;
-    gt_scaffolder_graph_init_vertices(graph, fasta_reader_data.nof_valid_ctg);
+    gt_scaffolder_graph_init_vertices(graph, nof_contigs);
 
-    fasta_reader_data.graph = graph;
     /* parse contigs in FASTA-format and save them as vertices of
        scaffold graph */
-    reader = gt_fasta_reader_rec_new(str_filename);
-    had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header,
-              NULL, gt_scaffolder_graph_save_ctg, &fasta_reader_data, err);
-    gt_fasta_reader_delete(reader);
+    gt_scaffolder_parser_read_contigs(graph, ctg_filename, min_ctg_len, err);
 
     if (had_err == 0)
     {
@@ -384,7 +374,6 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
     graph = NULL;
   }
 
-  gt_str_delete(str_filename);
   return graph;
 }
 

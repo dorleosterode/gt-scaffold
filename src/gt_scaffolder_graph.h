@@ -86,19 +86,6 @@ typedef struct GtScaffolderGraphWalk {
   GtScaffolderGraphEdge **edges;
 }GtScaffolderGraphWalk;
 
-/* for parsing valid contigs,
-   e.g. contigs with minimum length <min_ctg_len> */
-typedef struct {
-  GtUword nof_valid_ctg;
-  GtUword min_ctg_len;
-  GtStr *header_seq;
-  GtScaffolderGraph *graph;
-} GtScaffolderGraphFastaReaderData;
-
-/* DistanceMap */
-/* EdgeMap */
-
-
 /* Initialize vertex portion inside <*graph>. Allocate memory for
    <max_nof_vertices> vertices. */
 void gt_scaffolder_graph_init_vertices(GtScaffolderGraph *graph,
