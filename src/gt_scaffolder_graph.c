@@ -156,23 +156,22 @@ void gt_scaffolder_graph_delete(GtScaffolderGraph *graph)
   /*LG: NULL pointer has to be freed !?
     gt_assert(graph != NULL);*/
 
-  if (graph->vertices != NULL) {
-    /* If existent, free header_seq and pointer to outgoing edges first */
-    for ( vertex = graph->vertices;
-          vertex < (graph->vertices + graph->nof_vertices);
-          vertex++
-        )
-    {
-      if (vertex->header_seq != NULL)
+  if (graph != NULL) {
+    if (graph->vertices != NULL) {
+      /* If existent, free header_seq and pointer to outgoing edges first */
+      for ( vertex = graph->vertices;
+            vertex < (graph->vertices + graph->nof_vertices);
+            vertex++
+          )
+      {
         gt_str_delete(vertex->header_seq);
-      if (vertex->edges != NULL)
         gt_free(vertex->edges);
+      }
     }
-    gt_free(graph->vertices);
-  }
 
-  if (graph->edges != NULL)
+    gt_free(graph->vertices);
     gt_free(graph->edges);
+  }
 
   gt_free(graph);
 }
