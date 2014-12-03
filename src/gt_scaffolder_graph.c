@@ -37,8 +37,8 @@ typedef enum { GIS_UNVISITED, GIS_POLYMORPHIC, GIS_INCONSISTENT,
 
 /* vertex of scaffold graph (describes one contig) */
 typedef struct GtScaffolderGraphVertex {
-  /* unique vertex ID */
-  GtUword id;
+  /* vertex index in array */
+  GtUword index;
   /* header sequence of corresponding contig */
   GtStr *header_seq;
   /* sequence length of corresponding contig */
@@ -194,7 +194,7 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
   nextfree = graph->nof_vertices;
 
   /* Initialize vertex */
-  graph->vertices[nextfree].id = nextfree; /* SD: remove without breaking */
+  graph->vertices[nextfree].index = nextfree; /* SD: remove without breaking */
   graph->vertices[nextfree].seq_len = seq_len;
   graph->vertices[nextfree].astat = astat;
   graph->vertices[nextfree].copy_num = copy_num;
@@ -228,7 +228,7 @@ void gt_scaffolder_graph_add_edge_ptr_to_vertex(GtScaffolderGraph *graph,
   graph->vertices[vertexID].nof_edges++;
 }
 
-/* Initialize a new, directed edge in <*graph>. Each edge between two contig
+/* Initialize a new edge in <*graph>. Each edge between two contig
    vertices <vstartID> and <vendID> contains information about the distance
    <dist>, standard deviation <std_dev>, number of pairs <num_pairs> and the
    direction of <vstartID> <dir> and corresponding <vendID> <same> */
@@ -273,7 +273,7 @@ static GtScaffolderGraphEdge *gt_scaffolder_graph_find_edge(
   GtScaffolderGraphVertex *v1 = graph->vertices + vertexid_1;
 
   for (edge = v1->edges; edge < (v1->edges + v1->nof_edges); edge++) {
-    if ((*edge)->end->id == vertexid_2)
+    if ((*edge)->end->index == vertexid_2)
       return *edge;
   }
   return NULL;
@@ -303,7 +303,7 @@ static int gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
       if (cmp == 0)
       {
         found = true;
-        *vertex_id = mid_vertex->id;
+        *vertex_id = mid_vertex->index;
         break;
       }
       else if (cmp < 0)
@@ -377,7 +377,7 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
   /* iterate over all vertices and print them. add attribute color according
      to the current state */
   for (v = g->vertices; v < (g->vertices + g->nof_vertices); v++) {
-    gt_file_xprintf(f, GT_WU " [color=\"%s\" label=\"%s\"];\n", v->id,
+    gt_file_xprintf(f, GT_WU " [color=\"%s\" label=\"%s\"];\n", v->index,
                     color_array[v->state], gt_str_get(v->header_seq));
   }
 
@@ -386,7 +386,7 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
   for (e = g->edges; e < (g->edges + g->nof_edges); e++) {
     gt_file_xprintf(f,
                     GT_WU " -- " GT_WU " [color=\"%s\" label=\"" GT_WD "\"];\n",
-                    e->start->id, e->end->id,
+                    e->start->index, e->end->index,
                     color_array[e->state], e->dist);
   }
 
@@ -429,7 +429,7 @@ static int gt_scaffolder_graph_count_distances(const GtScaffolderGraph *graph,
   /* update vertex ID
      LG: Knoten ID eigentlich redundant? SD: Ja. */
   for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++)
-    v->id = v - graph->vertices;
+    v->index = v - graph->vertices;
 
   file = fopen(file_name, "rb");
   if (file == NULL){
@@ -679,97 +679,6 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
   return had_err;
 }
 
-
-/* load astatics and copy number of every contig and mark repeated contigs */
-int gt_scaffolder_graph_mark_repeats(const char *filename,
-                                     GtScaffolderGraph *graph,
-                                     float copy_num_cutoff,
-                                     float astat_cutoff,
-                                     GtError *err)
-{
-  FILE *file;
-  char line[1024], *field;
-  GtUword root_ctg_id, field_counter;
-  float astat, copy_num;
-  bool astat_found, copy_num_found;
-  int had_err, had_err_2;
-  GtStr *gt_str_field;
-  GtScaffolderGraphVertex *vertex;
-
-  had_err = 0;
-  had_err_2 = 0;
-  file = fopen(filename, "rb");
-  if (file == NULL){
-    had_err = -1;
-    gt_error_set(err, " can not read file %s ", filename);
-  }
-
-  if (had_err != -1)
-  {
-    /* iterate over each line of file until eof (contig record) */
-    while (fgets(line, 1024, file) != NULL) {
-    
-      /* remove '\n' from end of line */
-      line[strlen(line)-1] = '\0';
-
-      /* split line by first tab delimiter */
-      field = strtok(line,"\t");
-
-      /* get vertex id corresponding to root contig header */
-      root_ctg_id = 0;
-      gt_str_field = gt_str_new_cstr(field);
-      had_err_2 = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id,
-                gt_str_field);
-      gt_str_delete(gt_str_field);
-
-      field_counter = 0;
-      copy_num = 0.0;
-      astat = 0.0;
-      copy_num_found = false;
-      astat_found = false;
-
-      if (had_err_2 == 0) {
-        /* iterate over tab delimited records */
-        while (field != NULL)
-        {
-
-          /* parse record consisting of a-statistics and copy number */
-          if (field_counter == 4 && sscanf(field,"%f", &copy_num) == 1)
-            copy_num_found = true;
-          if (field_counter == 5 && sscanf(field,"%f", &astat) == 1)
-            astat_found = true;
-
-          /* split line by next tab delimiter */
-          field = strtok(NULL,"\t");
-          field_counter++;
-        }
-
-        /* save a-statistics and copy number */
-        if (copy_num_found && astat_found)
-        {
-          graph->vertices[root_ctg_id].astat = astat;
-          graph->vertices[root_ctg_id].copy_num = copy_num;
-        }
-        else
-          had_err = -1;
-      }
-    }
-  }
-  fclose(file);
-
-  if (had_err != -1)
-  {
-    /* iterate over all vertices */
-    for (vertex = graph->vertices;
-      vertex < (graph->vertices + graph->nof_vertices); vertex++) {
-      if (vertex->astat <= astat_cutoff || vertex->copy_num < copy_num_cutoff)
-        vertex->state = GIS_REPEAT;
-    }
-  }
-
-  return had_err;
-}
-
 /* create scaffold graph from file */
 /* TODO: include a-statistics, copy number */
 GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
@@ -840,6 +749,96 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
 
   gt_str_delete(str_filename);
   return graph;
+}
+
+/* load astatics and copy number of every contig and mark repeated contigs */
+int gt_scaffolder_graph_mark_repeats(const char *filename,
+                                     GtScaffolderGraph *graph,
+                                     float copy_num_cutoff,
+                                     float astat_cutoff,
+                                     GtError *err)
+{
+  FILE *file;
+  char line[1024], *field;
+  GtUword root_ctg_id, field_counter;
+  float astat, copy_num;
+  bool astat_found, copy_num_found;
+  int had_err, had_err_2;
+  GtStr *gt_str_field;
+  GtScaffolderGraphVertex *vertex;
+
+  had_err = 0;
+  had_err_2 = 0;
+  file = fopen(filename, "rb");
+  if (file == NULL){
+    had_err = -1;
+    gt_error_set(err, " can not read file %s ", filename);
+  }
+
+  if (had_err != -1)
+  {
+    /* iterate over each line of file until eof (contig record) */
+    while (fgets(line, 1024, file) != NULL) {
+
+      /* remove '\n' from end of line */
+      line[strlen(line)-1] = '\0';
+
+      /* split line by first tab delimiter */
+      field = strtok(line,"\t");
+
+      /* get vertex id corresponding to root contig header */
+      root_ctg_id = 0;
+      gt_str_field = gt_str_new_cstr(field);
+      had_err_2 = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id,
+                gt_str_field);
+      gt_str_delete(gt_str_field);
+
+      field_counter = 0;
+      copy_num = 0.0;
+      astat = 0.0;
+      copy_num_found = false;
+      astat_found = false;
+
+      if (had_err_2 == 0) {
+        /* iterate over tab delimited records */
+        while (field != NULL)
+        {
+
+          /* parse record consisting of a-statistics and copy number */
+          if (field_counter == 4 && sscanf(field,"%f", &copy_num) == 1)
+            copy_num_found = true;
+          if (field_counter == 5 && sscanf(field,"%f", &astat) == 1)
+            astat_found = true;
+
+          /* split line by next tab delimiter */
+          field = strtok(NULL,"\t");
+          field_counter++;
+        }
+
+        /* save a-statistics and copy number */
+        if (copy_num_found && astat_found)
+        {
+          graph->vertices[root_ctg_id].astat = astat;
+          graph->vertices[root_ctg_id].copy_num = copy_num;
+        }
+        else
+          had_err = -1;
+      }
+    }
+  }
+  fclose(file);
+
+  if (had_err != -1)
+  {
+    /* iterate over all vertices */
+    for (vertex = graph->vertices;
+      vertex < (graph->vertices + graph->nof_vertices); vertex++) {
+      if (vertex->astat <= astat_cutoff || vertex->copy_num < copy_num_cutoff)
+        vertex->state = GIS_REPEAT;
+    }
+  }
+
+  return had_err;
 }
 
 /* check if unique order of edges <*edge1>, <*edge2> with probability
@@ -1118,8 +1117,8 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
 
     /* SK: genometools hashes verwenden, Dichte evaluieren
        SK: DistEst beim Einlesen prüfen */
-    distancemap[endvertex->id] = edge->dist;
-    edgemap[endvertex->id] = edge;
+    distancemap[endvertex->index] = edge->dist;
+    edgemap[endvertex->index] = edge;
 
     gt_queue_add(wqueue, edge);
   }
@@ -1139,10 +1138,10 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
         distance = edge->dist + nextedge->dist;
 
         /* SK: 0 steht fuer unitialisiert*/
-        if (distancemap[nextendvertex->id] == 0 ||
-        distancemap[nextendvertex->id] > distance) {
-          distancemap[nextendvertex->id] = distance;
-          edgemap[nextendvertex->id] = nextedge;
+        if (distancemap[nextendvertex->index] == 0 ||
+        distancemap[nextendvertex->index] > distance) {
+          distancemap[nextendvertex->index] = distance;
+          edgemap[nextendvertex->index] = nextedge;
           gt_queue_add(wqueue, nextedge);
         }
       }
@@ -1157,8 +1156,8 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
     gt_assert(currentvertex >= graph->vertices);
 
     currentwalk = gt_scaffolder_walk_new();
-    while (currentvertex->id != start->id) {
-      reverseedge = edgemap[currentvertex->id];
+    while (currentvertex->index != start->index) {
+      reverseedge = edgemap[currentvertex->index];
       /* Start NICHT end */
       currentvertex = reverseedge->start;
       /* Speicherung des aktuellen Walks */
