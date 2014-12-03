@@ -408,7 +408,8 @@ int gt_scaffolder_graph_test(GtUword max_nof_vertices,
 
     unsigned i;
     for (i = 0; i < nof_vertices; i++) {
-      gt_scaffolder_graph_add_vertex(graph, gt_str_new_cstr("foobar"), 100, 20, 40);
+      gt_scaffolder_graph_add_vertex(graph, gt_str_new_cstr("foobar"),
+                                     100, 20, 40);
     }
   }
 

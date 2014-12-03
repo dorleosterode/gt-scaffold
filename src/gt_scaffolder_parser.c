@@ -311,7 +311,6 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
     gt_str_delete(fasta_reader_data->header_seq);
   }
 
-
   if (seq_length == 0) {
     gt_error_set (err , " invalid sequence length ");
     had_err = -1;
