@@ -7,16 +7,18 @@ GT_INCLUDE:=-DWITHOUT_CAIRO -I${GTDIR}/src
 CFLAGS=-g -Wall -Werror -O3 -Wunused-parameter -Wpointer-arith ${GT_INCLUDE}
 LDFLAGS=-lm
 LIBS=$(GTDIR)/lib/libgenometools.a -lpthread -lm
-OBJ=gt_scaffolder_graph.o test.o
-OBJ2=gt_scaffolder_graph.o test_2.o
+OBJ=gt_scaffolder_graph.o gt_scaffolder_parser.o gt_scaffolder_algorithms.o test.o
+OBJ2=gt_scaffolder_graph.o gt_scaffolder_parser.o gt_scaffolder_algorithms.o test_2.o
 
 all:test.x test_2.x
 
 gt_scaffolder_graph.o: gt_scaffolder_graph.h
+gt_scaffolder_parser.o: gt_scaffolder_parser.h
+gt_scaffolder_algorithms.o: gt_scaffolder_algorithms.h
 
-test.o: gt_scaffolder_graph.h
+test.o: gt_scaffolder_graph.h gt_scaffolder_parser.h gt_scaffolder_algorithms.h
 
-test_2.o: gt_scaffolder_graph.h
+test_2.o: gt_scaffolder_graph.h gt_scaffolder_parser.h gt_scaffolder_algorithms.h
 
 test.x:${OBJ}
 	${LD} ${OBJ} -o $@ ${LDFLAGS} $(LIBS)
