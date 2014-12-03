@@ -423,7 +423,7 @@ static int gt_scaffolder_graph_count_distances(const GtScaffolderGraph *graph,
   record_counter = 0;
 
   /* sort by lexicographic ascending order */
-  qsort(graph->vertices, graph->nof_vertices, sizeof(*graph->vertices),
+  qsort(graph->vertices, graph->nof_vertices, sizeof (*graph->vertices),
        gt_scaffolder_graph_vertices_compare);
   /* update vertex ID
      LG: Knoten ID eigentlich redundant? SD: Ja. */
