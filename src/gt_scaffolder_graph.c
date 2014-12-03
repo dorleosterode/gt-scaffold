@@ -1000,8 +1000,8 @@ gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
 /*        vertices. keep the array with terminal vertices clean. *\/ */
 /*     while (gt_array_size(terminal_vertices) != 0) { */
 /*       /\* search for cycles starting at every terminal vertex. if a */
-/* 	 backedge is found, mark both vertices connected with this */
-/* 	 backedge. *\/ */
+/*       backedge is found, mark both vertices connected with this */
+/*       backedge. *\/ */
 /*     } */
 
 /* } */
@@ -1014,7 +1014,7 @@ gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
 
 /*static GtScaffolderGraphEdge
 *gt_scaffolder_detect_cycle(GtScaffolderGraphVertex *v,
-							              bool dir) {
+                                                                      bool dir) {
   GtUword eid;
   GtScaffolderGraphVertex *end;
   GtScaffolderGraphEdge *back;
@@ -1025,14 +1025,14 @@ gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
   for (eid = 0; eid < v->nof_edges; eid++) {
     if (v->edges[eid]->sense == dir) {*/
       /* maybe we want just to mark the corresponding vertices at this
-	 point and return a boolean or something like that *//*
+         point and return a boolean or something like that *//*
       end = v->edges[eid]->end;
       if (end->state == GIS_VISITED)
-	return v->edges[eid];
+        return v->edges[eid];
       if (end->state == GIS_UNVISITED) {
-	back = gt_scaffolder_detect_cycle(end, dir);
-	if (back != NULL)
-	  return back;
+        back = gt_scaffolder_detect_cycle(end, dir);
+        if (back != NULL)
+          return back;
       }
     }
   }
@@ -1227,10 +1227,10 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
 
       /* store all terminal vertices to calculate all paths between them */
       if (gt_scaffolder_graph_isterminal(currentvertex)) {
-	gt_assert(currentvertex >= graph->vertices);
-	gt_assert(currentvertex < graph->vertices + graph->nof_vertices);
+        gt_assert(currentvertex >= graph->vertices);
+        gt_assert(currentvertex < graph->vertices + graph->nof_vertices);
         gt_array_add(terminal_vertices, currentvertex);
-	gt_assert((*(GtScaffolderGraphVertex **)gt_array_get_last(terminal_vertices)) == currentvertex);
+        gt_assert((*(GtScaffolderGraphVertex **)gt_array_get_last(terminal_vertices)) == currentvertex);
       }
 
       currentvertex->state = GIS_VISITED;
