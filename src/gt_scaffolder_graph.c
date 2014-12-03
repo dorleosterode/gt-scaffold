@@ -395,7 +395,7 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
   vertices.
 - Initialize edges if <init_edges> is true and create <nof_edges> edges.
 - Delete graph. */
-int gt_scaffolder_test_graph(GtUword max_nof_vertices,
+int gt_scaffolder_graph_test(GtUword max_nof_vertices,
                              GtUword max_nof_edges,
                              bool init_vertices,
                              GtUword nof_vertices,

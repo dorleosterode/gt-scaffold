@@ -13,23 +13,23 @@ int main(void) {
   err = gt_error_new();
 
   /* Create graph with wrapper construction function and delete it */
-  gt_scaffolder_test_graph(5, 8, false, 0, false, 0, false);
+  gt_scaffolder_graph_test(5, 8, false, 0, false, 0, false);
 
   /* Create graph, only initialize vertices, delete it */
-  gt_scaffolder_test_graph(5, 8, true, 0, false, 0, false);
+  gt_scaffolder_graph_test(5, 8, true, 0, false, 0, false);
 
   /* Create graph, initialize and create vertices, delete it */
-  gt_scaffolder_test_graph(5, 8, true, 5, false, 0, false);
+  gt_scaffolder_graph_test(5, 8, true, 5, false, 0, false);
 
   /* Create graph, initialize vertices and edges, create vertices, delete it */
-  gt_scaffolder_test_graph(5, 8, true, 5, true, 0, false);
+  gt_scaffolder_graph_test(5, 8, true, 5, true, 0, false);
 
   /* Create graph, initialize and create vertices and edges, delete it */
-  gt_scaffolder_test_graph(5, 8, true, 5, true, 8, false);
+  gt_scaffolder_graph_test(5, 8, true, 5, true, 8, false);
 
   /* Create graph, initialize and create vertices and edges, print it,
      delete it */
-  gt_scaffolder_test_graph(5, 8, true, 5, true, 8, true);
+  gt_scaffolder_graph_test(5, 8, true, 5, true, 8, true);
 
   gt_error_delete(err);
   gt_lib_clean();
