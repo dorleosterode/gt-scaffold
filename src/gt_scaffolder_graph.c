@@ -15,11 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <math.h>
 #include <core/assert_api.h>
 #include "core/queue_api.h"
 #include "core/str_api.h"

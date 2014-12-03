@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <stdio.h>
 #include "core/types_api.h"
 #include "core/error.h"
 #include "core/str_api.h"
