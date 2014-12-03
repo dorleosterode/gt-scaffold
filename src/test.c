@@ -32,5 +32,6 @@ int main(void) {
   gt_scaffolder_test_graph(5, 8, true, 5, true, 8, true);
 
   gt_error_delete(err);
+  gt_lib_clean();
   return EXIT_SUCCESS;
 }
