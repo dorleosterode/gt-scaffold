@@ -1287,7 +1287,6 @@ int gt_scaffolder_test_graph(GtUword max_nof_vertices,
   /* Construct graph, don't init as this will be done later */
   else {
     graph = gt_malloc(sizeof (*graph));
-    /* SD: Muss dennoch gefreed werden */
     graph->vertices = NULL;
     graph->edges = NULL;
   }
@@ -1338,6 +1337,7 @@ int gt_scaffolder_test_graph(GtUword max_nof_vertices,
     char outfile[] = "gt_scaffolder_test.dot";
     err = gt_error_new();
     gt_scaffolder_graph_print(graph, outfile, err);
+    gt_error_delete(err);
   }
 
   gt_scaffolder_graph_delete(graph);
