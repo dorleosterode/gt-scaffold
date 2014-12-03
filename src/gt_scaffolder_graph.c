@@ -459,7 +459,7 @@ int gt_scaffolder_graph_test(GtUword max_nof_vertices,
   /* SD: Ask Dorle about error object and (!ma) assertion */
   if (print_graph) {
     GtError *err;
-    char outfile[] = "gt_scaffolder_test.dot";
+    char outfile[] = "gt_scaffolder_graph_test.dot";
     err = gt_error_new();
     gt_scaffolder_graph_print(graph, outfile, err);
     gt_error_delete(err);
