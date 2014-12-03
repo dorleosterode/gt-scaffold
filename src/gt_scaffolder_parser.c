@@ -252,6 +252,16 @@ static int gt_scaffolder_graph_count_ctg(GtUword length,
   return had_err;
 }
 
+/* str_dup with gt_malloc */
+char *gt_strdup (const char *source)
+{
+  char *dest;
+  dest = gt_malloc (strlen (source) + 1);
+  if (dest == NULL) return NULL;
+  strcpy (dest, source);
+  return dest;
+}
+
 /* saves header to callback data
    (fasta reader callback function, gets called for each description
     of fasta entry) */
@@ -260,20 +270,18 @@ static int gt_scaffolder_graph_save_header(const char *description,
                                            void *data, GtError *err)
 {
   int had_err;
+  GtStr *gt_str_description;
+  char *writeable_description, *space_ptr;
   GtScaffolderGraphFastaReaderData *fasta_reader_data =
   (GtScaffolderGraphFastaReaderData*) data;
-  GtStr *gt_str_description;
-  char *new_description, *space_ptr;
 
   had_err = 0;
-
-  gt_str_description = gt_str_new_cstr(description);
-  new_description = gt_str_get(gt_str_description);
+  writeable_description = gt_strdup(description);
   /* cut header sequence after first space */
-  space_ptr = strchr(new_description, ' ');
+  space_ptr = strchr(writeable_description, ' ');
   if (space_ptr != NULL)
     *space_ptr = '\0';
-  gt_str_set(gt_str_description, new_description);
+  gt_str_description = gt_str_new_cstr(writeable_description);
 
   fasta_reader_data->header_seq = gt_str_description;
   if (length == 0) {
