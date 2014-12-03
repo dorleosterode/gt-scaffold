@@ -2,6 +2,7 @@
 #include "core/types_api.h"
 #include "core/error.h"
 #include "gt_scaffolder_graph.h"
+#include "gt_scaffolder_algorithms.h"
 
 /* adapted from SGA examples */
 #define MIN_CONTIG_LEN 200
