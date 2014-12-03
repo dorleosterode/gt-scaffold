@@ -2,7 +2,7 @@
 
 set -e -x
 
-TESTDATA=../testdata/
+TESTDATA=../testdata
 
 ./test.x $TESTDATA/primary-contigs.fa $TESTDATA/libPE.de $TESTDATA/libPE.astat
 
