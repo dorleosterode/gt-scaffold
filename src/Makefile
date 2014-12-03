@@ -27,6 +27,9 @@ test_2.x:${OBJ2}
 src_check:
 	${GTDIR}/scripts/src_check *.c
 
+src_clean:
+	${GTDIR}/scripts/src_clean *.c
+
 test: test.x
 	../testsuite/gt_scaffolder.sh
 
