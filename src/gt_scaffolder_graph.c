@@ -316,7 +316,6 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
 }
 
 /* create scaffold graph from file */
-/* TODO: include a-statistics, copy number */
 GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
                                                      GtUword min_ctg_len,
                                                      const char *dist_filename,
@@ -360,13 +359,11 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
         gt_scaffolder_graph_init_edges(graph, nof_distances);
         /* parse distance information of contigs in abyss-dist-format and
            save them as edges of scaffold graph */
-        had_err =
-          gt_scaffolder_parser_read_distances(dist_filename, graph, false, err);
+        had_err = gt_scaffolder_parser_read_distances(dist_filename,
+                  graph, false, err);
       }
     }
   }
-  /* SK: loeschen: gt_error_check(err);*/
-  /* SK: graph / callback loeschen und auf NULL setzen */
 
   if (had_err != 0)
   {
