@@ -44,7 +44,7 @@ static int gt_scaffolder_graph_vertices_compare(const void *a, const void *b)
 }
 
 /* count records */
-int gt_scaffolder_graph_count_distances(const GtScaffolderGraph *graph,
+int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
                                                const char *file_name,
                                                GtUword *nof_distances,
                                                GtError *err)
@@ -121,12 +121,11 @@ int gt_scaffolder_graph_count_distances(const GtScaffolderGraph *graph,
 }
 
 /* parse distance information of contigs in abyss-dist-format and
-   save them as edges of scaffold graph, PRECONDITION: header contains
-   no commas and spaces */
+   save them as edges of scaffold graph
+   PRECONDITION: header contains no commas and spaces */
 /* LG: check for "mate-flag"? */
-/* SK: DistParser in eigenes Modul auslagern? */
 /* Bsp.: Ctg1 Ctg2+,15,10,5.1 ; Ctg3-,65,10,5.1 */
-int gt_scaffolder_graph_read_distances(const char *filename,
+int gt_scaffolder_parser_read_distances(const char *filename,
                                               GtScaffolderGraph *graph,
                                               bool ismatepair,
                                               GtError *err)

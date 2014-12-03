@@ -21,14 +21,14 @@
 #define GT_SCAFFOLDER_PARSER_H
 
 /* count distance records */
-int gt_scaffolder_graph_count_distances(const GtScaffolderGraph *graph,
+int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
                                                const char *file_name,
                                                GtUword *nof_distances,
                                                GtError *err);
 
 /* parse distance information of contigs in abyss-dist-format and
    save them as edges of scaffold graph */
-int gt_scaffolder_graph_read_distances(const char *filename,
+int gt_scaffolder_parser_read_distances(const char *filename,
                                               GtScaffolderGraph *graph,
                                               bool ismatepair,
                                               GtError *err);

@@ -351,7 +351,7 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
     {
       /* count distance information */
       nof_distances = 0;
-      had_err = gt_scaffolder_graph_count_distances(graph, dist_filename,
+      had_err = gt_scaffolder_parser_count_distances(graph, dist_filename,
               &nof_distances, err);
 
       if (had_err == 0)
@@ -361,7 +361,7 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
         /* parse distance information of contigs in abyss-dist-format and
            save them as edges of scaffold graph */
         had_err =
-          gt_scaffolder_graph_read_distances(dist_filename, graph, false, err);
+          gt_scaffolder_parser_read_distances(dist_filename, graph, false, err);
       }
     }
   }
