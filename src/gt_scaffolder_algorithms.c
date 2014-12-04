@@ -349,7 +349,7 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
    GIS_UNVISITED before search with the next starting vertex. */
 
 /* SD: Commented because compiler complaines about it being unused function */
-
+/*
 GtScaffolderGraphEdge
 *gt_scaffolder_detect_cycle(GtScaffolderGraphVertex *v,
                             bool dir) {
@@ -361,15 +361,15 @@ GtScaffolderGraphEdge
 
   v->state = GIS_VISITED;
   for (eid = 0; eid < v->nof_edges; eid++) {
-    if (v->edges[eid]->sense == dir) {
+    if (v->edges[eid]->sense == dir) {*/
       /* maybe we want just to mark the corresponding vertices at this
          point and return a boolean or something like that */
-      end = v->edges[eid]->end;
+/*      end = v->edges[eid]->end;
       if (end->state == GIS_VISITED)
         return v->edges[eid];
-      if (end->state == GIS_UNVISITED) {
+      if (end->state == GIS_UNVISITED) {*/
         /* SK: Stack verwenden: gt_stack-inline.h */
-        back = gt_scaffolder_detect_cycle(end, dir);
+/*        back = gt_scaffolder_detect_cycle(end, dir);
         if (back != NULL)
           return back;
       }
@@ -379,7 +379,7 @@ GtScaffolderGraphEdge
   end->state = GIS_PROCESSED;
   return NULL;
 }
-
+*/
 /* create new walk */
 GtScaffolderGraphWalk *gt_scaffolder_walk_new(void)
 {
