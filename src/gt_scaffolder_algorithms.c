@@ -271,6 +271,58 @@ gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
   return true;
 }
 
+void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
+                                         GtArray *ccs) {
+  GtArray *terminal_vertices = NULL;
+  GtQueue *vqueue = NULL;
+  GtScaffolderGraphVertex *vertex, *currentvertex, *nextvertex;
+  GtUword eid;
+
+  for (vertex = graph->vertices; vertex <
+	 (graph->vertices + graph->nof_vertices); vertex++) {
+    if (vertex->state != GIS_POLYMORPHIC && vertex->state != GIS_REPEAT)
+      vertex->state = GIS_UNVISITED;
+  }
+
+  for (vertex = graph->vertices; vertex <
+	 (graph->vertices + graph->nof_vertices); vertex++) {
+    if (vertex->state == GIS_POLYMORPHIC || vertex->state == GIS_VISITED
+	|| vertex->state == GIS_REPEAT)
+      continue;
+
+    vertex->state = GIS_PROCESSED;
+    gt_queue_add(vqueue, vertex);
+    /* create a new gt_array-object to store the terminal vertices for
+       the next cc */
+    terminal_vertices = gt_array_new(sizeof (vertex));
+
+    while (gt_queue_size(vqueue) != 0) {
+      currentvertex = (GtScaffolderGraphVertex*)gt_queue_get(vqueue);
+
+      /* store all terminal vertices */
+      if (gt_scaffolder_graph_isterminal(currentvertex))
+        gt_array_add(terminal_vertices, currentvertex);
+
+      currentvertex->state = GIS_VISITED;
+      for (eid = 0; eid < currentvertex->nof_edges; eid++) {
+	if (currentvertex->edges[eid]->state != GIS_INCONSISTENT) {
+	  nextvertex = currentvertex->edges[eid]->end;
+	  /* just take vertices, that are consistent */
+	  if (nextvertex->state == GIS_POLYMORPHIC
+	      || nextvertex->state == GIS_REPEAT)
+	    continue;
+	  if (nextvertex->state == GIS_UNVISITED) {
+	    nextvertex->state = GIS_PROCESSED;
+	    gt_queue_add(vqueue, nextvertex);
+	  }
+	}
+      }
+    }
+    /* save the terminal_vertices for this cc in ccs */
+    gt_array_add(ccs, terminal_vertices);
+  }
+}
+
 /*  remove cycles */
 /* void gt_scaffolder_removecycles(GtScaffolderGraph *graph) { */
 
