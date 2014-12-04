@@ -15,11 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <core/assert_api.h>
-#include "core/queue_api.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "core/file_api.h"
+#include "core/ma_api.h"
 #include "core/str_api.h"
-#include "core/types_api.h"
-#include "core/error.h"
+
 #include "gt_scaffolder_graph.h"
 #include "gt_scaffolder_parser.h"
 

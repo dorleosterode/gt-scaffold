@@ -15,12 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include <math.h>
+
 #include "core/fasta_reader_rec.h"
+#include "core/ma_api.h"
+
 #include "gt_scaffolder_graph.h"
 #include "gt_scaffolder_parser.h"
 
@@ -178,6 +180,9 @@ int gt_scaffolder_parser_read_distances(const char *filename,
         {
           /* parse record consisting of contig header, distance,
              number of pairs, std. dev. */
+          /* SD: %[^>,] ist eine negierte Zeichenklasse (Workaround weil %s
+                 nicht funktioniert
+          */
           if (sscanf(field,"%[^>,],%ld,%lu,%f", ctg_header, &dist, &num_pairs,
               &std_dev) == 4)
           {

@@ -15,10 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/types_api.h"
+
+
 #include "core/error.h"
+#include "core/file_api.h"
 #include "core/str_api.h"
-#include "genometools.h"
+#include "core/types_api.h"
 
 #ifndef GT_SCAFFOLDER_GRAPH_H
 #define GT_SCAFFOLDER_GRAPH_H

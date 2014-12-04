@@ -1,7 +1,10 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
+
+#include "core/init_api.h"
 #include "core/types_api.h"
+
 #include "gt_scaffolder_graph.h"
 #include "gt_scaffolder_algorithms.h"
 

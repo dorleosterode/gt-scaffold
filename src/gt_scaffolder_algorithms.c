@@ -15,15 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include <math.h>
+
+#include "core/array_api.h"
 #include "core/fasta_reader_rec.h"
+#include "core/ma_api.h"
 #include "core/minmax.h"
+#include "core/queue_api.h"
+
 #include "gt_scaffolder_graph.h"
-#include "gt_scaffolder_parser.h"
 
 /* increment size for realloc of walk */
 #define INCREMENT_SIZE 32
