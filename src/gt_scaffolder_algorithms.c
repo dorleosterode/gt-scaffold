@@ -278,6 +278,8 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
   GtScaffolderGraphVertex *vertex, *currentvertex, *nextvertex;
   GtUword eid;
 
+  vqueue = gt_queue_new();
+
   for (vertex = graph->vertices; vertex <
 	 (graph->vertices + graph->nof_vertices); vertex++) {
     if (vertex->state != GIS_POLYMORPHIC && vertex->state != GIS_REPEAT)
@@ -321,6 +323,9 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
     /* save the terminal_vertices for this cc in ccs */
     gt_array_add(ccs, terminal_vertices);
   }
+
+  gt_queue_delete(vqueue);
+
 }
 
 /*  remove cycles */
