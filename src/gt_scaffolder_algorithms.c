@@ -466,8 +466,8 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
   gt_assert(graph != NULL);
 
   GtScaffolderGraphVertex *vertex, *currentvertex, *nextvertex, *start;
-  GtUword eid;
-  GtScaffolderGraphWalk *walk;
+  GtUword eid, max_num_bases;
+  GtScaffolderGraphWalk *walk, *bestwalk;
   GtUword ccnumber;
   GtQueue *vqueue;
   GtArray *terminal_vertices, *cc_walks;
@@ -536,7 +536,23 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
       gt_array_add(cc_walks, walk);
     }
 
-    /* TODO: the best walk in this cc has to be chosen */
+    /* the best walk in this cc is chosen */
+    max_num_bases = 0;
+    bestwalk = NULL;
+    while (gt_array_size(cc_walks) != 0) {
+      walk = *(GtScaffolderGraphWalk **) gt_array_pop(cc_walks);
+      if (walk->total_contig_len > max_num_bases) {
+	bestwalk = walk;
+	max_num_bases = walk->total_contig_len;
+      }
+    }
+
+    /* mark all nodes and edges in the best walk as GIS_SCAFFOLD */
+    bestwalk->edges[0]->start->state = GIS_SCAFFOLD;
+    for (eid = 0; eid < bestwalk->nof_edges; eid++) {
+      bestwalk->edges[0]->state = GIS_SCAFFOLD;
+      bestwalk->edges[0]->end->state = GIS_SCAFFOLD;
+    }
   }
 
   gt_array_delete(terminal_vertices);
