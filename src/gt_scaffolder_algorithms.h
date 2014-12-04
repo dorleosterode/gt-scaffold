@@ -63,6 +63,9 @@ void gt_scaffolder_walk_delete(GtScaffolderGraphWalk *walk);
 void gt_scaffolder_walk_addegde(GtScaffolderGraphWalk *walk,
                                        GtScaffolderGraphEdge *edge);
 
+void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
+                                         GtArray *ccs);
+
 GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
                  GtScaffolderGraphVertex *start);
 

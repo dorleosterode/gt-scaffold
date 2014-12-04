@@ -275,6 +275,63 @@ gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
   return true;
 }
 
+void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
+                                         GtArray *ccs) {
+  GtArray *terminal_vertices = NULL;
+  GtQueue *vqueue = NULL;
+  GtScaffolderGraphVertex *vertex, *currentvertex, *nextvertex;
+  GtUword eid;
+
+  vqueue = gt_queue_new();
+
+  for (vertex = graph->vertices; vertex <
+	 (graph->vertices + graph->nof_vertices); vertex++) {
+    if (vertex->state != GIS_POLYMORPHIC && vertex->state != GIS_REPEAT)
+      vertex->state = GIS_UNVISITED;
+  }
+
+  for (vertex = graph->vertices; vertex <
+	 (graph->vertices + graph->nof_vertices); vertex++) {
+    if (vertex->state == GIS_POLYMORPHIC || vertex->state == GIS_VISITED
+	|| vertex->state == GIS_REPEAT)
+      continue;
+
+    vertex->state = GIS_PROCESSED;
+    gt_queue_add(vqueue, vertex);
+    /* create a new gt_array-object to store the terminal vertices for
+       the next cc */
+    terminal_vertices = gt_array_new(sizeof (vertex));
+
+    while (gt_queue_size(vqueue) != 0) {
+      currentvertex = (GtScaffolderGraphVertex*)gt_queue_get(vqueue);
+
+      /* store all terminal vertices */
+      if (gt_scaffolder_graph_isterminal(currentvertex))
+        gt_array_add(terminal_vertices, currentvertex);
+
+      currentvertex->state = GIS_VISITED;
+      for (eid = 0; eid < currentvertex->nof_edges; eid++) {
+	if (currentvertex->edges[eid]->state != GIS_INCONSISTENT) {
+	  nextvertex = currentvertex->edges[eid]->end;
+	  /* just take vertices, that are consistent */
+	  if (nextvertex->state == GIS_POLYMORPHIC
+	      || nextvertex->state == GIS_REPEAT)
+	    continue;
+	  if (nextvertex->state == GIS_UNVISITED) {
+	    nextvertex->state = GIS_PROCESSED;
+	    gt_queue_add(vqueue, nextvertex);
+	  }
+	}
+      }
+    }
+    /* save the terminal_vertices for this cc in ccs */
+    gt_array_add(ccs, terminal_vertices);
+  }
+
+  gt_queue_delete(vqueue);
+
+}
+
 /*  remove cycles */
 /* void gt_scaffolder_removecycles(GtScaffolderGraph *graph) { */
 
@@ -470,8 +527,8 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
   gt_assert(graph != NULL);
 
   GtScaffolderGraphVertex *vertex, *currentvertex, *nextvertex, *start;
-  GtUword eid;
-  GtScaffolderGraphWalk *walk;
+  GtUword eid, max_num_bases;
+  GtScaffolderGraphWalk *walk, *bestwalk;
   GtUword ccnumber;
   GtQueue *vqueue;
   GtArray *terminal_vertices, *cc_walks;
@@ -540,7 +597,23 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
       gt_array_add(cc_walks, walk);
     }
 
-    /* TODO: the best walk in this cc has to be chosen */
+    /* the best walk in this cc is chosen */
+    max_num_bases = 0;
+    bestwalk = NULL;
+    while (gt_array_size(cc_walks) != 0) {
+      walk = *(GtScaffolderGraphWalk **) gt_array_pop(cc_walks);
+      if (walk->total_contig_len > max_num_bases) {
+	bestwalk = walk;
+	max_num_bases = walk->total_contig_len;
+      }
+    }
+
+    /* mark all nodes and edges in the best walk as GIS_SCAFFOLD */
+    bestwalk->edges[0]->start->state = GIS_SCAFFOLD;
+    for (eid = 0; eid < bestwalk->nof_edges; eid++) {
+      bestwalk->edges[0]->state = GIS_SCAFFOLD;
+      bestwalk->edges[0]->end->state = GIS_SCAFFOLD;
+    }
   }
 
   gt_array_delete(terminal_vertices);
