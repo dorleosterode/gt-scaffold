@@ -15,6 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/array_api.h"
+
 #include "gt_scaffolder_graph.h"
 
 #ifndef GT_SCAFFOLDER_ALGORITHMS_H

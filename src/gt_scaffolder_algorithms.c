@@ -285,15 +285,15 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
   vqueue = gt_queue_new();
 
   for (vertex = graph->vertices; vertex <
-	 (graph->vertices + graph->nof_vertices); vertex++) {
+      (graph->vertices + graph->nof_vertices); vertex++) {
     if (vertex->state != GIS_POLYMORPHIC && vertex->state != GIS_REPEAT)
       vertex->state = GIS_UNVISITED;
   }
 
   for (vertex = graph->vertices; vertex <
-	 (graph->vertices + graph->nof_vertices); vertex++) {
+      (graph->vertices + graph->nof_vertices); vertex++) {
     if (vertex->state == GIS_POLYMORPHIC || vertex->state == GIS_VISITED
-	|| vertex->state == GIS_REPEAT)
+        || vertex->state == GIS_REPEAT)
       continue;
 
     vertex->state = GIS_PROCESSED;
@@ -311,17 +311,17 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
 
       currentvertex->state = GIS_VISITED;
       for (eid = 0; eid < currentvertex->nof_edges; eid++) {
-	if (currentvertex->edges[eid]->state != GIS_INCONSISTENT) {
-	  nextvertex = currentvertex->edges[eid]->end;
-	  /* just take vertices, that are consistent */
-	  if (nextvertex->state == GIS_POLYMORPHIC
-	      || nextvertex->state == GIS_REPEAT)
-	    continue;
-	  if (nextvertex->state == GIS_UNVISITED) {
-	    nextvertex->state = GIS_PROCESSED;
-	    gt_queue_add(vqueue, nextvertex);
-	  }
-	}
+        if (currentvertex->edges[eid]->state != GIS_INCONSISTENT) {
+          nextvertex = currentvertex->edges[eid]->end;
+          /* just take vertices, that are consistent */
+          if (nextvertex->state == GIS_POLYMORPHIC
+              || nextvertex->state == GIS_REPEAT)
+            continue;
+          if (nextvertex->state == GIS_UNVISITED) {
+            nextvertex->state = GIS_PROCESSED;
+            gt_queue_add(vqueue, nextvertex);
+          }
+        }
       }
     }
     /* save the terminal_vertices for this cc in ccs */
@@ -603,8 +603,8 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
     while (gt_array_size(cc_walks) != 0) {
       walk = *(GtScaffolderGraphWalk **) gt_array_pop(cc_walks);
       if (walk->total_contig_len > max_num_bases) {
-	bestwalk = walk;
-	max_num_bases = walk->total_contig_len;
+        bestwalk = walk;
+        max_num_bases = walk->total_contig_len;
       }
     }
 
