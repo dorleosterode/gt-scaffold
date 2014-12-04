@@ -43,13 +43,13 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
   char line[1024], *field;
   GtUword root_ctg_id, field_counter;
   float astat, copy_num;
-  bool astat_found, copy_num_found;
-  int had_err, had_err_2;
+  bool astat_found, copy_num_found, valid_contig;
+  int had_err;
   GtStr *gt_str_field;
   GtScaffolderGraphVertex *vertex;
 
   had_err = 0;
-  had_err_2 = 0;
+  valid_contig = false;
   file = fopen(filename, "rb");
   if (file == NULL) {
     had_err = -1;
@@ -70,8 +70,8 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
       /* get vertex id corresponding to root contig header */
       root_ctg_id = 0;
       gt_str_field = gt_str_new_cstr(field);
-      had_err_2 = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id,
-                gt_str_field);
+      valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id,
+                     gt_str_field);
       gt_str_delete(gt_str_field);
 
       field_counter = 0;
@@ -80,7 +80,7 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
       copy_num_found = false;
       astat_found = false;
 
-      if (had_err_2 == 0) {
+      if (valid_contig) {
         /* iterate over tab delimited records */
         while (field != NULL)
         {
