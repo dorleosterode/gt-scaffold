@@ -94,7 +94,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
         while (field != NULL)
         {
           /* count records */
-          if (sscanf(field,"%[^<,],%ld,%lu,%f", ctg_header, &dist, &num_pairs,
+          if (sscanf(field,"%[^>,],%ld,%lu,%f", ctg_header, &dist, &num_pairs,
               &std_dev) == 4)
 
             /* cut composition sign */
@@ -178,10 +178,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
         {
           /* parse record consisting of contig header, distance,
              number of pairs, std. dev. */
-          /* SD: %[^<,] ist eine negierte Zeichenklasse (Workaround weil %s
-                 nicht funktioniert
-          */
-          if (sscanf(field,"%[^<,],%ld,%lu,%f", ctg_header, &dist, &num_pairs,
+          if (sscanf(field,"%[^>,],%ld,%lu,%f", ctg_header, &dist, &num_pairs,
               &std_dev) == 4)
           {
             /* parsing composition,
