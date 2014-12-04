@@ -17,6 +17,7 @@ int main(int argc, char **argv)
 {
   GtError *err;
   GtScaffolderGraph *graph;
+  char *contig_filename, *dist_filename, *astat_filename;
   int had_err = 0;
 
   /* initialize */
@@ -47,21 +48,22 @@ int main(int argc, char **argv)
   if (argc == 4)
   {
     graph = NULL;
-
-    /* SK: lokale Variablen fuer Input-Dateinamen einfuehren */
     /* load contigs and distance information from file */
-    graph = gt_scaffolder_graph_new_from_file(argv[1], MIN_CONTIG_LEN,
-            argv[2], err);
+    contig_filename = argv[1];
+    dist_filename = argv[2];
+    astat_filename = argv[3];
+    graph = gt_scaffolder_graph_new_from_file(contig_filename, MIN_CONTIG_LEN,
+            dist_filename, err);
     gt_scaffolder_graph_print(graph, "gt_scaffolder_parser_test_complete.dot",
                               err);
     /* load astatistics and copy number from file */
-    had_err = gt_scaffolder_graph_mark_repeats(argv[3], graph,
+    had_err = gt_scaffolder_graph_mark_repeats(astat_filename, graph,
               COPY_NUM_CUTOFF, ASTAT_NUM_CUTOFF, err);
     if (had_err == 0)
       gt_scaffolder_graph_print(graph,
-            "gt_scaffolder_algorithms_test_filter_repeats.dot",
-            err);
-    /* SK: else: fprintf(Fehlermeldung) */
+            "gt_scaffolder_algorithms_test_filter_repeats.dot", err);
+    else
+      fprintf(stderr,"ERROR: %s\n",gt_error_get(err));
     gt_scaffolder_graph_delete(graph);
   }
   else
