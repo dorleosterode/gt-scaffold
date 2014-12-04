@@ -32,6 +32,8 @@
 /* increment size for realloc of walk */
 #define INCREMENT_SIZE 32
 
+const GtUword BUFSIZE_2 = 1024;
+
 /* load a and copy number of every contig and mark repeated contigs */
 int gt_scaffolder_graph_mark_repeats(const char *filename,
                                      GtScaffolderGraph *graph,
@@ -40,16 +42,18 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
                                      GtError *err)
 {
   FILE *file;
-  char line[1024], *field;
-  GtUword root_ctg_id, field_counter;
+  char line[BUFSIZE_2+1], ctg_header[BUFSIZE_2+1];
+  GtUword ctg_id;
+  GtWord num1, num2, num3;
   float astat, copy_num;
-  bool astat_found, copy_num_found, valid_contig;
+  bool valid_contig;
   int had_err;
   GtStr *gt_str_field;
   GtScaffolderGraphVertex *vertex;
 
   had_err = 0;
   valid_contig = false;
+  gt_str_field = gt_str_new();
   file = fopen(filename, "rb");
   if (file == NULL) {
     had_err = -1;
@@ -59,55 +63,38 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
   if (had_err != -1)
   {
     /* iterate over each line of file until eof (contig record) */
-    while (fgets(line, 1024, file) != NULL) {
+    while (fgets(line, BUFSIZE_2, file) != NULL) {
 
       /* remove '\n' from end of line */
       line[strlen(line)-1] = '\0';
 
-      /* split line by first tab delimiter */
-      field = strtok(line,"\t");
-
-      /* get vertex id corresponding to root contig header */
-      root_ctg_id = 0;
-      gt_str_field = gt_str_new_cstr(field);
-      valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id,
-                     gt_str_field);
-      gt_str_delete(gt_str_field);
-
-      field_counter = 0;
+      num1 = 0;
+      num2 = 0;
+      num3 = 0;
       copy_num = 0.0;
       astat = 0.0;
-      copy_num_found = false;
-      astat_found = false;
+      ctg_id = 0;
 
-      if (valid_contig) {
-        /* iterate over tab delimited records */
-        while (field != NULL)
-        {
+      /* parse record consisting of ctg_header, a-statistics and copy number*/
+      if (sscanf(line,"%[^>,]\t%ld\t%ld\t%ld\t%f\t%f", ctg_header, &num1,
+          &num2, &num3, &copy_num, &astat) == 6) {
 
-          /* parse record consisting of a-statistics and copy number */
-          if (field_counter == 4 && sscanf(field,"%f", &copy_num) == 1)
-            copy_num_found = true;
-          if (field_counter == 5 && sscanf(field,"%f", &astat) == 1)
-            astat_found = true;
+        /* get vertex id corresponding to root contig header */
+        gt_str_set(gt_str_field, ctg_header);
+        valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id,
+                     gt_str_field);
 
-          /* split line by next tab delimiter */
-          field = strtok(NULL,"\t");
-          field_counter++;
+        if (valid_contig) {
+          graph->vertices[ctg_id].astat = astat;
+          graph->vertices[ctg_id].copy_num = copy_num;
         }
-
-        /* save a-statistics and copy number */
-        if (copy_num_found && astat_found)
-        {
-          graph->vertices[root_ctg_id].astat = astat;
-          graph->vertices[root_ctg_id].copy_num = copy_num;
-        }
-        else
-          had_err = -1;
       }
+      else
+        had_err = -1;
     }
   }
   fclose(file);
+  gt_str_delete(gt_str_field);
 
   if (had_err != -1)
   {

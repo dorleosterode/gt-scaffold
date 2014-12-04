@@ -26,7 +26,7 @@
 #include "gt_scaffolder_graph.h"
 #include "gt_scaffolder_parser.h"
 
-const GtUword BUFSIZE  = 1024;
+const GtUword BUFSIZE = 1024;
 
 /* for parsing valid contigs,
    e.g. contigs with minimum length <min_ctg_len> */
