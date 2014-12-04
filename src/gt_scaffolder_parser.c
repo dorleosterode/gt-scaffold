@@ -26,6 +26,8 @@
 #include "gt_scaffolder_graph.h"
 #include "gt_scaffolder_parser.h"
 
+const GtUword BUFSIZE  = 1025;
+
 /* for parsing valid contigs,
    e.g. contigs with minimum length <min_ctg_len> */
 typedef struct {
@@ -53,8 +55,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
                                                GtError *err)
 {
   FILE *file;
-  /* SK: Puffergroesse 1024+1, #define BUFSIZE setzen */
-  char line[1024], *field, ctg_header[1024];
+  char line[BUFSIZE+1], *field, ctg_header[BUFSIZE+1];
   GtUword num_pairs, record_counter, ctg_id, root_ctg_id;
   GtWord dist;
   float std_dev;
@@ -84,7 +85,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
   if (had_err != -1)
   {
     /* iterate over each line of file until eof (contig record) */
-    while (fgets(line, 1024, file) != NULL)
+    while (fgets(line, BUFSIZE, file) != NULL)
     {
       /* split line by first space delimiter */
       field = strtok(line," ");
@@ -137,7 +138,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
 {
   FILE *file;
   /* SD: Konstante setzen? */
-  char line[1024], *field, ctg_header[1024];
+  char line[BUFSIZE+1], *field, ctg_header[BUFSIZE+1];
   GtUword num_pairs, root_ctg_id, ctg_id, ctg_header_len;
   GtWord dist;
   float std_dev;
@@ -161,7 +162,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
   if (had_err != -1)
   {
     /* iterate over each line of file until eof (contig record) */
-    while (fgets(line, 1024, file) != NULL)
+    while (fgets(line, BUFSIZE, file) != NULL)
     {
       /* remove '\n' from end of line */
       line[strlen(line)-1] = '\0';
