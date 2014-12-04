@@ -25,6 +25,8 @@
 #ifndef GT_SCAFFOLDER_GRAPH_H
 #define GT_SCAFFOLDER_GRAPH_H
 
+/* SK: Implementationsaufwand fuer Getter / Setter abschaetzen */
+
 typedef enum { GIS_UNVISITED, GIS_POLYMORPHIC, GIS_INCONSISTENT,
                GIS_REPEAT, GIS_VISITED, GIS_PROCESSED,
                GIS_SCAFFOLD} GraphItemState;

@@ -233,7 +233,8 @@ int gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
     }
 
   /* contig header was not found */
-  if (found == false)
+  /* SK: found zurueckgeben statt had_err */
+  if (!found)
     had_err = -1;
 
   return had_err;

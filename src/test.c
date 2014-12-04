@@ -24,6 +24,7 @@ int main(int argc, char **argv)
   /* create error object */
   err = gt_error_new();
 
+  /* SK: err auch uebergeben */
   /* Create graph with wrapper construction function and delete it */
   gt_scaffolder_graph_test(5, 8, false, 0, false, 0, false);
 
@@ -43,10 +44,11 @@ int main(int argc, char **argv)
      delete it */
   gt_scaffolder_graph_test(5, 8, true, 5, true, 8, true);
 
-  graph = NULL;
-
   if (argc == 4)
   {
+    graph = NULL;
+
+    /* SK: lokale Variablen fuer Input-Dateinamen einfuehren */
     /* load contigs and distance information from file */
     graph = gt_scaffolder_graph_new_from_file(argv[1], MIN_CONTIG_LEN,
             argv[2], err);
@@ -59,12 +61,12 @@ int main(int argc, char **argv)
       gt_scaffolder_graph_print(graph,
             "gt_scaffolder_algorithms_test_filter_repeats.dot",
             err);
+    /* SK: else: fprintf(Fehlermeldung) */
+    gt_scaffolder_graph_delete(graph);
   }
   else
-    printf("Usage:<FASTA-file with contigs> <distance-file with"
+    fprintf(stderr, "Usage:<FASTA-file with contigs> <distance-file with"
            " est. distances between contigs> <astat file>\n");
-
-  gt_scaffolder_graph_delete(graph);
 
   gt_error_delete(err);
   gt_lib_clean();

@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-CC=gcc
+CC?=gcc
 LD=${CC}
 
 GT_INCLUDE:=-DWITHOUT_CAIRO -I${GTDIR}/src

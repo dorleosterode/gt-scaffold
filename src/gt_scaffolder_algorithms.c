@@ -329,7 +329,6 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
   }
 
   gt_queue_delete(vqueue);
-
 }
 
 /*  remove cycles */
@@ -351,7 +350,7 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
 
 /* SD: Commented because compiler complaines about it being unused function */
 
-/*GtScaffolderGraphEdge
+GtScaffolderGraphEdge
 *gt_scaffolder_detect_cycle(GtScaffolderGraphVertex *v,
                             bool dir) {
   GtUword eid;
@@ -362,13 +361,14 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
 
   v->state = GIS_VISITED;
   for (eid = 0; eid < v->nof_edges; eid++) {
-    if (v->edges[eid]->sense == dir) {*/
+    if (v->edges[eid]->sense == dir) {
       /* maybe we want just to mark the corresponding vertices at this
-         point and return a boolean or something like that */ /*
+         point and return a boolean or something like that */
       end = v->edges[eid]->end;
       if (end->state == GIS_VISITED)
         return v->edges[eid];
       if (end->state == GIS_UNVISITED) {
+        /* SK: Stack verwenden: gt_stack-inline.h */
         back = gt_scaffolder_detect_cycle(end, dir);
         if (back != NULL)
           return back;
@@ -378,7 +378,7 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
 
   end->state = GIS_PROCESSED;
   return NULL;
-}*/
+}
 
 /* create new walk */
 GtScaffolderGraphWalk *gt_scaffolder_walk_new(void)
@@ -454,7 +454,7 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
     endvertex = edge->end;
 
     /* SK: genometools hashes verwenden, Dichte evaluieren
-       SK: DistEst beim Einlesen prüfen */
+       SK: DistEst beim Einlesen prüfen, Basisadresse verwenden fuer Index */
     distancemap[endvertex->index] = edge->dist;
     edgemap[endvertex->index] = edge;
 
@@ -601,6 +601,7 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
     max_num_bases = 0;
     bestwalk = NULL;
     while (gt_array_size(cc_walks) != 0) {
+      /* SK: pop evtl nicht notwendig */
       walk = *(GtScaffolderGraphWalk **) gt_array_pop(cc_walks);
       if (walk->total_contig_len > max_num_bases) {
         bestwalk = walk;

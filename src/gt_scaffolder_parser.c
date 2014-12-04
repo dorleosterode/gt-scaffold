@@ -46,12 +46,14 @@ static int gt_scaffolder_graph_vertices_compare(const void *a, const void *b)
 }
 
 /* count records */
+/* SK: Ausgehende Kanten jedes einzelnen Knotens mitzaehlen, zum Allokieren */
 int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
                                                const char *file_name,
                                                GtUword *nof_distances,
                                                GtError *err)
 {
   FILE *file;
+  /* SK: Puffergroesse 1024+1, #define BUFSIZE setzen */
   char line[1024], *field, ctg_header[1024];
   GtUword num_pairs, record_counter, ctg_id, root_ctg_id;
   GtWord dist;
@@ -167,6 +169,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
       field = strtok(line," ");
 
       /* get vertex id corresponding to root contig header */
+      /* SK: Moeglichkeit einer set Funktion evaluieren */
       gt_str_field = gt_str_new_cstr(field);
       valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id,
                 gt_str_field);
@@ -181,8 +184,9 @@ int gt_scaffolder_parser_read_distances(const char *filename,
           /* parse record consisting of contig header, distance,
              number of pairs, std. dev. */
           /* SD: %[^>,] ist eine negierte Zeichenklasse (Workaround weil %s
-                 nicht funktioniert
+                 nicht funktioniert)
           */
+          /* SK: Keine unsigned Variablen verwenden wegen korrupter Eingaben */
           if (sscanf(field,"%[^>,],%ld,%lu,%f", ctg_header, &dist, &num_pairs,
               &std_dev) == 4)
           {
@@ -205,7 +209,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
               if (edge != NULL)
               {
                 /*  LG: laut SGA edge->std_dev < std_dev,  korrekt? */
-                if (ismatepair == false && edge->std_dev < std_dev)
+                if (!ismatepair && edge->std_dev < std_dev)
                 {
                   /* LG: Ueberpruefung Kantenrichtung notwendig? */
                   gt_scaffolder_graph_alter_edge(edge, dist, std_dev,
@@ -220,7 +224,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
           }
           /* switch direction */
           else if (*field == ';')
-            sense = !sense;
+            sense = sense ? false : true;
 
           /* split line by next space delimiter */
           field = strtok(NULL," ");
