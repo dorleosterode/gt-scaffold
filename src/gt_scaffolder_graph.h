@@ -85,16 +85,6 @@ typedef struct GtScaffolderGraphWalk {
   GtScaffolderGraphEdge **edges;
 }GtScaffolderGraphWalk;
 
-/* Initialize vertex portion inside <*graph>. Allocate memory for
-   <max_nof_vertices> vertices. */
-void gt_scaffolder_graph_init_vertices(GtScaffolderGraph *graph,
-                                       GtUword max_nof_vertices);
-
-/* Initialize edge portion inside <*graph>. Allocate memory for
-   <max_nof_edges> edges. */
-void gt_scaffolder_graph_init_edges(GtScaffolderGraph *graph,
-                                    GtUword max_nof_edges);
-
 /* Construct graph data structure <*GtScaffolderGraph>. Wrap around two
    seperate constructor functions, which allocate memory for <max_nof_edges>
    edges and <max_nof_vertices> vertices. */
@@ -112,10 +102,6 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
                                     GtUword seq_len,
                                     float astat,
                                     float copy_num);
-
-void gt_scaffolder_graph_add_edge_ptr_to_vertex(GtScaffolderGraph *graph,
-                                                GtUword edgeID,
-                                                GtUword vertexID);
 
 /* Initialize a new edge in <*graph>. Each edge between two contig
    vertices <vstartID> and <vendID> contains information about the distance
