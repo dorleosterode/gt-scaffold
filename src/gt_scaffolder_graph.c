@@ -101,7 +101,7 @@ void gt_scaffolder_graph_delete(GtScaffolderGraph *graph)
    contains information about the sequence header <*header_seq>, sequence
    length <seq_len>, A-statistics <astat> and estimated copy number <copy_num>*/
 void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
-                                    const GtStr *header_seq,
+                                    GtStr *header_seq,
                                     GtUword seq_len,
                                     float astat,
                                     float copy_num)
@@ -120,7 +120,7 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
   graph->vertices[nextfree].copy_num = copy_num;
   graph->vertices[nextfree].nof_edges = 0;
   if (header_seq != NULL) {
-    graph->vertices[nextfree].header_seq = gt_str_clone(header_seq);
+    graph->vertices[nextfree].header_seq = header_seq;
   }
   graph->vertices[nextfree].state = GIS_UNVISITED;
 

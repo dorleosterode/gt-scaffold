@@ -280,7 +280,6 @@ static int gt_scaffolder_graph_save_header(const char *description,
                                            void *data, GtError *err)
 {
   int had_err;
-  GtStr *gt_str_description;
   char *writeable_description, *space_ptr;
   GtScaffolderGraphFastaReaderData *fasta_reader_data =
   (GtScaffolderGraphFastaReaderData*) data;
@@ -291,9 +290,10 @@ static int gt_scaffolder_graph_save_header(const char *description,
   space_ptr = strchr(writeable_description, ' ');
   if (space_ptr != NULL)
     *space_ptr = '\0';
-  gt_str_description = gt_str_new_cstr(writeable_description);
+  /* overwrite current GtString */
+  gt_str_set(fasta_reader_data->header_seq, writeable_description);
+  gt_free(writeable_description);
 
-  fasta_reader_data->header_seq = gt_str_description;
   if (length == 0) {
     gt_error_set (err , " invalid header length ");
     had_err = -1;
@@ -309,16 +309,16 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
                                         GtError* err)
 {
   int had_err;
+  GtStr *cloned_gt_str;
   GtScaffolderGraphFastaReaderData *fasta_reader_data =
   (GtScaffolderGraphFastaReaderData*) data;
 
   had_err = 0;
   if (seq_length > fasta_reader_data->min_ctg_len)
   {
+    cloned_gt_str = gt_str_clone(fasta_reader_data->header_seq);
     gt_scaffolder_graph_add_vertex(fasta_reader_data->graph,
-    fasta_reader_data->header_seq, seq_length, 0.0, 0.0);
-
-    gt_str_delete(fasta_reader_data->header_seq);
+    cloned_gt_str, seq_length, 0.0, 0.0);
   }
 
   if (seq_length == 0) {
@@ -369,6 +369,7 @@ int gt_scaffolder_parser_read_contigs(GtScaffolderGraph *graph,
 
   had_err = 0;
   str_filename = gt_str_new_cstr(filename);
+  fasta_reader_data.header_seq = gt_str_new();
   fasta_reader_data.nof_valid_ctg = 0;
   fasta_reader_data.min_ctg_len = min_ctg_len;
   fasta_reader_data.graph = graph;
@@ -378,6 +379,6 @@ int gt_scaffolder_parser_read_contigs(GtScaffolderGraph *graph,
             NULL, gt_scaffolder_graph_save_ctg, &fasta_reader_data, err);
   gt_fasta_reader_delete(reader);
   gt_str_delete(str_filename);
-
+  gt_str_delete(fasta_reader_data.header_seq);
   return had_err;
 }
