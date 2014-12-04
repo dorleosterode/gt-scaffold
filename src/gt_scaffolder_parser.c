@@ -100,8 +100,8 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
         while (field != NULL)
         {
           /* count records */
-          if (sscanf(field,"%[^>,],%ld,%lu,%f", ctg_header, &dist, &num_pairs,
-              &std_dev) == 4)
+          if (sscanf(field,"%[^>,]," GT_WD "," GT_WU ",%f", ctg_header,
+              &dist, &num_pairs, &std_dev) == 4)
 
             /* cut composition sign */
             ctg_header[strlen(ctg_header) - 1] = '\0';
@@ -190,8 +190,8 @@ int gt_scaffolder_parser_read_distances(const char *filename,
                  nicht funktioniert)
           */
           /* SK: Keine unsigned Variablen verwenden wegen korrupter Eingaben */
-          if (sscanf(field,"%[^>,],%ld,%lu,%f", ctg_header, &dist, &num_pairs,
-              &std_dev) == 4)
+          if (sscanf(field,"%[^>,]," GT_WD "," GT_WU ",%f", ctg_header, &dist,
+              &num_pairs, &std_dev) == 4)
           {
             /* parsing composition,
              '+' indicates same strand and '-' reverse strand */

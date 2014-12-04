@@ -76,8 +76,8 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
       ctg_id = 0;
 
       /* parse record consisting of ctg_header, a-statistics and copy number*/
-      if (sscanf(line,"%[^>,]\t%ld\t%ld\t%ld\t%f\t%f", ctg_header, &num1,
-          &num2, &num3, &copy_num, &astat) == 6) {
+      if (sscanf(line,"%[^>,]\t" GT_WD "\t" GT_WD "\t" GT_WD "\t%f\t%f",
+          ctg_header, &num1, &num2, &num3, &copy_num, &astat) == 6) {
 
         /* get vertex id corresponding to root contig header */
         gt_str_set(gt_str_field, ctg_header);
