@@ -201,17 +201,15 @@ GtScaffolderGraphEdge
 
 /* determines corresponding vertex id to contig header */
 /* SD: Binaersuche separat testen */
-int gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
+bool gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
                                       GtUword *vertex_id,
                                       const GtStr *header_seq)
 {
   GtScaffolderGraphVertex *min_vertex, *max_vertex, *mid_vertex;
-  int had_err, cmp;
+  int cmp;
   bool found;
 
-  had_err = 0;
   found = false;
-
   /* binary search */
   min_vertex = graph->vertices;
   max_vertex = graph->vertices + graph->nof_vertices - 1;
@@ -231,13 +229,7 @@ int gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
       else
         max_vertex = mid_vertex - 1;
     }
-
-  /* contig header was not found */
-  /* SK: found zurueckgeben statt had_err */
-  if (!found)
-    had_err = -1;
-
-  return had_err;
+  return found;
 }
 
 /* assign edge <*edge> new attributes */

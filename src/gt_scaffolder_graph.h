@@ -127,7 +127,7 @@ GtScaffolderGraphEdge *gt_scaffolder_graph_find_edge(
                                     GtUword vertexid_2);
 
 /* determines corresponding vertex id to contig header */
-int gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
+bool gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
                                       GtUword *vertex_id,
                                       const GtStr *header_seq);
 

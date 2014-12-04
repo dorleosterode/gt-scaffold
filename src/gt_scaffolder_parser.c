@@ -26,7 +26,7 @@
 #include "gt_scaffolder_graph.h"
 #include "gt_scaffolder_parser.h"
 
-const GtUword BUFSIZE  = 1025;
+const GtUword BUFSIZE  = 1024;
 
 /* for parsing valid contigs,
    e.g. contigs with minimum length <min_ctg_len> */
@@ -59,12 +59,13 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
   GtUword num_pairs, record_counter, ctg_id, root_ctg_id;
   GtWord dist;
   float std_dev;
-  int had_err, valid_contig;
+  int had_err;
+  bool valid_contig;
   GtStr *gt_str_field;
   GtScaffolderGraphVertex *v;
 
   had_err = 0;
-  valid_contig = 0;
+  valid_contig = false;
   record_counter = 0;
   gt_str_field = gt_str_new();
 
@@ -94,7 +95,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
       valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id,
                 gt_str_field);
 
-      if (valid_contig == 0) {
+      if (valid_contig) {
         /* iterate over space delimited records */
         while (field != NULL)
         {
@@ -110,7 +111,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
             valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id,
                            gt_str_field);
 
-            if (valid_contig == 0)
+            if (valid_contig)
               record_counter++;
 
           /* split line by next space delimiter */
@@ -142,13 +143,13 @@ int gt_scaffolder_parser_read_distances(const char *filename,
   GtUword num_pairs, root_ctg_id, ctg_id, ctg_header_len;
   GtWord dist;
   float std_dev;
-  bool same, sense;
+  bool same, sense, valid_contig;
   GtScaffolderGraphEdge *edge;
-  int had_err, valid_contig;
+  int had_err;
   GtStr *gt_str_field;
 
   had_err = 0;
-  valid_contig = 0;
+  valid_contig = false;
   root_ctg_id = 0;
   ctg_id = 0;
   gt_str_field = gt_str_new();
@@ -179,7 +180,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
 
       /* Debbuging: printf("rootctgid: %s\n",field);*/
 
-      if (valid_contig == 0) {
+      if (valid_contig) {
         /* iterate over space delimited records */
         while (field != NULL)
         {
@@ -205,7 +206,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
             valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id,
                       gt_str_field);
 
-            if (valid_contig == 0) {
+            if (valid_contig) {
               /* check if edge between vertices already exists */
               edge = gt_scaffolder_graph_find_edge(graph, root_ctg_id, ctg_id);
               if (edge != NULL)
