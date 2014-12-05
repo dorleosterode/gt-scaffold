@@ -276,7 +276,8 @@ gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
 }
 
 void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
-                                         GtArray *ccs) {
+                                         GtArray *ccs)
+{
   GtArray *terminal_vertices = NULL;
   GtQueue *vqueue = NULL;
   GtScaffolderGraphVertex *vertex, *currentvertex, *nextvertex;
@@ -352,7 +353,8 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
 
 GtScaffolderGraphEdge
 *gt_scaffolder_detect_cycle(GtScaffolderGraphVertex *v,
-                            bool dir) {
+                            bool dir)
+{
   GtUword eid;
   GtScaffolderGraphVertex *end;
   GtScaffolderGraphEdge *back;
@@ -417,8 +419,9 @@ void gt_scaffolder_walk_addegde(GtScaffolderGraphWalk *walk,
   walk->nof_edges++;
 }
 
-GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
-                 GtScaffolderGraphVertex *start)
+GtScaffolderGraphWalk
+*gt_scaffolder_create_walk(GtScaffolderGraph *graph,
+                           GtScaffolderGraphVertex *start)
 {
   gt_assert(graph != NULL);
   gt_assert(start != NULL);
@@ -451,14 +454,18 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
   dir = start->edges[0]->sense;
   for (eid = 0; eid < start->nof_edges; eid++) {
     edge = start->edges[eid];
-    endvertex = edge->end;
+    if (edge->state != GIS_POLYMORPHIC && edge->state != GIS_INCONSISTENT
+        && edge->end->state != GIS_REPEAT)
+    {
+      endvertex = edge->end;
 
-    /* SK: genometools hashes verwenden, Dichte evaluieren
-       SK: DistEst beim Einlesen prüfen, Basisadresse verwenden fuer Index */
-    distancemap[endvertex->index] = edge->dist;
-    edgemap[endvertex->index] = edge;
+      /* SK: genometools hashes verwenden, Dichte evaluieren
+         SK: DistEst beim Einlesen prüfen, Basisadresse verwenden fuer Index */
+      distancemap[endvertex->index] = edge->dist;
+      edgemap[endvertex->index] = edge;
 
-    gt_queue_add(wqueue, edge);
+      gt_queue_add(wqueue, edge);
+    }
   }
 
   while (gt_queue_size(wqueue) != 0) {
@@ -473,14 +480,19 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
       nextedge = endvertex->edges[eid];
       if (nextedge->sense == dir) {
         nextendvertex = nextedge->end;
-        distance = edge->dist + nextedge->dist;
+        if (edge->state != GIS_POLYMORPHIC && edge->state != GIS_INCONSISTENT
+            && edge->end->state != GIS_REPEAT)
+        {
+          distance = edge->dist + nextedge->dist;
 
-        /* SK: 0 steht fuer unitialisiert*/
-        if (distancemap[nextendvertex->index] == 0 ||
-        distancemap[nextendvertex->index] > distance) {
-          distancemap[nextendvertex->index] = distance;
-          edgemap[nextendvertex->index] = nextedge;
-          gt_queue_add(wqueue, nextedge);
+          /* SK: 0 steht fuer unitialisiert*/
+          if (distancemap[nextendvertex->index] == 0 ||
+              distancemap[nextendvertex->index] > distance)
+          {
+            distancemap[nextendvertex->index] = distance;
+            edgemap[nextendvertex->index] = nextedge;
+            gt_queue_add(wqueue, nextedge);
+          }
         }
       }
     }
