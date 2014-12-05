@@ -45,8 +45,7 @@ int main(int argc, char **argv)
      delete it */
   gt_scaffolder_graph_test(5, 8, true, 5, true, 8, true);
 
-  if (argc == 4)
-  {
+  if (argc == 4) {
     graph = NULL;
     /* load contigs and distance information from file */
     contig_filename = argv[1];
@@ -59,11 +58,13 @@ int main(int argc, char **argv)
     /* load astatistics and copy number from file */
     had_err = gt_scaffolder_graph_mark_repeats(astat_filename, graph,
               COPY_NUM_CUTOFF, ASTAT_NUM_CUTOFF, err);
+
     if (had_err == 0)
       gt_scaffolder_graph_print(graph,
             "gt_scaffolder_algorithms_test_filter_repeats.dot", err);
     else
       fprintf(stderr,"ERROR: %s\n",gt_error_get(err));
+
     gt_scaffolder_graph_delete(graph);
   }
   else

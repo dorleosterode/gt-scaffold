@@ -59,7 +59,6 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
     had_err = -1;
     gt_error_set(err, " can not read file %s ", filename);
   }
-
   if (had_err != -1)
   {
     /* iterate over each line of file until eof (contig record) */
@@ -75,10 +74,11 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
       astat = 0.0;
       ctg_id = 0;
 
-      /* parse record consisting of ctg_header, a-statistics and copy number*/
-      if (sscanf(line,"%[^>,]\t" GT_WD "\t" GT_WD "\t" GT_WD "\t%f\t%f",
-          ctg_header, &num1, &num2, &num3, &copy_num, &astat) == 6) {
-
+      /* parse record consisting of ctg_header, a-statistics and copy number */
+      /* SD: %[^>,] failed, parsed the whole line instead */
+      if (sscanf(line,"%s\t" GT_WD "\t" GT_WD "\t" GT_WD "\t%f\t%f",
+          ctg_header, &num1, &num2, &num3, &copy_num, &astat) == 6)
+      {
         /* get vertex id corresponding to root contig header */
         gt_str_set(gt_str_field, ctg_header);
         valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id,

@@ -82,7 +82,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
     had_err = -1;
     gt_error_set(err, " can not read file %s ",file_name);
   }
-  
+
   if (had_err != -1)
   {
     /* iterate over each line of file until eof (contig record) */
@@ -100,6 +100,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
         while (field != NULL)
         {
           /* count records */
+          /* SD: Keep an eye on negated string, might fail, did before */
           if (sscanf(field,"%[^>,]," GT_WD "," GT_WU ",%f", ctg_header,
               &dist, &num_pairs, &std_dev) == 4)
 
