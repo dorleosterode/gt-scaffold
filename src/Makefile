@@ -11,11 +11,11 @@ OBJ=gt_scaffolder_graph.o gt_scaffolder_parser.o gt_scaffolder_algorithms.o test
 
 all:test.x
 
-gt_scaffolder_graph.o: gt_scaffolder_graph.h
-gt_scaffolder_parser.o: gt_scaffolder_parser.h
-gt_scaffolder_algorithms.o: gt_scaffolder_algorithms.h
-
-test.o: gt_scaffolder_graph.h gt_scaffolder_parser.h gt_scaffolder_algorithms.h
+# generic compilation rule which creates dependency file on the fly
+%.o: %.c
+	$(CC) -c $< -o $@ $(CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+# read dependencies
+-include $(wildcard *.d)
 
 test.x:${OBJ}
 	${LD} ${OBJ} -o $@ ${LDFLAGS} $(LIBS)
