@@ -103,7 +103,7 @@ void gt_scaffolder_graph_delete(GtScaffolderGraph *graph);
    contains information about the sequence header <*header_seq>, sequence
    length <seq_len>, A-statistics <astat> and estimated copy number <copy_num>*/
 void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
-                                    const GtStr *header_seq,
+                                    GtStr *header_seq,
                                     GtUword seq_len,
                                     float astat,
                                     float copy_num);
@@ -127,7 +127,7 @@ GtScaffolderGraphEdge *gt_scaffolder_graph_find_edge(
                                     GtUword vertexid_2);
 
 /* determines corresponding vertex id to contig header */
-int gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
+bool gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
                                       GtUword *vertex_id,
                                       const GtStr *header_seq);
 

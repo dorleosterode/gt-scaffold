@@ -101,7 +101,7 @@ void gt_scaffolder_graph_delete(GtScaffolderGraph *graph)
    contains information about the sequence header <*header_seq>, sequence
    length <seq_len>, A-statistics <astat> and estimated copy number <copy_num>*/
 void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
-                                    const GtStr *header_seq,
+                                    GtStr *header_seq,
                                     GtUword seq_len,
                                     float astat,
                                     float copy_num)
@@ -120,7 +120,7 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
   graph->vertices[nextfree].copy_num = copy_num;
   graph->vertices[nextfree].nof_edges = 0;
   if (header_seq != NULL) {
-    graph->vertices[nextfree].header_seq = gt_str_clone(header_seq);
+    graph->vertices[nextfree].header_seq = header_seq;
   }
   graph->vertices[nextfree].state = GIS_UNVISITED;
 
@@ -201,17 +201,15 @@ GtScaffolderGraphEdge
 
 /* determines corresponding vertex id to contig header */
 /* SD: Binaersuche separat testen */
-int gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
+bool gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
                                       GtUword *vertex_id,
                                       const GtStr *header_seq)
 {
   GtScaffolderGraphVertex *min_vertex, *max_vertex, *mid_vertex;
-  int had_err, cmp;
+  int cmp;
   bool found;
 
-  had_err = 0;
   found = false;
-
   /* binary search */
   min_vertex = graph->vertices;
   max_vertex = graph->vertices + graph->nof_vertices - 1;
@@ -231,13 +229,7 @@ int gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
       else
         max_vertex = mid_vertex - 1;
     }
-
-  /* contig header was not found */
-  /* SK: found zurueckgeben statt had_err */
-  if (!found)
-    had_err = -1;
-
-  return had_err;
+  return found;
 }
 
 /* assign edge <*edge> new attributes */

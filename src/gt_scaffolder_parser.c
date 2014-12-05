@@ -26,6 +26,8 @@
 #include "gt_scaffolder_graph.h"
 #include "gt_scaffolder_parser.h"
 
+const GtUword BUFSIZE = 1024;
+
 /* for parsing valid contigs,
    e.g. contigs with minimum length <min_ctg_len> */
 typedef struct {
@@ -53,18 +55,19 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
                                                GtError *err)
 {
   FILE *file;
-  /* SK: Puffergroesse 1024+1, #define BUFSIZE setzen */
-  char line[1024], *field, ctg_header[1024];
+  char line[BUFSIZE+1], *field, ctg_header[BUFSIZE+1];
   GtUword num_pairs, record_counter, ctg_id, root_ctg_id;
   GtWord dist;
   float std_dev;
-  int had_err, valid_contig;
-  GtStr *gt_str_ctg_header, *gt_str_field;
+  int had_err;
+  bool valid_contig;
+  GtStr *gt_str_field;
   GtScaffolderGraphVertex *v;
 
   had_err = 0;
-  valid_contig = 0;
+  valid_contig = false;
   record_counter = 0;
+  gt_str_field = gt_str_new();
 
   /* sort by lexicographic ascending order */
   qsort(graph->vertices, graph->nof_vertices, sizeof (*graph->vertices),
@@ -79,37 +82,36 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
     had_err = -1;
     gt_error_set(err, " can not read file %s ",file_name);
   }
-
+  
   if (had_err != -1)
   {
     /* iterate over each line of file until eof (contig record) */
-    while (fgets(line, 1024, file) != NULL)
+    while (fgets(line, BUFSIZE, file) != NULL)
     {
       /* split line by first space delimiter */
       field = strtok(line," ");
 
-      gt_str_field = gt_str_new_cstr(field);
+      gt_str_set(gt_str_field, field);
       valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id,
                 gt_str_field);
-      gt_str_delete(gt_str_field);
 
-      if (valid_contig == 0) {
+      if (valid_contig) {
         /* iterate over space delimited records */
         while (field != NULL)
         {
           /* count records */
-          if (sscanf(field,"%[^>,],%ld,%lu,%f", ctg_header, &dist, &num_pairs,
-              &std_dev) == 4)
+          if (sscanf(field,"%[^>,]," GT_WD "," GT_WU ",%f", ctg_header,
+              &dist, &num_pairs, &std_dev) == 4)
 
             /* cut composition sign */
             ctg_header[strlen(ctg_header) - 1] = '\0';
-            gt_str_ctg_header = gt_str_new_cstr(ctg_header);
+
+            gt_str_set(gt_str_field, ctg_header);
             /* get vertex id corresponding to contig header */
             valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id,
-                        gt_str_ctg_header);
-            gt_str_delete(gt_str_ctg_header);
+                           gt_str_field);
 
-            if (valid_contig == 0)
+            if (valid_contig)
               record_counter++;
 
           /* split line by next space delimiter */
@@ -119,6 +121,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
     }
   }
   *nof_distances = record_counter;
+  gt_str_delete(gt_str_field);
 
   fclose(file);
   return had_err;
@@ -136,19 +139,20 @@ int gt_scaffolder_parser_read_distances(const char *filename,
 {
   FILE *file;
   /* SD: Konstante setzen? */
-  char line[1024], *field, ctg_header[1024];
+  char line[BUFSIZE+1], *field, ctg_header[BUFSIZE+1];
   GtUword num_pairs, root_ctg_id, ctg_id, ctg_header_len;
   GtWord dist;
   float std_dev;
-  bool same, sense;
+  bool same, sense, valid_contig;
   GtScaffolderGraphEdge *edge;
-  int had_err, valid_contig;
-  GtStr *gt_str_ctg_header, *gt_str_field;
+  int had_err;
+  GtStr *gt_str_field;
 
   had_err = 0;
-  valid_contig = 0;
+  valid_contig = false;
   root_ctg_id = 0;
   ctg_id = 0;
+  gt_str_field = gt_str_new();
 
   file = fopen(filename, "rb");
   if (file == NULL) {
@@ -159,7 +163,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
   if (had_err != -1)
   {
     /* iterate over each line of file until eof (contig record) */
-    while (fgets(line, 1024, file) != NULL)
+    while (fgets(line, BUFSIZE, file) != NULL)
     {
       /* remove '\n' from end of line */
       line[strlen(line)-1] = '\0';
@@ -170,14 +174,13 @@ int gt_scaffolder_parser_read_distances(const char *filename,
 
       /* get vertex id corresponding to root contig header */
       /* SK: Moeglichkeit einer set Funktion evaluieren */
-      gt_str_field = gt_str_new_cstr(field);
+      gt_str_set(gt_str_field, field);
       valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id,
                 gt_str_field);
-      gt_str_delete(gt_str_field);
 
       /* Debbuging: printf("rootctgid: %s\n",field);*/
 
-      if (valid_contig == 0) {
+      if (valid_contig) {
         /* iterate over space delimited records */
         while (field != NULL)
         {
@@ -187,8 +190,8 @@ int gt_scaffolder_parser_read_distances(const char *filename,
                  nicht funktioniert)
           */
           /* SK: Keine unsigned Variablen verwenden wegen korrupter Eingaben */
-          if (sscanf(field,"%[^>,],%ld,%lu,%f", ctg_header, &dist, &num_pairs,
-              &std_dev) == 4)
+          if (sscanf(field,"%[^>,]," GT_WD "," GT_WU ",%f", ctg_header, &dist,
+              &num_pairs, &std_dev) == 4)
           {
             /* parsing composition,
              '+' indicates same strand and '-' reverse strand */
@@ -197,13 +200,13 @@ int gt_scaffolder_parser_read_distances(const char *filename,
 
             /* cut composition sign */
             ctg_header[ctg_header_len - 1] = '\0';
-            gt_str_ctg_header = gt_str_new_cstr(ctg_header);
+
+            gt_str_set(gt_str_field, ctg_header);
             /* get vertex id corresponding to contig header */
             valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id,
-                      gt_str_ctg_header);
-            gt_str_delete(gt_str_ctg_header);
+                      gt_str_field);
 
-            if (valid_contig == 0) {
+            if (valid_contig) {
               /* check if edge between vertices already exists */
               edge = gt_scaffolder_graph_find_edge(graph, root_ctg_id, ctg_id);
               if (edge != NULL)
@@ -233,6 +236,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
     }
   }
 
+  gt_str_delete(gt_str_field);
   fclose(file);
   return had_err;
 }
@@ -276,7 +280,6 @@ static int gt_scaffolder_graph_save_header(const char *description,
                                            void *data, GtError *err)
 {
   int had_err;
-  GtStr *gt_str_description;
   char *writeable_description, *space_ptr;
   GtScaffolderGraphFastaReaderData *fasta_reader_data =
   (GtScaffolderGraphFastaReaderData*) data;
@@ -287,9 +290,10 @@ static int gt_scaffolder_graph_save_header(const char *description,
   space_ptr = strchr(writeable_description, ' ');
   if (space_ptr != NULL)
     *space_ptr = '\0';
-  gt_str_description = gt_str_new_cstr(writeable_description);
+  /* overwrite current GtString */
+  gt_str_set(fasta_reader_data->header_seq, writeable_description);
+  gt_free(writeable_description);
 
-  fasta_reader_data->header_seq = gt_str_description;
   if (length == 0) {
     gt_error_set (err , " invalid header length ");
     had_err = -1;
@@ -305,16 +309,16 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
                                         GtError* err)
 {
   int had_err;
+  GtStr *cloned_gt_str;
   GtScaffolderGraphFastaReaderData *fasta_reader_data =
   (GtScaffolderGraphFastaReaderData*) data;
 
   had_err = 0;
   if (seq_length > fasta_reader_data->min_ctg_len)
   {
+    cloned_gt_str = gt_str_clone(fasta_reader_data->header_seq);
     gt_scaffolder_graph_add_vertex(fasta_reader_data->graph,
-    fasta_reader_data->header_seq, seq_length, 0.0, 0.0);
-
-    gt_str_delete(fasta_reader_data->header_seq);
+    cloned_gt_str, seq_length, 0.0, 0.0);
   }
 
   if (seq_length == 0) {
@@ -365,6 +369,7 @@ int gt_scaffolder_parser_read_contigs(GtScaffolderGraph *graph,
 
   had_err = 0;
   str_filename = gt_str_new_cstr(filename);
+  fasta_reader_data.header_seq = gt_str_new();
   fasta_reader_data.nof_valid_ctg = 0;
   fasta_reader_data.min_ctg_len = min_ctg_len;
   fasta_reader_data.graph = graph;
@@ -374,6 +379,6 @@ int gt_scaffolder_parser_read_contigs(GtScaffolderGraph *graph,
             NULL, gt_scaffolder_graph_save_ctg, &fasta_reader_data, err);
   gt_fasta_reader_delete(reader);
   gt_str_delete(str_filename);
-
+  gt_str_delete(fasta_reader_data.header_seq);
   return had_err;
 }
