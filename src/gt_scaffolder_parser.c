@@ -56,7 +56,8 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
 {
   FILE *file;
   char line[BUFSIZE+1], *field, ctg_header[BUFSIZE+1];
-  GtUword num_pairs, record_counter, ctg_id, root_ctg_id;
+  GtUword num_pairs, record_counter, ctg_id, root_ctg_id, *edge_counter,
+          line_record_counter;
   GtWord dist;
   float std_dev;
   int had_err;
@@ -83,6 +84,8 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
     gt_error_set(err, " can not read file %s ",file_name);
   }
 
+  edge_counter = gt_calloc(graph->nof_vertices, sizeof(*edge_counter));
+
   if (had_err != -1)
   {
     /* iterate over each line of file until eof (contig record) */
@@ -96,6 +99,8 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
                 gt_str_field);
 
       if (valid_contig) {
+
+        line_record_counter = 0;
         /* iterate over space delimited records */
         while (field != NULL)
         {
@@ -112,15 +117,28 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
             valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id,
                            gt_str_field);
 
-            if (valid_contig)
+            if (valid_contig) {
               record_counter++;
+
+              edge_counter[ctg_id] += 1;
+              line_record_counter++;
+            }
 
           /* split line by next space delimiter */
           field = strtok(NULL," ");
         }
+        edge_counter[root_ctg_id] += line_record_counter;
       }
     }
   }
+
+  /* allocate memory for edges of vertices */
+  for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++) {
+    if (edge_counter[v->index] != 0)
+      v->edges = gt_malloc(sizeof(*v->edges) * edge_counter[v->index]);
+  }
+
+  gt_free(edge_counter);
   *nof_distances = record_counter;
   gt_str_delete(gt_str_field);
 

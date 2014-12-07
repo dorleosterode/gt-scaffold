@@ -26,24 +26,24 @@ int main(int argc, char **argv)
   err = gt_error_new();
 
   /* SK: err auch uebergeben */
-  /* Create graph with wrapper construction function and delete it */
-  gt_scaffolder_graph_test(5, 8, false, 0, false, 0, false);
+  /* Create graph with wrapper construction function and delete it 
+  gt_scaffolder_graph_test(5, 8, false, 0, false, 0, false);*/
 
-  /* Create graph, only initialize vertices, delete it */
-  gt_scaffolder_graph_test(5, 8, true, 0, false, 0, false);
+  /* Create graph, only initialize vertices, delete it 
+  gt_scaffolder_graph_test(5, 8, true, 0, false, 0, false);*/
 
-  /* Create graph, initialize and create vertices, delete it */
-  gt_scaffolder_graph_test(5, 8, true, 5, false, 0, false);
+  /* Create graph, initialize and create vertices, delete it 
+  gt_scaffolder_graph_test(5, 8, true, 5, false, 0, false);*/
 
-  /* Create graph, initialize vertices and edges, create vertices, delete it */
-  gt_scaffolder_graph_test(5, 8, true, 5, true, 0, false);
+  /* Create graph, initialize vertices and edges, create vertices, delete it 
+  gt_scaffolder_graph_test(5, 8, true, 5, true, 0, false);*/
 
-  /* Create graph, initialize and create vertices and edges, delete it */
-  gt_scaffolder_graph_test(5, 8, true, 5, true, 8, false);
+  /* Create graph, initialize and create vertices and edges, delete it 
+  gt_scaffolder_graph_test(5, 8, true, 5, true, 8, false);*/
 
   /* Create graph, initialize and create vertices and edges, print it,
-     delete it */
-  gt_scaffolder_graph_test(5, 8, true, 5, true, 8, true);
+     delete it 
+  gt_scaffolder_graph_test(5, 8, true, 5, true, 8, true);*/
 
   if (argc == 4) {
     graph = NULL;
