@@ -192,9 +192,15 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
   unsigned int dir; /* int statt bool, weil Iteration bislang nicht möglich */
   int had_err = 0;
 
+
   /* iterate over all vertices */
   for (vertex = graph->vertices;
        vertex < (graph->vertices + graph->nof_vertices); vertex++) {
+
+    /* ignore repeat vertices */
+    if (vertex->state == GIS_REPEAT)
+      continue;
+
     /* iterate over directions (sense/antisense) */
     for (dir = 0; dir < 2; dir++) {
       /* iterate over all pairs of edges */
