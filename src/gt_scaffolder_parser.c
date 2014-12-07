@@ -84,7 +84,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
     gt_error_set(err, " can not read file %s ",file_name);
   }
 
-  edge_counter = gt_calloc(graph->nof_vertices, sizeof(*edge_counter));
+  edge_counter = gt_calloc(graph->nof_vertices, sizeof (*edge_counter));
 
   if (had_err != -1)
   {

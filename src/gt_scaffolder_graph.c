@@ -137,7 +137,7 @@ static void gt_scaffolder_graph_add_edge_ptr_to_vertex(GtScaffolderGraph *graph,
   /* Allocate new space for pointer to this edge
   if (graph->vertices[vertexID].nof_edges > 0) {
     graph->vertices[vertexID].edges = */
-      /* SK: realloc zu teuer? Besser: DistEst parsen und gezielt allokieren 
+      /* SK: realloc zu teuer? Besser: DistEst parsen und gezielt allokieren
       gt_realloc( graph->vertices[vertexID].edges, sizeof (*graph->edges) *
                   (graph->vertices[vertexID].nof_edges + 1) );
   }*/
