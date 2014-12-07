@@ -56,9 +56,9 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
 {
   FILE *file;
   char line[BUFSIZE+1], *field, ctg_header[BUFSIZE+1];
-  GtUword num_pairs, record_counter, ctg_id, root_ctg_id, *edge_counter,
+  GtUword record_counter, ctg_id, root_ctg_id, *edge_counter,
           line_record_counter;
-  GtWord dist;
+  GtWord dist, num_pairs;
   float std_dev;
   int had_err;
   bool valid_contig;
@@ -106,8 +106,14 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
         {
           /* count records */
           /* SD: Keep an eye on negated string, might fail, did before */
-          if (sscanf(field,"%[^>,]," GT_WD "," GT_WU ",%f", ctg_header,
+          if (sscanf(field,"%[^>,]," GT_WD "," GT_WD ",%f", ctg_header,
               &dist, &num_pairs, &std_dev) == 4)
+
+            /* ignore invalid records */
+            if (num_pairs < 0) {
+              had_err = -1;
+              continue;
+            }
 
             /* cut composition sign */
             ctg_header[strlen(ctg_header) - 1] = '\0';
@@ -159,8 +165,8 @@ int gt_scaffolder_parser_read_distances(const char *filename,
   FILE *file;
   /* SD: Konstante setzen? */
   char line[BUFSIZE+1], *field, ctg_header[BUFSIZE+1];
-  GtUword num_pairs, root_ctg_id, ctg_id, ctg_header_len;
-  GtWord dist;
+  GtUword root_ctg_id, ctg_id, ctg_header_len;
+  GtWord dist, num_pairs;
   float std_dev;
   bool same, sense, valid_contig;
   GtScaffolderGraphEdge *edge;
@@ -208,10 +214,15 @@ int gt_scaffolder_parser_read_distances(const char *filename,
           /* SD: %[^>,] ist eine negierte Zeichenklasse (Workaround weil %s
                  nicht funktioniert)
           */
-          /* SK: Keine unsigned Variablen verwenden wegen korrupter Eingaben */
-          if (sscanf(field,"%[^>,]," GT_WD "," GT_WU ",%f", ctg_header, &dist,
+          if (sscanf(field,"%[^>,]," GT_WD "," GT_WD ",%f", ctg_header, &dist,
               &num_pairs, &std_dev) == 4)
           {
+            /* ignore invalid records */
+            if (num_pairs < 0) {
+              had_err = -1;
+              continue;
+            }
+
             /* parsing composition,
              '+' indicates same strand and '-' reverse strand */
             ctg_header_len = strlen(ctg_header);
