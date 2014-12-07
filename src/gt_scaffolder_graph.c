@@ -124,7 +124,7 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
   graph->vertices[nextfree].state = GIS_UNVISITED;
 
   /* Allocate initial space for pointer to outgoing edges */
-  graph->vertices[nextfree].edges = gt_malloc(sizeof (*graph->vertices->edges));
+  graph->vertices[nextfree].edges = NULL;
 
   graph->nof_vertices++;
 }
@@ -133,13 +133,13 @@ static void gt_scaffolder_graph_add_edge_ptr_to_vertex(GtScaffolderGraph *graph,
                                                        GtUword edgeID,
                                                        GtUword vertexID)
 {
-  /* Allocate new space for pointer to this edge */
+  /* Allocate new space for pointer to this edge
   if (graph->vertices[vertexID].nof_edges > 0) {
-    graph->vertices[vertexID].edges =
-      /* SK: realloc zu teuer? Besser: DistEst parsen und gezielt allokieren */
+    graph->vertices[vertexID].edges = */
+      /* SK: realloc zu teuer? Besser: DistEst parsen und gezielt allokieren
       gt_realloc( graph->vertices[vertexID].edges, sizeof (*graph->edges) *
                   (graph->vertices[vertexID].nof_edges + 1) );
-  }
+  }*/
   /* Assign adress of this edge to the pointer */
   graph->vertices[vertexID].edges[graph->vertices[vertexID].nof_edges] =
     &graph->edges[edgeID];
