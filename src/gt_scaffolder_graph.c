@@ -189,12 +189,13 @@ GtScaffolderGraphEdge
                                GtUword vertexid_1,
                                GtUword vertexid_2)
 {
-  GtScaffolderGraphEdge **edge;
+  GtUword eid;
   GtScaffolderGraphVertex *v1 = graph->vertices + vertexid_1;
 
-  for (edge = v1->edges; edge < (v1->edges + v1->nof_edges); edge++) {
-    if ((*edge)->end->index == vertexid_2)
-      return *edge;
+  for (eid = 0; eid < v1->nof_edges; eid++) {
+    if (v1->edges[eid]->end->index == vertexid_2 ||
+	v1->edges[eid]->start->index == vertexid_2)
+      return v1->edges[eid];
   }
   return NULL;
 }
