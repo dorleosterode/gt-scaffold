@@ -168,7 +168,6 @@ gt_scaffolder_graph_check_mark_polymorphic(GtScaffolderGraphEdge *edge1,
       poly_vertex = edge2->end;
     /* mark all edges of the polymorphic vertex as polymorphic */
     if (poly_vertex->state != GIS_POLYMORPHIC) {
-      /* SK: Ueber korrekten Pointer iterieren */
       GtUword eid;
       for (eid = 0; eid < poly_vertex->nof_edges; eid++)
         poly_vertex->edges[eid]->state = GIS_POLYMORPHIC;
@@ -271,6 +270,9 @@ gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
 void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
                                          GtArray *ccs)
 {
+  gt_assert(graph != NULL);
+  gt_assert(ccs != NULL);
+
   GtArray *terminal_vertices = NULL;
   GtQueue *vqueue = NULL;
   GtScaffolderGraphVertex *vertex, *currentvertex, *nextvertex;
@@ -472,10 +474,11 @@ GtScaffolderGraphWalk
     for (eid = 0; eid < endvertex->nof_edges; eid++) {
       nextedge = endvertex->edges[eid];
       if (nextedge->sense == dir) {
-        nextendvertex = nextedge->end;
-        if (edge->state != GIS_POLYMORPHIC && edge->state != GIS_INCONSISTENT
-            && edge->end->state != GIS_REPEAT)
+        if (nextedge->state != GIS_POLYMORPHIC && nextedge->state != GIS_INCONSISTENT
+            && nextedge->end->state != GIS_REPEAT)
         {
+          nextendvertex = nextedge->end;
+
           distance = edge->dist + nextedge->dist;
 
           /* SK: 0 steht fuer unitialisiert*/
