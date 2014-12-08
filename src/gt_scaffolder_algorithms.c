@@ -329,28 +329,11 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
   gt_queue_delete(vqueue);
 }
 
-/*  remove cycles */
-/* void gt_scaffolder_removecycles(GtScaffolderGraph *graph) { */
-
-/*     /\* found one cc first remove all cycles starting at terminal */
-/*        vertices. keep the array with terminal vertices clean. *\/ */
-/*     while (gt_array_size(terminal_vertices) != 0) { */
-/*       /\* search for cycles starting at every terminal vertex. if a */
-/*       backedge is found, mark both vertices connected with this */
-/*       backedge. *\/ */
-/*     } */
-
-/* } */
-
 /* DFS to detect Cycles given a starting vertex */
-/* TODO: remember all visited vertices to change the state to
-   GIS_UNVISITED before search with the next starting vertex. */
-
-/* SD: Commented because compiler complaines about it being unused function */
-/*
 GtScaffolderGraphEdge
 *gt_scaffolder_detect_cycle(GtScaffolderGraphVertex *v,
-                            bool dir)
+                            bool dir,
+			    GtArray *visited)
 {
   GtUword eid;
   GtScaffolderGraphVertex *end;
@@ -358,27 +341,95 @@ GtScaffolderGraphEdge
 
   gt_assert(v != NULL);
 
+  gt_array_add(visited, v);
+
   v->state = GIS_VISITED;
   for (eid = 0; eid < v->nof_edges; eid++) {
-    if (v->edges[eid]->sense == dir) {*/
+    if (v->edges[eid]->sense == dir &&
+	v->edges[eid]->state != GIS_INCONSISTENT) {
       /* maybe we want just to mark the corresponding vertices at this
          point and return a boolean or something like that */
-/*      end = v->edges[eid]->end;
-      if (end->state == GIS_VISITED)
-        return v->edges[eid];
-      if (end->state == GIS_UNVISITED) {*/
-        /* SK: Stack verwenden: gt_stack-inline.h */
-/*        back = gt_scaffolder_detect_cycle(end, dir);
-        if (back != NULL)
-          return back;
+      end = v->edges[eid]->end;
+      if (end->state != GIS_POLYMORPHIC && end->state != GIS_REPEAT) {
+	if (end->state == GIS_VISITED)
+	  return v->edges[eid];
+	if (end->state == GIS_UNVISITED) {
+	  /* SK: Stack verwenden: gt_stack-inline.h */
+	  back = gt_scaffolder_detect_cycle(end, dir, visited);
+	  if (back != NULL)
+	    return back;
+	}
       }
     }
   }
 
-  end->state = GIS_PROCESSED;
+  v->state = GIS_PROCESSED;
   return NULL;
 }
-*/
+
+/*  remove cycles */
+void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
+  bool done, found_cycle;
+  GtUword i, j, k;
+  GtArray *ccs, *terminal_vertices, *visited;
+  GtScaffolderGraphEdge *back_edge;
+  GtScaffolderGraphVertex *start, *v;
+
+  ccs = gt_array_new(sizeof (GtArray *));
+  visited = gt_array_new(sizeof (GtScaffolderGraphVertex *));
+
+  while (!done) {
+    found_cycle = false;
+
+    gt_scaffolder_calc_cc_and_terminals(graph, ccs);
+
+    /* iterate over all ccs */
+    for (i = 0; i < gt_array_size(ccs); i++) {
+      terminal_vertices = *(GtArray **) gt_array_get(ccs, i);
+
+      /* iterate over all terminal vertices of this cc */
+      for (j = 0; j < gt_array_size(terminal_vertices); j++) {
+	start = *(GtScaffolderGraphVertex **) gt_array_get(terminal_vertices, j);
+	/* search for a cycle, if terminal vertex has edges */
+	if (start->nof_edges > 0) {
+	  back_edge = gt_scaffolder_detect_cycle(start, start->edges[0]->sense, visited);
+
+	  /* mark all visited vertices as unvisited for the next search */
+	  for (k = 0; k < gt_array_size(visited); k++) {
+	    v = *(GtScaffolderGraphVertex **) gt_array_get(visited, k);
+	    v->state = GIS_UNVISITED;
+	  }
+
+	  gt_array_reset(visited);
+
+	  if (back_edge != NULL) {
+	    found_cycle = true;
+	    /* maybe we want a state for cyclic edges and vertices */
+	    back_edge->state = GIS_INCONSISTENT;
+	    back_edge->start->state = GIS_POLYMORPHIC;
+	    back_edge->end->state = GIS_POLYMORPHIC;
+	  }
+	}
+      }
+    }
+
+    for (i = 0; i < gt_array_size(ccs); i++)
+      gt_array_delete(*(GtArray **) gt_array_get(ccs, i));
+
+    gt_array_reset(ccs);
+
+    /* if a cycle was found, we have to search again */
+    done = found_cycle ? false : true;
+  }
+
+  for (i = 0; i < gt_array_size(ccs); i++)
+    gt_array_delete(*(GtArray **) gt_array_get(ccs, i));
+
+  gt_array_delete(ccs);
+  gt_array_delete(visited);
+
+}
+
 /* create new walk */
 GtScaffolderGraphWalk *gt_scaffolder_walk_new(void)
 {
