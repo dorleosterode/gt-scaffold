@@ -283,7 +283,7 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
   GtScaffolderGraphEdge *e;
   /* 0: GIS_UNVISITED, 1: GIS_POLYMORPHIC, 2: GIS_INCONSISTENT,
      3: GIS_REPEAT, 4: GIS_VISITED, 5: GIS_PROCESSED, 6: GIS_SCAFFOLD */
-  const char *color_array[] = {"black", "gray", "gray", "gray", "red",
+  const char *color_array[] = {"black", "gray80", "gainsboro", "ivory3", "red",
                                "green", "magenta"};
 
   /* print first line into f */
