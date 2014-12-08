@@ -461,10 +461,10 @@ GtScaffolderGraphWalk
          SK: DistEst beim Einlesen prüfen, Basisadresse verwenden fuer Index */
       if (endvertex->state != GIS_POLYMORPHIC &&
           endvertex->state != GIS_REPEAT) {
-	distancemap[endvertex->index] = edge->dist;
-	edgemap[endvertex->index] = edge;
+        distancemap[endvertex->index] = edge->dist;
+        edgemap[endvertex->index] = edge;
 
-	gt_queue_add(wqueue, edge);
+        gt_queue_add(wqueue, edge);
       }
     }
   }
@@ -485,20 +485,20 @@ GtScaffolderGraphWalk
         {
           nextendvertex = nextedge->end;
 
-	  if (nextendvertex->state != GIS_POLYMORPHIC &&
-	      nextendvertex->state != GIS_REPEAT) {
+          if (nextendvertex->state != GIS_POLYMORPHIC &&
+              nextendvertex->state != GIS_REPEAT) {
 
-	    distance = edge->dist + nextedge->dist;
+            distance = edge->dist + nextedge->dist;
 
-	    /* GT_WORD_MAX is the initial value */
-	    if (distancemap[nextendvertex->index] == GT_WORD_MAX ||
-		distancemap[nextendvertex->index] > distance)
-	      {
-		distancemap[nextendvertex->index] = distance;
-		edgemap[nextendvertex->index] = nextedge;
-		gt_queue_add(wqueue, nextedge);
-	      }
-	  }
+            /* GT_WORD_MAX is the initial value */
+            if (distancemap[nextendvertex->index] == GT_WORD_MAX ||
+                distancemap[nextendvertex->index] > distance)
+              {
+                distancemap[nextendvertex->index] = distance;
+                edgemap[nextendvertex->index] = nextedge;
+                gt_queue_add(wqueue, nextedge);
+              }
+          }
         }
       }
     }
@@ -544,69 +544,23 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
 {
   gt_assert(graph != NULL);
 
-  GtScaffolderGraphVertex *vertex, *currentvertex, *nextvertex, *start;
-  GtUword eid, max_num_bases;
+  GtUword eid, max_num_bases, i;
   GtScaffolderGraphWalk *walk, *bestwalk;
-  GtUword ccnumber;
-  GtQueue *vqueue;
-  GtArray *terminal_vertices, *cc_walks;
+  GtScaffolderGraphVertex *start;
+  GtArray *terminal_vertices, *cc_walks, *ccs;
 
   /* Entfernung von Zyklen
      gt_scaffolder_removecycles(graph); */
 
-  /* Iteration ueber alle Knoten, Makierung aller Knoten als unbesucht */
-  /* SK: Schleife evtl nich mehr benoetigt, da vor-initialisiert */
-  for (vertex = graph->vertices;
-       vertex < (graph->vertices + graph->nof_vertices); vertex++) {
-    if (vertex->state != GIS_POLYMORPHIC && vertex->state != GIS_REPEAT)
-      vertex->state = GIS_UNVISITED;
-  }
-
- /* BFS-Traversierung durch Zusammenhangskomponenten des Graphen,
-    siehe GraphSearchTree.h */
-  ccnumber = 0;
-  vqueue = gt_queue_new();
-  terminal_vertices = gt_array_new(sizeof (vertex));
   cc_walks = gt_array_new(sizeof (walk));
 
-  for (vertex = graph->vertices; vertex <
-       (graph->vertices + graph->nof_vertices); vertex++) {
-    if (vertex->state == GIS_POLYMORPHIC || vertex->state == GIS_VISITED
-	|| GIS_REPEAT)
-      continue;
-    ccnumber += 1;
-    vertex->state = GIS_PROCESSED;
-    gt_queue_add(vqueue, vertex);
-    gt_array_reset(terminal_vertices);
-    gt_array_reset(cc_walks);
+  /* create GtArray to store all ccs in it */
+  ccs = gt_array_new(sizeof (GtArray *));
 
-    while (gt_queue_size(vqueue) != 0) {
-      currentvertex = (GtScaffolderGraphVertex*)gt_queue_get(vqueue);
-      /*currentvertex.cc = ccnumber;*/
+  gt_scaffolder_calc_cc_and_terminals(graph, ccs);
 
-      /* store all terminal vertices to calculate all paths between them */
-      if (gt_scaffolder_graph_isterminal(currentvertex)) {
-        gt_assert(currentvertex >= graph->vertices);
-        gt_assert(currentvertex < graph->vertices + graph->nof_vertices);
-        gt_array_add(terminal_vertices, currentvertex);
-        gt_assert(
-          ( *(GtScaffolderGraphVertex **) gt_array_get_last(terminal_vertices) )
-            == currentvertex );
-      }
-
-      currentvertex->state = GIS_VISITED;
-      for (eid = 0; eid < currentvertex->nof_edges; eid++) {
-        nextvertex = currentvertex->edges[eid]->end;
-        /* why vertex->state? */
-        if (nextvertex->state == GIS_POLYMORPHIC ||
-	    nextvertex->state == GIS_REPEAT)
-          continue;
-        if (nextvertex->state == GIS_UNVISITED) {
-          nextvertex->state = GIS_PROCESSED;
-          gt_queue_add(vqueue, nextvertex);
-        }
-      }
-    }
+  for (i = 0; i < gt_array_size(ccs); i++) {
+    terminal_vertices = *(GtArray **) gt_array_get(ccs, i);
 
     /* calculate all paths between terminal vertices in this cc */
     while (gt_array_size(terminal_vertices) != 0) {
@@ -615,7 +569,7 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
       gt_assert(start < graph->vertices + graph->nof_vertices);
       walk = gt_scaffolder_create_walk(graph, start);
       if (walk != NULL) {
-	gt_array_add(cc_walks, walk);
+        gt_array_add(cc_walks, walk);
       }
     }
 
@@ -635,13 +589,15 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
     if (bestwalk != NULL) {
       bestwalk->edges[0]->start->state = GIS_SCAFFOLD;
       for (eid = 0; eid < bestwalk->nof_edges; eid++) {
-	bestwalk->edges[eid]->state = GIS_SCAFFOLD;
-	bestwalk->edges[eid]->end->state = GIS_SCAFFOLD;
+        bestwalk->edges[eid]->state = GIS_SCAFFOLD;
+        bestwalk->edges[eid]->end->state = GIS_SCAFFOLD;
       }
     }
   }
 
-  gt_array_delete(terminal_vertices);
+  for (i = 0; i < gt_array_size(ccs); i++)
+    gt_array_delete(gt_array_get(ccs, i));
+
+  gt_array_delete(ccs);
   gt_array_delete(cc_walks);
-  gt_queue_delete(vqueue);
 }
