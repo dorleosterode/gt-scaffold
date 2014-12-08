@@ -459,10 +459,13 @@ GtScaffolderGraphWalk
 
       /* SK: genometools hashes verwenden, Dichte evaluieren
          SK: DistEst beim Einlesen prüfen, Basisadresse verwenden fuer Index */
-      distancemap[endvertex->index] = edge->dist;
-      edgemap[endvertex->index] = edge;
+      if (endvertex->state != GIS_POLYMORPHIC &&
+          endvertex->state != GIS_REPEAT) {
+	distancemap[endvertex->index] = edge->dist;
+	edgemap[endvertex->index] = edge;
 
-      gt_queue_add(wqueue, edge);
+	gt_queue_add(wqueue, edge);
+      }
     }
   }
 
@@ -482,16 +485,20 @@ GtScaffolderGraphWalk
         {
           nextendvertex = nextedge->end;
 
-          distance = edge->dist + nextedge->dist;
+	  if (nextendvertex->state != GIS_POLYMORPHIC &&
+	      nextendvertex->state != GIS_REPEAT) {
 
-          /* GT_WORD_MAX is the initial value */
-          if (distancemap[nextendvertex->index] == GT_WORD_MAX ||
-              distancemap[nextendvertex->index] > distance)
-          {
-            distancemap[nextendvertex->index] = distance;
-            edgemap[nextendvertex->index] = nextedge;
-            gt_queue_add(wqueue, nextedge);
-          }
+	    distance = edge->dist + nextedge->dist;
+
+	    /* GT_WORD_MAX is the initial value */
+	    if (distancemap[nextendvertex->index] == GT_WORD_MAX ||
+		distancemap[nextendvertex->index] > distance)
+	      {
+		distancemap[nextendvertex->index] = distance;
+		edgemap[nextendvertex->index] = nextedge;
+		gt_queue_add(wqueue, nextedge);
+	      }
+	  }
         }
       }
     }
@@ -551,7 +558,7 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
   /* SK: Schleife evtl nich mehr benoetigt, da vor-initialisiert */
   for (vertex = graph->vertices;
        vertex < (graph->vertices + graph->nof_vertices); vertex++) {
-    if (vertex->state != GIS_POLYMORPHIC)
+    if (vertex->state != GIS_POLYMORPHIC && vertex->state != GIS_REPEAT)
       vertex->state = GIS_UNVISITED;
   }
 
@@ -564,7 +571,8 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
 
   for (vertex = graph->vertices; vertex <
        (graph->vertices + graph->nof_vertices); vertex++) {
-    if (vertex->state == GIS_POLYMORPHIC || vertex->state == GIS_VISITED)
+    if (vertex->state == GIS_POLYMORPHIC || vertex->state == GIS_VISITED
+	|| GIS_REPEAT)
       continue;
     ccnumber += 1;
     vertex->state = GIS_PROCESSED;
@@ -590,7 +598,8 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
       for (eid = 0; eid < currentvertex->nof_edges; eid++) {
         nextvertex = currentvertex->edges[eid]->end;
         /* why vertex->state? */
-        if (nextvertex->state == GIS_POLYMORPHIC)
+        if (nextvertex->state == GIS_POLYMORPHIC ||
+	    nextvertex->state == GIS_REPEAT)
           continue;
         if (nextvertex->state == GIS_UNVISITED) {
           nextvertex->state = GIS_PROCESSED;
