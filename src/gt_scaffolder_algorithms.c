@@ -626,8 +626,8 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
     if (bestwalk != NULL) {
       bestwalk->edges[0]->start->state = GIS_SCAFFOLD;
       for (eid = 0; eid < bestwalk->nof_edges; eid++) {
-	bestwalk->edges[0]->state = GIS_SCAFFOLD;
-	bestwalk->edges[0]->end->state = GIS_SCAFFOLD;
+	bestwalk->edges[eid]->state = GIS_SCAFFOLD;
+	bestwalk->edges[eid]->end->state = GIS_SCAFFOLD;
       }
     }
   }
