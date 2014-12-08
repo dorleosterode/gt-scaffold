@@ -427,7 +427,7 @@ GtScaffolderGraphWalk
   GtArray *terminal_vertices;
   GtScaffolderGraphEdge *edge, *reverseedge, *nextedge, **edgemap;
   GtScaffolderGraphVertex *endvertex, *currentvertex, *nextendvertex;
-  GtUword lengthbestwalk, lengthcwalk, eid;
+  GtUword lengthbestwalk, lengthcwalk, eid, i;
   GtScaffolderGraphWalk *bestwalk, *currentwalk;
   float distance, *distancemap;
   bool dir;
@@ -437,8 +437,11 @@ GtScaffolderGraphWalk
   wqueue = gt_queue_new();
   terminal_vertices = gt_array_new(sizeof (start));
 
-  /* SK: Mit GtWord_Min / erwarteter Genomlaenge statt 0 initialisieren */
-  distancemap = calloc(graph->nof_vertices, sizeof (*distancemap));
+  /* initialize distancemap with GT_WORD_MAX, we want to minimize over distancemap */
+  distancemap = gt_malloc(sizeof (*distancemap) * graph->nof_vertices);
+  for (i = 0; i < graph->nof_vertices; i++)
+    distancemap[i] = GT_WORD_MAX;
+
   edgemap = gt_malloc(sizeof (*edgemap)*graph->nof_vertices);
 
   /* check if node has edges */
@@ -481,8 +484,8 @@ GtScaffolderGraphWalk
 
           distance = edge->dist + nextedge->dist;
 
-          /* SK: 0 steht fuer unitialisiert*/
-          if (distancemap[nextendvertex->index] == 0 ||
+          /* GT_WORD_MAX is the initial value */
+          if (distancemap[nextendvertex->index] == GT_WORD_MAX ||
               distancemap[nextendvertex->index] > distance)
           {
             distancemap[nextendvertex->index] = distance;
@@ -602,7 +605,9 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
       gt_assert(start >= graph->vertices);
       gt_assert(start < graph->vertices + graph->nof_vertices);
       walk = gt_scaffolder_create_walk(graph, start);
-      gt_array_add(cc_walks, walk);
+      if (walk != NULL) {
+	gt_array_add(cc_walks, walk);
+      }
     }
 
     /* the best walk in this cc is chosen */
@@ -618,10 +623,12 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
     }
 
     /* mark all nodes and edges in the best walk as GIS_SCAFFOLD */
-    bestwalk->edges[0]->start->state = GIS_SCAFFOLD;
-    for (eid = 0; eid < bestwalk->nof_edges; eid++) {
-      bestwalk->edges[0]->state = GIS_SCAFFOLD;
-      bestwalk->edges[0]->end->state = GIS_SCAFFOLD;
+    if (bestwalk != NULL) {
+      bestwalk->edges[0]->start->state = GIS_SCAFFOLD;
+      for (eid = 0; eid < bestwalk->nof_edges; eid++) {
+	bestwalk->edges[0]->state = GIS_SCAFFOLD;
+	bestwalk->edges[0]->end->state = GIS_SCAFFOLD;
+      }
     }
   }
 
