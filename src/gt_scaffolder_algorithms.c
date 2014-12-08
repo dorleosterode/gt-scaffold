@@ -187,8 +187,7 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
   GtScaffolderGraphVertex *vertex;
   GtScaffolderGraphEdge *edge1, *edge2;
   GtUword overlap, eid1, eid2;
-  GtUword maxoverlap = 0;
-  unsigned int dir; /* int statt bool, weil Iteration bislang nicht möglich */
+  GtUword maxoverlap;
   int had_err = 0;
 
 
@@ -200,47 +199,50 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
     if (vertex->state == GIS_REPEAT)
       continue;
 
-    /* iterate over directions (sense/antisense) */
-    for (dir = 0; dir < 2; dir++) {
-      /* iterate over all pairs of edges */
-      for (eid1 = 0; eid1 < vertex->nof_edges; eid1++) {
-        for (eid2 = eid1 + 1; eid2 < vertex->nof_edges; eid2++) {
-          edge1 = vertex->edges[eid1];
-          edge2 = vertex->edges[eid2];
-          /* SK: edge->sense == edge->sense pruefen? */
-          if (edge1->sense == dir && edge2->sense == dir) {
-            /* check if edge1->end and edge2->end are polymorphic */
-            gt_scaffolder_graph_check_mark_polymorphic(edge1, edge2,
-                                                       pcutoff, cncutoff);
-            /* SD: Nur das erste Paar polymoprh markieren? */
-          }
+    /* iterate over all pairs of edges */
+    for (eid1 = 0; eid1 < vertex->nof_edges; eid1++) {
+      for (eid2 = eid1 + 1; eid2 < vertex->nof_edges; eid2++) {
+        edge1 = vertex->edges[eid1];
+        edge2 = vertex->edges[eid2];
+
+        /* check pair of edges (implict twin edge included) with same
+           direction for polymorphism (if directions are opposite,
+           one of the edges has to be reverse) */
+        if (edge1->sense == edge2->sense || !edge1->same || !edge2->same) {
+          /* check if edge1->end and edge2->end are polymorphic */
+          gt_scaffolder_graph_check_mark_polymorphic(edge1, edge2,
+                                                     pcutoff, cncutoff);
+          /* SD: Nur das erste Paar polymoprh markieren? */
         }
       }
+    }
 
-      /* no need to check inconsistent edges for polymorphic vertices */
-      if (vertex->state == GIS_POLYMORPHIC)
-        break;
-      /* iterate over all pairs of edges, that are not polymorphic */
-      for (eid1 = 0; eid1 < vertex->nof_edges; eid1++) {
-        for (eid2 = eid1 + 1; eid2 < vertex->nof_edges; eid2++) {
-          edge1 = vertex->edges[eid1];
-          edge2 = vertex->edges[eid2];
-          if (edge1->sense == dir && edge2->sense == dir &&
-              edge1->state != GIS_POLYMORPHIC &&
-              edge2->state != GIS_POLYMORPHIC) {
-            overlap = gt_scaffolder_calculate_overlap(edge1, edge2);
-            if (overlap > maxoverlap)
-              maxoverlap = overlap;
-          }
+    /* no need to check inconsistent edges for polymorphic vertices */
+    if (vertex->state == GIS_POLYMORPHIC)
+      continue;
+
+    maxoverlap = 0;
+    /* iterate over all pairs of edges, that are not polymorphic */
+    for (eid1 = 0; eid1 < vertex->nof_edges; eid1++) {
+      for (eid2 = eid1 + 1; eid2 < vertex->nof_edges; eid2++) {
+        edge1 = vertex->edges[eid1];
+        edge2 = vertex->edges[eid2];
+
+        if ((edge1->sense == edge2->sense || !edge1->same || !edge2->same) &&
+            (edge1->state != GIS_POLYMORPHIC &&
+             edge2->state != GIS_POLYMORPHIC)) {
+          overlap = gt_scaffolder_calculate_overlap(edge1, edge2);
+          if (overlap > maxoverlap)
+            maxoverlap = overlap;
         }
       }
+    }
 
-     /* check if maxoverlap is larger than ocutoff and mark edges
-        as inconsistent */
-      if (maxoverlap > ocutoff) {
-        for (eid1 = 0; eid1 < vertex->nof_edges; eid1++)
-          vertex->edges[eid1]->state = GIS_INCONSISTENT;
-      }
+   /* check if maxoverlap is larger than ocutoff and mark edges
+      as inconsistent */
+    if (maxoverlap > ocutoff) {
+      for (eid1 = 0; eid1 < vertex->nof_edges; eid1++)
+        vertex->edges[eid1]->state = GIS_INCONSISTENT;
     }
   }
   return had_err;
