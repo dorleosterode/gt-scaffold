@@ -16,7 +16,7 @@
 
 #define PROBABILITY_CUTOFF 0.01
 #define COPY_NUM_CUTOFF_2 1.5
-#define OVERLAP_CUTOFF 100
+#define OVERLAP_CUTOFF 400
 
 int main(int argc, char **argv)
 {
@@ -30,6 +30,10 @@ int main(int argc, char **argv)
   /* create error object */
   err = gt_error_new();
 
+  /* LG: gt_scaffolder_graph_test has to be adapted to new
+         gt_scaffolder_graph_add_edge_ptr_to_vertex function (allocation of
+         space for edges of every vertex in advance, instead of reallocation)
+  */
   /* SK: err auch uebergeben */
   /* Create graph with wrapper construction function and delete it
   gt_scaffolder_graph_test(5, 8, false, 0, false, 0, false);*/
