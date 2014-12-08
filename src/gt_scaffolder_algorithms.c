@@ -546,7 +546,7 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
 {
   gt_assert(graph != NULL);
 
-  GtUword eid, max_num_bases, i;
+  GtUword eid, max_num_bases, i, j;
   GtScaffolderGraphWalk *walk, *bestwalk;
   GtScaffolderGraphVertex *start;
   GtArray *terminal_vertices, *cc_walks, *ccs;
@@ -565,8 +565,8 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
     terminal_vertices = *(GtArray **) gt_array_get(ccs, i);
 
     /* calculate all paths between terminal vertices in this cc */
-    while (gt_array_size(terminal_vertices) != 0) {
-      start = *(GtScaffolderGraphVertex **) gt_array_pop(terminal_vertices);
+    for (j = 0; j < gt_array_size(terminal_vertices); j++) {
+      start = *(GtScaffolderGraphVertex **) gt_array_get(terminal_vertices, j);
       gt_assert(start >= graph->vertices);
       gt_assert(start < graph->vertices + graph->nof_vertices);
       walk = gt_scaffolder_create_walk(graph, start);
@@ -578,9 +578,8 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
     /* the best walk in this cc is chosen */
     max_num_bases = 0;
     bestwalk = NULL;
-    while (gt_array_size(cc_walks) != 0) {
-      /* SK: pop evtl nicht notwendig */
-      walk = *(GtScaffolderGraphWalk **) gt_array_pop(cc_walks);
+    for (j = 0; j < gt_array_size(cc_walks); j++) {
+      walk = *(GtScaffolderGraphWalk **) gt_array_get(cc_walks, j);
       if (walk->total_contig_len > max_num_bases) {
         bestwalk = walk;
         max_num_bases = walk->total_contig_len;
@@ -598,7 +597,11 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
   }
 
   for (i = 0; i < gt_array_size(ccs); i++)
-    gt_array_delete(gt_array_get(ccs, i));
+    gt_array_delete(*(GtArray **) gt_array_get(ccs, i));
+
+  /* free all walks in cc_walks */
+  for (i = 0; i < gt_array_size(cc_walks); i++)
+    gt_scaffolder_walk_delete(*(GtScaffolderGraphWalk **) gt_array_get(cc_walks, i));
 
   gt_array_delete(ccs);
   gt_array_delete(cc_walks);
