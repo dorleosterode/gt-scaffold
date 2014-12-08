@@ -48,7 +48,6 @@ static int gt_scaffolder_graph_vertices_compare(const void *a, const void *b)
 }
 
 /* count records */
-/* SK: Ausgehende Kanten jedes einzelnen Knotens mitzaehlen, zum Allokieren */
 int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
                                                const char *file_name,
                                                GtUword *nof_distances,

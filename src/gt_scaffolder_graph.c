@@ -188,12 +188,13 @@ GtScaffolderGraphEdge
                                GtUword vertexid_1,
                                GtUword vertexid_2)
 {
-  GtScaffolderGraphEdge **edge;
+  GtUword eid;
   GtScaffolderGraphVertex *v1 = graph->vertices + vertexid_1;
 
-  for (edge = v1->edges; edge < (v1->edges + v1->nof_edges); edge++) {
-    if ((*edge)->end->index == vertexid_2)
-      return *edge;
+  for (eid = 0; eid < v1->nof_edges; eid++) {
+    if (v1->edges[eid]->end->index == vertexid_2 ||
+	v1->edges[eid]->start->index == vertexid_2)
+      return v1->edges[eid];
   }
   return NULL;
 }
@@ -280,8 +281,9 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
   GtScaffolderGraphVertex *v;
   GtScaffolderGraphEdge *e;
   /* 0: GIS_UNVISITED, 1: GIS_POLYMORPHIC, 2: GIS_INCONSISTENT,
-     3: GIS_VISITED, 4: GIS_PROCESSED */
-  const char *color_array[] = {"black", "gray", "gray", "red", "green"};
+     3: GIS_REPEAT, 4: GIS_VISITED, 5: GIS_PROCESSED, 6: GIS_SCAFFOLD */
+  const char *color_array[] = {"black", "gray80", "gainsboro", "ivory3", "red",
+                               "green", "magenta"};
 
   /* print first line into f */
   gt_file_xprintf(f, "graph {\n");
@@ -406,6 +408,11 @@ int gt_scaffolder_graph_test(GtUword max_nof_vertices,
     for (i = 0; i < nof_vertices; i++) {
       gt_scaffolder_graph_add_vertex(graph, gt_str_new_cstr("foobar"),
                                      100, 20, 40);
+      /* Simply allocate maximum amount of memory for pointer to potentially
+         outgoing edges */
+      if (nof_edges > 0)
+        graph->vertices[i].edges
+          = gt_malloc(sizeof(*graph->vertices->edges) * nof_edges);
     }
   }
 
