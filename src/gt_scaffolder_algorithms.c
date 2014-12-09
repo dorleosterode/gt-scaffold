@@ -329,42 +329,54 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
   gt_queue_delete(vqueue);
 }
 
+bool is_twin(GtScaffolderGraphEdge *e1, GtScaffolderGraphEdge *e2) {
+  if (e1->start == e2->end &&
+      e1->end == e2->start &&
+      e1->sense != e2->sense)
+    return true;
+  return false;
+}
+
 /* DFS to detect Cycles given a starting vertex */
 GtScaffolderGraphEdge
 *gt_scaffolder_detect_cycle(GtScaffolderGraphVertex *v,
-                            bool dir,
-			    GtArray *visited)
-{
-  GtUword eid;
-  GtScaffolderGraphVertex *end;
+			    bool dir,
+			    GtArray *visited) {
+  GtUword eid, beid;
   GtScaffolderGraphEdge *back;
+  GtArray *stack;
 
   gt_assert(v != NULL);
 
+  stack = gt_array_new(sizeof (GtScaffolderGraphEdge *));
+
   gt_array_add(visited, v);
 
-  v->state = GIS_VISITED;
   for (eid = 0; eid < v->nof_edges; eid++) {
     if (v->edges[eid]->sense == dir &&
 	v->edges[eid]->state != GIS_INCONSISTENT) {
-      /* maybe we want just to mark the corresponding vertices at this
-         point and return a boolean or something like that */
-      end = v->edges[eid]->end;
-      if (end->state != GIS_POLYMORPHIC && end->state != GIS_REPEAT) {
-	if (end->state == GIS_VISITED)
-	  return v->edges[eid];
-	if (end->state == GIS_UNVISITED) {
-	  /* SK: Stack verwenden: gt_stack-inline.h */
-	  back = gt_scaffolder_detect_cycle(end, dir, visited);
-	  if (back != NULL)
+      gt_array_add(stack, v->edges[eid]);
+
+      while (gt_array_size(stack) != 0) {
+	back = *(GtScaffolderGraphEdge **) gt_array_pop(stack);
+	if (back->end->state != GIS_POLYMORPHIC &&
+	    back->end->state != GIS_REPEAT) {
+	  if (back->end->state == GIS_VISITED)
 	    return back;
+	  back->end->state = GIS_VISITED;
+	  for (beid = 0; beid < back->end->nof_edges; beid++) {
+	    if (back->end->edges[beid]->sense == dir &&
+		back->end->edges[beid]->state != GIS_INCONSISTENT &&
+		!is_twin(back, back->end->edges[beid]))
+	      gt_array_add(stack, back->end->edges[beid]);
+	  }
 	}
       }
     }
   }
 
-  v->state = GIS_PROCESSED;
   return NULL;
+
 }
 
 /*  remove cycles */
@@ -382,6 +394,12 @@ void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
     found_cycle = false;
 
     gt_scaffolder_calc_cc_and_terminals(graph, ccs);
+
+    /* initialize all vertices as not visited */
+    for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++) {
+      if (v->state != GIS_POLYMORPHIC && v->state != GIS_REPEAT)
+	v->state = GIS_UNVISITED;
+    }
 
     /* iterate over all ccs */
     for (i = 0; i < gt_array_size(ccs); i++) {
