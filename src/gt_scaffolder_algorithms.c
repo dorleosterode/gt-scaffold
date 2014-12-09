@@ -381,7 +381,7 @@ GtScaffolderGraphEdge
 
 /*  remove cycles */
 void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
-  bool done, found_cycle;
+  bool done = false, found_cycle;
   GtUword i, j, k;
   GtArray *ccs, *terminal_vertices, *visited;
   GtScaffolderGraphEdge *back_edge;

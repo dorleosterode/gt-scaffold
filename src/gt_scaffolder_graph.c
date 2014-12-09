@@ -74,12 +74,11 @@ GtScaffolderGraph *gt_scaffolder_graph_new(GtUword max_nof_vertices,
 void gt_scaffolder_graph_delete(GtScaffolderGraph *graph)
 {
   GtScaffolderGraphVertex *vertex;
-  /*LG: NULL pointer has to be freed !?
-    gt_assert(graph != NULL);*/
 
   if (graph != NULL) {
+
+    /* If existent, free header_seq and pointer to outgoing edges first */
     if (graph->vertices != NULL) {
-      /* If existent, free header_seq and pointer to outgoing edges first */
       for ( vertex = graph->vertices;
             vertex < (graph->vertices + graph->nof_vertices);
             vertex++
@@ -409,6 +408,11 @@ int gt_scaffolder_graph_test(GtUword max_nof_vertices,
     for (i = 0; i < nof_vertices; i++) {
       gt_scaffolder_graph_add_vertex(graph, gt_str_new_cstr("foobar"),
                                      100, 20, 40);
+      /* Simply allocate maximum amount of memory for pointer to potentially
+         outgoing edges */
+      if (nof_edges > 0)
+        graph->vertices[i].edges
+          = gt_malloc(sizeof(*graph->vertices->edges) * nof_edges);
     }
   }
 
@@ -437,7 +441,6 @@ int gt_scaffolder_graph_test(GtUword max_nof_vertices,
   }
 
   /* Print the graph for diff comparison */
-  /* SD: Ask Dorle about error object and (!ma) assertion */
   if (print_graph) {
     GtError *err;
     char outfile[] = "gt_scaffolder_graph_test.dot";
