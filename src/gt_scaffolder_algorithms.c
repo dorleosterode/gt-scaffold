@@ -340,8 +340,8 @@ bool is_twin(GtScaffolderGraphEdge *e1, GtScaffolderGraphEdge *e2) {
 /* DFS to detect Cycles given a starting vertex */
 GtScaffolderGraphEdge
 *gt_scaffolder_detect_cycle(GtScaffolderGraphVertex *v,
-			    bool dir,
-			    GtArray *visited) {
+                            bool dir,
+                            GtArray *visited) {
   GtUword eid, beid;
   GtScaffolderGraphEdge *back;
   GtArray *stack;
@@ -354,26 +354,28 @@ GtScaffolderGraphEdge
 
   for (eid = 0; eid < v->nof_edges; eid++) {
     if (v->edges[eid]->sense == dir &&
-	v->edges[eid]->state != GIS_INCONSISTENT) {
+        v->edges[eid]->state != GIS_INCONSISTENT) {
       gt_array_add(stack, v->edges[eid]);
 
       while (gt_array_size(stack) != 0) {
-	back = *(GtScaffolderGraphEdge **) gt_array_pop(stack);
-	if (back->end->state != GIS_POLYMORPHIC &&
-	    back->end->state != GIS_REPEAT) {
-	  if (back->end->state == GIS_VISITED)
-	    return back;
-	  back->end->state = GIS_VISITED;
-	  for (beid = 0; beid < back->end->nof_edges; beid++) {
-	    if (back->end->edges[beid]->sense == dir &&
-		back->end->edges[beid]->state != GIS_INCONSISTENT &&
-		!is_twin(back, back->end->edges[beid]))
-	      gt_array_add(stack, back->end->edges[beid]);
-	  }
-	}
+        back = *(GtScaffolderGraphEdge **) gt_array_pop(stack);
+        if (back->end->state != GIS_POLYMORPHIC &&
+            back->end->state != GIS_REPEAT) {
+          if (back->end->state == GIS_VISITED)
+            return back;
+          back->end->state = GIS_VISITED;
+          for (beid = 0; beid < back->end->nof_edges; beid++) {
+            if (back->end->edges[beid]->sense == dir &&
+                back->end->edges[beid]->state != GIS_INCONSISTENT &&
+                !is_twin(back, back->end->edges[beid]))
+              gt_array_add(stack, back->end->edges[beid]);
+          }
+        }
       }
     }
   }
+
+  gt_array_delete(stack);
 
   return NULL;
 
@@ -398,7 +400,7 @@ void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
     /* initialize all vertices as not visited */
     for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++) {
       if (v->state != GIS_POLYMORPHIC && v->state != GIS_REPEAT)
-	v->state = GIS_UNVISITED;
+        v->state = GIS_UNVISITED;
     }
 
     /* iterate over all ccs */
@@ -407,27 +409,27 @@ void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
 
       /* iterate over all terminal vertices of this cc */
       for (j = 0; j < gt_array_size(terminal_vertices); j++) {
-	start = *(GtScaffolderGraphVertex **) gt_array_get(terminal_vertices, j);
-	/* search for a cycle, if terminal vertex has edges */
-	if (start->nof_edges > 0) {
-	  back_edge = gt_scaffolder_detect_cycle(start, start->edges[0]->sense, visited);
+        start = *(GtScaffolderGraphVertex **) gt_array_get(terminal_vertices, j);
+        /* search for a cycle, if terminal vertex has edges */
+        if (start->nof_edges > 0) {
+          back_edge = gt_scaffolder_detect_cycle(start, start->edges[0]->sense, visited);
 
-	  /* mark all visited vertices as unvisited for the next search */
-	  for (k = 0; k < gt_array_size(visited); k++) {
-	    v = *(GtScaffolderGraphVertex **) gt_array_get(visited, k);
-	    v->state = GIS_UNVISITED;
-	  }
+          /* mark all visited vertices as unvisited for the next search */
+          for (k = 0; k < gt_array_size(visited); k++) {
+            v = *(GtScaffolderGraphVertex **) gt_array_get(visited, k);
+            v->state = GIS_UNVISITED;
+          }
 
-	  gt_array_reset(visited);
+          gt_array_reset(visited);
 
-	  if (back_edge != NULL) {
-	    found_cycle = true;
-	    /* maybe we want a state for cyclic edges and vertices */
-	    back_edge->state = GIS_INCONSISTENT;
-	    back_edge->start->state = GIS_POLYMORPHIC;
-	    back_edge->end->state = GIS_POLYMORPHIC;
-	  }
-	}
+          if (back_edge != NULL) {
+            found_cycle = true;
+            /* maybe we want a state for cyclic edges and vertices */
+            back_edge->state = GIS_INCONSISTENT;
+            back_edge->start->state = GIS_POLYMORPHIC;
+            back_edge->end->state = GIS_POLYMORPHIC;
+          }
+        }
       }
     }
 
