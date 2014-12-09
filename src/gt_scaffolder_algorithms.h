@@ -29,27 +29,11 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
                                      float astat_cutoff,
                                      GtError *err);
 
-/* check if unique order of edges <*edge1>, <*edge2> with probability
-   <cutoff> exists */
-bool
-gt_scaffolder_graph_ambiguousorder(const GtScaffolderGraphEdge *edge1,
-                                   const GtScaffolderGraphEdge *edge2,
-                                   float cutoff);
-
-GtUword gt_scaffolder_calculate_overlap(GtScaffolderGraphEdge *edge1,
-                                               GtScaffolderGraphEdge *edge2);
-
-void
-gt_scaffolder_graph_check_mark_polymorphic(GtScaffolderGraphEdge *edge1,
-                                           GtScaffolderGraphEdge *edge2,
-                                           float pcutoff,
-                                           float cncutoff);
-
 /* mark polymorphic edges/vertices and inconsistent edges in scaffold graph */
 int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
                                float pcutoff,
                                float cncutoff,
-                               GtUword ocutoff);
+                               GtWord ocutoff);
 
 /* check if vertex holds just sense or antisense edges */
 bool

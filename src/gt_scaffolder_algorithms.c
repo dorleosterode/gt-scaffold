@@ -111,7 +111,7 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
 
 /* check if unique order of edges <*edge1>, <*edge2> with probability
    <cutoff> exists */
-bool
+static bool
 gt_scaffolder_graph_ambiguousorder(const GtScaffolderGraphEdge *edge1,
                                    const GtScaffolderGraphEdge *edge2,
                                    float cutoff)
@@ -131,13 +131,14 @@ gt_scaffolder_graph_ambiguousorder(const GtScaffolderGraphEdge *edge1,
   return (prob12 <= cutoff && prob21 <= cutoff) ? true : false;
 }
 
-GtUword gt_scaffolder_calculate_overlap(GtScaffolderGraphEdge *edge1,
-                                               GtScaffolderGraphEdge *edge2)
+/* LG:overlap can be negative!? */
+static GtWord gt_scaffolder_calculate_overlap(GtScaffolderGraphEdge *edge1,
+                                        GtScaffolderGraphEdge *edge2)
 {
   gt_assert(edge1 != NULL);
   gt_assert(edge2 != NULL);
 
-  GtUword overlap = 0;
+  GtWord overlap = 0;
 
   if (edge2->dist > (edge1->end->seq_len - 1) ||
       edge1->dist > (edge2->end->seq_len - 1)) {
@@ -148,7 +149,7 @@ GtUword gt_scaffolder_calculate_overlap(GtScaffolderGraphEdge *edge1,
   return overlap;
 }
 
-void
+static void
 gt_scaffolder_graph_check_mark_polymorphic(GtScaffolderGraphEdge *edge1,
                                            GtScaffolderGraphEdge *edge2,
                                            float pcutoff,
@@ -180,14 +181,14 @@ gt_scaffolder_graph_check_mark_polymorphic(GtScaffolderGraphEdge *edge1,
 int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
                                float pcutoff,
                                float cncutoff,
-                               GtUword ocutoff)
+                               GtWord ocutoff)
 {
   gt_assert(graph != NULL);
 
   GtScaffolderGraphVertex *vertex;
   GtScaffolderGraphEdge *edge1, *edge2;
-  GtUword overlap, eid1, eid2;
-  GtUword maxoverlap;
+  GtUword eid1, eid2;
+  GtWord maxoverlap, overlap;
   int had_err = 0;
 
 
