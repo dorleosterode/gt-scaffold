@@ -34,6 +34,24 @@
 
 const GtUword BUFSIZE_2 = 1024;
 
+/* Check if vertex already has been filtered out of the graph */
+static bool
+gt_scaffolder_graph_vertex_is_marked(GtScaffolderGraphVertex *vertex) {
+  if(vertex->state == GIS_POLYMORPHIC || vertex->state == GIS_REPEAT)
+    return true;
+  else
+    return false;
+}
+
+/* Check if edge already has been filtered out of the graph */
+static bool gt_scaffolder_graph_edge_is_marked(GtScaffolderGraphEdge *edge) {
+  if(edge->state == GIS_INCONSISTENT || edge->state == GIS_POLYMORPHIC)
+    return true;
+  else
+    return false;
+}
+
+
 /* load a and copy number of every contig and mark repeated contigs */
 int gt_scaffolder_graph_mark_repeats(const char *filename,
                                      GtScaffolderGraph *graph,
@@ -168,7 +186,7 @@ gt_scaffolder_graph_check_mark_polymorphic(GtScaffolderGraphEdge *edge1,
     else
       poly_vertex = edge2->end;
     /* mark all edges of the polymorphic vertex as polymorphic */
-    if (poly_vertex->state != GIS_POLYMORPHIC) {
+    if (!gt_scaffolder_graph_vertex_is_marked(poly_vertex)) {
       GtUword eid;
       for (eid = 0; eid < poly_vertex->nof_edges; eid++)
         poly_vertex->edges[eid]->state = GIS_POLYMORPHIC;
@@ -197,7 +215,7 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
        vertex < (graph->vertices + graph->nof_vertices); vertex++) {
 
     /* ignore repeat vertices */
-    if (vertex->state == GIS_REPEAT)
+    if (gt_scaffolder_graph_vertex_is_marked(vertex))
       continue;
 
     /* iterate over all pairs of edges */
@@ -219,7 +237,7 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
     }
 
     /* no need to check inconsistent edges for polymorphic vertices */
-    if (vertex->state == GIS_POLYMORPHIC)
+    if (gt_scaffolder_graph_vertex_is_marked(vertex))
       continue;
 
     maxoverlap = 0;
@@ -230,8 +248,8 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
         edge2 = vertex->edges[eid2];
 
         if ((edge1->sense == edge2->sense) && /* || !edge1->same || !edge2->same) &&*/
-            (edge1->state != GIS_POLYMORPHIC &&
-             edge2->state != GIS_POLYMORPHIC)) {
+            (!gt_scaffolder_graph_edge_is_marked(edge1) &&
+             !gt_scaffolder_graph_edge_is_marked(edge2))) {
           overlap = gt_scaffolder_calculate_overlap(edge1, edge2);
           if (overlap > maxoverlap)
             maxoverlap = overlap;
@@ -285,14 +303,14 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
 
   for (vertex = graph->vertices; vertex <
       (graph->vertices + graph->nof_vertices); vertex++) {
-    if (vertex->state != GIS_POLYMORPHIC && vertex->state != GIS_REPEAT)
+    if (!gt_scaffolder_graph_vertex_is_marked(vertex))
       vertex->state = GIS_UNVISITED;
   }
 
   for (vertex = graph->vertices; vertex <
       (graph->vertices + graph->nof_vertices); vertex++) {
-    if (vertex->state == GIS_POLYMORPHIC || vertex->state == GIS_VISITED
-        || vertex->state == GIS_REPEAT)
+    if (gt_scaffolder_graph_vertex_is_marked(vertex) ||
+        vertex->state == GIS_VISITED)
       continue;
 
     vertex->state = GIS_PROCESSED;
@@ -310,11 +328,10 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
 
       currentvertex->state = GIS_VISITED;
       for (eid = 0; eid < currentvertex->nof_edges; eid++) {
-        if (currentvertex->edges[eid]->state != GIS_INCONSISTENT) {
+        if (!gt_scaffolder_graph_edge_is_marked(currentvertex->edges[eid])) {
           nextvertex = currentvertex->edges[eid]->end;
           /* just take vertices, that are consistent */
-          if (nextvertex->state == GIS_POLYMORPHIC
-              || nextvertex->state == GIS_REPEAT)
+          if (gt_scaffolder_graph_vertex_is_marked(nextvertex))
             continue;
           if (nextvertex->state == GIS_UNVISITED) {
             nextvertex->state = GIS_PROCESSED;
@@ -354,19 +371,18 @@ GtScaffolderGraphEdge
 
   for (eid = 0; eid < v->nof_edges; eid++) {
     if (v->edges[eid]->sense == dir &&
-        v->edges[eid]->state != GIS_INCONSISTENT) {
+        !gt_scaffolder_graph_edge_is_marked(v->edges[eid])) {
       gt_array_add(stack, v->edges[eid]);
 
       while (gt_array_size(stack) != 0) {
         back = *(GtScaffolderGraphEdge **) gt_array_pop(stack);
-        if (back->end->state != GIS_POLYMORPHIC &&
-            back->end->state != GIS_REPEAT) {
+        if (!gt_scaffolder_graph_vertex_is_marked(back->end)) {
           if (back->end->state == GIS_VISITED)
             return back;
           back->end->state = GIS_VISITED;
           for (beid = 0; beid < back->end->nof_edges; beid++) {
             if (back->end->edges[beid]->sense == dir &&
-                back->end->edges[beid]->state != GIS_INCONSISTENT &&
+                !gt_scaffolder_graph_edge_is_marked(back->end->edges[beid]) &&
                 !is_twin(back, back->end->edges[beid]))
               gt_array_add(stack, back->end->edges[beid]);
           }
@@ -399,7 +415,7 @@ void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
 
     /* initialize all vertices as not visited */
     for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++) {
-      if (v->state != GIS_POLYMORPHIC && v->state != GIS_REPEAT)
+      if (!gt_scaffolder_graph_vertex_is_marked(v))
         v->state = GIS_UNVISITED;
     }
 
@@ -525,15 +541,14 @@ GtScaffolderGraphWalk
   dir = start->edges[0]->sense;
   for (eid = 0; eid < start->nof_edges; eid++) {
     edge = start->edges[eid];
-    if (edge->state != GIS_POLYMORPHIC && edge->state != GIS_INCONSISTENT
-        && edge->end->state != GIS_REPEAT)
+    if (!gt_scaffolder_graph_edge_is_marked(edge) &&
+        !gt_scaffolder_graph_vertex_is_marked(edge->end))
     {
       endvertex = edge->end;
 
       /* SK: genometools hashes verwenden, Dichte evaluieren
          SK: DistEst beim Einlesen prüfen, Basisadresse verwenden fuer Index */
-      if (endvertex->state != GIS_POLYMORPHIC &&
-          endvertex->state != GIS_REPEAT) {
+      if (!gt_scaffolder_graph_vertex_is_marked(endvertex)) {
         distancemap[endvertex->index] = edge->dist;
         edgemap[endvertex->index] = edge;
 
@@ -553,13 +568,12 @@ GtScaffolderGraphWalk
     for (eid = 0; eid < endvertex->nof_edges; eid++) {
       nextedge = endvertex->edges[eid];
       if (nextedge->sense == dir) {
-        if (nextedge->state != GIS_POLYMORPHIC && nextedge->state != GIS_INCONSISTENT
-            && nextedge->end->state != GIS_REPEAT)
+        if (!gt_scaffolder_graph_edge_is_marked(nextedge) &&
+            !gt_scaffolder_graph_vertex_is_marked(nextedge->end))
         {
           nextendvertex = nextedge->end;
 
-          if (nextendvertex->state != GIS_POLYMORPHIC &&
-              nextendvertex->state != GIS_REPEAT) {
+          if (!gt_scaffolder_graph_vertex_is_marked(nextendvertex)) {
 
             distance = edge->dist + nextedge->dist;
 
