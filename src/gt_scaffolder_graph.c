@@ -176,9 +176,8 @@ void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
   graph->edges[nextfree].same = same;
   graph->edges[nextfree].state = GIS_UNVISITED;
 
-  /* Add ptr to edge to start and end vertex */
+  /* Add ptr to edge to start vertex */
   gt_scaffolder_graph_add_edge_ptr_to_vertex(graph, nextfree, vstartID);
-  gt_scaffolder_graph_add_edge_ptr_to_vertex(graph, nextfree, vendID);
 
   graph->nof_edges++;
 }
@@ -192,8 +191,7 @@ GtScaffolderGraphEdge
   GtScaffolderGraphVertex *v1 = graph->vertices + vertexid_1;
 
   for (eid = 0; eid < v1->nof_edges; eid++) {
-    if (v1->edges[eid]->end->index == vertexid_2 ||
-	v1->edges[eid]->start->index == vertexid_2)
+    if (v1->edges[eid]->end->index == vertexid_2)
       return v1->edges[eid];
   }
   return NULL;
