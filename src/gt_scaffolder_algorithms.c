@@ -424,10 +424,9 @@ void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
 
           if (back_edge != NULL) {
             found_cycle = true;
-            /* maybe we want a state for cyclic edges and vertices */
-            back_edge->state = GIS_INCONSISTENT;
-            back_edge->start->state = GIS_POLYMORPHIC;
-            back_edge->end->state = GIS_POLYMORPHIC;
+            back_edge->state = GIS_CYCLIC;
+            back_edge->start->state = GIS_CYCLIC;
+            back_edge->end->state = GIS_CYCLIC;
           }
         }
       }
