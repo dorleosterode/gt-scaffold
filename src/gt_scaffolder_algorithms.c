@@ -209,7 +209,7 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
         /* check pair of edges (implict twin edge included) with same
            direction for polymorphism (if directions are opposite,
            one of the edges has to be reverse) */
-        if (edge1->sense == edge2->sense || !edge1->same || !edge2->same) {
+        if (edge1->sense == edge2->sense) { /* || !edge1->same || !edge2->same) {*/
           /* check if edge1->end and edge2->end are polymorphic */
           gt_scaffolder_graph_check_mark_polymorphic(edge1, edge2,
                                                      pcutoff, cncutoff);
@@ -229,7 +229,7 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
         edge1 = vertex->edges[eid1];
         edge2 = vertex->edges[eid2];
 
-        if ((edge1->sense == edge2->sense || !edge1->same || !edge2->same) &&
+        if ((edge1->sense == edge2->sense) && /* || !edge1->same || !edge2->same) &&*/
             (edge1->state != GIS_POLYMORPHIC &&
              edge2->state != GIS_POLYMORPHIC)) {
           overlap = gt_scaffolder_calculate_overlap(edge1, edge2);
@@ -332,8 +332,7 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
 
 bool is_twin(GtScaffolderGraphEdge *e1, GtScaffolderGraphEdge *e2) {
   if (e1->start == e2->end &&
-      e1->end == e2->start &&
-      e1->sense != e2->sense)
+      e1->end == e2->start)
     return true;
   return false;
 }
