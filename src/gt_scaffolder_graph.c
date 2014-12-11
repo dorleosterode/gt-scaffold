@@ -129,31 +129,13 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
   graph->nof_vertices++;
 }
 
-static void gt_scaffolder_graph_add_edge_ptr_to_vertex(GtScaffolderGraph *graph,
-                                                       GtUword edgeID,
-                                                       GtUword vertexID)
-{
-  /* Allocate new space for pointer to this edge
-  if (graph->vertices[vertexID].nof_edges > 0) {
-    graph->vertices[vertexID].edges = */
-      /* SK: realloc zu teuer? Besser: DistEst parsen und gezielt allokieren
-      gt_realloc( graph->vertices[vertexID].edges, sizeof (*graph->edges) *
-                  (graph->vertices[vertexID].nof_edges + 1) );
-  }*/
-  /* Assign adress of this edge to the pointer */
-  graph->vertices[vertexID].edges[graph->vertices[vertexID].nof_edges] =
-    &graph->edges[edgeID];
-
-  graph->vertices[vertexID].nof_edges++;
-}
-
 /* Initialize a new edge in <*graph>. Each edge between two contig
    vertices <vstartID> and <vendID> contains information about the distance
    <dist>, standard deviation <std_dev>, number of pairs <num_pairs> and the
    direction of <vstartID> <dir> and corresponding <vendID> <same> */
 void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
-                                  GtUword vstartID,
-                                  GtUword vendID,
+                                  GtScaffolderGraphVertex *vstart,
+                                  GtScaffolderGraphVertex *vend,
                                   GtWord dist,
                                   float std_dev,
                                   GtUword num_pairs,
@@ -167,8 +149,8 @@ void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
   GtUword nextfree = graph->nof_edges;
 
   /* Inititalize edge */
-  graph->edges[nextfree].start = graph->vertices + vstartID;
-  graph->edges[nextfree].end = graph->vertices + vendID;
+  graph->edges[nextfree].start = vstart;
+  graph->edges[nextfree].end = vend;
   graph->edges[nextfree].dist = dist;
   graph->edges[nextfree].std_dev = std_dev;
   graph->edges[nextfree].num_pairs = num_pairs;
@@ -177,31 +159,30 @@ void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
   graph->edges[nextfree].state = GIS_UNVISITED;
 
   /* Add ptr to edge to start vertex */
-  gt_scaffolder_graph_add_edge_ptr_to_vertex(graph, nextfree, vstartID);
+  vstart->edges[vstart->nof_edges] = graph->edges + nextfree;
+  vstart->nof_edges++;
 
   graph->nof_edges++;
 }
 
 GtScaffolderGraphEdge
-*gt_scaffolder_graph_find_edge(const GtScaffolderGraph *graph,
-                               GtUword vertexid_1,
-                               GtUword vertexid_2)
+*gt_scaffolder_graph_find_edge(const GtScaffolderGraphVertex *vertex_1,
+                               const GtScaffolderGraphVertex *vertex_2)
 {
   GtUword eid;
-  GtScaffolderGraphVertex *v1 = graph->vertices + vertexid_1;
 
-  for (eid = 0; eid < v1->nof_edges; eid++) {
-    if (v1->edges[eid]->end->index == vertexid_2)
-      return v1->edges[eid];
+  for (eid = 0; eid < vertex_1->nof_edges; eid++) {
+    if (vertex_1->edges[eid]->end == vertex_2)
+      return vertex_1->edges[eid];
   }
   return NULL;
 }
 
-/* determines corresponding vertex id to contig header */
+/* determines corresponding vertex to contig header */
 /* SD: Binaersuche separat testen */
-bool gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
-                                      GtUword *vertex_id,
-                                      const GtStr *header_seq)
+bool gt_scaffolder_graph_get_vertex(const GtScaffolderGraph *graph,
+                                    GtScaffolderGraphVertex **vertex,
+                                    const GtStr *header_seq)
 {
   GtScaffolderGraphVertex *min_vertex, *max_vertex, *mid_vertex;
   int cmp;
@@ -219,7 +200,7 @@ bool gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
       if (cmp == 0)
       {
         found = true;
-        *vertex_id = mid_vertex->index;
+        *vertex = mid_vertex;
         break;
       }
       else if (cmp < 0)
@@ -421,7 +402,9 @@ int gt_scaffolder_graph_test(GtUword max_nof_vertices,
   /* Init edge portion of graph. Connect every vertex with another vertex until
   <nof_edges> is reached. */
   if (init_edges) {
-    unsigned vertex1 = 0, vertex2 = 0;
+    GtScaffolderGraphVertex *vertex1, *vertex2;
+    vertex1 = graph->vertices;
+    vertex2 = graph->vertices;
 
     gt_scaffolder_graph_init_edges(graph, max_nof_edges);
 
@@ -431,9 +414,9 @@ int gt_scaffolder_graph_test(GtUword max_nof_vertices,
     /* Connect 1st vertex with every other vertex, then 2nd one, etc */
     unsigned i;
     for (i = 0; i < nof_edges; i++) {
-      if (vertex2 < nof_vertices - 1)
+      if (vertex2-graph->vertices < nof_vertices - 1)
         vertex2++;
-      else if (vertex1 < nof_vertices - 2) {
+      else if (vertex1-graph->vertices < nof_vertices - 2) {
         vertex1++;
         vertex2 = vertex1 + 1;
       }

@@ -62,13 +62,12 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
 {
   FILE *file;
   char line[BUFSIZE_2+1], ctg_header[BUFSIZE_2+1];
-  GtUword ctg_id;
   GtWord num1, num2, num3;
   float astat, copy_num;
   bool valid_contig;
   int had_err;
   GtStr *gt_str_field;
-  GtScaffolderGraphVertex *vertex;
+  GtScaffolderGraphVertex *vertex, *ctg;
 
   had_err = 0;
   valid_contig = false;
@@ -91,7 +90,6 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
       num3 = 0;
       copy_num = 0.0;
       astat = 0.0;
-      ctg_id = 0;
 
       /* parse record consisting of ctg_header, a-statistics and copy number */
       /* SD: %[^>,] failed, parsed the whole line instead */
@@ -101,13 +99,13 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
         /* get vertex id corresponding to root contig header */
         gt_str_set(gt_str_field, ctg_header);
         /* gt_scaffolder_graph_get_vertex_id in if Statement schieben */
-        valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id,
+        valid_contig = gt_scaffolder_graph_get_vertex(graph, &ctg,
                      gt_str_field);
 
         if (valid_contig) {
           /* SK: Evaluieren, ob Knoten hier als Repeat gesetzt werden können */
-          graph->vertices[ctg_id].astat = astat;
-          graph->vertices[ctg_id].copy_num = copy_num;
+          ctg->astat = astat;
+          ctg->copy_num = copy_num;
         }
       }
       else
