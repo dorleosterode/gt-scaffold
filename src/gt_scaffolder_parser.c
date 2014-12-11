@@ -225,7 +225,8 @@ int gt_scaffolder_parser_read_distances(const char *filename,
             /* ignore invalid records */
             if (num_pairs < 0) {
               had_err = -1;
-              continue;
+              gt_error_set(err, "Invalid value for number of pairs");
+              break;
             }
 
             /* parsing composition,
@@ -267,6 +268,8 @@ int gt_scaffolder_parser_read_distances(const char *filename,
           /* split line by next space delimiter */
           field = strtok(NULL," ");
         }
+        if (had_err == -1)
+          break;
       }
     }
   }
