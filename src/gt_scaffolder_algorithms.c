@@ -30,13 +30,15 @@
 #include "gt_scaffolder_graph.h"
 
 /* increment size for realloc of walk */
+/* SK: Increment evaluieren, zB mit Faktor 1.2 multiplizieren */
 #define INCREMENT_SIZE 32
 
+/* SK: BUFSIZE_2 lokal in Funktion deklarieren */
 const GtUword BUFSIZE_2 = 1024;
 
 /* Check if vertex already has been filtered out of the graph */
 static bool
-gt_scaffolder_graph_vertex_is_marked(GtScaffolderGraphVertex *vertex) {
+gt_scaffolder_graph_vertex_is_marked(const GtScaffolderGraphVertex *vertex) {
   if(vertex->state == GIS_POLYMORPHIC || vertex->state == GIS_REPEAT)
     return true;
   else
@@ -44,7 +46,8 @@ gt_scaffolder_graph_vertex_is_marked(GtScaffolderGraphVertex *vertex) {
 }
 
 /* Check if edge already has been filtered out of the graph */
-static bool gt_scaffolder_graph_edge_is_marked(GtScaffolderGraphEdge *edge) {
+static bool
+gt_scaffolder_graph_edge_is_marked(const GtScaffolderGraphEdge *edge) {
   if(edge->state == GIS_INCONSISTENT || edge->state == GIS_POLYMORPHIC)
     return true;
   else
@@ -75,7 +78,7 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
   file = fopen(filename, "rb");
   if (file == NULL) {
     had_err = -1;
-    gt_error_set(err, " can not read file %s ", filename);
+    gt_error_set(err, "can not read file %s", filename);
   }
   if (had_err != -1)
   {
@@ -99,16 +102,19 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
       {
         /* get vertex id corresponding to root contig header */
         gt_str_set(gt_str_field, ctg_header);
+        /* gt_scaffolder_graph_get_vertex_id in if Statement schieben */
         valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id,
                      gt_str_field);
 
         if (valid_contig) {
+          /* SK: Evaluieren, ob Knoten hier als Repeat gesetzt werden können */
           graph->vertices[ctg_id].astat = astat;
           graph->vertices[ctg_id].copy_num = copy_num;
         }
       }
       else
         had_err = -1;
+        /* SK: Fehlermeldung setzen */
     }
   }
   fclose(file);
@@ -117,8 +123,11 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
   if (had_err != -1)
   {
     /* iterate over all vertices */
+    /* SK: Vertex lokal deklarieren */
     for (vertex = graph->vertices;
-      vertex < (graph->vertices + graph->nof_vertices); vertex++) {
+      vertex < (graph->vertices + graph->nof_vertices); vertex++)
+    {
+      /* SK: Cutoffs und Bedingungen nochmal evaluieren */
       if (vertex->astat <= astat_cutoff || vertex->copy_num < copy_num_cutoff)
         vertex->state = GIS_REPEAT;
     }
@@ -151,17 +160,19 @@ gt_scaffolder_graph_ambiguousorder(const GtScaffolderGraphEdge *edge1,
 
 /* LG:overlap can be negative!? */
 static GtWord gt_scaffolder_calculate_overlap(GtScaffolderGraphEdge *edge1,
-                                        GtScaffolderGraphEdge *edge2)
+                                              GtScaffolderGraphEdge *edge2)
 {
   gt_assert(edge1 != NULL);
   gt_assert(edge2 != NULL);
 
   GtWord overlap = 0;
 
-  if (edge2->dist > (edge1->end->seq_len - 1) ||
-      edge1->dist > (edge2->end->seq_len - 1)) {
+  if (edge2->dist >= edge1->end->seq_len ||
+      edge1->dist >= edge2->end->seq_len)
+  {
     GtWord intersect_start = MAX(edge1->dist, edge2->dist);
     GtWord intersect_end = MAX(edge1->end->seq_len, edge2->end->seq_len);
+    /* SK: gt_assert(intersect_end >= intersect_start); */
     overlap = intersect_end - intersect_start;
   }
   return overlap;
@@ -196,6 +207,7 @@ gt_scaffolder_graph_check_mark_polymorphic(GtScaffolderGraphEdge *edge1,
 }
 
 /* mark polymorphic edges/vertices and inconsistent edges in scaffold graph */
+/* SK: kann void Funktion sein */
 int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
                                float pcutoff,
                                float cncutoff,
@@ -208,7 +220,6 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
   GtUword eid1, eid2;
   GtWord maxoverlap, overlap;
   int had_err = 0;
-
 
   /* iterate over all vertices */
   for (vertex = graph->vertices;
@@ -268,13 +279,12 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
 }
 
 /* check if vertex holds just sense or antisense edges */
-bool
-gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
+bool gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
 {
-  gt_assert(vertex != NULL);
-
   bool dir;
   GtUword eid;
+
+  gt_assert(vertex != NULL);
 
   if (vertex->nof_edges == 0)
     return true;
@@ -299,13 +309,13 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
   GtScaffolderGraphVertex *vertex, *currentvertex, *nextvertex;
   GtUword eid;
 
-  vqueue = gt_queue_new();
-
   for (vertex = graph->vertices; vertex <
       (graph->vertices + graph->nof_vertices); vertex++) {
     if (!gt_scaffolder_graph_vertex_is_marked(vertex))
       vertex->state = GIS_UNVISITED;
   }
+
+  vqueue = gt_queue_new();
 
   for (vertex = graph->vertices; vertex <
       (graph->vertices + graph->nof_vertices); vertex++) {
@@ -347,7 +357,8 @@ void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
   gt_queue_delete(vqueue);
 }
 
-bool is_twin(GtScaffolderGraphEdge *e1, GtScaffolderGraphEdge *e2) {
+static bool
+is_twin(const GtScaffolderGraphEdge *e1, const GtScaffolderGraphEdge *e2) {
   if (e1->start == e2->end &&
       e1->end == e2->start)
     return true;
@@ -378,7 +389,7 @@ GtScaffolderGraphEdge
         back = *(GtScaffolderGraphEdge **) gt_array_pop(stack);
         if (!gt_scaffolder_graph_vertex_is_marked(back->end)) {
           if (back->end->state == GIS_VISITED)
-            return back;
+            return back; /* SK: Stack aufräumen */
           back->end->state = GIS_VISITED;
           for (beid = 0; beid < back->end->nof_edges; beid++) {
             if (back->end->edges[beid]->sense == dir &&
@@ -455,6 +466,7 @@ void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
     gt_array_reset(ccs);
 
     /* if a cycle was found, we have to search again */
+    /* SK: done = !found_cycle, eine Variable verwenden */
     done = found_cycle ? false : true;
   }
 
@@ -489,7 +501,7 @@ void gt_scaffolder_walk_delete(GtScaffolderGraphWalk *walk)
 
 /* add edge <*edge> to walk <*walk> */
 void gt_scaffolder_walk_addegde(GtScaffolderGraphWalk *walk,
-                                       GtScaffolderGraphEdge *edge)
+                                GtScaffolderGraphEdge *edge)
 {
   gt_assert(walk != NULL);
   gt_assert(edge != NULL);

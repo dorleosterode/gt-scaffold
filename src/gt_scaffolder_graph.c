@@ -335,11 +335,15 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
 
     /* parse contigs in FASTA-format and save them as vertices of
        scaffold graph */
+    /* SK: had_err = */
     gt_scaffolder_parser_read_contigs(graph, ctg_filename, min_ctg_len, err);
 
+    /* SK: had_err wird zwischendurch nicht umgesetzt */
+    /* SK: Statt schachteln, Block beenden */
     if (had_err == 0)
     {
       /* count distance information */
+      /* SK: Nochmal prüfen, warum initialisiert werden muss */
       nof_distances = 0;
       had_err = gt_scaffolder_parser_count_distances(graph, dist_filename,
               &nof_distances, err);

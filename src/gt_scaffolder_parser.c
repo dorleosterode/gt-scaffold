@@ -108,9 +108,10 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
           if (sscanf(field,"%[^>,]," GT_WD "," GT_WD ",%f", ctg_header,
               &dist, &num_pairs, &std_dev) == 4)
 
-            /* ignore invalid records */
+            /* ignore invalid records; SK: Fehler wird momentan ignoriert? */
             if (num_pairs < 0) {
               had_err = -1;
+              /* SK: Fehler in Errorobjekt, break statt continue, aufräumen */
               continue;
             }
 
@@ -133,6 +134,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
           field = strtok(NULL," ");
         }
         edge_counter[root_ctg_id] += line_record_counter;
+        /* SK: record_counter += line_record_counter; */
       }
     }
   }
