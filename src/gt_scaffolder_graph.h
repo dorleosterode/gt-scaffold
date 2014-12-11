@@ -28,7 +28,7 @@
 /* SK: Implementationsaufwand fuer Getter / Setter abschaetzen */
 typedef enum { GIS_UNVISITED, GIS_POLYMORPHIC, GIS_INCONSISTENT,
                GIS_REPEAT, GIS_VISITED, GIS_PROCESSED,
-               GIS_SCAFFOLD} GraphItemState;
+               GIS_SCAFFOLD, GIS_CYCLIC} GraphItemState;
 
 /* vertex of scaffold graph (describes one contig) */
 typedef struct GtScaffolderGraphVertex {
