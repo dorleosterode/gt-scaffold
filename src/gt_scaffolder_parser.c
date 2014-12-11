@@ -80,7 +80,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
   file = fopen(file_name, "rb");
   if (file == NULL) {
     had_err = -1;
-    gt_error_set(err, " can not read file %s ",file_name);
+    gt_error_set(err, "can not read file %s",file_name);
   }
 
   edge_counter = gt_calloc(graph->nof_vertices, sizeof (*edge_counter));
@@ -108,11 +108,11 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
           if (sscanf(field,"%[^>,]," GT_WD "," GT_WD ",%f", ctg_header,
               &dist, &num_pairs, &std_dev) == 4)
 
-            /* ignore invalid records; SK: Fehler wird momentan ignoriert? */
+            /* ignore invalid records; */
             if (num_pairs < 0) {
               had_err = -1;
-              /* SK: Fehler in Errorobjekt, break statt continue, aufräumen */
-              continue;
+              gt_error_set(err, "Invalid value for number of pairs");
+              break;
             }
 
             /* cut composition sign */
@@ -124,7 +124,6 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
                            gt_str_field);
 
             if (valid_contig) {
-              record_counter++;
 
               edge_counter[ctg-graph->vertices] += 1;
               line_record_counter++;
@@ -133,21 +132,26 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
           /* split line by next space delimiter */
           field = strtok(NULL," ");
         }
+
+        if (had_err == -1)
+          break;
         edge_counter[root_ctg-graph->vertices] += line_record_counter;
-        /* SK: record_counter += line_record_counter; */
+        record_counter += line_record_counter;
       }
     }
   }
 
-  /* allocate memory for edges of vertices */
-  for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++) {
-    if (edge_counter[gt_scaffolder_graph_get_vertex_id(graph, v)] != 0)
-      v->edges = gt_malloc(sizeof(*v->edges) *
-       edge_counter[gt_scaffolder_graph_get_vertex_id(graph, v)]);
+  if (had_err != -1) {
+    /* allocate memory for edges of vertices */
+    for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++) {
+      if (edge_counter[gt_scaffolder_graph_get_vertex_id(graph, v)] != 0)
+        v->edges = gt_malloc(sizeof(*v->edges) *
+         edge_counter[gt_scaffolder_graph_get_vertex_id(graph, v)]);
+    }
+    *nof_distances = record_counter;
   }
 
   gt_free(edge_counter);
-  *nof_distances = record_counter;
   gt_str_delete(gt_str_field);
 
   fclose(file);
