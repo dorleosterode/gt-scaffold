@@ -279,9 +279,10 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
   GtScaffolderGraphVertex *v;
   GtScaffolderGraphEdge *e;
   /* 0: GIS_UNVISITED, 1: GIS_POLYMORPHIC, 2: GIS_INCONSISTENT,
-     3: GIS_REPEAT, 4: GIS_VISITED, 5: GIS_PROCESSED, 6: GIS_SCAFFOLD */
+     3: GIS_REPEAT, 4: GIS_VISITED, 5: GIS_PROCESSED, 6: GIS_SCAFFOLD
+     7: GIS_CYCLIC */
   const char *color_array[] = {"black", "gray80", "gainsboro", "ivory3", "red",
-                               "green", "magenta"};
+                               "green", "magenta", "blue"};
 
   /* print first line into f */
   gt_file_xprintf(f, "graph {\n");
