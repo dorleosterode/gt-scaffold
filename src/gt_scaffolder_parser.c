@@ -55,14 +55,14 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
 {
   FILE *file;
   char line[BUFSIZE+1], *field, ctg_header[BUFSIZE+1];
-  GtUword record_counter, ctg_id, root_ctg_id, *edge_counter,
+  GtUword record_counter, *edge_counter,
           line_record_counter;
   GtWord dist, num_pairs;
   float std_dev;
   int had_err;
   bool valid_contig;
   GtStr *gt_str_field;
-  GtScaffolderGraphVertex *v;
+  GtScaffolderGraphVertex *v, *ctg, *root_ctg;
 
   had_err = 0;
   valid_contig = false;
@@ -94,7 +94,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
       field = strtok(line," ");
 
       gt_str_set(gt_str_field, field);
-      valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id,
+      valid_contig = gt_scaffolder_graph_get_vertex(graph, &root_ctg,
                 gt_str_field);
 
       if (valid_contig) {
@@ -108,9 +108,10 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
           if (sscanf(field,"%[^>,]," GT_WD "," GT_WD ",%f", ctg_header,
               &dist, &num_pairs, &std_dev) == 4)
 
-            /* ignore invalid records */
+            /* ignore invalid records; SK: Fehler wird momentan ignoriert? */
             if (num_pairs < 0) {
               had_err = -1;
+              /* SK: Fehler in Errorobjekt, break statt continue, aufräumen */
               continue;
             }
 
@@ -119,20 +120,21 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
 
             gt_str_set(gt_str_field, ctg_header);
             /* get vertex id corresponding to contig header */
-            valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id,
+            valid_contig = gt_scaffolder_graph_get_vertex(graph, &ctg,
                            gt_str_field);
 
             if (valid_contig) {
               record_counter++;
 
-              edge_counter[ctg_id] += 1;
+              edge_counter[ctg-graph->vertices] += 1;
               line_record_counter++;
             }
 
           /* split line by next space delimiter */
           field = strtok(NULL," ");
         }
-        edge_counter[root_ctg_id] += line_record_counter;
+        edge_counter[root_ctg-graph->vertices] += line_record_counter;
+        /* SK: record_counter += line_record_counter; */
       }
     }
   }
@@ -164,18 +166,17 @@ int gt_scaffolder_parser_read_distances(const char *filename,
   FILE *file;
   /* SD: Konstante setzen? */
   char line[BUFSIZE+1], *field, ctg_header[BUFSIZE+1];
-  GtUword root_ctg_id, ctg_id, ctg_header_len;
+  GtUword ctg_header_len;
   GtWord dist, num_pairs;
   float std_dev;
   bool same, sense, valid_contig;
   GtScaffolderGraphEdge *edge;
+  GtScaffolderGraphVertex *root_ctg, *ctg;
   int had_err;
   GtStr *gt_str_field;
 
   had_err = 0;
   valid_contig = false;
-  root_ctg_id = 0;
-  ctg_id = 0;
   gt_str_field = gt_str_new();
 
   file = fopen(filename, "rb");
@@ -199,7 +200,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
       /* get vertex id corresponding to root contig header */
       /* SK: Moeglichkeit einer set Funktion evaluieren */
       gt_str_set(gt_str_field, field);
-      valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id,
+      valid_contig = gt_scaffolder_graph_get_vertex(graph, &root_ctg,
                 gt_str_field);
 
       /* Debbuging: printf("rootctgid: %s\n",field);*/
@@ -232,12 +233,12 @@ int gt_scaffolder_parser_read_distances(const char *filename,
 
             gt_str_set(gt_str_field, ctg_header);
             /* get vertex id corresponding to contig header */
-            valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id,
+            valid_contig = gt_scaffolder_graph_get_vertex(graph, &ctg,
                       gt_str_field);
 
             if (valid_contig) {
               /* check if edge between vertices already exists */
-              edge = gt_scaffolder_graph_find_edge(graph, root_ctg_id, ctg_id);
+              edge = gt_scaffolder_graph_find_edge(root_ctg, ctg);
               if (edge != NULL)
               {
                 /*  LG: laut SGA edge->std_dev < std_dev,  korrekt? */
@@ -250,7 +251,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
                 /*else { Conflicting-Flag? }*/
               }
               else
-                gt_scaffolder_graph_add_edge(graph, root_ctg_id, ctg_id, dist,
+                gt_scaffolder_graph_add_edge(graph, root_ctg, ctg, dist,
                                               std_dev,num_pairs, sense, same);
             }
           }
