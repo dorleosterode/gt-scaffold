@@ -309,8 +309,6 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
 
   graph = NULL;
   had_err = 0;
-  nof_contigs = 0;
-  nof_distances = 0;
 
   /* count contigs */
   had_err = gt_scaffolder_parser_count_contigs(ctg_filename, min_ctg_len,
@@ -323,33 +321,29 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
     graph->vertices = NULL;
     graph->edges = NULL;
     gt_scaffolder_graph_init_vertices(graph, nof_contigs);
-
-    /* parse contigs in FASTA-format and save them as vertices of
-       scaffold graph */
-    /* SK: had_err = */
-    gt_scaffolder_parser_read_contigs(graph, ctg_filename, min_ctg_len, err);
-
-    /* SK: had_err wird zwischendurch nicht umgesetzt */
-    /* SK: Statt schachteln, Block beenden */
-    if (had_err == 0)
-    {
-      /* count distance information */
-      /* SK: Nochmal prüfen, warum initialisiert werden muss */
-      nof_distances = 0;
-      had_err = gt_scaffolder_parser_count_distances(graph, dist_filename,
-              &nof_distances, err);
-
-      if (had_err == 0)
-      {
-        /* allocate memory for edges of scaffolder graph */
-        gt_scaffolder_graph_init_edges(graph, nof_distances);
-        /* parse distance information of contigs in abyss-dist-format and
-           save them as edges of scaffold graph */
-        had_err = gt_scaffolder_parser_read_distances(dist_filename,
-                  graph, false, err);
-      }
-    }
   }
+
+  /* parse contigs in FASTA-format and save them as vertices of
+     scaffold graph */
+  if (had_err == 0)
+    had_err = gt_scaffolder_parser_read_contigs(graph, ctg_filename, min_ctg_len, err);
+
+  if (had_err == 0)
+  {
+    /* count distance information */
+    had_err = gt_scaffolder_parser_count_distances(graph, dist_filename,
+            &nof_distances, err);
+  }
+
+  if (had_err == 0)
+  {
+    /* allocate memory for edges of scaffolder graph */
+    gt_scaffolder_graph_init_edges(graph, nof_distances);
+    /* parse distance information of contigs in abyss-dist-format and
+       save them as edges of scaffold graph */
+    had_err = gt_scaffolder_parser_read_distances(dist_filename,
+              graph, false, err);
+  }   
 
   if (had_err != 0)
   {
