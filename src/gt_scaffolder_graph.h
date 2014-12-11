@@ -32,8 +32,6 @@ typedef enum { GIS_UNVISITED, GIS_POLYMORPHIC, GIS_INCONSISTENT,
 
 /* vertex of scaffold graph (describes one contig) */
 typedef struct GtScaffolderGraphVertex {
-  /* vertex index in array */
-  GtUword index;
   /* header sequence of corresponding contig */
   GtStr *header_seq;
   /* sequence length of corresponding contig */
@@ -123,6 +121,10 @@ void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
 GtScaffolderGraphEdge
 *gt_scaffolder_graph_find_edge(const GtScaffolderGraphVertex *vertex_1,
                                const GtScaffolderGraphVertex *vertex_2);
+
+/* determines vertex id */
+GtUword gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
+                                       const GtScaffolderGraphVertex *vertex);
 
 /* determines corresponding vertex to contig header */
 bool gt_scaffolder_graph_get_vertex(const GtScaffolderGraph *graph,

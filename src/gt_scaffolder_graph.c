@@ -113,7 +113,6 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
   nextfree = graph->nof_vertices;
 
   /* Initialize vertex */
-  graph->vertices[nextfree].index = nextfree; /* SD: remove without breaking */
   graph->vertices[nextfree].seq_len = seq_len;
   graph->vertices[nextfree].astat = astat;
   graph->vertices[nextfree].copy_num = copy_num;
@@ -230,6 +229,14 @@ void gt_scaffolder_graph_alter_edge(GtScaffolderGraphEdge *edge,
   edge->same = same;
 }
 
+/* determine vertex id*/
+GtUword gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
+                                       const GtScaffolderGraphVertex *vertex)
+{
+  gt_assert(graph != NULL);
+  return (vertex - graph->vertices);
+}
+
 /* print graphrepresentation in dot-format into file filename */
 int gt_scaffolder_graph_print(const GtScaffolderGraph *g,
                               const char *filename,
@@ -271,7 +278,8 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
   /* iterate over all vertices and print them. add attribute color according
      to the current state */
   for (v = g->vertices; v < (g->vertices + g->nof_vertices); v++) {
-    gt_file_xprintf(f, GT_WU " [color=\"%s\" label=\"%s\"];\n", v->index,
+    gt_file_xprintf(f, GT_WU " [color=\"%s\" label=\"%s\"];\n", 
+                    gt_scaffolder_graph_get_vertex_id(g, v),
                     color_array[v->state], gt_str_get(v->header_seq));
   }
 
@@ -280,7 +288,8 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
   for (e = g->edges; e < (g->edges + g->nof_edges); e++) {
     gt_file_xprintf(f,
                     GT_WU " -- " GT_WU " [color=\"%s\" label=\"" GT_WD "\"];\n",
-                    e->start->index, e->end->index,
+                    gt_scaffolder_graph_get_vertex_id(g, e->start),
+                    gt_scaffolder_graph_get_vertex_id(g, e->end),
                     color_array[e->state], e->dist);
   }
 

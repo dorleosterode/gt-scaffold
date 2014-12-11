@@ -559,8 +559,9 @@ GtScaffolderGraphWalk
       /* SK: genometools hashes verwenden, Dichte evaluieren
          SK: DistEst beim Einlesen prüfen, Basisadresse verwenden fuer Index */
       if (!vertex_is_marked(endvertex)) {
-        distancemap[endvertex->index] = edge->dist;
-        edgemap[endvertex->index] = edge;
+        GtUword endvertex_index = gt_scaffolder_graph_get_vertex_id(graph, endvertex);
+        distancemap[endvertex_index] = edge->dist;
+        edgemap[endvertex_index] = edge;
 
         gt_queue_add(wqueue, edge);
       }
@@ -588,11 +589,13 @@ GtScaffolderGraphWalk
             distance = edge->dist + nextedge->dist;
 
             /* GT_WORD_MAX is the initial value */
-            if (distancemap[nextendvertex->index] == GT_WORD_MAX ||
-                distancemap[nextendvertex->index] > distance)
+            GtUword next_endvertex_index =
+                    gt_scaffolder_graph_get_vertex_id(graph, nextendvertex);
+            if (distancemap[next_endvertex_index] == GT_WORD_MAX ||
+                distancemap[next_endvertex_index] > distance)
               {
-                distancemap[nextendvertex->index] = distance;
-                edgemap[nextendvertex->index] = nextedge;
+                distancemap[next_endvertex_index] = distance;
+                edgemap[next_endvertex_index] = nextedge;
                 gt_queue_add(wqueue, nextedge);
               }
           }
@@ -610,8 +613,8 @@ GtScaffolderGraphWalk
     gt_assert(currentvertex >= graph->vertices);
 
     currentwalk = gt_scaffolder_walk_new();
-    while (currentvertex->index != start->index) {
-      reverseedge = edgemap[currentvertex->index];
+    while (currentvertex != start) {
+      reverseedge = edgemap[gt_scaffolder_graph_get_vertex_id(graph, currentvertex)];
       /* Start NICHT end */
       currentvertex = reverseedge->start;
       /* Speicherung des aktuellen Walks */
