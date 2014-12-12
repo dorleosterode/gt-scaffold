@@ -38,7 +38,7 @@ const GtUword BUFSIZE_2 = 1024;
 
 /* Check if vertex already has been filtered out of the graph */
 static bool
-gt_scaffolder_graph_vertex_is_marked(const GtScaffolderGraphVertex *vertex) {
+vertex_is_marked(const GtScaffolderGraphVertex *vertex) {
   if(vertex->state == GIS_POLYMORPHIC || vertex->state == GIS_REPEAT
      || vertex->state == GIS_CYCLIC)
     return true;
@@ -47,7 +47,7 @@ gt_scaffolder_graph_vertex_is_marked(const GtScaffolderGraphVertex *vertex) {
 }
 
 /* Check if edge already has been filtered out of the graph */
-static bool gt_scaffolder_graph_edge_is_marked(const GtScaffolderGraphEdge *edge) {
+static bool edge_is_marked(const GtScaffolderGraphEdge *edge) {
   if(edge->state == GIS_INCONSISTENT || edge->state == GIS_POLYMORPHIC
      || edge->state == GIS_CYCLIC)
     return true;
