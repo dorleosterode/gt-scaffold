@@ -112,15 +112,15 @@ int gt_scaffolder_parser_read_distances_test(const char *filename,
 
           /* cut composition sign */
           ctg_header[ctg_header_len - 1] = '\0';
-            
+
           /* write parsed distance information to file */
           sign = same == true ? '+' : '-';
-          gt_file_xprintf(f, " %s%c,%ld,%ld,%.1f", ctg_header, sign,
-                  dist, num_pairs, std_dev);
+          gt_file_xprintf(f, " %s%c," GT_WD "," GT_WD ",%.1f", ctg_header,
+                  sign, dist, num_pairs, std_dev);
         }
         /* switch direction */
         else if (*field == ';')
-          sense = sense ? false : true;        
+          sense = sense ? false : true;
 
         /* split line by next space delimiter */
         field = strtok(NULL," ");
@@ -243,7 +243,8 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
 
   if (had_err != -1) {
     /* allocate memory for edges of vertices */
-    for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++) {
+    for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices);
+         v++) {
       if (edge_counter[gt_scaffolder_graph_get_vertex_id(graph, v)] != 0)
         v->edges = gt_malloc(sizeof(*v->edges) *
          edge_counter[gt_scaffolder_graph_get_vertex_id(graph, v)]);

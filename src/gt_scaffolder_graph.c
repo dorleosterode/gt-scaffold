@@ -278,7 +278,7 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
   /* iterate over all vertices and print them. add attribute color according
      to the current state */
   for (v = g->vertices; v < (g->vertices + g->nof_vertices); v++) {
-    gt_file_xprintf(f, GT_WU " [color=\"%s\" label=\"%s\"];\n", 
+    gt_file_xprintf(f, GT_WU " [color=\"%s\" label=\"%s\"];\n",
                     gt_scaffolder_graph_get_vertex_id(g, v),
                     color_array[v->state], gt_str_get(v->header_seq));
   }
@@ -342,7 +342,7 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
        save them as edges of scaffold graph */
     had_err = gt_scaffolder_parser_read_distances(dist_filename,
               graph, false, err);
-  }   
+  }
 
   if (had_err != 0)
   {

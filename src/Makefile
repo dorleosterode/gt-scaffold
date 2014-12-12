@@ -30,4 +30,4 @@ test: test.x
 	../testsuite/gt_scaffolder.sh
 
 clean:
-	${RM} *.d *.dot *.o *.x *~
+	${RM} *.d *.dot *.o *.x *~ *.de
