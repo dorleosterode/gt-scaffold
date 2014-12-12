@@ -14,3 +14,6 @@ diff gt_scaffolder_parser_test_complete.dot \
 
 diff gt_scaffolder_algorithms_test_filter_repeats.dot \
   $TESTDATA/gt_scaffolder_algorithms_test_filter_repeats_expected.dot
+
+diff gt_scaffolder_parser_test_read_distances.de \
+  $TESTDATA/libPE.de

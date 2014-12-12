@@ -1,6 +1,7 @@
 *.aux
 *.aux
 *.d
+*.de
 *.dot
 *.DS_Store
 *.dvi
