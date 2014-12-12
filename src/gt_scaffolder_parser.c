@@ -47,6 +47,106 @@ static int gt_scaffolder_graph_vertices_compare(const void *a, const void *b)
   return gt_str_cmp(vertex_a->header_seq, vertex_b->header_seq);
 }
 
+/* test parsing distance records */
+int gt_scaffolder_parser_read_distances_test(const char *filename,
+                                             char *output_filename,
+                                             GtError *err)
+{
+  FILE *file;
+  GtFile *f;
+  char line[BUFSIZE+1], *field, ctg_header[BUFSIZE+1], sign;
+  GtUword ctg_header_len;
+  GtWord dist, num_pairs;
+  float std_dev;
+  bool same, sense, first_antisense;
+  int had_err;
+
+  had_err = 0;
+  file = fopen(filename, "rb");
+  if (file == NULL) {
+    had_err = -1;
+    gt_error_set(err, "can not read file %s",filename);
+  }
+
+  if (had_err != -1) {
+    f = gt_file_new(output_filename, "w", err);
+    if (f == NULL)
+      had_err = -1;
+  }
+
+  if (had_err != -1)
+  {
+    /* iterate over each line of file until eof (contig record) */
+    while (fgets(line, BUFSIZE, file) != NULL)
+    {
+      /* remove '\n' from end of line */
+      line[strlen(line)-1] = '\0';
+      /* set sense direction as default */
+      sense = true;
+      /* split line by first space delimiter */
+      field = strtok(line," ");
+
+      /* write parsed distance information to file */
+      gt_file_xprintf(f, "%s", field);
+      first_antisense = true;
+
+      /* iterate over space delimited records */
+      while (field != NULL)
+      {
+        /* parse record consisting of contig header, distance,
+           number of pairs, std. dev. */
+        if (sscanf(field,"%[^>,]," GT_WD "," GT_WD ",%f", ctg_header, &dist,
+            &num_pairs, &std_dev) == 4)
+        {
+          /* ignore invalid records */
+          if (num_pairs < 0) {
+            had_err = -1;
+            gt_error_set(err, "Invalid value for number of pairs");
+            break;
+          }
+
+          /* parsing composition,
+           '+' indicates same strand and '-' reverse strand */
+          ctg_header_len = strlen(ctg_header);
+          same = ctg_header[ctg_header_len - 1] == '+' ? true : false;
+
+          /* cut composition sign */
+          ctg_header[ctg_header_len - 1] = '\0';
+            
+          /* write parsed distance information to file */
+          sign = same == true ? '+' : '-';
+          gt_file_xprintf(f, " %s%c,%ld,%ld,%.1f", ctg_header, sign,
+                  dist, num_pairs, std_dev);
+        }
+        /* switch direction */
+        else if (*field == ';')
+          sense = sense ? false : true;        
+
+        /* split line by next space delimiter */
+        field = strtok(NULL," ");
+
+        if (!sense && first_antisense) {
+          gt_file_xprintf(f, " ;");
+          first_antisense = false;
+        }
+
+      }
+      if (had_err == -1)
+        break;
+
+      if (sense)
+        gt_file_xprintf(f, " ;");
+      gt_file_xprintf(f, "\n");
+    }
+  }
+
+  if (file != NULL)
+    gt_file_delete(f);
+
+  fclose(file);
+  return had_err;
+}
+
 /* count records */
 int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
                                                const char *file_name,

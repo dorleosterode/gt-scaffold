@@ -7,6 +7,7 @@
 
 #include "gt_scaffolder_graph.h"
 #include "gt_scaffolder_algorithms.h"
+#include "gt_scaffolder_parser.h"
 
 /* adapted from SGA examples */
 #define MIN_CONTIG_LEN 200
@@ -60,15 +61,20 @@ int main(int argc, char **argv)
     dist_filename = argv[2];
     astat_filename = argv[3];
 
-    /* load contigs and distance information from file */
-    /* LG: return had_err by function ...new_from_file? */
-    graph = gt_scaffolder_graph_new_from_file(contig_filename, MIN_CONTIG_LEN,
-            dist_filename, err);
-    gt_scaffolder_graph_print(graph, "gt_scaffolder_parser_test_complete.dot",
-                              err);
-    /* load astatistics and copy number from file */
-    had_err = gt_scaffolder_graph_mark_repeats(astat_filename, graph,
-              COPY_NUM_CUTOFF, ASTAT_NUM_CUTOFF, err);
+    /* test function for correct parsing of distance file */
+    had_err = gt_scaffolder_parser_read_distances_test(dist_filename,
+              "gt_scaffolder_parser_test_read_distances.de", err);
+
+    if (had_err == 0) {
+      /* load contigs and distance information from file */
+      graph = gt_scaffolder_graph_new_from_file(contig_filename,
+              MIN_CONTIG_LEN, dist_filename, err);
+      gt_scaffolder_graph_print(graph,
+      "gt_scaffolder_parser_test_complete.dot", err);
+      /* load astatistics and copy number from file */
+      had_err = gt_scaffolder_graph_mark_repeats(astat_filename, graph,
+                COPY_NUM_CUTOFF, ASTAT_NUM_CUTOFF, err);
+    }
 
     if (had_err == 0) {
       gt_scaffolder_graph_print(graph,
@@ -76,12 +82,15 @@ int main(int argc, char **argv)
       /* mark polymorphic vertices, edges and inconsistent edges */
       had_err = gt_scaffolder_graph_filter(graph, PROBABILITY_CUTOFF,
                 COPY_NUM_CUTOFF_2, OVERLAP_CUTOFF);
-      if (had_err == 0)
-        gt_scaffolder_graph_print(graph,
+    }
+
+    if (had_err == 0) {
+      gt_scaffolder_graph_print(graph,
             "gt_scaffolder_algorithms_test_filter_polymorphism.dot", err);
     }
+
     if (had_err != 0)
-      fprintf(stderr,"ERROR: %s\n",gt_error_get(err));
+      fprintf(stderr,"ERROR: %s\n", gt_error_get(err));
 
     gt_scaffolder_graph_delete(graph);
   }
