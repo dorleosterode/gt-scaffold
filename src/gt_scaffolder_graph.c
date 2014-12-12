@@ -321,12 +321,11 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
     graph->vertices = NULL;
     graph->edges = NULL;
     gt_scaffolder_graph_init_vertices(graph, nof_contigs);
-  }
-
-  /* parse contigs in FASTA-format and save them as vertices of
+    /* parse contigs in FASTA-format and save them as vertices of
      scaffold graph */
-  if (had_err == 0)
-    had_err = gt_scaffolder_parser_read_contigs(graph, ctg_filename, min_ctg_len, err);
+    had_err = gt_scaffolder_parser_read_contigs(graph, ctg_filename,
+              min_ctg_len, err);
+  }
 
   if (had_err == 0)
   {
