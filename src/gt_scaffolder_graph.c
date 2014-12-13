@@ -366,7 +366,8 @@ int gt_scaffolder_graph_test(GtUword max_nof_vertices,
                              GtUword nof_vertices,
                              bool init_edges,
                              GtUword nof_edges,
-                             bool print_graph)
+                             bool print_graph,
+                             GtError *err)
 {
   int had_err = 0;
   GtScaffolderGraph *graph;
@@ -430,16 +431,11 @@ int gt_scaffolder_graph_test(GtUword max_nof_vertices,
 
   /* Print the graph for diff comparison */
   if (print_graph) {
-    GtError *err;
     char outfile[] = "gt_scaffolder_graph_test.dot";
-    err = gt_error_new();
     gt_scaffolder_graph_print(graph, outfile, err);
-    gt_error_delete(err);
   }
 
   gt_scaffolder_graph_delete(graph);
-  if (graph != NULL)
-    had_err = -1;
 
   return had_err;
 }

@@ -55,25 +55,34 @@ int main(int argc, char **argv)
   err = gt_error_new();
 
   if(strcmp(mode, "graph") == 0) {
-    /* SK: err auch uebergeben */
-    /* Create graph with wrapper construction function and delete it */
-    gt_scaffolder_graph_test(5, 8, false, 0, false, 0, false);
+    GtUword max_nof_vertices, max_nof_edges, nof_vertices, nof_edges;
+    int init_vertices_tmp, init_edges_tmp, print_graph_tmp;
+    bool init_vertices, init_edges, print_graph;
 
-    /* Create graph, only initialize vertices, delete it */
-    gt_scaffolder_graph_test(5, 8, true, 0, false, 0, false);
+    if (argc != 9 ||
+        sscanf(argv[2], GT_WD, &max_nof_vertices) != 1 ||
+        sscanf(argv[3], GT_WD, &max_nof_edges) != 1 ||
+        sscanf(argv[4], "%d", &init_vertices_tmp) != 1 ||
+        sscanf(argv[5], GT_WD, &nof_vertices) != 1 ||
+        sscanf(argv[6], "%i", &init_edges_tmp) != 1 ||
+        sscanf(argv[7], GT_WD, &nof_edges) != 1 ||
+        sscanf(argv[8], "%i", &print_graph_tmp) != 1)
+    {
+      fprintf(stderr, "USAGE: <max_nof_vertices> <max_nof_edges> "
+              "<init_vertices> <nof_vertices> <init_edges> <nof_edges> "
+               "<print_graph> %s\n", argv[0]);
+    } else {
+      init_vertices = init_vertices_tmp;
+      init_edges = init_edges_tmp;
+      print_graph = print_graph_tmp;
 
-    /* Create graph, initialize and create vertices, delete it */
-    gt_scaffolder_graph_test(5, 8, true, 5, false, 0, false);
+      /* Create graph with wrapper construction function and delete it */
+      had_err = gt_scaffolder_graph_test(max_nof_vertices, max_nof_edges,
+        init_vertices, nof_vertices, init_edges, nof_edges, print_graph, err);
 
-    /* Create graph, initialize vertices and edges, create vertices, delete it */
-    gt_scaffolder_graph_test(5, 8, true, 5, true, 0, false);
-
-    /* Create graph, initialize and create vertices and edges, delete it */
-    gt_scaffolder_graph_test(5, 8, true, 5, true, 8, false);
-
-    /* Create graph, initialize and create vertices and edges, print it,
-       delete it */
-    gt_scaffolder_graph_test(5, 8, true, 5, true, 8, true);
+      if (had_err != 0)
+          fprintf(stderr,"ERROR: %s\n",gt_error_get(err));
+    }
   }
 
   if (strcmp(mode, "parser") == 0) {
@@ -122,5 +131,5 @@ int main(int argc, char **argv)
 
   gt_error_delete(err);
   gt_lib_clean();
-  return EXIT_SUCCESS;
+  return had_err;
 }

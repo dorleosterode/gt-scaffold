@@ -168,6 +168,7 @@ int gt_scaffolder_graph_test(GtUword max_nof_vertices,
                              GtUword nof_vertices,
                              bool init_edges,
                              GtUword nof_edges,
-                             bool print_graph);
+                             bool print_graph,
+                             GtError *err);
 
 #endif

@@ -18,8 +18,21 @@
 set -e -x
 
 TESTDATA=../testdata
+FALSE=0
+TRUE=1
 
-./test.x graph
+# Create graph with wrapper construction function and delete it
+./test.x graph 5 8 $FALSE 0 $FALSE 0 $FALSE
+# Create graph, only initialize vertices, delete it
+./test.x graph 5 8 $TRUE 0 $FALSE 0 $FALSE
+# Create graph, initialize and create vertices, delete it
+./test.x graph 5 8 $TRUE 5 $FALSE 0 $FALSE
+# Create graph, initialize vertices and edges, create vertices, delete it
+./test.x graph 5 8 $TRUE 5 $TRUE 0 $FALSE
+# Create graph, initialize and create vertices and edges, delete it
+./test.x graph 5 8 $TRUE 5 $TRUE 8 $FALSE
+# Create graph, initialize and create vertices and edges, print it, delete it
+./test.x graph 5 8 $TRUE 5 $TRUE 8 $TRUE
 diff gt_scaffolder_graph_test.dot \
   $TESTDATA/gt_scaffolder_graph_test_expected.dot
 
