@@ -85,7 +85,7 @@ int main(int argc, char **argv)
     }
   }
 
-  if (strcmp(mode, "parser") == 0) {
+  else if (strcmp(mode, "parser") == 0) {
     if (argc != 3) {
       fprintf(stderr, "Usage: <DistEst file>\n");
     } else {
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
     }
   }
 
-  if (strcmp(mode, "filter") == 0) {
+  else if (strcmp(mode, "filter") == 0) {
     if (argc != 5) {
       fprintf(stderr, "Usage:<FASTA-file with contigs> <DistEst file> "
                       "<astat file>\n");
