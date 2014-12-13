@@ -32,8 +32,6 @@ typedef enum { GIS_UNVISITED, GIS_POLYMORPHIC, GIS_INCONSISTENT,
 
 /* vertex of scaffold graph (describes one contig) */
 typedef struct GtScaffolderGraphVertex {
-  /* vertex index in array */
-  GtUword index;
   /* header sequence of corresponding contig */
   GtStr *header_seq;
   /* sequence length of corresponding contig */
@@ -112,23 +110,26 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
    <dist>, standard deviation <std_dev>, number of pairs <num_pairs> and the
    direction of <vstartID> <dir> and corresponding <vendID> <same> */
 void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
-                                  GtUword vstartID,
-                                  GtUword vendID,
+                                  GtScaffolderGraphVertex *vstart,
+                                  GtScaffolderGraphVertex *vend,
                                   GtWord dist,
                                   float std_dev,
                                   GtUword num_pairs,
                                   bool dir,
                                   bool same);
 
-GtScaffolderGraphEdge *gt_scaffolder_graph_find_edge(
-                                    const GtScaffolderGraph *graph,
-                                    GtUword vertexid_1,
-                                    GtUword vertexid_2);
+GtScaffolderGraphEdge
+*gt_scaffolder_graph_find_edge(const GtScaffolderGraphVertex *vertex_1,
+                               const GtScaffolderGraphVertex *vertex_2);
 
-/* determines corresponding vertex id to contig header */
-bool gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
-                                      GtUword *vertex_id,
-                                      const GtStr *header_seq);
+/* determines vertex id */
+GtUword gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
+                                       const GtScaffolderGraphVertex *vertex);
+
+/* determines corresponding vertex to contig header */
+bool gt_scaffolder_graph_get_vertex(const GtScaffolderGraph *graph,
+                                    GtScaffolderGraphVertex **vertex,
+                                    const GtStr *header_seq);
 
 /* assign edge <*edge> new attributes */
 void gt_scaffolder_graph_alter_edge(GtScaffolderGraphEdge *edge,

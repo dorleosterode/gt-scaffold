@@ -37,8 +37,10 @@
 const GtUword BUFSIZE_2 = 1024;
 
 /* Check if vertex already has been filtered out of the graph */
-static bool vertex_is_marked(const GtScaffolderGraphVertex *vertex) {
-  if(vertex->state == GIS_POLYMORPHIC || vertex->state == GIS_REPEAT)
+static bool
+vertex_is_marked(const GtScaffolderGraphVertex *vertex) {
+  if (vertex->state == GIS_POLYMORPHIC || vertex->state == GIS_REPEAT
+     || vertex->state == GIS_CYCLIC)
     return true;
   else
     return false;
@@ -46,12 +48,12 @@ static bool vertex_is_marked(const GtScaffolderGraphVertex *vertex) {
 
 /* Check if edge already has been filtered out of the graph */
 static bool edge_is_marked(const GtScaffolderGraphEdge *edge) {
-  if(edge->state == GIS_INCONSISTENT || edge->state == GIS_POLYMORPHIC)
+  if (edge->state == GIS_INCONSISTENT || edge->state == GIS_POLYMORPHIC
+     || edge->state == GIS_CYCLIC)
     return true;
   else
     return false;
 }
-
 
 /* load a and copy number of every contig and mark repeated contigs */
 int gt_scaffolder_graph_mark_repeats(const char *filename,
@@ -62,13 +64,12 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
 {
   FILE *file;
   char line[BUFSIZE_2+1], ctg_header[BUFSIZE_2+1];
-  GtUword ctg_id;
   GtWord num1, num2, num3;
   float astat, copy_num;
   bool valid_contig;
   int had_err;
   GtStr *gt_str_field;
-  GtScaffolderGraphVertex *vertex;
+  GtScaffolderGraphVertex *vertex, *ctg;
 
   had_err = 0;
   valid_contig = false;
@@ -91,7 +92,6 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
       num3 = 0;
       copy_num = 0.0;
       astat = 0.0;
-      ctg_id = 0;
 
       /* parse record consisting of ctg_header, a-statistics and copy number */
       /* SD: %[^>,] failed, parsed the whole line instead */
@@ -101,13 +101,13 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
         /* get vertex id corresponding to root contig header */
         gt_str_set(gt_str_field, ctg_header);
         /* gt_scaffolder_graph_get_vertex_id in if Statement schieben */
-        valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id,
+        valid_contig = gt_scaffolder_graph_get_vertex(graph, &ctg,
                      gt_str_field);
 
         if (valid_contig) {
           /* SK: Evaluieren, ob Knoten hier als Repeat gesetzt werden können */
-          graph->vertices[ctg_id].astat = astat;
-          graph->vertices[ctg_id].copy_num = copy_num;
+          ctg->astat = astat;
+          ctg->copy_num = copy_num;
         }
       }
       else
@@ -236,7 +236,8 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
         /* check pair of edges (implict twin edge included) with same
            direction for polymorphism (if directions are opposite,
            one of the edges has to be reverse) */
-        if (edge1->sense == edge2->sense) { /* || !edge1->same || !edge2->same) {*/
+        /* || !edge1->same || !edge2->same) {*/
+        if (edge1->sense == edge2->sense) {
           /* check if edge1->end and edge2->end are polymorphic */
           gt_scaffolder_graph_check_mark_polymorphic(edge1, edge2,
                                                      pcutoff, cncutoff);
@@ -255,8 +256,8 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
       for (eid2 = eid1 + 1; eid2 < vertex->nof_edges; eid2++) {
         edge1 = vertex->edges[eid1];
         edge2 = vertex->edges[eid2];
-
-        if ((edge1->sense == edge2->sense) && /* || !edge1->same || !edge2->same) &&*/
+        /* || !edge1->same || !edge2->same) &&*/
+        if ((edge1->sense == edge2->sense) &&
             (!edge_is_marked(edge1) &&
              !edge_is_marked(edge2))) {
           overlap = gt_scaffolder_calculate_overlap(edge1, edge2);
@@ -423,7 +424,8 @@ void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
     gt_scaffolder_calc_cc_and_terminals(graph, ccs);
 
     /* initialize all vertices as not visited */
-    for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++) {
+    for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices);
+         v++) {
       if (!vertex_is_marked(v))
         v->state = GIS_UNVISITED;
     }
@@ -434,10 +436,12 @@ void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
 
       /* iterate over all terminal vertices of this cc */
       for (j = 0; j < gt_array_size(terminal_vertices); j++) {
-        start = *(GtScaffolderGraphVertex **) gt_array_get(terminal_vertices, j);
+        start = *(GtScaffolderGraphVertex **)
+                gt_array_get(terminal_vertices, j);
         /* search for a cycle, if terminal vertex has edges */
         if (start->nof_edges > 0) {
-          back_edge = gt_scaffolder_detect_cycle(start, start->edges[0]->sense, visited);
+          back_edge = gt_scaffolder_detect_cycle(start,
+                      start->edges[0]->sense, visited);
 
           /* mark all visited vertices as unvisited for the next search */
           for (k = 0; k < gt_array_size(visited); k++) {
@@ -535,7 +539,8 @@ GtScaffolderGraphWalk
   wqueue = gt_queue_new();
   terminal_vertices = gt_array_new(sizeof (start));
 
-  /* initialize distancemap with GT_WORD_MAX, we want to minimize over distancemap */
+  /* initialize distancemap with GT_WORD_MAX, we want to minimize
+     over distancemap */
   distancemap = gt_malloc(sizeof (*distancemap) * graph->nof_vertices);
   for (i = 0; i < graph->nof_vertices; i++)
     distancemap[i] = GT_WORD_MAX;
@@ -558,8 +563,10 @@ GtScaffolderGraphWalk
       /* SK: genometools hashes verwenden, Dichte evaluieren
          SK: DistEst beim Einlesen prüfen, Basisadresse verwenden fuer Index */
       if (!vertex_is_marked(endvertex)) {
-        distancemap[endvertex->index] = edge->dist;
-        edgemap[endvertex->index] = edge;
+        GtUword endvertex_index = gt_scaffolder_graph_get_vertex_id(graph,
+                                  endvertex);
+        distancemap[endvertex_index] = edge->dist;
+        edgemap[endvertex_index] = edge;
 
         gt_queue_add(wqueue, edge);
       }
@@ -587,11 +594,13 @@ GtScaffolderGraphWalk
             distance = edge->dist + nextedge->dist;
 
             /* GT_WORD_MAX is the initial value */
-            if (distancemap[nextendvertex->index] == GT_WORD_MAX ||
-                distancemap[nextendvertex->index] > distance)
+            GtUword next_endvertex_index =
+                    gt_scaffolder_graph_get_vertex_id(graph, nextendvertex);
+            if (distancemap[next_endvertex_index] == GT_WORD_MAX ||
+                distancemap[next_endvertex_index] > distance)
               {
-                distancemap[nextendvertex->index] = distance;
-                edgemap[nextendvertex->index] = nextedge;
+                distancemap[next_endvertex_index] = distance;
+                edgemap[next_endvertex_index] = nextedge;
                 gt_queue_add(wqueue, nextedge);
               }
           }
@@ -609,8 +618,9 @@ GtScaffolderGraphWalk
     gt_assert(currentvertex >= graph->vertices);
 
     currentwalk = gt_scaffolder_walk_new();
-    while (currentvertex->index != start->index) {
-      reverseedge = edgemap[currentvertex->index];
+    while (currentvertex != start) {
+      reverseedge = edgemap[gt_scaffolder_graph_get_vertex_id(graph,
+                            currentvertex)];
       /* Start NICHT end */
       currentvertex = reverseedge->start;
       /* Speicherung des aktuellen Walks */
@@ -695,7 +705,8 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
 
   /* free all walks in cc_walks */
   for (i = 0; i < gt_array_size(cc_walks); i++)
-    gt_scaffolder_walk_delete(*(GtScaffolderGraphWalk **) gt_array_get(cc_walks, i));
+    gt_scaffolder_walk_delete(*(GtScaffolderGraphWalk **)
+                  gt_array_get(cc_walks, i));
 
   gt_array_delete(ccs);
   gt_array_delete(cc_walks);

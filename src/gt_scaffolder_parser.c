@@ -47,6 +47,106 @@ static int gt_scaffolder_graph_vertices_compare(const void *a, const void *b)
   return gt_str_cmp(vertex_a->header_seq, vertex_b->header_seq);
 }
 
+/* test parsing distance records */
+int gt_scaffolder_parser_read_distances_test(const char *filename,
+                                             char *output_filename,
+                                             GtError *err)
+{
+  FILE *file;
+  GtFile *f;
+  char line[BUFSIZE+1], *field, ctg_header[BUFSIZE+1], sign;
+  GtUword ctg_header_len;
+  GtWord dist, num_pairs;
+  float std_dev;
+  bool same, sense, first_antisense;
+  int had_err;
+
+  had_err = 0;
+  file = fopen(filename, "rb");
+  if (file == NULL) {
+    had_err = -1;
+    gt_error_set(err, "can not read file %s",filename);
+  }
+
+  if (had_err != -1) {
+    f = gt_file_new(output_filename, "w", err);
+    if (f == NULL)
+      had_err = -1;
+  }
+
+  if (had_err != -1)
+  {
+    /* iterate over each line of file until eof (contig record) */
+    while (fgets(line, BUFSIZE, file) != NULL)
+    {
+      /* remove '\n' from end of line */
+      line[strlen(line)-1] = '\0';
+      /* set sense direction as default */
+      sense = true;
+      /* split line by first space delimiter */
+      field = strtok(line," ");
+
+      /* write parsed distance information to file */
+      gt_file_xprintf(f, "%s", field);
+      first_antisense = true;
+
+      /* iterate over space delimited records */
+      while (field != NULL)
+      {
+        /* parse record consisting of contig header, distance,
+           number of pairs, std. dev. */
+        if (sscanf(field,"%[^>,]," GT_WD "," GT_WD ",%f", ctg_header, &dist,
+            &num_pairs, &std_dev) == 4)
+        {
+          /* ignore invalid records */
+          if (num_pairs < 0) {
+            had_err = -1;
+            gt_error_set(err, "Invalid value for number of pairs");
+            break;
+          }
+
+          /* parsing composition,
+           '+' indicates same strand and '-' reverse strand */
+          ctg_header_len = strlen(ctg_header);
+          same = ctg_header[ctg_header_len - 1] == '+' ? true : false;
+
+          /* cut composition sign */
+          ctg_header[ctg_header_len - 1] = '\0';
+
+          /* write parsed distance information to file */
+          sign = same == true ? '+' : '-';
+          gt_file_xprintf(f, " %s%c," GT_WD "," GT_WD ",%.1f", ctg_header,
+                  sign, dist, num_pairs, std_dev);
+        }
+        /* switch direction */
+        else if (*field == ';')
+          sense = sense ? false : true;
+
+        /* split line by next space delimiter */
+        field = strtok(NULL," ");
+
+        if (!sense && first_antisense) {
+          gt_file_xprintf(f, " ;");
+          first_antisense = false;
+        }
+
+      }
+      if (had_err == -1)
+        break;
+
+      if (sense)
+        gt_file_xprintf(f, " ;");
+      gt_file_xprintf(f, "\n");
+    }
+  }
+
+  if (file != NULL)
+    gt_file_delete(f);
+
+  fclose(file);
+  return had_err;
+}
+
 /* count records */
 int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
                                                const char *file_name,
@@ -55,14 +155,14 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
 {
   FILE *file;
   char line[BUFSIZE+1], *field, ctg_header[BUFSIZE+1];
-  GtUword record_counter, ctg_id, root_ctg_id, *edge_counter,
+  GtUword record_counter, *edge_counter,
           line_record_counter;
   GtWord dist, num_pairs;
   float std_dev;
   int had_err;
   bool valid_contig;
   GtStr *gt_str_field;
-  GtScaffolderGraphVertex *v;
+  GtScaffolderGraphVertex *v, *ctg, *root_ctg;
 
   had_err = 0;
   valid_contig = false;
@@ -73,14 +173,14 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
   qsort(graph->vertices, graph->nof_vertices, sizeof (*graph->vertices),
        gt_scaffolder_graph_vertices_compare);
   /* update vertex ID
-     LG: Knoten ID eigentlich redundant? SD: Ja. LG: OK?!*/
+     LG: Knoten ID eigentlich redundant? SD: Ja. LG: OK?!
   for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++)
-    v->index = v - graph->vertices;
+    v->index = v - graph->vertices;*/
 
   file = fopen(file_name, "rb");
   if (file == NULL) {
     had_err = -1;
-    gt_error_set(err, " can not read file %s ",file_name);
+    gt_error_set(err, "can not read file %s",file_name);
   }
 
   edge_counter = gt_calloc(graph->nof_vertices, sizeof (*edge_counter));
@@ -94,7 +194,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
       field = strtok(line," ");
 
       gt_str_set(gt_str_field, field);
-      valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id,
+      valid_contig = gt_scaffolder_graph_get_vertex(graph, &root_ctg,
                 gt_str_field);
 
       if (valid_contig) {
@@ -108,11 +208,11 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
           if (sscanf(field,"%[^>,]," GT_WD "," GT_WD ",%f", ctg_header,
               &dist, &num_pairs, &std_dev) == 4)
 
-            /* ignore invalid records; SK: Fehler wird momentan ignoriert? */
+            /* ignore invalid records; */
             if (num_pairs < 0) {
               had_err = -1;
-              /* SK: Fehler in Errorobjekt, break statt continue, aufräumen */
-              continue;
+              gt_error_set(err, "Invalid value for number of pairs");
+              break;
             }
 
             /* cut composition sign */
@@ -120,33 +220,39 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
 
             gt_str_set(gt_str_field, ctg_header);
             /* get vertex id corresponding to contig header */
-            valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id,
+            valid_contig = gt_scaffolder_graph_get_vertex(graph, &ctg,
                            gt_str_field);
 
             if (valid_contig) {
-              record_counter++;
 
-              edge_counter[ctg_id] += 1;
+              edge_counter[ctg-graph->vertices] += 1;
               line_record_counter++;
             }
 
           /* split line by next space delimiter */
           field = strtok(NULL," ");
         }
-        edge_counter[root_ctg_id] += line_record_counter;
-        /* SK: record_counter += line_record_counter; */
+
+        if (had_err == -1)
+          break;
+        edge_counter[root_ctg-graph->vertices] += line_record_counter;
+        record_counter += line_record_counter;
       }
     }
   }
 
-  /* allocate memory for edges of vertices */
-  for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++) {
-    if (edge_counter[v->index] != 0)
-      v->edges = gt_malloc(sizeof(*v->edges) * edge_counter[v->index]);
+  if (had_err != -1) {
+    /* allocate memory for edges of vertices */
+    for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices);
+         v++) {
+      if (edge_counter[gt_scaffolder_graph_get_vertex_id(graph, v)] != 0)
+        v->edges = gt_malloc(sizeof(*v->edges) *
+         edge_counter[gt_scaffolder_graph_get_vertex_id(graph, v)]);
+    }
+    *nof_distances = record_counter;
   }
 
   gt_free(edge_counter);
-  *nof_distances = record_counter;
   gt_str_delete(gt_str_field);
 
   fclose(file);
@@ -166,18 +272,17 @@ int gt_scaffolder_parser_read_distances(const char *filename,
   FILE *file;
   /* SD: Konstante setzen? */
   char line[BUFSIZE+1], *field, ctg_header[BUFSIZE+1];
-  GtUword root_ctg_id, ctg_id, ctg_header_len;
+  GtUword ctg_header_len;
   GtWord dist, num_pairs;
   float std_dev;
   bool same, sense, valid_contig;
   GtScaffolderGraphEdge *edge;
+  GtScaffolderGraphVertex *root_ctg, *ctg;
   int had_err;
   GtStr *gt_str_field;
 
   had_err = 0;
   valid_contig = false;
-  root_ctg_id = 0;
-  ctg_id = 0;
   gt_str_field = gt_str_new();
 
   file = fopen(filename, "rb");
@@ -201,7 +306,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
       /* get vertex id corresponding to root contig header */
       /* SK: Moeglichkeit einer set Funktion evaluieren */
       gt_str_set(gt_str_field, field);
-      valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &root_ctg_id,
+      valid_contig = gt_scaffolder_graph_get_vertex(graph, &root_ctg,
                 gt_str_field);
 
       /* Debbuging: printf("rootctgid: %s\n",field);*/
@@ -221,7 +326,8 @@ int gt_scaffolder_parser_read_distances(const char *filename,
             /* ignore invalid records */
             if (num_pairs < 0) {
               had_err = -1;
-              continue;
+              gt_error_set(err, "Invalid value for number of pairs");
+              break;
             }
 
             /* parsing composition,
@@ -234,12 +340,12 @@ int gt_scaffolder_parser_read_distances(const char *filename,
 
             gt_str_set(gt_str_field, ctg_header);
             /* get vertex id corresponding to contig header */
-            valid_contig = gt_scaffolder_graph_get_vertex_id(graph, &ctg_id,
+            valid_contig = gt_scaffolder_graph_get_vertex(graph, &ctg,
                       gt_str_field);
 
             if (valid_contig) {
               /* check if edge between vertices already exists */
-              edge = gt_scaffolder_graph_find_edge(graph, root_ctg_id, ctg_id);
+              edge = gt_scaffolder_graph_find_edge(root_ctg, ctg);
               if (edge != NULL)
               {
                 /*  LG: laut SGA edge->std_dev < std_dev,  korrekt? */
@@ -252,7 +358,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
                 /*else { Conflicting-Flag? }*/
               }
               else
-                gt_scaffolder_graph_add_edge(graph, root_ctg_id, ctg_id, dist,
+                gt_scaffolder_graph_add_edge(graph, root_ctg, ctg, dist,
                                               std_dev,num_pairs, sense, same);
             }
           }
@@ -263,6 +369,8 @@ int gt_scaffolder_parser_read_distances(const char *filename,
           /* split line by next space delimiter */
           field = strtok(NULL," ");
         }
+        if (had_err == -1)
+          break;
       }
     }
   }
