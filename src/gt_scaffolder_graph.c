@@ -108,6 +108,7 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
   GtUword nextfree;
 
   gt_assert(graph != NULL);
+  gt_assert(graph->vertices != NULL);
   gt_assert(graph->nof_vertices < graph->max_nof_vertices);
 
   nextfree = graph->nof_vertices;
@@ -121,8 +122,6 @@ void gt_scaffolder_graph_add_vertex(GtScaffolderGraph *graph,
     graph->vertices[nextfree].header_seq = header_seq;
   }
   graph->vertices[nextfree].state = GIS_UNVISITED;
-
-  /* Allocate initial space for pointer to outgoing edges */
   graph->vertices[nextfree].edges = NULL;
 
   graph->nof_vertices++;
@@ -143,6 +142,7 @@ void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
 {
 
   gt_assert(graph != NULL);
+  gt_assert(graph->edges != NULL);
   gt_assert(graph->nof_edges < graph->max_nof_edges);
 
   GtUword nextfree = graph->nof_edges;
@@ -158,6 +158,7 @@ void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
   graph->edges[nextfree].state = GIS_UNVISITED;
 
   /* Add ptr to edge to start vertex */
+  gt_assert(vstart != NULL);
   vstart->edges[vstart->nof_edges] = graph->edges + nextfree;
   vstart->nof_edges++;
 
@@ -286,6 +287,7 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
   /* iterate over all edges and print them. add attribute color according to
      the current state and label the edge with the distance*/
   for (e = g->edges; e < (g->edges + g->nof_edges); e++) {
+    gt_assert(e != NULL);
     gt_file_xprintf(f,
                     GT_WU " -- " GT_WU " [color=\"%s\" label=\"" GT_WD "\"];\n",
                     gt_scaffolder_graph_get_vertex_id(g, e->start),
@@ -399,7 +401,7 @@ int gt_scaffolder_graph_test(GtUword max_nof_vertices,
          outgoing edges */
       if (nof_edges > 0)
         graph->vertices[i].edges
-          = gt_malloc(sizeof(*graph->vertices->edges) * nof_edges);
+          = gt_malloc(sizeof (*graph->vertices->edges) * nof_edges);
     }
   }
 
