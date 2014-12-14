@@ -41,11 +41,11 @@ int main(int argc, char **argv)
 {
   GtError *err;
   GtScaffolderGraph *graph;
-  char mode[32], *contig_filename, *dist_filename, *astat_filename;
+  char module[32], *contig_filename, *dist_filename, *astat_filename;
   int had_err = 0;
 
-  if (sscanf(argv[1], "%s", mode) != 1) {
-    fprintf(stderr,"Usage: %s <mode> <arguments>" ,argv[0]);
+  if (sscanf(argv[1], "%s", module) != 1) {
+    fprintf(stderr,"Usage: %s <module> <arguments>" ,argv[0]);
     exit(EXIT_FAILURE);
   }
 
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
   /* create error object */
   err = gt_error_new();
 
-  if(strcmp(mode, "graph") == 0) {
+  if (strcmp(module, "graph") == 0) {
     GtUword max_nof_vertices, max_nof_edges, nof_vertices, nof_edges;
     int init_vertices_tmp, init_edges_tmp, print_graph_tmp;
     bool init_vertices, init_edges, print_graph;
@@ -85,7 +85,7 @@ int main(int argc, char **argv)
     }
   }
 
-  else if (strcmp(mode, "parser") == 0) {
+  else if (strcmp(module, "parser") == 0) {
     if (argc != 3) {
       fprintf(stderr, "Usage: <DistEst file>\n");
     } else {
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
     }
   }
 
-  else if (strcmp(mode, "filter") == 0) {
+  else if (strcmp(module, "filter") == 0) {
     if (argc != 5) {
       fprintf(stderr, "Usage:<FASTA-file with contigs> <DistEst file> "
                       "<astat file>\n");
