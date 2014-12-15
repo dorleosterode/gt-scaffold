@@ -49,10 +49,34 @@ vertex_is_marked(const GtScaffolderGraphVertex *vertex) {
 /* Check if edge already has been filtered out of the graph */
 static bool edge_is_marked(const GtScaffolderGraphEdge *edge) {
   if (edge->state == GIS_INCONSISTENT || edge->state == GIS_POLYMORPHIC
-     || edge->state == GIS_CYCLIC)
+     || edge->state == GIS_CYCLIC || GIS_REPEAT)
     return true;
   else
     return false;
+}
+
+/* Marks edge as GIS_STATE */
+static void mark_edge(GtScaffolderGraphEdge *edge, GraphItemState state) {
+  GtUword eid;
+
+  /* mark edge as state*/
+  edge->state = state;
+  /* search twin-edge and mark twin-edge as state */
+  for (eid = 0; eid < edge->end->nof_edges; eid++) {
+    if (edge->end->edges[eid]->end == edge->start)
+      edge->end->edges[eid]->state = state;
+  }
+}
+
+static void mark_vertex(GtScaffolderGraphVertex *vertex, GraphItemState state) {
+  GtUword eid;
+
+  /* mark vertex as state */
+  vertex->state = state;
+
+  /* mark all edges and their twins as state */
+  for (eid = 0; eid < vertex->nof_edges; eid++)
+    mark_edge(vertex->edges[eid], state);
 }
 
 /* load a and copy number of every contig and mark repeated contigs */
@@ -127,7 +151,7 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
     {
       /* SK: Cutoffs und Bedingungen nochmal evaluieren */
       if (vertex->astat <= astat_cutoff || vertex->copy_num < copy_num_cutoff)
-        vertex->state = GIS_REPEAT;
+        mark_vertex(vertex, GIS_REPEAT);
     }
   }
 
@@ -196,10 +220,7 @@ gt_scaffolder_graph_check_mark_polymorphic(GtScaffolderGraphEdge *edge1,
       poly_vertex = edge2->end;
     /* mark all edges of the polymorphic vertex as polymorphic */
     if (!vertex_is_marked(poly_vertex)) {
-      GtUword eid;
-      for (eid = 0; eid < poly_vertex->nof_edges; eid++)
-        poly_vertex->edges[eid]->state = GIS_POLYMORPHIC;
-      poly_vertex->state = GIS_POLYMORPHIC;
+      mark_vertex(poly_vertex, GIS_POLYMORPHIC);
     }
   }
 }
@@ -271,7 +292,7 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
       as inconsistent */
     if (maxoverlap > ocutoff) {
       for (eid1 = 0; eid1 < vertex->nof_edges; eid1++)
-        vertex->edges[eid1]->state = GIS_INCONSISTENT;
+	mark_edge(vertex->edges[eid1], GIS_INCONSISTENT);
     }
   }
   return had_err;
