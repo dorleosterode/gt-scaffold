@@ -15,4 +15,5 @@
 - test: modularized everything [Stefan]
 - removed attribute index of vertices, adapted graph functions [Lukas]
 - added test function for distance parser [Lukas]
+- implement new script to filter DistEst-file [Dorle]
 
