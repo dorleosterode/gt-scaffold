@@ -81,9 +81,9 @@ def filter_de(d, new_de, contigs):
                     new_line.append(record)
                 except KeyError:
                     continue
-                if not new_line[-1].endswith('\n'):
-                    new_line[-1] = new_line[-1] + '\n'
-                out.write(' '.join(new_line))
+            if not new_line[-1].endswith('\n'):
+                new_line[-1] = new_line[-1] + '\n'
+            out.write(' '.join(new_line))
 
 
 def main():
