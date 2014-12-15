@@ -1,4 +1,4 @@
-graph {
+digraph {
 0 [color="black" label="contig-1158"];
 1 [color="black" label="contig-1159"];
 2 [color="black" label="contig-1380"];
@@ -49,12 +49,12 @@ graph {
 47 [color="black" label="contig-980"];
 48 [color="black" label="contig-984"];
 49 [color="black" label="contig-987"];
-38 -- 7 [color="black" label="1011"];
-7 -- 38 [color="black" label="1011"];
-20 -- 31 [color="black" label="13"];
-42 -- 30 [color="black" label="1828"];
-26 -- 41 [color="black" label="-99"];
-31 -- 20 [color="black" label="13"];
-30 -- 42 [color="black" label="1828"];
-41 -- 26 [color="black" label="-99"];
+38 -> 7 [color="black" label="1011" arrowhead="normal"];
+7 -> 38 [color="black" label="1011" arrowhead="inv"];
+20 -> 31 [color="black" label="13" arrowhead="inv"];
+42 -> 30 [color="black" label="1828" arrowhead="normal"];
+26 -> 41 [color="black" label="-99" arrowhead="inv"];
+31 -> 20 [color="black" label="13" arrowhead="inv"];
+30 -> 42 [color="black" label="1828" arrowhead="inv"];
+41 -> 26 [color="black" label="-99" arrowhead="normal"];
 }

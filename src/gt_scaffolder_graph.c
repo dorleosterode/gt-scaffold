@@ -274,7 +274,7 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
                                "green", "magenta", "blue"};
 
   /* print first line into f */
-  gt_file_xprintf(f, "graph {\n");
+  gt_file_xprintf(f, "digraph {\n");
 
   /* iterate over all vertices and print them. add attribute color according
      to the current state */
@@ -289,10 +289,10 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
   for (e = g->edges; e < (g->edges + g->nof_edges); e++) {
     gt_assert(e != NULL);
     gt_file_xprintf(f,
-                    GT_WU " -- " GT_WU " [color=\"%s\" label=\"" GT_WD "\"];\n",
+                    GT_WU " -> " GT_WU " [color=\"%s\" label=\"" GT_WD "\" arrowhead=\"%s\"];\n",
                     gt_scaffolder_graph_get_vertex_id(g, e->start),
                     gt_scaffolder_graph_get_vertex_id(g, e->end),
-                    color_array[e->state], e->dist);
+                    color_array[e->state], e->dist, e->sense?"normal":"inv");
   }
 
   /* print the last line into f */
