@@ -44,7 +44,7 @@ int main(int argc, char **argv)
   char module[32], *contig_filename, *dist_filename, *astat_filename;
   int had_err = 0;
 
-  if (sscanf(argv[1], "%s", module) != 1) {
+  if (argc == 1 || sscanf(argv[1], "%s", module) != 1) {
     fprintf(stderr,"Usage: %s <module> <arguments>" ,argv[0]);
     exit(EXIT_FAILURE);
   }
