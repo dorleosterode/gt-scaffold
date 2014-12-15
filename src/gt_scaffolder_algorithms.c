@@ -204,9 +204,19 @@ gt_scaffolder_graph_check_mark_polymorphic(GtScaffolderGraphEdge *edge1,
   }
 }
 
+static void mark_edges_in_twin_dir(GtScaffolderGraphVertex *vertex,
+                                   bool sense)
+{
+  GtUword eid;
+
+  for (eid = 0; eid < vertex->nof_edges; eid++) {
+    if (vertex->edges[eid]->sense == sense)
+      vertex->edges[eid]->state = GIS_INCONSISTENT;
+  }
+}
+
 /* mark polymorphic edges/vertices and inconsistent edges in scaffold graph */
-/* SK: kann void Funktion sein */
-int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
+void gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
                                float pcutoff,
                                float cncutoff,
                                GtWord ocutoff)
@@ -216,8 +226,8 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
   GtScaffolderGraphVertex *vertex;
   GtScaffolderGraphEdge *edge1, *edge2;
   GtUword eid1, eid2;
-  GtWord maxoverlap, overlap;
-  int had_err = 0;
+  GtWord sense_maxoverlap, antisense_maxoverlap, overlap;
+  bool twin_dir;
 
   /* iterate over all vertices */
   for (vertex = graph->vertices;
@@ -233,10 +243,6 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
         edge1 = vertex->edges[eid1];
         edge2 = vertex->edges[eid2];
 
-        /* check pair of edges (implict twin edge included) with same
-           direction for polymorphism (if directions are opposite,
-           one of the edges has to be reverse) */
-        /* || !edge1->same || !edge2->same) {*/
         if (edge1->sense == edge2->sense) {
           /* check if edge1->end and edge2->end are polymorphic */
           gt_scaffolder_graph_check_mark_polymorphic(edge1, edge2,
@@ -250,31 +256,48 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
     if (vertex_is_marked(vertex))
       continue;
 
-    maxoverlap = 0;
+    sense_maxoverlap = 0;
+    antisense_maxoverlap = 0;
     /* iterate over all pairs of edges, that are not polymorphic */
     for (eid1 = 0; eid1 < vertex->nof_edges; eid1++) {
       for (eid2 = eid1 + 1; eid2 < vertex->nof_edges; eid2++) {
         edge1 = vertex->edges[eid1];
         edge2 = vertex->edges[eid2];
-        /* || !edge1->same || !edge2->same) &&*/
         if ((edge1->sense == edge2->sense) &&
-            (!edge_is_marked(edge1) &&
-             !edge_is_marked(edge2))) {
+            (!edge_is_marked(edge1) && !edge_is_marked(edge2))) {
           overlap = gt_scaffolder_calculate_overlap(edge1, edge2);
-          if (overlap > maxoverlap)
-            maxoverlap = overlap;
+
+          /* differentiate between maximal overlap of sense edge
+             pairs and antisense edge pairs */
+          if (edge1->sense && overlap > sense_maxoverlap)
+            sense_maxoverlap = overlap;
+          if (!edge1->sense && overlap > antisense_maxoverlap)
+            antisense_maxoverlap = overlap;
         }
       }
     }
 
-   /* check if maxoverlap is larger than ocutoff and mark edges
-      as inconsistent */
-    if (maxoverlap > ocutoff) {
-      for (eid1 = 0; eid1 < vertex->nof_edges; eid1++)
-        vertex->edges[eid1]->state = GIS_INCONSISTENT;
+    /* check if maxoverlap is larger than ocutoff and mark edges
+       as inconsistent */
+    if (sense_maxoverlap > ocutoff || antisense_maxoverlap > ocutoff) {
+
+      for (eid1 = 0; eid1 < vertex->nof_edges; eid1++) {
+        if (sense_maxoverlap > ocutoff && vertex->edges[eid1]->sense) {
+          vertex->edges[eid1]->state = GIS_INCONSISTENT;
+          /* LG: adapted from SGA, is it necessary to mark all edges
+                 in twin dir? */
+          twin_dir = !vertex->edges[eid1]->same;
+          mark_edges_in_twin_dir(vertex->edges[eid1]->end, twin_dir);
+        }
+        if (antisense_maxoverlap > ocutoff && !vertex->edges[eid1]->sense) {
+          vertex->edges[eid1]->state = GIS_INCONSISTENT;
+          twin_dir = vertex->edges[eid1]->same;
+          mark_edges_in_twin_dir(vertex->edges[eid1]->end, twin_dir);
+        }
+      }
+
     }
   }
-  return had_err;
 }
 
 /* check if vertex holds just sense or antisense edges */
