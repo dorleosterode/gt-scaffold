@@ -49,7 +49,7 @@ vertex_is_marked(const GtScaffolderGraphVertex *vertex) {
 /* Check if edge already has been filtered out of the graph */
 static bool edge_is_marked(const GtScaffolderGraphEdge *edge) {
   if (edge->state == GIS_INCONSISTENT || edge->state == GIS_POLYMORPHIC
-     || edge->state == GIS_CYCLIC || GIS_REPEAT)
+     || edge->state == GIS_CYCLIC || edge->state == GIS_REPEAT)
     return true;
   else
     return false;
@@ -292,7 +292,7 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
       as inconsistent */
     if (maxoverlap > ocutoff) {
       for (eid1 = 0; eid1 < vertex->nof_edges; eid1++)
-	mark_edge(vertex->edges[eid1], GIS_INCONSISTENT);
+        mark_edge(vertex->edges[eid1], GIS_INCONSISTENT);
     }
   }
   return had_err;
@@ -408,9 +408,12 @@ GtScaffolderGraphEdge
       while (gt_array_size(stack) != 0) {
         back = *(GtScaffolderGraphEdge **) gt_array_pop(stack);
         if (!vertex_is_marked(back->end)) {
-          if (back->end->state == GIS_VISITED)
-            return back; /* SK: Stack aufräumen */
+          if (back->end->state == GIS_VISITED) {
+            gt_array_delete(stack);
+            return back;
+          }
           back->end->state = GIS_VISITED;
+          gt_array_add(visited, back->end);
           for (beid = 0; beid < back->end->nof_edges; beid++) {
             if (back->end->edges[beid]->sense == dir &&
                 !edge_is_marked(back->end->edges[beid]) &&
