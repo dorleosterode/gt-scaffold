@@ -302,6 +302,7 @@ int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
 bool gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
 {
   bool dir;
+  bool set_dir = false;
   GtUword eid;
 
   gt_assert(vertex != NULL);
@@ -309,10 +310,19 @@ bool gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex)
   if (vertex->nof_edges == 0)
     return true;
 
-  dir = vertex->edges[0]->sense;
-  for (eid = 1; eid < vertex->nof_edges; eid++) {
-    if (vertex->edges[eid]->sense != dir)
-      return false;
+  for (eid = 0; eid < vertex->nof_edges; eid++) {
+    if (set_dir) {
+      if (vertex->edges[eid]->sense != dir &&
+          !edge_is_marked(vertex->edges[eid]))
+        return false;
+    }
+    else {
+      if (!edge_is_marked(vertex->edges[eid])) {
+        dir = vertex->edges[eid]->sense;
+        set_dir = true;
+      }
+    }
+
   }
 
   return true;
@@ -557,7 +567,10 @@ GtScaffolderGraphWalk
   GtScaffolderGraphWalk *bestwalk, *currentwalk;
   float distance, *distancemap;
   bool dir;
+  bool set_dir = false;
   lengthbestwalk = 0;
+  /* do we need this initialization? isn't bestwalk
+     just a pointer to the best currentwalk? */
   bestwalk = gt_scaffolder_walk_new();
 
   wqueue = gt_queue_new();
@@ -576,7 +589,18 @@ GtScaffolderGraphWalk
     return NULL;
   }
 
-  dir = start->edges[0]->sense;
+  /* we have to take the direction of the first not marked edge! */
+  for(eid = 0; eid < start->nof_edges; eid++) {
+    if (!edge_is_marked(start->edges[eid])) {
+      dir = start->edges[eid]->sense;
+      set_dir = true;
+      break;
+    }
+  }
+
+  if (!set_dir)
+    return NULL;
+
   for (eid = 0; eid < start->nof_edges; eid++) {
     edge = start->edges[eid];
     if (!edge_is_marked(edge) &&
@@ -609,7 +633,8 @@ GtScaffolderGraphWalk
       nextedge = endvertex->edges[eid];
       if (nextedge->sense == dir) {
         if (!edge_is_marked(nextedge) &&
-            !vertex_is_marked(nextedge->end))
+            !vertex_is_marked(nextedge->end) &&
+            !is_twin(edge, nextedge))
         {
           nextendvertex = nextedge->end;
 
@@ -674,13 +699,13 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
 {
   gt_assert(graph != NULL);
 
-  GtUword eid, max_num_bases, i, j;
+  GtUword max_num_bases, i, j;
   GtScaffolderGraphWalk *walk, *bestwalk;
   GtScaffolderGraphVertex *start;
   GtArray *terminal_vertices, *cc_walks, *ccs;
 
-  /* Entfernung von Zyklen
-     gt_scaffolder_removecycles(graph); */
+  /* Entfernung von Zyklen */
+  gt_scaffolder_removecycles(graph);
 
   cc_walks = gt_array_new(sizeof (walk));
 
@@ -692,14 +717,16 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
   for (i = 0; i < gt_array_size(ccs); i++) {
     terminal_vertices = *(GtArray **) gt_array_get(ccs, i);
 
-    /* calculate all paths between terminal vertices in this cc */
-    for (j = 0; j < gt_array_size(terminal_vertices); j++) {
-      start = *(GtScaffolderGraphVertex **) gt_array_get(terminal_vertices, j);
-      gt_assert(start >= graph->vertices);
-      gt_assert(start < graph->vertices + graph->nof_vertices);
-      walk = gt_scaffolder_create_walk(graph, start);
-      if (walk != NULL) {
-        gt_array_add(cc_walks, walk);
+    if (gt_array_size(terminal_vertices) > 1) {
+      /* calculate all paths between terminal vertices in this cc */
+      for (j = 0; j < gt_array_size(terminal_vertices); j++) {
+        start = *(GtScaffolderGraphVertex **) gt_array_get(terminal_vertices, j);
+        gt_assert(start >= graph->vertices);
+        gt_assert(start < graph->vertices + graph->nof_vertices);
+        walk = gt_scaffolder_create_walk(graph, start);
+        if (walk != NULL) {
+          gt_array_add(cc_walks, walk);
+        }
       }
     }
 
@@ -716,12 +743,20 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
 
     /* mark all nodes and edges in the best walk as GIS_SCAFFOLD */
     if (bestwalk != NULL) {
-      bestwalk->edges[0]->start->state = GIS_SCAFFOLD;
-      for (eid = 0; eid < bestwalk->nof_edges; eid++) {
-        bestwalk->edges[eid]->state = GIS_SCAFFOLD;
-        bestwalk->edges[eid]->end->state = GIS_SCAFFOLD;
+      GtWord id;
+      bestwalk->edges[bestwalk->nof_edges - 1]->start->state = GIS_SCAFFOLD;
+      for (id = (bestwalk->nof_edges - 1); id >= 0; id--) {
+        bestwalk->edges[id]->state = GIS_SCAFFOLD;
+        bestwalk->edges[id]->end->state = GIS_SCAFFOLD;
       }
     }
+
+    /* free all walks in cc_walks */
+    for (j = 0; j < gt_array_size(cc_walks); j++)
+      gt_scaffolder_walk_delete(*(GtScaffolderGraphWalk **)
+                                gt_array_get(cc_walks, j));
+
+    gt_array_reset(cc_walks);
   }
 
   for (i = 0; i < gt_array_size(ccs); i++)
