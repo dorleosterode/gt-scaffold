@@ -432,6 +432,7 @@ GtScaffolderGraphEdge
   stack = gt_array_new(sizeof (GtScaffolderGraphEdge *));
 
   gt_array_add(visited, v);
+  v->state = GIS_VISITED;
 
   for (eid = 0; eid < v->nof_edges; eid++) {
     if (v->edges[eid]->sense == dir &&
@@ -510,6 +511,9 @@ void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
 
           if (!set_dir)
             continue;
+
+	  if (vertex_is_marked(start))
+	    continue;
 
           back_edge = gt_scaffolder_detect_cycle(start,
                       dir, visited);
@@ -647,14 +651,12 @@ GtScaffolderGraphWalk
 
       /* SK: genometools hashes verwenden, Dichte evaluieren
          SK: DistEst beim Einlesen prüfen, Basisadresse verwenden fuer Index */
-      if (!vertex_is_marked(endvertex)) {
-        GtUword endvertex_index = gt_scaffolder_graph_get_vertex_id(graph,
-                                  endvertex);
-        distancemap[endvertex_index] = edge->dist;
-        edgemap[endvertex_index] = edge;
+      GtUword endvertex_index = gt_scaffolder_graph_get_vertex_id(graph,
+                                                                  endvertex);
+      distancemap[endvertex_index] = edge->dist;
+      edgemap[endvertex_index] = edge;
 
-        gt_queue_add(wqueue, edge);
-      }
+      gt_queue_add(wqueue, edge);
     }
   }
 
@@ -675,25 +677,23 @@ GtScaffolderGraphWalk
         {
           nextendvertex = nextedge->end;
 
-          if (!vertex_is_marked(nextendvertex)) {
+          distance = edge->dist + nextedge->dist;
 
-            distance = edge->dist + nextedge->dist;
-
-            /* GT_WORD_MAX is the initial value */
-            GtUword next_endvertex_index =
-                    gt_scaffolder_graph_get_vertex_id(graph, nextendvertex);
-            if (distancemap[next_endvertex_index] == GT_WORD_MAX ||
-                distancemap[next_endvertex_index] > distance)
-              {
-                distancemap[next_endvertex_index] = distance;
-                edgemap[next_endvertex_index] = nextedge;
-                gt_queue_add(wqueue, nextedge);
-              }
-          }
+          /* GT_WORD_MAX is the initial value */
+          GtUword next_endvertex_index =
+            gt_scaffolder_graph_get_vertex_id(graph, nextendvertex);
+          if (distancemap[next_endvertex_index] == GT_WORD_MAX ||
+              distancemap[next_endvertex_index] > distance)
+            {
+              distancemap[next_endvertex_index] = distance;
+              edgemap[next_endvertex_index] = nextedge;
+              gt_queue_add(wqueue, nextedge);
+            }
         }
       }
     }
   }
+
 
   /* Ruecktraversierung durch EdgeMap für alle terminalen Knoten
      Konstruktion des Walks  */
