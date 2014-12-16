@@ -497,8 +497,22 @@ void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
                 gt_array_get(terminal_vertices, j);
         /* search for a cycle, if terminal vertex has edges */
         if (start->nof_edges > 0) {
+          GtUword eid;
+          bool dir;
+          bool set_dir = false;
+
+          for (eid = 0; eid < start->nof_edges; eid++) {
+            if (!edge_is_marked(start->edges[eid])) {
+              dir = start->edges[eid]->sense;
+              set_dir = true;
+            }
+          }
+
+          if (!set_dir)
+            continue;
+
           back_edge = gt_scaffolder_detect_cycle(start,
-                      start->edges[0]->sense, visited);
+                      dir, visited);
 
           /* mark all visited vertices as unvisited for the next search */
           for (k = 0; k < gt_array_size(visited); k++) {
