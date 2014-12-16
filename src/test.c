@@ -44,7 +44,7 @@ int main(int argc, char **argv)
   char module[32], *contig_filename, *dist_filename, *astat_filename;
   int had_err = 0;
 
-  if (sscanf(argv[1], "%s", module) != 1) {
+  if (argc == 1 || sscanf(argv[1], "%s", module) != 1) {
     fprintf(stderr,"Usage: %s <module> <arguments>" ,argv[0]);
     exit(EXIT_FAILURE);
   }
@@ -116,10 +116,9 @@ int main(int argc, char **argv)
         gt_scaffolder_graph_print(graph,
               "gt_scaffolder_algorithms_test_filter_repeats.dot", err);
         /* mark polymorphic vertices, edges and inconsistent edges */
-        had_err = gt_scaffolder_graph_filter(graph, PROBABILITY_CUTOFF,
+        gt_scaffolder_graph_filter(graph, PROBABILITY_CUTOFF,
                   COPY_NUM_CUTOFF_2, OVERLAP_CUTOFF);
-        if (had_err == 0)
-          gt_scaffolder_graph_print(graph,
+        gt_scaffolder_graph_print(graph,
               "gt_scaffolder_algorithms_test_filter_polymorphism.dot", err);
       }
       if (had_err != 0)

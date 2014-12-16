@@ -30,10 +30,10 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
                                      GtError *err);
 
 /* mark polymorphic edges/vertices and inconsistent edges in scaffold graph */
-int gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
-                               float pcutoff,
-                               float cncutoff,
-                               GtWord ocutoff);
+void gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
+                                float pcutoff,
+                                float cncutoff,
+                                GtWord ocutoff);
 
 /* check if vertex holds just sense or antisense edges */
 bool
