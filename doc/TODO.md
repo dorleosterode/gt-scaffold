@@ -3,7 +3,9 @@
 - algorithms: mark single contigs as scaffolds [Dorle]
 - graph: print scaffold only [Dorle]
 - output: evaluate possibility to convert scaffolds to fasta [Lukas]
+- test: parser scenarios (e.g. negative contig length, wrong input) [Lukas]
 - SGA: print .dot for step-by-step comparison [Stefan]
+- test: test makeScaffold and removeCycles [Stefan]
 
 ## OBSTACLES
 - scan-build: fix dead init of variables or not? [Stefan]
