@@ -1,8 +1,13 @@
 ## TODO
+- algorithms: implement removeMultiEdgeScaffold function [Dorle]
+- algorithms: mark single contigs as scaffolds [Dorle]
+- graph: print scaffold only [Dorle]
+- output: evaluate possibility to convert scaffolds to fasta [Lukas]
 - SGA: print .dot for step-by-step comparison [Stefan]
 
 ## OBSTACLES
 - scan-build: fix dead init of variables or not? [Stefan]
+- ScaffoldLinkValidator::visit: line 188, mark all edges in twin dir?
 
 ## DONE
 - test pipeline: prettify and shellcheck for review [Stefan]
@@ -16,4 +21,3 @@
   [Dorle]
 - implement set_vertex_status(v, status) and set_edge_status(e, status)
    to correclty mark all vertices and edges [Dorle]
-
