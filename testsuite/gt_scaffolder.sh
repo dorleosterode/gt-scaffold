@@ -37,6 +37,8 @@ diff gt_scaffolder_graph_test.dot $TESTDATA/gt_scaffolder_graph_test_expected.do
 
 # TEST PARSER MODULE
 # usage: test.x graph <DistEst file>
+./test.x parser $TESTDATA/wrong_libPE_1.de
+./test.x parser $TESTDATA/wrong_libPE_2.de
 ./test.x parser $TESTDATA/libPE.de
 diff gt_scaffolder_parser_test_read_distances.de $TESTDATA/libPE.de
 
