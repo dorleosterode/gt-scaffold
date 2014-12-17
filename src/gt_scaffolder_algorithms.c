@@ -33,9 +33,6 @@
 /* SK: Increment evaluieren, zB mit Faktor 1.2 multiplizieren */
 #define INCREMENT_SIZE 32
 
-/* SK: BUFSIZE_2 lokal in Funktion deklarieren */
-const GtUword BUFSIZE_2 = 1024;
-
 /* Check if vertex already has been filtered out of the graph */
 static bool
 vertex_is_marked(const GtScaffolderGraphVertex *vertex) {
@@ -86,6 +83,7 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
                                      float astat_cutoff,
                                      GtError *err)
 {
+  const GtUword BUFSIZE_2 = 1024;
   FILE *file;
   char line[BUFSIZE_2+1], ctg_header[BUFSIZE_2+1];
   GtWord num1, num2, num3;
@@ -93,7 +91,7 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
   bool valid_contig;
   int had_err;
   GtStr *gt_str_field;
-  GtScaffolderGraphVertex *vertex, *ctg;
+  GtScaffolderGraphVertex *ctg;
 
   had_err = 0;
   valid_contig = false;
@@ -147,8 +145,9 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
 
   if (had_err != -1)
   {
+    GtScaffolderGraphVertex *vertex;
+
     /* iterate over all vertices */
-    /* SK: Vertex lokal deklarieren */
     for (vertex = graph->vertices;
       vertex < (graph->vertices + graph->nof_vertices); vertex++)
     {
