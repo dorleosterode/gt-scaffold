@@ -352,7 +352,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
           if (sscanf(field,"%[^>,]," GT_WD "," GT_WD ",%f", ctg_header, &dist,
               &num_pairs, &std_dev) == 4)
           {
-            
+
             /* parsing composition,
              '+' indicates same strand and '-' reverse strand */
             ctg_header_len = strlen(ctg_header);

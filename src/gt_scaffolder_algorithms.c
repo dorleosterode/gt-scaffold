@@ -139,7 +139,7 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
         gt_error_set(err, "Invalid record in astat file %s",
                            filename);
         break;
-      }      
+      }
     }
   }
   fclose(file);
@@ -515,8 +515,8 @@ void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
           if (!set_dir)
             continue;
 
-	  if (vertex_is_marked(start))
-	    continue;
+          if (vertex_is_marked(start))
+            continue;
 
           back_edge = gt_scaffolder_detect_cycle(start,
                       dir, visited);
@@ -634,7 +634,7 @@ GtScaffolderGraphWalk
   }
 
   /* we have to take the direction of the first not marked edge! */
-  for(eid = 0; eid < start->nof_edges; eid++) {
+  for (eid = 0; eid < start->nof_edges; eid++) {
     if (!edge_is_marked(start->edges[eid])) {
       dir = start->edges[eid]->sense;
       set_dir = true;
@@ -696,7 +696,6 @@ GtScaffolderGraphWalk
       }
     }
   }
-
 
   /* Ruecktraversierung durch EdgeMap für alle terminalen Knoten
      Konstruktion des Walks  */
@@ -760,7 +759,8 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
     if (gt_array_size(terminal_vertices) > 1) {
       /* calculate all paths between terminal vertices in this cc */
       for (j = 0; j < gt_array_size(terminal_vertices); j++) {
-        start = *(GtScaffolderGraphVertex **) gt_array_get(terminal_vertices, j);
+        start = *(GtScaffolderGraphVertex **)
+                gt_array_get(terminal_vertices, j);
         gt_assert(start >= graph->vertices);
         gt_assert(start < graph->vertices + graph->nof_vertices);
         walk = gt_scaffolder_create_walk(graph, start);

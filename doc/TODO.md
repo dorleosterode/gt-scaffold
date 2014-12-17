@@ -8,7 +8,12 @@
 
 ## OBSTACLES
 - scan-build: fix dead init of variables or not? [Stefan]
-- ScaffoldLinkValidator::visit: line 188, mark all edges in twin dir?
+- mark all edges of end vertex of inconsistent edge in twin direction ?
+  (ScaffoldVisitors.cpp: ScaffoldLinkValidator::visit: line 188)
+  (...algorithms.c: ...filter: line 314)
+- mark vertex as repeat if copy number below cutoff ?
+  (ScaffoldVisitors.cpp: ScaffoldAStatisticVisitor::visit: line 86)
+  (...algorithms.c: ...mark_repeats: line 83)
 
 ## DONE
 - test pipeline: prettify and shellcheck for review [Stefan]
