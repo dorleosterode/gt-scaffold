@@ -455,7 +455,7 @@ static int gt_scaffolder_graph_save_header(const char *description,
   gt_free(writeable_description);
 
   if (length == 0) {
-    gt_error_set (err , " invalid header length ");
+    gt_error_set (err , "Invalid header length");
     had_err = -1;
   }
   return had_err;
@@ -482,7 +482,7 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
   }
 
   if (seq_length == 0) {
-    gt_error_set (err , " invalid sequence length ");
+    gt_error_set (err , "Invalid sequence length");
     had_err = -1;
   }
   return had_err;

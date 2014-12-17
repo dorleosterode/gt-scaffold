@@ -134,9 +134,12 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
           ctg->copy_num = copy_num;
         }
       }
-      else
+      else {
         had_err = -1;
-        /* SK: Fehlermeldung setzen */
+        gt_error_set(err, "Invalid record in astat file %s",
+                           filename);
+        break;
+      }      
     }
   }
   fclose(file);
