@@ -197,9 +197,21 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
       valid_contig = gt_scaffolder_graph_get_vertex(graph, &root_ctg,
                 gt_str_field);
 
+      /* split line by next space delimiter */
+      field = strtok(NULL," ");
+
+      /* if no records exist */
+      if (field == NULL) {
+        had_err = -1;
+        gt_error_set(err, "Invalid record in dist file %s",
+                           file_name);
+        break;
+      }
+
       if (valid_contig) {
 
         line_record_counter = 0;
+
         /* iterate over space delimited records */
         while (field != NULL)
         {
@@ -238,6 +250,13 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
               line_record_counter++;
             }
 
+          }
+          /* detect invalid record */
+          else if (*field != ';') {
+            had_err = -1;
+            gt_error_set(err, "Invalid record in dist file %s",
+                               file_name);
+            break;
           }
 
           /* split line by next space delimiter */
