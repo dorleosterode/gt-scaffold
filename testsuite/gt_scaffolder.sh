@@ -21,25 +21,27 @@ TESTDATA=../testdata
 FALSE=0
 TRUE=1
 
-# Create graph with wrapper construction function and delete it
+# TEST BASIC MODULE
+# usage: test.x graph <max_nof_vertices> <max_nof_edges> <init_vertices>
+#                     <nof_vertices> <init_edges> <nof_edges> <print_graph>
 ./test.x graph 5 8 $FALSE 0 $FALSE 0 $FALSE
-# Create graph, only initialize vertices, delete it
 ./test.x graph 5 8 $TRUE 0 $FALSE 0 $FALSE
-# Create graph, initialize and create vertices, delete it
 ./test.x graph 5 8 $TRUE 5 $FALSE 0 $FALSE
-# Create graph, initialize vertices and edges, create vertices, delete it
+! ./test.x graph 5 8 $TRUE 6 $FALSE 0 $FALSE
 ./test.x graph 5 8 $TRUE 5 $TRUE 0 $FALSE
-# Create graph, initialize and create vertices and edges, delete it
 ./test.x graph 5 8 $TRUE 5 $TRUE 8 $FALSE
-# Create graph, initialize and create vertices and edges, print it, delete it
+! ./test.x graph 5 8 $TRUE 0 $TRUE 8 $FALSE
+! ./test.x graph 5 8 $TRUE 5 $TRUE 9 $FALSE
 ./test.x graph 5 8 $TRUE 5 $TRUE 8 $TRUE
-diff gt_scaffolder_graph_test.dot \
-  $TESTDATA/gt_scaffolder_graph_test_expected.dot
+diff gt_scaffolder_graph_test.dot $TESTDATA/gt_scaffolder_graph_test_expected.dot
 
+# TEST PARSER MODULE
+# usage: test.x graph <DistEst file>
 ./test.x parser $TESTDATA/libPE.de
-diff gt_scaffolder_parser_test_read_distances.de \
-  $TESTDATA/libPE.de
+diff gt_scaffolder_parser_test_read_distances.de $TESTDATA/libPE.de
 
+# TEST FILTER MODULE
+# usage: test.x graph <FASTA-file with contigs> <DistEst file> <astat file>
 ./test.x filter $TESTDATA/primary-contigs.fa $TESTDATA/libPE.de $TESTDATA/libPE.astat
 diff gt_scaffolder_algorithms_test_filter_repeats.dot \
   $TESTDATA/gt_scaffolder_algorithms_test_filter_repeats_expected.dot
