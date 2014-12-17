@@ -3,7 +3,6 @@
 - algorithms: mark single contigs as scaffolds [Dorle]
 - graph: print scaffold only [Dorle]
 - output: evaluate possibility to convert scaffolds to fasta [Lukas]
-- test: parser scenarios (e.g. negative contig length, wrong input) [Lukas]
 - SGA: print .dot for step-by-step comparison [Stefan]
 - test: test makeScaffold and removeCycles [Stefan]
 
@@ -18,6 +17,7 @@
 - test: modularized everything [Stefan]
 - removed attribute index of vertices, adapted graph functions [Lukas]
 - added test function for distance parser [Lukas]
+- test: parser scenarios (e.g. negative contig length, wrong input) [Lukas]
 - implement new script to filter DistEst-file [Dorle]
 - extend graph_print-function to print the dir-information as arrowhead and tail
   [Dorle]
