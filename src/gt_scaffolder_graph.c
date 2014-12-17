@@ -235,6 +235,7 @@ GtUword gt_scaffolder_graph_get_vertex_id(const GtScaffolderGraph *graph,
                                        const GtScaffolderGraphVertex *vertex)
 {
   gt_assert(graph != NULL);
+  /* LG: gt_assert(graph->vertices != NULL); */
   return (vertex - graph->vertices);
 }
 
@@ -300,10 +301,11 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
 }
 
 /* create scaffold graph from file */
-GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
-                                                     GtUword min_ctg_len,
-                                                     const char *dist_filename,
-                                                     GtError *err)
+int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
+                                      const char *ctg_filename,
+                                      GtUword min_ctg_len,
+                                      const char *dist_filename,
+                                      GtError *err)
 {
   GtScaffolderGraph *graph;
   int had_err;
@@ -352,7 +354,9 @@ GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
     graph = NULL;
   }
 
-  return graph;
+  *graph_par = graph;
+
+  return had_err;
 }
 
 /* Function to test basic graph functionality on different scenarios:

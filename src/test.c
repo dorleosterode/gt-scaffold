@@ -105,12 +105,14 @@ int main(int argc, char **argv)
       dist_filename = argv[3];
       astat_filename = argv[4];
 
-      graph = gt_scaffolder_graph_new_from_file(contig_filename, MIN_CONTIG_LEN,
-              dist_filename, err);
+      had_err = gt_scaffolder_graph_new_from_file(&graph, contig_filename,
+                MIN_CONTIG_LEN, dist_filename, err);
 
-      /* load astatistics and copy number from file */
-      had_err = gt_scaffolder_graph_mark_repeats(astat_filename, graph,
-                COPY_NUM_CUTOFF, ASTAT_NUM_CUTOFF, err);
+      if (had_err == 0) {
+        /* load astatistics and copy number from file */
+        had_err = gt_scaffolder_graph_mark_repeats(astat_filename, graph,
+                  COPY_NUM_CUTOFF, ASTAT_NUM_CUTOFF, err);
+      }
 
       if (had_err == 0) {
         gt_scaffolder_graph_print(graph,

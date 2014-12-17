@@ -149,11 +149,11 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
                                        GtFile *f);
 
 /* create scaffold graph from file */
-/* TODO: include a-statistics, copy number */
-GtScaffolderGraph *gt_scaffolder_graph_new_from_file(const char *ctg_filename,
-                                                     GtUword min_ctg_len,
-                                                     const char *dist_filename,
-                                                     GtError *err);
+int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
+                                      const char *ctg_filename,
+                                      GtUword min_ctg_len,
+                                      const char *dist_filename,
+                                      GtError *err);
 
 /* Function to test basic graph functionality on different scenarios:
 - Create graph and allocate space for <max_nof_vertices> vertices and

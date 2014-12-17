@@ -25,7 +25,7 @@ int gt_scaffolder_parser_read_distances_test(const char *filename,
                                              char *output_filename,
                                              GtError *err);
 
-/* count distance records */
+/* count records and check integrity of abyss-dist-format */
 int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
                                                const char *file_name,
                                                GtUword *nof_distances,

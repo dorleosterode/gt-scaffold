@@ -147,14 +147,14 @@ int gt_scaffolder_parser_read_distances_test(const char *filename,
   return had_err;
 }
 
-/* count records */
+/* count records and check integrity of abyss-dist-format */
 int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
                                                const char *file_name,
                                                GtUword *nof_distances,
                                                GtError *err)
 {
   FILE *file;
-  char line[BUFSIZE+1], *field, ctg_header[BUFSIZE+1];
+  char line[BUFSIZE+1], *field, ctg_header[BUFSIZE+1], comp_sign;
   GtUword record_counter, *edge_counter,
           line_record_counter;
   GtWord dist, num_pairs;
@@ -206,12 +206,21 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
           /* count records */
           /* SD: Keep an eye on negated string, might fail, did before */
           if (sscanf(field,"%[^>,]," GT_WD "," GT_WD ",%f", ctg_header,
-              &dist, &num_pairs, &std_dev) == 4)
+              &dist, &num_pairs, &std_dev) == 4) {
 
-            /* ignore invalid records; */
+            /* detect invalid records */
             if (num_pairs < 0) {
               had_err = -1;
-              gt_error_set(err, "Invalid value for number of pairs");
+              gt_error_set(err, "Invalid value for number of pairs in dist "
+                                "file %s", file_name);
+              break;
+            }
+
+            comp_sign = ctg_header[strlen(ctg_header) - 1];
+            if (comp_sign != '+' && comp_sign != '-') {
+              had_err = -1;
+              gt_error_set(err, "Invalid composition sign in dist file %s",
+                                 file_name);
               break;
             }
 
@@ -229,10 +238,11 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
               line_record_counter++;
             }
 
+          }
+
           /* split line by next space delimiter */
           field = strtok(NULL," ");
         }
-
         if (had_err == -1)
           break;
         edge_counter[root_ctg-graph->vertices] += line_record_counter;
@@ -323,13 +333,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
           if (sscanf(field,"%[^>,]," GT_WD "," GT_WD ",%f", ctg_header, &dist,
               &num_pairs, &std_dev) == 4)
           {
-            /* ignore invalid records */
-            if (num_pairs < 0) {
-              had_err = -1;
-              gt_error_set(err, "Invalid value for number of pairs");
-              break;
-            }
-
+            
             /* parsing composition,
              '+' indicates same strand and '-' reverse strand */
             ctg_header_len = strlen(ctg_header);
@@ -369,8 +373,6 @@ int gt_scaffolder_parser_read_distances(const char *filename,
           /* split line by next space delimiter */
           field = strtok(NULL," ");
         }
-        if (had_err == -1)
-          break;
       }
     }
   }
