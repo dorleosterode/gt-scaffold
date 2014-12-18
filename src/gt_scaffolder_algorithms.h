@@ -58,7 +58,7 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
 /* Konstruktion des Scaffolds mit groesster Contig-Gesamtlaenge */
 void gt_scaffolder_makescaffold(GtScaffolderGraph *graph);
 
-
+void gt_scaffolder_removecycles(GtScaffolderGraph *graph);
 
 
 
