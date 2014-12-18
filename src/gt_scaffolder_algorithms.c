@@ -726,6 +726,8 @@ GtScaffolderGraphWalk
       gt_scaffolder_walk_delete(currentwalk);
   }
 
+  gt_free(distancemap);
+  gt_free(edgemap);
   gt_array_delete(terminal_vertices);
   gt_queue_delete(wqueue);
 
