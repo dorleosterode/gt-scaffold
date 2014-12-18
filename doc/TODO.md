@@ -3,7 +3,6 @@
 - algorithms: mark single contigs as scaffolds [Dorle]
 - graph: print scaffold only [Dorle]
 - output: evaluate possibility to convert scaffolds to fasta [Lukas]
-- SGA: print .dot for step-by-step comparison [Stefan]
 
 ## OBSTACLES
 - scan-build: fix dead init of variables or not? [Stefan]
@@ -15,6 +14,7 @@
   (...algorithms.c: ...mark_repeats: line 83)
 
 ## DONE
+- SGA: print .dot for step-by-step comparison [Stefan]
 - test: test makeScaffold and removeCycles [Stefan]
 - test pipeline: prettify and shellcheck for review [Stefan]
 - test: ensure expected failures – found workaround [Stefan]
