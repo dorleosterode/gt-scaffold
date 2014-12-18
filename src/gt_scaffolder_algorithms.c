@@ -757,6 +757,26 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
   for (i = 0; i < gt_array_size(ccs); i++) {
     terminal_vertices = *(GtArray **) gt_array_get(ccs, i);
 
+    /* mark all lonesome vertices as scaffold */
+    if (gt_array_size(terminal_vertices) == 1) {
+      GtScaffolderGraphVertex *v;
+      v = *(GtScaffolderGraphVertex **) gt_array_get(terminal_vertices, 0);
+      if (v->nof_edges > 0) {
+	bool lonesome = true;
+	GtUword eid;
+	for (eid = 0; eid < v->nof_edges; eid++) {
+	  if (!edge_is_marked(v->edges[eid])) {
+	    lonesome = false;
+	    break;
+	  }
+	}
+	if (lonesome)
+	  v->state = GIS_SCAFFOLD;
+      }
+      else
+	v->state = GIS_SCAFFOLD;
+    }
+
     if (gt_array_size(terminal_vertices) > 1) {
       /* calculate all paths between terminal vertices in this cc */
       for (j = 0; j < gt_array_size(terminal_vertices); j++) {
