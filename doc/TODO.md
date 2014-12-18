@@ -17,7 +17,7 @@
 ## DONE
 - test: test makeScaffold and removeCycles [Stefan]
 - test pipeline: prettify and shellcheck for review [Stefan]
-- test: ensure expected exits – found workaround [Stefan]
+- test: ensure expected failures – found workaround [Stefan]
 - test: refactor basic module [Stefan]
 - test: modularized everything [Stefan]
 - removed attribute index of vertices, adapted graph functions [Lukas]
