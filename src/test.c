@@ -95,7 +95,7 @@ int main(int argc, char **argv)
     }
   }
 
-  else if (strcmp(module, "filter") == 0) {
+  else if (strcmp(module, "scaffold") == 0) {
     if (argc != 5) {
       fprintf(stderr, "Usage:<FASTA-file with contigs> <DistEst file> "
                       "<astat file>\n");
@@ -116,12 +116,23 @@ int main(int argc, char **argv)
 
       if (had_err == 0) {
         gt_scaffolder_graph_print(graph,
-              "gt_scaffolder_algorithms_test_filter_repeats.dot", err);
+              "gt_scaffolder_algorithms_test_mark_repeats.dot", err);
+
         /* mark polymorphic vertices, edges and inconsistent edges */
         gt_scaffolder_graph_filter(graph, PROBABILITY_CUTOFF,
                   COPY_NUM_CUTOFF_2, OVERLAP_CUTOFF);
         gt_scaffolder_graph_print(graph,
-              "gt_scaffolder_algorithms_test_filter_polymorphism.dot", err);
+              "gt_scaffolder_algorithms_test_filter.dot", err);
+
+        /* SD: makescaffold includes _removecycles(), perform on copy? */
+        gt_scaffolder_removecycles(graph);
+        gt_scaffolder_graph_print(graph,
+              "gt_scaffolder_algorithms_test_removecycles.dot", err);
+
+        gt_scaffolder_makescaffold(graph);
+        gt_scaffolder_graph_print(graph,
+              "gt_scaffolder_algorithms_test_makescaffold.dot", err);
+
       }
       if (had_err != 0)
         fprintf(stderr,"ERROR: %s\n",gt_error_get(err));
