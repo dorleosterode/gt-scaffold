@@ -301,6 +301,42 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
   gt_file_xprintf(f, "}\n");
 }
 
+/* print graphrepresentation in dot-format into gt-filestream f */
+void gt_scaffolder_graph_print_scaffold(const GtScaffolderGraph *g,
+                                        GtFile *f)
+{
+  GtScaffolderGraphVertex *v;
+  GtScaffolderGraphEdge *e;
+
+  gt_assert(g != NULL);
+
+  /* print first line into f */
+  gt_file_xprintf(f, "digraph {\n");
+
+  /* iterate over all vertices and print just the scaffold vertices */
+  for (v = g->vertices; v < (g->vertices + g->nof_vertices); v++) {
+    if (v->state == GIS_SCAFFOLD)
+      gt_file_xprintf(f, GT_WU " [label=\"%s\"];\n",
+		      gt_scaffolder_graph_get_vertex_id(g, v),
+		      gt_str_get(v->header_seq));
+  }
+
+  /* iterate over all edges and print just the scaffold edges */
+  for (e = g->edges; e < (g->edges + g->nof_edges); e++) {
+    gt_assert(e != NULL);
+    if (e->state == GIS_SCAFFOLD)
+      gt_file_xprintf(f,
+		      GT_WU " -> " GT_WU " [label="
+		      "\"" GT_WD "\" arrowhead=\"%s\"];\n",
+		      gt_scaffolder_graph_get_vertex_id(g, e->start),
+		      gt_scaffolder_graph_get_vertex_id(g, e->end),
+		      e->dist, e->sense?"normal":"inv");
+  }
+
+  /* print the last line into f */
+  gt_file_xprintf(f, "}\n");
+}
+
 /* create scaffold graph from file */
 int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
                                       const char *ctg_filename,
