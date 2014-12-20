@@ -165,7 +165,6 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
   GtScaffolderGraphVertex *v, *ctg, *root_ctg;
 
   had_err = 0;
-  valid_contig = false;
   record_counter = 0;
   gt_str_field = gt_str_new();
 
@@ -311,7 +310,6 @@ int gt_scaffolder_parser_read_distances(const char *filename,
   GtStr *gt_str_field;
 
   had_err = 0;
-  valid_contig = false;
   gt_str_field = gt_str_new();
 
   file = fopen(filename, "rb");
@@ -499,7 +497,6 @@ int gt_scaffolder_parser_count_contigs(const char *filename,
   GtScaffolderGraphFastaReaderData fasta_reader_data;
   int had_err;
 
-  had_err = 0;
   str_filename = gt_str_new_cstr(filename);
   fasta_reader_data.nof_valid_ctg = 0;
   fasta_reader_data.min_ctg_len = min_ctg_len;
@@ -527,7 +524,6 @@ int gt_scaffolder_parser_read_contigs(GtScaffolderGraph *graph,
   GtScaffolderGraphFastaReaderData fasta_reader_data;
   int had_err;
 
-  had_err = 0;
   str_filename = gt_str_new_cstr(filename);
   fasta_reader_data.header_seq = gt_str_new();
   fasta_reader_data.nof_valid_ctg = 0;

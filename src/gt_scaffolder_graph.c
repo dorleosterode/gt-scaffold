@@ -349,7 +349,6 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
   GtUword nof_distances, nof_contigs;
 
   graph = NULL;
-  had_err = 0;
 
   /* count contigs */
   had_err = gt_scaffolder_parser_count_contigs(ctg_filename, min_ctg_len,

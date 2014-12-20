@@ -94,7 +94,6 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
   GtScaffolderGraphVertex *ctg;
 
   had_err = 0;
-  valid_contig = false;
   gt_str_field = gt_str_new();
   file = fopen(filename, "rb");
   if (file == NULL) {
