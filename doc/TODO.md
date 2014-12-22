@@ -3,7 +3,6 @@
 - output: evaluate possibility to convert scaffolds to fasta [Lukas]
   - evaluate usage of string graph in SGA to fill gaps
 - parser: parse astat from contig file [Lukas]
-- diff-script: sga-dot and gt-scaffolder dot [Dorle]
 - extensively test on several test sets [Stefan]
 - scan-build: fix dead init of variables [Stefan]
 - research on Abyss DistanceEst
@@ -32,4 +31,4 @@
    to correctly mark all vertices and edges [Dorle]
 - algorithms: mark single contigs as scaffolds [Dorle]
 - graph: print scaffold only [Dorle]
-
+- diff-script: sga-dot and gt-scaffolder dot [Lukas]

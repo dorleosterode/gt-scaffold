@@ -18,6 +18,7 @@
 set -e -x
 
 TESTDATA=../testdata
+TESTSUITE=../testsuite
 FALSE=0
 TRUE=1
 
@@ -36,7 +37,7 @@ TRUE=1
 diff gt_scaffolder_graph_test.dot $TESTDATA/gt_scaffolder_graph_test_expected.dot
 
 # TEST PARSER MODULE
-# usage: test.x graph <DistEst file>
+# usage: test.x parser <DistEst file>
 # SK: Testfall mit nicht-existenter Datei hinzufügen
 ./test.x parser $TESTDATA/wrong_libPE_1.de
 ./test.x parser $TESTDATA/wrong_libPE_2.de
@@ -54,3 +55,5 @@ diff gt_scaffolder_algorithms_test_removecycles.dot \
   $TESTDATA/gt_scaffolder_algorithms_test_removecycles_expected.dot
 diff gt_scaffolder_algorithms_test_makescaffold.dot \
   $TESTDATA/gt_scaffolder_algorithms_test_makescaffold_expected.dot
+$TESTSUITE/diff_graph_files.rb $TESTDATA/sga_makeScaffolds.dot \
+  gt_scaffolder_algorithms_test_makescaffold.dot
