@@ -830,3 +830,97 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
   gt_array_delete(ccs);
   gt_array_delete(cc_walks);
 }
+
+/* write scaffold into file */
+int gt_scaffolder_graph_write_scaffold(GtScaffolderGraph *graph,
+                                       const char *file_name,
+                                       GtError *err)
+{
+  GtScaffolderGraphVertex *vertex, *next_edge_end;
+  GtScaffolderGraphEdge *next_edge, *new_next_edge;
+  GtFile *file;
+  int had_err;
+  bool dir;
+  GtUword eid, nof_edges_in_dir;
+
+  new_next_edge = NULL;
+  had_err = 0;
+  /* create file */
+  file = gt_file_new(file_name, "w", err);
+  if (file == NULL) {
+    had_err = -1;
+    gt_error_set(err,"can not create file %s", file_name);
+  }
+
+  /* iterate over all vertices */
+  if (had_err == 0) {
+
+    /* initialize all vertices as not visited */
+    for (vertex = graph->vertices;
+         vertex < (graph->vertices + graph->nof_vertices); vertex++) {
+      if (!vertex_is_marked(vertex))
+        vertex->state = GIS_UNVISITED;
+    }
+
+
+    for (vertex = graph->vertices;
+         vertex < (graph->vertices + graph->nof_vertices); vertex++) {
+
+      if (vertex->state == GIS_VISITED || vertex_is_marked(vertex))
+        continue;
+
+      if (vertex->nof_edges <= 1) {
+
+        vertex->state = GIS_VISITED;
+        gt_file_xprintf(file, "%s", gt_str_get(vertex->header_seq));
+        
+        if (vertex->nof_edges == 1) {
+
+          next_edge = vertex->edges[0];
+
+          while(1) {
+            /* write edge information */
+            gt_file_xprintf(file, "\t%s -- %s," GT_WD ",%f,%d,%d",
+                                 gt_str_get(next_edge->start->header_seq),
+                                 gt_str_get(next_edge->end->header_seq),
+                                 next_edge->dist,
+                                 next_edge->std_dev,
+                                 next_edge->sense,
+                                 next_edge->same);
+            next_edge_end = next_edge->end;
+
+            if(next_edge_end->state == GIS_VISITED)
+              break;
+
+            next_edge_end->state = GIS_VISITED;
+
+            /* according to SGA: EdgeDir nextDir = !pXY->getTwin()->getDir(); */
+            if (next_edge->same)
+              dir = next_edge->sense;
+            else
+              dir = !next_edge->sense;
+
+            /* count edges in direction dir and save first of them */
+            nof_edges_in_dir = 0;
+            for (eid = 0; eid < next_edge_end->nof_edges; eid++) {
+              if (next_edge_end->edges[eid]->sense == dir &&
+                  !edge_is_marked(next_edge_end->edges[eid])) {
+                nof_edges_in_dir++;
+                new_next_edge = next_edge_end->edges[eid];
+              }
+            }
+
+            if (nof_edges_in_dir == 1)
+              next_edge = new_next_edge;
+            else
+              break;
+          }
+        }
+        gt_file_xprintf(file, "\n");
+      }
+    }
+    gt_file_delete(file);
+  }
+
+  return had_err;
+}
