@@ -832,7 +832,7 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
 }
 
 /* write scaffold into file */
-int gt_scaffolder_graph_write_scaffold(GtScaffolderGraph *graph,
+int gt_scaffolder_graph_write_scaffold(const GtScaffolderGraph *graph,
                                        const char *file_name,
                                        GtError *err)
 {
@@ -852,7 +852,6 @@ int gt_scaffolder_graph_write_scaffold(GtScaffolderGraph *graph,
     gt_error_set(err,"can not create file %s", file_name);
   }
 
-  /* iterate over all vertices */
   if (had_err == 0) {
 
     /* initialize all vertices as not visited */
@@ -862,7 +861,7 @@ int gt_scaffolder_graph_write_scaffold(GtScaffolderGraph *graph,
         vertex->state = GIS_UNVISITED;
     }
 
-
+     /* iterate over all vertices */
     for (vertex = graph->vertices;
          vertex < (graph->vertices + graph->nof_vertices); vertex++) {
 

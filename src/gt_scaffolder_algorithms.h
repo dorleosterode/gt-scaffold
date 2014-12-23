@@ -23,7 +23,7 @@
 #define GT_SCAFFOLDER_ALGORITHMS_H
 
 /* write scaffold into file */
-int gt_scaffolder_graph_write_scaffold(GtScaffolderGraph *graph,
+int gt_scaffolder_graph_write_scaffold(const GtScaffolderGraph *graph,
                                        const char *file_name,
                                        GtError *err);
 
