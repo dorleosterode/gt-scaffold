@@ -133,6 +133,9 @@ int main(int argc, char **argv)
         gt_scaffolder_graph_print(graph,
               "gt_scaffolder_algorithms_test_makescaffold.dot", err);
 
+        gt_scaffolder_graph_write_scaffold(graph,
+              "gt_scaffolder_algorithms_write_scaffold.scaf", err);
+
       }
       if (had_err != 0)
         fprintf(stderr,"ERROR: %s\n",gt_error_get(err));
