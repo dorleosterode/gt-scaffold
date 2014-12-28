@@ -912,7 +912,7 @@ int gt_scaffolder_graph_write_scaffold(const GtScaffolderGraph *graph,
 
           while(1) {
             /* write edge information */
-            gt_file_xprintf(file, "\t%s," GT_WD ",%f,%d,%d",
+            gt_file_xprintf(file, "\t%s," GT_WD ",%f,%d,%d,",
                                  gt_str_get(next_edge->end->header_seq),
                                  next_edge->dist,
                                  next_edge->std_dev,
