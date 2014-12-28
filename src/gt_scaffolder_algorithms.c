@@ -592,6 +592,10 @@ void gt_scaffolder_walk_addegde(GtScaffolderGraphWalk *walk,
   walk->nof_edges++;
 }
 
+
+
+/* BFS-Traversierung innerhalb aktueller Zusammenhangskomponente
+   ausgehend von terminalen Knoten zu terminalen Knoten */
 GtScaffolderGraphWalk
 *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
                            GtScaffolderGraphVertex *start)
@@ -599,8 +603,6 @@ GtScaffolderGraphWalk
   gt_assert(graph != NULL);
   gt_assert(start != NULL);
 
-  /* BFS-Traversierung innerhalb aktueller Zusammenhangskomponente
-     ausgehend von terminalen Knoten zu terminalen Knoten */
   GtQueue *wqueue;
   GtArray *terminal_vertices;
   GtScaffolderGraphEdge *edge, *reverseedge, *nextedge, **edgemap;
@@ -856,13 +858,15 @@ int gt_scaffolder_graph_write_scaffold(const GtScaffolderGraph *graph,
                                        GtError *err)
 {
   GtScaffolderGraphVertex *vertex, *next_edge_end;
-  GtScaffolderGraphEdge *next_edge, *new_next_edge;
+  GtScaffolderGraphEdge *next_edge, *edge, *unmarked_edge;
   GtFile *file;
   int had_err;
   bool dir;
-  GtUword eid, nof_edges_in_dir;
+  GtUword eid, nof_edges_in_dir, nof_unmarked_edges;
 
-  new_next_edge = NULL;
+  next_edge = NULL;
+  edge = NULL;
+  unmarked_edge = NULL;
   had_err = 0;
   /* create file */
   file = gt_file_new(file_name, "w", err);
@@ -887,14 +891,24 @@ int gt_scaffolder_graph_write_scaffold(const GtScaffolderGraph *graph,
       if (vertex->state == GIS_VISITED || vertex_is_marked(vertex))
         continue;
 
-      if (vertex->nof_edges <= 1) {
+      /* count unmarked edges and save one of them */
+      nof_unmarked_edges = 0;
+      for (eid = 0; eid < vertex->nof_edges; eid++) {
+        edge = vertex->edges[eid];
+        if (!edge_is_marked(edge)) {
+          nof_unmarked_edges++;
+          unmarked_edge = edge;
+        }
+      }
+
+      if (nof_unmarked_edges <= 1) {
 
         vertex->state = GIS_VISITED;
         gt_file_xprintf(file, "%s", gt_str_get(vertex->header_seq));
         
-        if (vertex->nof_edges == 1) {
+        if (nof_unmarked_edges == 1) {
 
-          next_edge = vertex->edges[0];
+          next_edge = unmarked_edge;
 
           while(1) {
             /* write edge information */
@@ -917,18 +931,20 @@ int gt_scaffolder_graph_write_scaffold(const GtScaffolderGraph *graph,
             else
               dir = !next_edge->sense;
 
-            /* count edges in direction dir and save first of them */
+            /* count valid edges (unmarked, no twin) in direction dir
+               and save one of them */
             nof_edges_in_dir = 0;
             for (eid = 0; eid < next_edge_end->nof_edges; eid++) {
-              if (next_edge_end->edges[eid]->sense == dir &&
-                  !edge_is_marked(next_edge_end->edges[eid])) {
+              edge = next_edge_end->edges[eid]; 
+              if (edge->sense == dir && !edge_is_marked(edge)
+                  && !is_twin(next_edge, edge)) {
                 nof_edges_in_dir++;
-                new_next_edge = next_edge_end->edges[eid];
+                unmarked_edge = edge;
               }
             }
 
             if (nof_edges_in_dir == 1)
-              next_edge = new_next_edge;
+              next_edge = unmarked_edge;
             else
               break;
           }
