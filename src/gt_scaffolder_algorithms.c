@@ -633,7 +633,7 @@ GtScaffolderGraphWalk
     return NULL;
   }
 
-  /* LG: obsolete as dir is set in line ... now
+  /* LG: obsolete as dir is set in line 677 now
      we have to take the direction of the first not marked edge! 
   for (eid = 0; eid < start->nof_edges; eid++) {
     if (!edge_is_marked(start->edges[eid])) {

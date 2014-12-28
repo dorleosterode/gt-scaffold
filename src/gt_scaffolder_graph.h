@@ -87,6 +87,12 @@ typedef struct GtScaffolderGraphWalk {
   GtScaffolderGraphEdge **edges;
 }GtScaffolderGraphWalk;
 
+/* node */
+typedef struct GtScaffolderGraphNode {
+  GtScaffolderGraphEdge *edge;
+  GtWord dist;
+}GtScaffolderGraphNode;
+
 /* Construct graph data structure <*GtScaffolderGraph>. Wrap around two
    seperate constructor functions, which allocate memory for <max_nof_edges>
    edges and <max_nof_vertices> vertices. */
