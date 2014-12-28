@@ -317,8 +317,8 @@ void gt_scaffolder_graph_print_scaffold(const GtScaffolderGraph *g,
   for (v = g->vertices; v < (g->vertices + g->nof_vertices); v++) {
     if (v->state == GIS_SCAFFOLD)
       gt_file_xprintf(f, GT_WU " [label=\"%s\"];\n",
-		      gt_scaffolder_graph_get_vertex_id(g, v),
-		      gt_str_get(v->header_seq));
+                      gt_scaffolder_graph_get_vertex_id(g, v),
+                      gt_str_get(v->header_seq));
   }
 
   /* iterate over all edges and print just the scaffold edges */
@@ -326,11 +326,11 @@ void gt_scaffolder_graph_print_scaffold(const GtScaffolderGraph *g,
     gt_assert(e != NULL);
     if (e->state == GIS_SCAFFOLD)
       gt_file_xprintf(f,
-		      GT_WU " -> " GT_WU " [label="
-		      "\"" GT_WD "\" arrowhead=\"%s\"];\n",
-		      gt_scaffolder_graph_get_vertex_id(g, e->start),
-		      gt_scaffolder_graph_get_vertex_id(g, e->end),
-		      e->dist, e->sense?"normal":"inv");
+                      GT_WU " -> " GT_WU " [label="
+                      "\"" GT_WD "\" arrowhead=\"%s\"];\n",
+                      gt_scaffolder_graph_get_vertex_id(g, e->start),
+                      gt_scaffolder_graph_get_vertex_id(g, e->end),
+                      e->dist, e->sense?"normal":"inv");
   }
 
   /* print the last line into f */
