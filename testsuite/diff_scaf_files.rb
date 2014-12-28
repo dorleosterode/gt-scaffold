@@ -11,6 +11,7 @@ def compare_scaffolds(scaffold_arrays_1, scaffold_arrays_2)
       #at least one common element
       if diff.size < scaffold_array_1.size
         break
+
       end
     end
     #show contigs existing only in first scaffold file
@@ -42,7 +43,7 @@ def read_scaffolds(scaffolds)
     scaffold_array = scaffold.split(/\t/)
     scaffold_array.each do |element|
       element.chomp!
-      element.sub!(/,-?\d+,\d+\.\d+,\d+,\d+,\D*$/,"")
+      element.sub!(/,-?\d+,\d+\.?\d*,\d+,\d+,\D*$/,"")
     end
     scaffold_arrays.push(scaffold_array)
   end
