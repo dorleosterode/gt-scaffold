@@ -608,9 +608,11 @@ GtScaffolderGraphWalk
   GtUword lengthbestwalk, lengthcwalk, eid, i;
   GtScaffolderGraphWalk *bestwalk, *currentwalk;
   float distance, *distancemap;
+  GtScaffolderGraphNode initial_node, current_node, *node;
   bool dir;
-  bool set_dir = false;
   lengthbestwalk = 0;
+  /* bool set_dir = false; */
+
   /* do we need this initialization? isn't bestwalk
      just a pointer to the best currentwalk? */
   bestwalk = gt_scaffolder_walk_new();
@@ -631,7 +633,8 @@ GtScaffolderGraphWalk
     return NULL;
   }
 
-  /* we have to take the direction of the first not marked edge! */
+  /* LG: obsolete as dir is set in line ... now
+     we have to take the direction of the first not marked edge! 
   for (eid = 0; eid < start->nof_edges; eid++) {
     if (!edge_is_marked(start->edges[eid])) {
       dir = start->edges[eid]->sense;
@@ -639,9 +642,9 @@ GtScaffolderGraphWalk
       break;
     }
   }
-
   if (!set_dir)
     return NULL;
+  */
 
   for (eid = 0; eid < start->nof_edges; eid++) {
     edge = start->edges[eid];
@@ -657,15 +660,27 @@ GtScaffolderGraphWalk
       distancemap[endvertex_index] = edge->dist;
       edgemap[endvertex_index] = edge;
 
-      gt_queue_add(wqueue, edge);
+      initial_node.edge = edge;
+      initial_node.dist = edge->dist;
+
+      gt_queue_add(wqueue, &initial_node);
     }
   }
 
   while (gt_queue_size(wqueue) != 0) {
-    edge = (GtScaffolderGraphEdge*)gt_queue_get(wqueue);
+    node = (GtScaffolderGraphNode*)gt_queue_get(wqueue);
+    edge = node->edge;
     endvertex = edge->end;
 
+    /* determine opposite direction of twin of edge egde */
+    /* according to SGA: EdgeDir yDir = !pXY->getTwin()->getDir(); */
+    if (edge->same)
+      dir = edge->sense;
+    else
+      dir = !edge->sense;
+
     /* store all terminal vertices */
+    /* LG: endvertex is terminal iff no edges exist in dir direction */
     if (gt_scaffolder_graph_isterminal(endvertex))
       gt_array_add(terminal_vertices, endvertex);
 
@@ -678,7 +693,7 @@ GtScaffolderGraphWalk
         {
           nextendvertex = nextedge->end;
 
-          distance = edge->dist + nextedge->dist;
+          distance = node->dist + nextedge->dist;
 
           /* GT_WORD_MAX is the initial value */
           GtUword next_endvertex_index =
@@ -688,7 +703,11 @@ GtScaffolderGraphWalk
             {
               distancemap[next_endvertex_index] = distance;
               edgemap[next_endvertex_index] = nextedge;
-              gt_queue_add(wqueue, nextedge);
+
+              current_node.edge = nextedge;
+              current_node.dist = distance;
+
+              gt_queue_add(wqueue, &current_node);
             }
         }
       }
