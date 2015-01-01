@@ -163,6 +163,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
   bool valid_contig;
   GtStr *gt_str_field;
   GtScaffolderGraphVertex *v, *ctg, *root_ctg;
+  GtScaffolderGraphEdge *edge;
 
   had_err = 0;
   record_counter = 0;
@@ -245,8 +246,14 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
 
             if (valid_contig) {
 
-              edge_counter[ctg-graph->vertices] += 1;
-              line_record_counter++;
+              /* check if edge between vertices already exists */
+              edge = gt_scaffolder_graph_find_edge(root_ctg, ctg);
+              if (edge == NULL)
+              {
+                edge_counter[ctg-graph->vertices] += 1;
+                edge_counter[root_ctg-graph->vertices] += 1;
+                line_record_counter += 2;
+              }
             }
 
           }
@@ -303,7 +310,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
   GtUword ctg_header_len;
   GtWord dist, num_pairs;
   float std_dev;
-  bool same, sense, valid_contig;
+  bool same, sense, valid_contig, twin_dir;
   GtScaffolderGraphEdge *edge;
   GtScaffolderGraphVertex *root_ctg, *ctg;
   int had_err;
@@ -378,9 +385,19 @@ int gt_scaffolder_parser_read_distances(const char *filename,
                 }
                 /*else { Conflicting-Flag? }*/
               }
-              else
+              else {
+                /* set edge with corresponding twin edge, as dist format does
+                 not contain twin edge in all cases (why?!) */
+                if (same)
+                  twin_dir = !sense;
+                else
+                  twin_dir = sense;
+
                 gt_scaffolder_graph_add_edge(graph, root_ctg, ctg, dist,
                                               std_dev,num_pairs, sense, same);
+                gt_scaffolder_graph_add_edge(graph, ctg, root_ctg, dist,
+                                              std_dev,num_pairs, twin_dir, same);
+              }
             }
           }
           /* switch direction */
