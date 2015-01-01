@@ -55,12 +55,15 @@ end
 def show_stat(scaffold_arrays)
   nof_single_scaffolds = 0
   nof_scaffolds = 0
+  nof_contigs = 0
   scaffold_arrays.each do |scaffold_array|
     if scaffold_array.size == 1
       nof_single_scaffolds += 1
     end
     nof_scaffolds += 1
+    nof_contigs += scaffold_array.size
   end
+  print("Total number of unique contigs: ",nof_contigs,"\n")
   print("Total number of scaffolds: ",nof_scaffolds,"\n")
   print("Number of single scaffolds: ",nof_single_scaffolds,"\n\n")
 end
