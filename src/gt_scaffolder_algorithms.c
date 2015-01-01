@@ -138,8 +138,8 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
         break;
       }
     }
+    fclose(file);
   }
-  fclose(file);
   gt_str_delete(gt_str_field);
 
   if (had_err != -1)

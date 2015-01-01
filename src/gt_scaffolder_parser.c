@@ -267,6 +267,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
         record_counter += line_record_counter;
       }
     }
+    fclose(file);
   }
 
   if (had_err != -1) {
@@ -283,7 +284,6 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
   gt_free(edge_counter);
   gt_str_delete(gt_str_field);
 
-  fclose(file);
   return had_err;
 }
 
@@ -392,10 +392,10 @@ int gt_scaffolder_parser_read_distances(const char *filename,
         }
       }
     }
+    fclose(file);
   }
 
   gt_str_delete(gt_str_field);
-  fclose(file);
   return had_err;
 }
 
