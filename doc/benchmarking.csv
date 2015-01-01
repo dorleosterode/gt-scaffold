@@ -20,10 +20,10 @@ paired reads created by ART_ILLUMINA*,,,,,
 Run_1,,2569,2100/2100,824/824,325/325
 P. falciparum denovo 23 Mbp (Sanger Institute),19,,,,
 paired reads created by ART_ILLUMINA*,,,,,
-Run_1,,18236,10655/10690,5287/5280,2691/2671
+Run_1,,18236,10655/10656,5287/5286,2691/2690
 H. sapiens Chr. 14 88.7 Mbp (NT_026437.13),40,,,,
 paired reads created by ART_ILLUMINA*,,,,,
-Run_1,,60493,40029/40077,19746/19750,9992/9969
+Run_1,,60493,40029/40029,19746/19746,9992/9992
 ,,,,,
 "*Conditions: read length 150 bp, coverage 20,",,,,,
 " fragment length 400 bp, standard deviation 10 bp",,,,,
