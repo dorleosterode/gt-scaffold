@@ -2,7 +2,6 @@
 - algorithms: implement removeMultiEdgeScaffold function [Dorle]
   - evaluate usage of string graph in SGA to fill gaps
 - parser: parse astat from contig file [Lukas]
-- extensively test on several test sets [Stefan]
 - scan-build: fix dead init of variables [Stefan]
 - research on Abyss DistanceEst
 
@@ -25,7 +24,8 @@
 - added test function for distance parser [Lukas]
 - test: parser scenarios (e.g. negative contig length, wrong input) [Lukas]
 - output: evaluate possibility to convert scaffolds to fasta [Lukas]
-- diff-script: sga-dot and gt-scaffolder dot [Lukas]
+- diff-script: sga-dot and gt-scaffolder dot, sga-scaf and gt-scaffolder scaf[Lukas]
+- extensively test on several test sets [Lukas]
 - implement new script to filter DistEst-file [Dorle]
 - extend graph_print-function to print the dir-information as arrowhead and tail [Dorle]
 - implement set_vertex_status(v, status) and set_edge_status(e, status)
