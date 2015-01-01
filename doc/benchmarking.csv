@@ -1,0 +1,29 @@
+,,,,,
+,GC-Content [%],,Comparison SGA/GT_SCAFFOLD based on scaf-File,,
+Data sets,,# Contigs,# Unique contigs,# Scaffolds,# Singleton Scaffolds
+Lambda Phage 48.5 kbp (NC_001416.1),,,,,
+paired reads created by ART_ILLUMINA*,,,,,
+Run_1,,30,24/24,12/12,6/6
+Run_2,,30,23/23,11/11,5/5
+Run_3,,30,24/24,12/12,6/6
+Run_4,,30,23/23,11/11,5/5
+Run_5,,30,25/25,13/13,7/7
+S. cerevisiae Chr. 7 1.5 Mbp (NC_001136.10),38,,,,
+paired reads created by ART_ILLUMINA*,,,,,
+Run_1,,917,656/656,254/254,101/101
+Run_2,,917,656/656,255/255,101/101
+Run_3,,917,654/654,252/252,98/98
+Run_4,,917,656/656,254/254,101/101
+Run_5,,917,653/653,252/252,99/99
+R. sphaeroides 4.6 Mbp (GAGE Assembly),68,,,,
+paired reads created by ART_ILLUMINA*,,,,,
+Run_1,,2569,2100/2100,824/824,325/325
+P. falciparum denovo 23 Mbp (Sanger Institute),19,,,,
+paired reads created by ART_ILLUMINA*,,,,,
+Run_1,,18236,10655/10690,5287/5280,2691/2671
+H. sapiens Chr. 14 88.7 Mbp (NT_026437.13),40,,,,
+paired reads created by ART_ILLUMINA*,,,,,
+Run_1,,60493,40029/40077,19746/19750,9992/9969
+,,,,,
+"*Conditions: read length 150 bp, coverage 20,",,,,,
+" fragment length 400 bp, standard deviation 10 bp",,,,,
