@@ -185,16 +185,22 @@ gt_scaffolder_graph_ambiguousorder(const GtScaffolderGraphEdge *edge1,
 static GtWord gt_scaffolder_calculate_overlap(GtScaffolderGraphEdge *edge1,
                                               GtScaffolderGraphEdge *edge2)
 {
+  GtWord overlap = 0;
+  GtWord start1, start2, end1, end2;
+
   gt_assert(edge1 != NULL);
   gt_assert(edge2 != NULL);
 
-  GtWord overlap = 0;
+  start1 = edge1->dist;
+  start2 = edge2->dist;
+  end1 = edge1->dist + edge1->end->seq_len;
+  end2 = edge2->dist + edge2->end->seq_len;
 
-  if (edge2->dist >= edge1->end->seq_len ||
-      edge1->dist >= edge2->end->seq_len)
+  if (start2 >= end1 ||
+      start1 >= end2)
   {
-    GtWord intersect_start = MAX(edge1->dist, edge2->dist);
-    GtWord intersect_end = MAX(edge1->end->seq_len, edge2->end->seq_len);
+    GtWord intersect_start = MAX(start1, start2);
+    GtWord intersect_end = MAX(end1, end2);
     /* SK: gt_assert(intersect_end >= intersect_start); */
     overlap = intersect_end - intersect_start;
   }
