@@ -2,7 +2,6 @@
 - algorithms: implement removeMultiEdgeScaffold function [Dorle]
   - evaluate usage of string graph in SGA to fill gaps
 - parser: parse astat from contig file [Lukas]
-- scan-build: fix dead init of variables [Stefan]
 - research on Abyss DistanceEst
 
 ## OBSTACLES
@@ -17,6 +16,7 @@
 - diff-script: sga-dot and gt-scaffolder dot, sga-scaf and gt-scaffolder scaf[Lukas]
 - output: evaluate possibility to convert scaffolds to fasta [Lukas]
 - extensively test on several test sets [Lukas]
+- scan-build: fix dead init of variables [Stefan]
 
 --
 - SGA: print .dot for step-by-step comparison [Stefan]
