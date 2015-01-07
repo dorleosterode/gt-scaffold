@@ -65,6 +65,8 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph);
 
 void gt_scaffolder_removecycles(GtScaffolderGraph *graph);
 
-
+/* generates the fasta-string for the given scaffold-record */
+GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
+                                           GtStr *ids);
 
 #endif

@@ -19,6 +19,7 @@
 
 #include "core/error.h"
 #include "core/file_api.h"
+#include "core/array_api.h"
 #include "core/str_api.h"
 #include "core/types_api.h"
 
@@ -92,6 +93,12 @@ typedef struct GtScaffolderGraphNode {
   GtScaffolderGraphEdge *edge;
   GtWord dist;
 }GtScaffolderGraphNode;
+
+/* Datatype to store the scaffolds */
+typedef struct GtScaffolderGraphRecord {
+  GtScaffolderGraphVertex *root;
+  GtArray *edges;
+}GtScaffolderGraphRecord;
 
 /* Construct graph data structure <*GtScaffolderGraph>. Wrap around two
    seperate constructor functions, which allocate memory for <max_nof_edges>

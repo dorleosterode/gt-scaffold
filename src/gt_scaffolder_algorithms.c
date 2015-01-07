@@ -856,6 +856,35 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
   gt_array_delete(cc_walks);
 }
 
+/* functions to use GtScaffolderGraphRecords not used yet
+static GtScaffolderGraphRecord *
+gt_scaffolder_graph_new_record(GtScaffolderGraphVertex *root) {
+  GtScaffolderGraphRecord *rec;
+
+  gt_assert(root != NULL);
+
+  rec = gt_malloc(sizeof(*rec));
+  rec->root = root;
+  rec->edges = gt_array_new(sizeof(GtScaffolderGraphEdge *));
+  return rec;
+}
+
+static void gt_scaffolder_graph_record_add_edge(GtScaffolderGraphRecord *rec,
+                                                GtScaffolderGraphEdge *edge) {
+  gt_assert(rec != NULL);
+  gt_assert(edge != NULL);
+
+  gt_array_add(rec->edges, edge);
+}
+
+static void gt_scaffolder_graph_delete_record(GtScaffolderGraphRecord *rec) {
+  gt_assert(rec != NULL);
+
+  gt_array_delete(rec->edges);
+
+  gt_free(rec);
+}*/
+
 /* write scaffold into file */
 int gt_scaffolder_graph_write_scaffold(const GtScaffolderGraph *graph,
                                        const char *file_name,
@@ -960,4 +989,196 @@ int gt_scaffolder_graph_write_scaffold(const GtScaffolderGraph *graph,
   }
 
   return had_err;
+}
+
+void gt_scaffolder_graph_reverse_gt_str(GtStr *str) {
+  GtUword i;
+  GtUword len = gt_str_length(str);
+  char *rev = gt_malloc(sizeof(char)*len);
+  char *cstr = gt_str_get(str);
+
+  for (i = 0; i < len; i++) {
+    rev[i] = cstr[len - i - 1];
+  }
+
+  gt_str_set(str, rev);
+  gt_free(rev);
+}
+
+static char complement_base(char c) {
+  switch(c) {
+  case 'A': return 'T';
+  case 'T': return 'A';
+  case 'C': return 'G';
+  case 'G': return 'C';
+  default: return 'N';
+  }
+}
+
+void gt_scaffolder_graph_reverse_complement_gt_str(GtStr *str) {
+  GtUword i;
+  GtUword len = gt_str_length(str);
+  char *rev = gt_malloc(sizeof(char)*len);
+  char *cstr = gt_str_get(str);
+
+  for (i = 0; i < len; i++) {
+    rev[i] = complement_base(cstr[len - i - 1]);
+  }
+
+  gt_str_set(str, rev);
+  gt_free(rev);
+}
+
+static bool gt_scaffolder_graph_graph_resolve(GtScaffolderGraphEdge *edge,
+                                              GtStr *resv_seq) {
+  gt_assert(edge != NULL);
+  gt_assert(resv_seq != NULL);
+
+  return true;
+}
+
+static bool gt_scaffolder_graph_overlap_resolve(GtScaffolderGraphEdge *edge,
+                                                GtStr *seq,
+                                                GtStr *next_seq,
+                                                GtStr *resv_seq) {
+  gt_assert(edge != NULL);
+  gt_assert(seq != NULL);
+  gt_assert(next_seq != NULL);
+  gt_assert(resv_seq != NULL);
+
+  return true;
+}
+
+
+static void gt_scaffolder_graph_introduce_gap(GtScaffolderGraphEdge *edge,
+                                              GtStr *seq,
+                                              GtStr *next_seq,
+                                              GtStr *resv_seq) {
+  gt_assert(edge != NULL);
+  gt_assert(seq != NULL);
+  gt_assert(next_seq != NULL);
+  gt_assert(resv_seq != NULL);
+}
+
+GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
+                                           GtStr *ids) {
+  GtStr *seq, *root_id;
+  GtArray *id_array;
+
+  /* TODO: initialize seq with gt_str of the root-node of rec. we need
+     the sequence for that */
+  seq = gt_str_new();
+
+  id_array = gt_array_new(sizeof(GtStr *));
+  root_id = gt_str_clone(rec->root->header_seq);
+  gt_array_add(id_array, root_id);
+
+  if (gt_array_size(rec->edges) > 0) {
+    GtUword i;
+    GtScaffolderGraphEdge *edge;
+    GtStr *resv_seq = NULL;
+    GtStr *out_id;
+    bool resolved;
+    bool root_dir;
+    bool rel_comp = true;
+    bool prev_comp = true;
+
+    edge = *(GtScaffolderGraphEdge **)gt_array_get(rec->edges, 0);
+    root_dir = edge->sense;
+
+    if (!root_dir)
+      gt_scaffolder_graph_reverse_gt_str(seq);
+
+    /* iterate over all edges in the scaffold */
+    for (i = 0; i < gt_array_size(rec->edges); i++) {
+      edge = *(GtScaffolderGraphEdge **)gt_array_get(rec->edges, i);
+
+      /* store relative composition to root-contig */
+      if (!edge->same)
+        rel_comp = rel_comp ? false : true;
+
+      /* try to find unique walk through graph to resolve the gap */
+      resolved = gt_scaffolder_graph_graph_resolve(edge, resv_seq);
+
+      if (resolved) {
+        /* check if we have to reverse complement the sequence */
+        if (!prev_comp) {
+          /* reverse complement the sequence */
+          gt_scaffolder_graph_reverse_complement_gt_str(resv_seq);
+        }
+
+        if (!root_dir)
+          gt_scaffolder_graph_reverse_gt_str(resv_seq);
+      }
+
+      /* check if the contigs overlap and resolve the overlap */
+      if (!resolved) {
+        GtStr *next_seq;
+
+        /* TODO: get the sequence of edge->end.
+         maybe this initialization is not needed! */
+        next_seq = gt_str_new();
+
+        if (!rel_comp) {
+          /* reverse complement the sequence */
+          gt_scaffolder_graph_reverse_complement_gt_str(next_seq);
+        }
+
+        if (!root_dir)
+          gt_scaffolder_graph_reverse_gt_str(next_seq);
+
+        if (edge->dist < 0) {
+          resolved = gt_scaffolder_graph_overlap_resolve(edge, seq,
+                                                         next_seq, resv_seq);
+        }
+
+        /* introduce a gap between the contigs */
+        if (!resolved) {
+          gt_scaffolder_graph_introduce_gap(edge, seq, next_seq, resv_seq);
+        }
+
+        gt_str_delete(next_seq);
+      }
+
+      /* get the header of the current end-vertex and add the sense
+         information */
+      gt_str_append_str(seq, resv_seq);
+      out_id = gt_str_clone(edge->end->header_seq);
+      gt_str_append_char(out_id, rel_comp ? '+' : '-');
+      gt_array_add(id_array, out_id);
+
+      prev_comp = rel_comp;
+    }
+
+    if (!root_dir) {
+      GtUword i;
+      GtStr *out_id;
+
+      gt_scaffolder_graph_reverse_gt_str(seq);
+      /* reverse the order of the ids */
+      for (i = gt_array_size(id_array) - 1; i >= 0; i--) {
+        out_id = *(GtStr **) gt_array_get(id_array, i);
+        gt_str_append_str(ids, out_id);
+      }
+    }
+    else {
+      GtUword i;
+      GtStr *out_id;
+
+      for (i = 0; i < gt_array_size(id_array); i++) {
+        out_id = *(GtStr **) gt_array_get(id_array, i);
+        gt_str_append_str(ids, out_id);
+      }
+    }
+  }
+
+  /* singleton scaffold */
+  if (gt_array_size(id_array) == 1) {
+    GtStr *out_id = *(GtStr **) gt_array_get(id_array, 0);
+    gt_str_append_str(ids, out_id);
+  }
+
+  gt_array_delete(id_array);
+
+  return seq;
 }
