@@ -992,17 +992,22 @@ int gt_scaffolder_graph_write_scaffold(const GtScaffolderGraph *graph,
 }
 
 void gt_scaffolder_graph_reverse_gt_str(GtStr *str) {
-  GtUword i;
-  GtUword len = gt_str_length(str);
-  char *rev = gt_malloc(sizeof(char)*len);
-  char *cstr = gt_str_get(str);
+  GtUword len;
+  gt_assert(str != NULL);
+  len = gt_str_length(str);
 
-  for (i = 0; i < len; i++) {
-    rev[i] = cstr[len - i - 1];
+  if (len > 0) {
+    GtUword i;
+    char *rev = gt_malloc(sizeof(char)*len);
+    char *cstr = gt_str_get(str);
+
+    for (i = 0; i < len; i++) {
+      rev[i] = cstr[len - i - 1];
+    }
+
+    gt_str_set(str, rev);
+    gt_free(rev);
   }
-
-  gt_str_set(str, rev);
-  gt_free(rev);
 }
 
 static char complement_base(char c) {
@@ -1016,17 +1021,22 @@ static char complement_base(char c) {
 }
 
 void gt_scaffolder_graph_reverse_complement_gt_str(GtStr *str) {
-  GtUword i;
-  GtUword len = gt_str_length(str);
-  char *rev = gt_malloc(sizeof(char)*len);
-  char *cstr = gt_str_get(str);
+  GtUword len;
+  gt_assert(str != NULL);
+  len = gt_str_length(str);
 
-  for (i = 0; i < len; i++) {
-    rev[i] = complement_base(cstr[len - i - 1]);
+  if (len > 0) {
+    GtUword i;
+    char *rev = gt_malloc(sizeof(char)*len);
+    char *cstr = gt_str_get(str);
+
+    for (i = 0; i < len; i++) {
+      rev[i] = complement_base(cstr[len - i - 1]);
+    }
+
+    gt_str_set(str, rev);
+    gt_free(rev);
   }
-
-  gt_str_set(str, rev);
-  gt_free(rev);
 }
 
 static bool gt_scaffolder_graph_graph_resolve(GtScaffolderGraphEdge *edge,
@@ -1050,13 +1060,44 @@ static bool gt_scaffolder_graph_overlap_resolve(GtScaffolderGraphEdge *edge,
 }
 
 static void gt_scaffolder_graph_introduce_gap(GtScaffolderGraphEdge *edge,
-                                              GtStr *seq,
+                                              GtUword min_gap_length,
                                               GtStr *next_seq,
                                               GtStr *resv_seq) {
   gt_assert(edge != NULL);
-  gt_assert(seq != NULL);
   gt_assert(next_seq != NULL);
   gt_assert(resv_seq != NULL);
+
+  char *seq = NULL;
+  char *next_cseq = gt_str_get(next_seq);
+  GtUword next_seq_len = gt_str_length(next_seq);
+
+  /* overlap couldn't be resolved */
+  if (edge->dist < 0) {
+    GtWord overlap = edge->dist * -1;
+    GtUword rest_len = next_seq_len - overlap;
+    GtUword len = min_gap_length + rest_len + 1;
+    seq = gt_malloc(len * sizeof (*seq));
+
+    memset(seq, 'N', min_gap_length);
+
+    memcpy(seq + min_gap_length, next_cseq + overlap, rest_len + 1);
+
+    gt_assert(seq[len-1] == '\0');
+  }
+  else {
+    GtUword gap_len = MAX(edge->dist, min_gap_length);
+    GtUword len = gap_len + next_seq_len + 1;
+    seq = gt_malloc(len * sizeof (*seq));
+
+    memset(seq, 'N', gap_len);
+
+    memcpy(seq + gap_len, next_cseq, next_seq_len + 1);
+
+    gt_assert(seq[len-1] == '\0');
+  }
+
+  gt_str_set(resv_seq, seq);
+  gt_free(seq);
 }
 
 GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
@@ -1069,14 +1110,14 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
      the sequence for that */
   seq = gt_str_new();
 
-  id_array = gt_array_new(sizeof(GtStr *));
+  id_array = gt_array_new(sizeof (GtStr *));
   root_id = gt_str_clone(rec->root->header_seq);
   gt_array_add(id_array, root_id);
 
   if (gt_array_size(rec->edges) > 0) {
     GtUword i;
     GtScaffolderGraphEdge *edge;
-    GtStr *resv_seq = NULL;
+    GtStr *resv_seq = gt_str_new();
     GtStr *out_id;
     bool resolved;
     bool root_dir;
@@ -1091,6 +1132,7 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
 
     /* iterate over all edges in the scaffold */
     for (i = 0; i < gt_array_size(rec->edges); i++) {
+      gt_str_reset(resv_seq);
       edge = *(GtScaffolderGraphEdge **)gt_array_get(rec->edges, i);
 
       /* store relative composition to root-contig */
@@ -1133,10 +1175,10 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
         }
 
         /* introduce a gap between the contigs */
-        if (!resolved) {
-          gt_scaffolder_graph_introduce_gap(edge, seq, next_seq, resv_seq);
-        }
+        if (!resolved)
+          gt_scaffolder_graph_introduce_gap(edge, 10, next_seq, resv_seq);
 
+	/* (void)gt_scaffolder_graph_introduce_gap; */
         gt_str_delete(next_seq);
       }
 
@@ -1150,6 +1192,8 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
       prev_comp = rel_comp;
     }
 
+    gt_str_delete(resv_seq);
+
     if (!root_dir) {
       GtUword i, num_ids;
       GtStr *out_id;
@@ -1160,6 +1204,7 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
       for (i = 0; i < num_ids; i++) {
         out_id = *(GtStr **) gt_array_get(id_array, num_ids - i - 1);
         gt_str_append_str(ids, out_id);
+	gt_str_delete(out_id);
       }
     }
     else {
@@ -1169,6 +1214,7 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
       for (i = 0; i < gt_array_size(id_array); i++) {
         out_id = *(GtStr **) gt_array_get(id_array, i);
         gt_str_append_str(ids, out_id);
+	gt_str_delete(out_id);
       }
     }
   }
