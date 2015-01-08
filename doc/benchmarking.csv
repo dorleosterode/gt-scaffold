@@ -1,5 +1,5 @@
 ,,,,,
-,GC-Content [%],,Comparison SGA/GT_SCAFFOLD based on scaf-File,,
+,GC-Content [%],,Comparison SGA/,GT_SCAFFOLD,based on scaf-File
 Data sets,,# Contigs,# Unique contigs,# Scaffolds,# Singleton Scaffolds
 Lambda Phage 48.5 kbp (NC_001416.1),,,,,
 paired reads created by ART_ILLUMINA*,,,,,
@@ -20,7 +20,7 @@ paired reads created by ART_ILLUMINA*,,,,,
 Run_1,,2569,2100/2100,824/824,325/325
 P. falciparum denovo 23 Mbp (Sanger Institute),19,,,,
 paired reads created by ART_ILLUMINA*,,,,,
-Run_1,,18236,10655/10656,5287/5286,2691/2690
+Run_1,,18236,10655/10655,5287/5287,2691/2691
 H. sapiens Chr. 14 88.7 Mbp (NT_026437.13),40,,,,
 paired reads created by ART_ILLUMINA*,,,,,
 Run_1,,60493,40029/40029,19746/19746,9992/9992
