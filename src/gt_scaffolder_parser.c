@@ -394,9 +394,9 @@ int gt_scaffolder_parser_read_distances(const char *filename,
                   twin_dir = sense;
 
                 gt_scaffolder_graph_add_edge(graph, root_ctg, ctg, dist,
-                                              std_dev,num_pairs, sense, same);
+                                             std_dev,num_pairs, sense, same);
                 gt_scaffolder_graph_add_edge(graph, ctg, root_ctg, dist,
-                                              std_dev,num_pairs, twin_dir, same);
+                                             std_dev,num_pairs, twin_dir, same);
               }
             }
           }

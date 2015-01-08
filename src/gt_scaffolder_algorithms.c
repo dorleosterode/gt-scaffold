@@ -1006,12 +1006,12 @@ void gt_scaffolder_graph_reverse_gt_str(GtStr *str) {
 }
 
 static char complement_base(char c) {
-  switch(c) {
-  case 'A': return 'T';
-  case 'T': return 'A';
-  case 'C': return 'G';
-  case 'G': return 'C';
-  default: return 'N';
+  switch (c) {
+    case 'A': return 'T';
+    case 'T': return 'A';
+    case 'C': return 'G';
+    case 'G': return 'C';
+    default: return 'N';
   }
 }
 
@@ -1048,7 +1048,6 @@ static bool gt_scaffolder_graph_overlap_resolve(GtScaffolderGraphEdge *edge,
 
   return true;
 }
-
 
 static void gt_scaffolder_graph_introduce_gap(GtScaffolderGraphEdge *edge,
                                               GtStr *seq,
