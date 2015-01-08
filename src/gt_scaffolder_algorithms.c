@@ -1151,15 +1151,16 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
     }
 
     if (!root_dir) {
-      //GtUword i;
-      //GtStr *out_id;
+      GtUword i, num_ids;
+      GtStr *out_id;
 
       gt_scaffolder_graph_reverse_gt_str(seq);
       /* reverse the order of the ids */
-      /*SK: for (i = gt_array_size(id_array) - 1; i >= 0; i--) {
-        out_id = *(GtStr **) gt_array_get(id_array, i);
+      num_ids = gt_array_size(id_array);
+      for (i = 0; i < num_ids; i++) {
+        out_id = *(GtStr **) gt_array_get(id_array, num_ids - i - 1);
         gt_str_append_str(ids, out_id);
-      }*/
+      }
     }
     else {
       GtUword i;
