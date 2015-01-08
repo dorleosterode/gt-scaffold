@@ -1034,7 +1034,7 @@ static bool gt_scaffolder_graph_graph_resolve(GtScaffolderGraphEdge *edge,
   gt_assert(edge != NULL);
   gt_assert(resv_seq != NULL);
 
-  return true;
+  return false;
 }
 
 static bool gt_scaffolder_graph_overlap_resolve(GtScaffolderGraphEdge *edge,
@@ -1046,7 +1046,7 @@ static bool gt_scaffolder_graph_overlap_resolve(GtScaffolderGraphEdge *edge,
   gt_assert(next_seq != NULL);
   gt_assert(resv_seq != NULL);
 
-  return true;
+  return false;
 }
 
 static void gt_scaffolder_graph_introduce_gap(GtScaffolderGraphEdge *edge,
