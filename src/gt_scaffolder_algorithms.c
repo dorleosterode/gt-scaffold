@@ -998,12 +998,13 @@ void gt_scaffolder_graph_reverse_gt_str(GtStr *str) {
 
   if (len > 0) {
     GtUword i;
-    char *rev = gt_malloc(sizeof(char)*len);
+    char *rev = gt_malloc(sizeof (char) * (len + 1));
     char *cstr = gt_str_get(str);
 
     for (i = 0; i < len; i++) {
       rev[i] = cstr[len - i - 1];
     }
+    rev[len] = '\0';
 
     gt_str_set(str, rev);
     gt_free(rev);
@@ -1027,12 +1028,13 @@ void gt_scaffolder_graph_reverse_complement_gt_str(GtStr *str) {
 
   if (len > 0) {
     GtUword i;
-    char *rev = gt_malloc(sizeof(char)*len);
+    char *rev = gt_malloc(sizeof (char) * (len + 1));
     char *cstr = gt_str_get(str);
 
     for (i = 0; i < len; i++) {
       rev[i] = complement_base(cstr[len - i - 1]);
     }
+    rev[len] = '\0';
 
     gt_str_set(str, rev);
     gt_free(rev);
