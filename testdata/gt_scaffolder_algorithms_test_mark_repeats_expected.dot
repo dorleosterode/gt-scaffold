@@ -52,9 +52,9 @@ digraph {
 38 -> 7 [color="black" label="1011" arrowhead="normal"];
 7 -> 38 [color="black" label="1011" arrowhead="inv"];
 20 -> 31 [color="black" label="13" arrowhead="inv"];
-42 -> 30 [color="black" label="1828" arrowhead="normal"];
-26 -> 41 [color="black" label="-99" arrowhead="inv"];
 31 -> 20 [color="black" label="13" arrowhead="inv"];
+42 -> 30 [color="black" label="1828" arrowhead="normal"];
 30 -> 42 [color="black" label="1828" arrowhead="inv"];
+26 -> 41 [color="black" label="-99" arrowhead="inv"];
 41 -> 26 [color="black" label="-99" arrowhead="normal"];
 }
