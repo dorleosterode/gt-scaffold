@@ -18,7 +18,7 @@
 set -e -x
 
 TESTDATA=../testdata/gt-scaffold-assets
-TESTDIRS="e_coli e_lambda m_tuberculosis phix s_aureus"
+TESTDIRS="e_coli e_lambda m_tuberculosis s_aureus"
 TESTSUITE=../testsuite
 
 # DOWNLOAD / UPDATE TESTDATA
@@ -36,3 +36,7 @@ for dir in $TESTDIRS; do
   $TESTSUITE/diff_graph_files.rb "$full_dir/07_sga_makeScaffolds.dot" \
     gt_scaffolder_algorithms_test_makescaffold.dot
 done
+
+# test expected failure
+full_dir="$TESTDATA/phix"
+  ! ./test.x scaffold "$full_dir/primary-contigs.fa" "$full_dir/libPE.de" "$full_dir/libPE.astat"
