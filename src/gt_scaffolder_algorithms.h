@@ -23,9 +23,12 @@
 #define GT_SCAFFOLDER_ALGORITHMS_H
 
 /* write scaffold into file */
-int gt_scaffolder_graph_write_scaffold(const GtScaffolderGraph *graph,
-                                       const char *file_name,
-                                       GtError *err);
+int gt_scaffolder_graph_write_scaffold(GtArray *records,
+				       const char *file_name,
+				       GtError *err);
+
+/* iterate graph to construct scaffold-records */
+GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph);
 
 /* load astatics and copy number of every contig and mark repeated contigs */
 int gt_scaffolder_graph_mark_repeats(const char *filename,

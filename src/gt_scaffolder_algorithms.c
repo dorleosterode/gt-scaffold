@@ -856,9 +856,9 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
   gt_array_delete(cc_walks);
 }
 
-/* functions to use GtScaffolderGraphRecords not used yet
+/* functions to use GtScaffolderGraphRecords */
 static GtScaffolderGraphRecord *
-gt_scaffolder_graph_new_record(GtScaffolderGraphVertex *root) {
+gt_scaffolder_graph_record_new(GtScaffolderGraphVertex *root) {
   GtScaffolderGraphRecord *rec;
 
   gt_assert(root != NULL);
@@ -877,30 +877,115 @@ static void gt_scaffolder_graph_record_add_edge(GtScaffolderGraphRecord *rec,
   gt_array_add(rec->edges, edge);
 }
 
-static void gt_scaffolder_graph_delete_record(GtScaffolderGraphRecord *rec) {
-  gt_assert(rec != NULL);
+/* static void gt_scaffolder_graph_record_delete(GtScaffolderGraphRecord *rec) { */
+/*   gt_assert(rec != NULL); */
 
-  gt_array_delete(rec->edges);
+/*   gt_array_delete(rec->edges); */
 
-  gt_free(rec);
-}*/
+/*   gt_free(rec); */
+/* } */
 
-/* write scaffold into file */
-int gt_scaffolder_graph_write_scaffold(const GtScaffolderGraph *graph,
-                                       const char *file_name,
-                                       GtError *err)
-{
+/* iterate over graph and return each scaffold in a scaffold record */
+GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph) {
   GtScaffolderGraphVertex *vertex, *next_edge_end;
   GtScaffolderGraphEdge *next_edge, *edge, *unmarked_edge;
-  GtFile *file;
-  int had_err;
+  GtScaffolderGraphRecord *rec;
+  GtArray *records;
   bool dir;
   GtUword eid, nof_edges_in_dir, nof_unmarked_edges;
 
   next_edge = NULL;
   edge = NULL;
   unmarked_edge = NULL;
-  had_err = 0;
+
+  records = gt_array_new(sizeof (rec));
+
+  /* initialize all vertices as not visited */
+  for (vertex = graph->vertices;
+       vertex < (graph->vertices + graph->nof_vertices); vertex++) {
+    if (!vertex_is_marked(vertex))
+      vertex->state = GIS_UNVISITED;
+  }
+
+  /* iterate over all vertices */
+  for (vertex = graph->vertices;
+       vertex < (graph->vertices + graph->nof_vertices); vertex++) {
+
+    if (vertex->state == GIS_VISITED || vertex_is_marked(vertex))
+      continue;
+
+    /* count unmarked edges and save one of them */
+    nof_unmarked_edges = 0;
+    for (eid = 0; eid < vertex->nof_edges; eid++) {
+      edge = vertex->edges[eid];
+      if (!edge_is_marked(edge)) {
+	nof_unmarked_edges++;
+	unmarked_edge = edge;
+      }
+    }
+
+    if (nof_unmarked_edges <= 1) {
+      /* found new scaffold */
+      rec = gt_scaffolder_graph_record_new(vertex);
+
+      vertex->state = GIS_VISITED;
+
+      if (nof_unmarked_edges == 1) {
+
+	next_edge = unmarked_edge;
+
+	while (1) {
+	  /* store edge in scaffold-record */
+	  gt_scaffolder_graph_record_add_edge(rec, next_edge);
+
+	  next_edge_end = next_edge->end;
+
+	  if (next_edge_end->state == GIS_VISITED)
+	    break;
+
+	  next_edge_end->state = GIS_VISITED;
+
+	  /* according to SGA: EdgeDir nextDir = !pXY->getTwin()->getDir(); */
+	  if (next_edge->same)
+	    dir = next_edge->sense;
+	  else
+	    dir = !next_edge->sense;
+
+	  /* count valid edges (unmarked, no twin) in direction dir
+	     and save one of them */
+	  nof_edges_in_dir = 0;
+	  for (eid = 0; eid < next_edge_end->nof_edges; eid++) {
+	    edge = next_edge_end->edges[eid];
+	    if (edge->sense == dir && !edge_is_marked(edge)
+		&& !is_twin(next_edge, edge)) {
+	      nof_edges_in_dir++;
+	      unmarked_edge = edge;
+	    }
+	  }
+
+	  if (nof_edges_in_dir == 1)
+	    next_edge = unmarked_edge;
+	  else
+	    break;
+	}
+      }
+      /* process scaffold-record rec here! */
+      gt_array_add(records, rec);
+    }
+  }
+  return records;
+}
+
+/* write scaffold into file */
+int gt_scaffolder_graph_write_scaffold(GtArray *records,
+				       const char *file_name,
+				       GtError *err) {
+  GtFile *file;
+  GtScaffolderGraphRecord *rec;
+  GtScaffolderGraphEdge *e;
+  GtUword i, j;
+  int had_err = 0;
+
   /* create file */
   file = gt_file_new(file_name, "w", err);
   if (file == NULL) {
@@ -909,82 +994,26 @@ int gt_scaffolder_graph_write_scaffold(const GtScaffolderGraph *graph,
   }
 
   if (had_err == 0) {
+    for (i = 0; i < gt_array_size(records); i++) {
+      rec = *(GtScaffolderGraphRecord **) gt_array_get(records, i);
 
-    /* initialize all vertices as not visited */
-    for (vertex = graph->vertices;
-         vertex < (graph->vertices + graph->nof_vertices); vertex++) {
-      if (!vertex_is_marked(vertex))
-        vertex->state = GIS_UNVISITED;
-    }
+      gt_file_xprintf(file, "%s", gt_str_get(rec->root->header_seq));
 
-     /* iterate over all vertices */
-    for (vertex = graph->vertices;
-         vertex < (graph->vertices + graph->nof_vertices); vertex++) {
+      for (j = 0; j < gt_array_size(rec->edges); j++) {
+	e = *(GtScaffolderGraphEdge **) gt_array_get(rec->edges, j);
 
-      if (vertex->state == GIS_VISITED || vertex_is_marked(vertex))
-        continue;
+	gt_file_xprintf(file, "\t%s," GT_WD ",%f,%d,%d,",
+			gt_str_get(e->end->header_seq),
+			e->dist,
+			e->std_dev,
+			e->sense,
+			e->same);
 
-      /* count unmarked edges and save one of them */
-      nof_unmarked_edges = 0;
-      for (eid = 0; eid < vertex->nof_edges; eid++) {
-        edge = vertex->edges[eid];
-        if (!edge_is_marked(edge)) {
-          nof_unmarked_edges++;
-          unmarked_edge = edge;
-        }
       }
 
-      if (nof_unmarked_edges <= 1) {
-
-        vertex->state = GIS_VISITED;
-        gt_file_xprintf(file, "%s", gt_str_get(vertex->header_seq));
-
-        if (nof_unmarked_edges == 1) {
-
-          next_edge = unmarked_edge;
-
-          while (1) {
-            /* write edge information */
-            gt_file_xprintf(file, "\t%s," GT_WD ",%f,%d,%d,",
-                                 gt_str_get(next_edge->end->header_seq),
-                                 next_edge->dist,
-                                 next_edge->std_dev,
-                                 next_edge->sense,
-                                 next_edge->same);
-            next_edge_end = next_edge->end;
-
-            if (next_edge_end->state == GIS_VISITED)
-              break;
-
-            next_edge_end->state = GIS_VISITED;
-
-            /* according to SGA: EdgeDir nextDir = !pXY->getTwin()->getDir(); */
-            if (next_edge->same)
-              dir = next_edge->sense;
-            else
-              dir = !next_edge->sense;
-
-            /* count valid edges (unmarked, no twin) in direction dir
-               and save one of them */
-            nof_edges_in_dir = 0;
-            for (eid = 0; eid < next_edge_end->nof_edges; eid++) {
-              edge = next_edge_end->edges[eid];
-              if (edge->sense == dir && !edge_is_marked(edge)
-                  && !is_twin(next_edge, edge)) {
-                nof_edges_in_dir++;
-                unmarked_edge = edge;
-              }
-            }
-
-            if (nof_edges_in_dir == 1)
-              next_edge = unmarked_edge;
-            else
-              break;
-          }
-        }
-        gt_file_xprintf(file, "\n");
-      }
+      gt_file_xprintf(file, "\n");
     }
+
     gt_file_delete(file);
   }
 
@@ -1076,6 +1105,9 @@ static void gt_scaffolder_graph_introduce_gap(GtScaffolderGraphEdge *edge,
   /* overlap couldn't be resolved */
   if (edge->dist < 0) {
     GtWord overlap = edge->dist * -1;
+    /* TODO: this assertion does not hold at the moment, because
+       next_seq_len is 0! */
+    gt_assert(next_seq_len >= overlap);
     GtUword rest_len = next_seq_len - overlap;
     GtUword len = min_gap_length + rest_len + 1;
     seq = gt_malloc(len * sizeof (*seq));
