@@ -857,7 +857,7 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
 }
 
 /* functions to use GtScaffolderGraphRecords */
-static GtScaffolderGraphRecord *
+GtScaffolderGraphRecord *
 gt_scaffolder_graph_record_new(GtScaffolderGraphVertex *root) {
   GtScaffolderGraphRecord *rec;
 
@@ -869,21 +869,21 @@ gt_scaffolder_graph_record_new(GtScaffolderGraphVertex *root) {
   return rec;
 }
 
-static void gt_scaffolder_graph_record_add_edge(GtScaffolderGraphRecord *rec,
-                                                GtScaffolderGraphEdge *edge) {
+void gt_scaffolder_graph_record_add_edge(GtScaffolderGraphRecord *rec,
+					 GtScaffolderGraphEdge *edge) {
   gt_assert(rec != NULL);
   gt_assert(edge != NULL);
 
   gt_array_add(rec->edges, edge);
 }
 
-/* static void gt_scaffolder_graph_record_delete(GtScaffolderGraphRecord *rec) { */
-/*   gt_assert(rec != NULL); */
+void gt_scaffolder_graph_record_delete(GtScaffolderGraphRecord *rec) {
+  gt_assert(rec != NULL);
 
-/*   gt_array_delete(rec->edges); */
+  gt_array_delete(rec->edges);
 
-/*   gt_free(rec); */
-/* } */
+  gt_free(rec);
+}
 
 /* iterate over graph and return each scaffold in a scaffold record */
 GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph) {
@@ -1107,7 +1107,7 @@ static void gt_scaffolder_graph_introduce_gap(GtScaffolderGraphEdge *edge,
     GtWord overlap = edge->dist * -1;
     /* TODO: this assertion does not hold at the moment, because
        next_seq_len is 0! */
-    gt_assert(next_seq_len >= overlap);
+    if (next_seq_len >= overlap) {
     GtUword rest_len = next_seq_len - overlap;
     GtUword len = min_gap_length + rest_len + 1;
     seq = gt_malloc(len * sizeof (*seq));
@@ -1117,6 +1117,7 @@ static void gt_scaffolder_graph_introduce_gap(GtScaffolderGraphEdge *edge,
     memcpy(seq + min_gap_length, next_cseq + overlap, rest_len + 1);
 
     gt_assert(seq[len-1] == '\0');
+    }
   }
   else {
     GtUword gap_len = MAX(edge->dist, min_gap_length);
@@ -1257,6 +1258,7 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
   if (gt_array_size(id_array) == 1) {
     GtStr *out_id = *(GtStr **) gt_array_get(id_array, 0);
     gt_str_append_str(ids, out_id);
+    gt_str_delete(out_id);
   }
 
   gt_array_delete(id_array);
