@@ -38,13 +38,12 @@ diff gt_scaffolder_graph_test.dot $TESTDATA/gt_scaffolder_graph_test_expected.do
 
 # TEST PARSER MODULE
 # usage: test.x parser <DistEst file>
-# SK: Testfall mit nicht-existenter Datei hinzufügen
 ./test.x parser $TESTDATA/wrong_libPE_1.de
 ./test.x parser $TESTDATA/wrong_libPE_2.de
 ./test.x parser $TESTDATA/libPE.de
 diff gt_scaffolder_parser_test_read_distances.de $TESTDATA/libPE.de
 
-# TEST FILTER MODULE
+# TEST SCAFFOLD MODULE
 # usage: test.x graph <FASTA-file with contigs> <DistEst file> <astat file>
 ./test.x scaffold $TESTDATA/primary-contigs.fa $TESTDATA/libPE.de $TESTDATA/libPE.astat
 diff gt_scaffolder_algorithms_test_mark_repeats.dot \

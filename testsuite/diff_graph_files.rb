@@ -3,6 +3,8 @@
 #compare hash tables with vertex and edge information of two graphs
 def compare_graphs(hash_table_1, hash_table_2)
 
+  has_diff = 0
+
   hash_table_1.keys.each do |vertex|
     if hash_table_2.key?(vertex)
       diff_1 = hash_table_1[vertex] - hash_table_2[vertex]
@@ -10,14 +12,17 @@ def compare_graphs(hash_table_1, hash_table_2)
       #show edge existing only in sga graph file
       if !diff_1.empty?
         print("< ",vertex," to ",diff_1.join(",")," (edge)\n")
+        has_diff = 1
       end
       #show edge existing only in other graph file
       if !diff_2.empty?
         print("> ",vertex," to ",diff_2.join(",")," (edge)\n")
+        has_diff = 1
       end
     #show vertex existing only in sga graph file
     else
       print("< ",vertex," (vertex)\n")
+      has_diff = 1
     end
   end
 
@@ -25,8 +30,11 @@ def compare_graphs(hash_table_1, hash_table_2)
     #show vertex existing only in graph file
     if !hash_table_1.key?(vertex)
       print("> ",vertex," (vertex)\n")
+      has_diff = 1
     end
   end
+
+  exit has_diff
 
 end
 
@@ -99,9 +107,9 @@ end
 graph_1 = graph_file_1.readlines
 graph_2 = graph_file_2.readlines
 
+graph_file_1.close
+graph_file_2.close
+
 hash_table_1 = read_graph_sga(graph_1)
 hash_table_2 = read_graph_gt_scaffolder(graph_2)
 compare_graphs(hash_table_1, hash_table_2)
-
-graph_file_1.close
-graph_file_2.close

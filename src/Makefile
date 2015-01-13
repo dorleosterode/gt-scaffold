@@ -27,7 +27,10 @@ src_clean:
 	${GTDIR}/scripts/src_clean *.c
 
 test: test.x
-	../testsuite/gt_scaffolder.sh
+	../testsuite/gt_scaffolder_test.sh
+
+testall: test.x
+	../testsuite/gt_scaffolder_testall.sh
 
 clean:
 	${RM} *.d *.dot *.o *.x *~ *.de *.scaf

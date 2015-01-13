@@ -6,8 +6,7 @@
   - match/rdj-ovlfind-dp.h
   - global alignment extended/alignment.h
 - research on Abyss DistanceEst
-- test on e coli k12 [Lukas]
-- automate all tests [Stefan]
+- test on e coli k12 [Stefan]
 
 ## OBSTACLES
 - [insert line with standard deviation]
@@ -19,6 +18,9 @@
   (...algorithms.c: ...mark_repeats: line 83)
 
 ## DONE
+- automate all tests [Stefan]
+
+--
 - diff-script: sga-dot and gt-scaffolder dot, sga-scaf and gt-scaffolder scaf[Lukas]
 - extensively test on several test sets [Lukas]
 - scan-build: fix dead init of variables [Stefan]
