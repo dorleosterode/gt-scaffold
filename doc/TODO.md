@@ -1,14 +1,17 @@
 ## TODO
-- algorithms: implement removeMultiEdgeScaffold function [Dorle]
-  - evaluate usage of string graph in SGA to fill gaps
-- parser: parse astat from contig file [Lukas]
 - output: convert scaffolds to fasta [Dorle]
-  - match/rdj-ovlfind-dp.h
-  - global alignment extended/alignment.h
-- research on Abyss DistanceEst
-- test on e coli k12 [Stefan]
+  - traverse string graph
+  - fill gaps
+  - global alignment [Kurtz]
+- parser: tranform asqc format to readjoiner-compatible format [Dorle]
+- parser / new module: generate DistEst file from .bam [Lukas]
+- parser: parse astat from readjoiner contig file [Lukas / Stefan]
+- test: test on e coli k12 [Stefan]
+- parser: build hashmap contig_id (headerseq after first whitespace) -> seq [Stefan]
+  - filepointer?
 
 ## OBSTACLES
+- algorithms: implement removeMultiEdgeScaffold function [Dorle]
 - [insert line with standard deviation]
 - mark all edges of end vertex of inconsistent edge in twin direction ?
   (ScaffoldVisitors.cpp: ScaffoldLinkValidator::visit: line 188)
@@ -18,11 +21,11 @@
   (...algorithms.c: ...mark_repeats: line 83)
 
 ## DONE
-- automate all tests [Stefan]
+- test: automate all tests [Stefan]
 
 --
-- diff-script: sga-dot and gt-scaffolder dot, sga-scaf and gt-scaffolder scaf[Lukas]
-- extensively test on several test sets [Lukas]
+- test: diff-script: sga-dot and gt-scaffolder dot, sga-scaf and gt-scaffolder scaf[Lukas]
+- test: extensively test on several test sets [Lukas]
 - scan-build: fix dead init of variables [Stefan]
 
 --
