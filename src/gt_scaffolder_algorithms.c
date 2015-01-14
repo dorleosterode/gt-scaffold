@@ -1106,12 +1106,13 @@ static bool gt_scaffolder_graph_overlap_resolve(GtScaffolderGraphEdge *edge,
                                                 GtStr *seq,
                                                 GtStr *next_seq,
                                                 GtStr *resv_seq,
-                                                double max_error,
+                                                GtUword max_edist,
                                                 GtUword min_length) {
   GtUword upper_bound;
   /* 500 is used in sga (Algorithms/OverlapTools)*/
   GtUword max_alignment_length = 500;
   GtUword align_len;
+  double max_error;
   GtScaffolderGraphAlignmentData data;
 
   gt_assert(edge != NULL);
@@ -1130,6 +1131,8 @@ static bool gt_scaffolder_graph_overlap_resolve(GtScaffolderGraphEdge *edge,
     align_len = MIN3(upper_bound, gt_str_length(seq), gt_str_length(next_seq));
     if (align_len > max_alignment_length)
       return false;
+
+    max_error = max_edist/(float) MAX(gt_str_length(seq), gt_str_length(next_seq));
 
     /* initialize data for callback */
     data.best_dist = GT_UWORD_MAX;
@@ -1282,7 +1285,8 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
 
         if (edge->dist < 0) {
           /* TODO: determine what values should be used for max_error
-             and min_overlap_length */
+             and min_overlap_length.
+             max_edist = max_error * MAX(|seq|,|next_seq|) */
           resolved = gt_scaffolder_graph_overlap_resolve(edge, seq,
                                                          next_seq, resv_seq,
                                                          0, 1);
