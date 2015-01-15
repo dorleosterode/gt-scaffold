@@ -27,6 +27,8 @@
 #include "core/minmax.h"
 #include "core/queue_api.h"
 
+#include "match/rdj-ovlfind-dp.h"
+
 #include "gt_scaffolder_graph.h"
 
 /* increment size for realloc of walk */
@@ -870,7 +872,7 @@ gt_scaffolder_graph_record_new(GtScaffolderGraphVertex *root) {
 }
 
 void gt_scaffolder_graph_record_add_edge(GtScaffolderGraphRecord *rec,
-					 GtScaffolderGraphEdge *edge) {
+                                         GtScaffolderGraphEdge *edge) {
   gt_assert(rec != NULL);
   gt_assert(edge != NULL);
 
@@ -919,8 +921,8 @@ GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph) {
     for (eid = 0; eid < vertex->nof_edges; eid++) {
       edge = vertex->edges[eid];
       if (!edge_is_marked(edge)) {
-	nof_unmarked_edges++;
-	unmarked_edge = edge;
+        nof_unmarked_edges++;
+        unmarked_edge = edge;
       }
     }
 
@@ -932,42 +934,42 @@ GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph) {
 
       if (nof_unmarked_edges == 1) {
 
-	next_edge = unmarked_edge;
+        next_edge = unmarked_edge;
 
-	while (1) {
-	  /* store edge in scaffold-record */
-	  gt_scaffolder_graph_record_add_edge(rec, next_edge);
+        while (1) {
+          /* store edge in scaffold-record */
+          gt_scaffolder_graph_record_add_edge(rec, next_edge);
 
-	  next_edge_end = next_edge->end;
+          next_edge_end = next_edge->end;
 
-	  if (next_edge_end->state == GIS_VISITED)
-	    break;
+          if (next_edge_end->state == GIS_VISITED)
+            break;
 
-	  next_edge_end->state = GIS_VISITED;
+          next_edge_end->state = GIS_VISITED;
 
-	  /* according to SGA: EdgeDir nextDir = !pXY->getTwin()->getDir(); */
-	  if (next_edge->same)
-	    dir = next_edge->sense;
-	  else
-	    dir = !next_edge->sense;
+          /* according to SGA: EdgeDir nextDir = !pXY->getTwin()->getDir(); */
+          if (next_edge->same)
+            dir = next_edge->sense;
+          else
+            dir = !next_edge->sense;
 
-	  /* count valid edges (unmarked, no twin) in direction dir
-	     and save one of them */
-	  nof_edges_in_dir = 0;
-	  for (eid = 0; eid < next_edge_end->nof_edges; eid++) {
-	    edge = next_edge_end->edges[eid];
-	    if (edge->sense == dir && !edge_is_marked(edge)
-		&& !is_twin(next_edge, edge)) {
-	      nof_edges_in_dir++;
-	      unmarked_edge = edge;
-	    }
-	  }
+          /* count valid edges (unmarked, no twin) in direction dir
+             and save one of them */
+          nof_edges_in_dir = 0;
+          for (eid = 0; eid < next_edge_end->nof_edges; eid++) {
+            edge = next_edge_end->edges[eid];
+            if (edge->sense == dir && !edge_is_marked(edge)
+                && !is_twin(next_edge, edge)) {
+              nof_edges_in_dir++;
+              unmarked_edge = edge;
+            }
+          }
 
-	  if (nof_edges_in_dir == 1)
-	    next_edge = unmarked_edge;
-	  else
-	    break;
-	}
+          if (nof_edges_in_dir == 1)
+            next_edge = unmarked_edge;
+          else
+            break;
+        }
       }
       /* process scaffold-record rec here! */
       gt_array_add(records, rec);
@@ -978,8 +980,8 @@ GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph) {
 
 /* write scaffold into file */
 int gt_scaffolder_graph_write_scaffold(GtArray *records,
-				       const char *file_name,
-				       GtError *err) {
+                                       const char *file_name,
+                                       GtError *err) {
   GtFile *file;
   GtScaffolderGraphRecord *rec;
   GtScaffolderGraphEdge *e;
@@ -1000,14 +1002,14 @@ int gt_scaffolder_graph_write_scaffold(GtArray *records,
       gt_file_xprintf(file, "%s", gt_str_get(rec->root->header_seq));
 
       for (j = 0; j < gt_array_size(rec->edges); j++) {
-	e = *(GtScaffolderGraphEdge **) gt_array_get(rec->edges, j);
+        e = *(GtScaffolderGraphEdge **) gt_array_get(rec->edges, j);
 
-	gt_file_xprintf(file, "\t%s," GT_WD ",%f,%d,%d,",
-			gt_str_get(e->end->header_seq),
-			e->dist,
-			e->std_dev,
-			e->sense,
-			e->same);
+        gt_file_xprintf(file, "\t%s," GT_WD ",%f,%d,%d,",
+                        gt_str_get(e->end->header_seq),
+                        e->dist,
+                        e->std_dev,
+                        e->sense,
+                        e->same);
 
       }
 
@@ -1078,15 +1080,92 @@ static bool gt_scaffolder_graph_graph_resolve(GtScaffolderGraphEdge *edge,
   return false;
 }
 
+typedef struct GtScaffolderGraphAlignmentData {
+  GtUword best_dist;
+  GtUword u_len;
+} GtScaffolderGraphAlignmentData;
+
+/* callback function. is called for every alignment found by gt_ovlfind_dp() */
+static void gt_scaffolder_graph_best_alignment_by_distance(GtUword u_len,
+                                                           GT_UNUSED GtUword v_len,
+                                                           GtUword dist,
+                                                           bool suff,
+                                                           void *data) {
+  if (suff) {
+    GtScaffolderGraphAlignmentData *d = (GtScaffolderGraphAlignmentData *) data;
+    /* TODO:? SGA uses similarity scores instead of distances */
+    if (dist < d->best_dist) {
+      /* found new minimal distance */
+      d->best_dist = dist;
+      d->u_len = u_len;
+    }
+  }
+}
+
 static bool gt_scaffolder_graph_overlap_resolve(GtScaffolderGraphEdge *edge,
                                                 GtStr *seq,
                                                 GtStr *next_seq,
-                                                GtStr *resv_seq) {
+                                                GtStr *resv_seq,
+                                                GtUword max_edist,
+                                                GtUword min_length) {
+  GtUword upper_bound;
+  /* 500 is used in sga (Algorithms/OverlapTools)*/
+  GtUword max_alignment_length = 500;
+  GtUword align_len;
+  double max_error;
+  GtScaffolderGraphAlignmentData data;
+
   gt_assert(edge != NULL);
   gt_assert(seq != NULL);
   gt_assert(next_seq != NULL);
   gt_assert(resv_seq != NULL);
 
+  if (gt_str_length(seq) != 0 && gt_str_length(next_seq) != 0) {
+
+    /* set upper bound for overlap */
+    upper_bound = (GtUword) -1 * edge->dist + 3.0f * edge->std_dev;
+    if (upper_bound > max_alignment_length)
+      return false;
+
+    /* calculate the length of the strings to align */
+    align_len = MIN3(upper_bound, gt_str_length(seq), gt_str_length(next_seq));
+    if (align_len > max_alignment_length)
+      return false;
+
+    max_error = max_edist/(float) MAX(gt_str_length(seq), gt_str_length(next_seq));
+
+    /* initialize data for callback */
+    data.best_dist = GT_UWORD_MAX;
+    data.u_len = 0;
+
+    /* calculate all alignments of the to strings */
+    gt_ovlfind_dp(gt_str_get(seq) + (gt_str_length(seq) - align_len),
+                  align_len,
+                  gt_str_get(next_seq),
+                  align_len,
+                  max_error,
+                  GT_OVLFIND_SPM,
+                  min_length,
+                  false,
+                  gt_scaffolder_graph_best_alignment_by_distance,
+                  &data);
+
+    if (data.best_dist < GT_UWORD_MAX) {
+      /* found good overlap */
+      char *str;
+      GtUword resv_len = gt_str_length(next_seq) - data.u_len;
+
+      str = gt_malloc((resv_len + 1) * sizeof (*str));
+      memcpy(str, gt_str_get(next_seq) + data.u_len, resv_len);
+      str[resv_len] = '\0';
+      gt_str_set(resv_seq, str);
+
+      gt_free(str);
+
+      return true;
+    }
+
+  }
   return false;
 }
 
@@ -1205,15 +1284,19 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
           gt_scaffolder_graph_reverse_gt_str(next_seq);
 
         if (edge->dist < 0) {
+          /* TODO: determine what values should be used for max_error
+             and min_overlap_length.
+             max_edist = max_error * MAX(|seq|,|next_seq|) */
           resolved = gt_scaffolder_graph_overlap_resolve(edge, seq,
-                                                         next_seq, resv_seq);
+                                                         next_seq, resv_seq,
+                                                         0, 1);
         }
 
         /* introduce a gap between the contigs */
         if (!resolved)
           gt_scaffolder_graph_introduce_gap(edge, 10, next_seq, resv_seq);
 
-	/* (void)gt_scaffolder_graph_introduce_gap; */
+        /* (void)gt_scaffolder_graph_introduce_gap; */
         gt_str_delete(next_seq);
       }
 
@@ -1239,7 +1322,7 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
       for (i = 0; i < num_ids; i++) {
         out_id = *(GtStr **) gt_array_get(id_array, num_ids - i - 1);
         gt_str_append_str(ids, out_id);
-	gt_str_delete(out_id);
+        gt_str_delete(out_id);
       }
     }
     else {
@@ -1249,7 +1332,7 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
       for (i = 0; i < gt_array_size(id_array); i++) {
         out_id = *(GtStr **) gt_array_get(id_array, i);
         gt_str_append_str(ids, out_id);
-	gt_str_delete(out_id);
+        gt_str_delete(out_id);
       }
     }
   }

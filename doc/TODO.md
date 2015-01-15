@@ -1,8 +1,6 @@
 ## TODO
 - output: convert scaffolds to fasta [Dorle]
   - traverse string graph
-  - fill gaps
-  - global alignment [Kurtz]
 - parser: tranform asqc format to readjoiner-compatible format [Dorle]
 - parser / new module: generate DistEst file from .bam [Lukas]
 - parser: parse astat from readjoiner contig file [Lukas / Stefan]
@@ -22,6 +20,10 @@
 
 ## DONE
 - graph: exit, when graph only contains 1 vertex and 0 edges [Stefan]
+- output: convert scaffolds to fasta [Dorle]
+  - resolve overlaps
+  - fill gaps
+  - global alignment [Kurtz] (not needed)
 - test: automate all tests [Stefan]
 
 --
