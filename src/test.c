@@ -119,7 +119,6 @@ int main(int argc, char **argv)
         gt_scaffolder_parser_hashmap_test(hashmap, hash_filename, err);
       }
 
-
       if (had_err == 0) {
         /* load astatistics and copy number from file */
         had_err = gt_scaffolder_graph_mark_repeats(astat_filename, graph,
@@ -153,7 +152,8 @@ int main(int argc, char **argv)
         GtScaffolderGraphRecord *rec;
         GtArray *recs = gt_scaffolder_graph_iterate_scaffolds(graph);
 
-        gt_scaffolder_graph_write_scaffold(recs, "gt_scaffolder_new_write.scaf", err);
+        gt_scaffolder_graph_write_scaffold(recs, "gt_scaffolder_new_write.scaf",
+          err);
 
         ids = gt_str_new();
         for (i = 0; i < gt_array_size(recs); i++) {

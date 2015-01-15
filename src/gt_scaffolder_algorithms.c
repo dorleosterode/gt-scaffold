@@ -1087,7 +1087,7 @@ typedef struct GtScaffolderGraphAlignmentData {
 
 /* callback function. is called for every alignment found by gt_ovlfind_dp() */
 static void gt_scaffolder_graph_best_alignment_by_distance(GtUword u_len,
-                                                           GT_UNUSED GtUword v_len,
+                                                        GT_UNUSED GtUword v_len,
                                                            GtUword dist,
                                                            bool suff,
                                                            void *data) {
@@ -1132,7 +1132,8 @@ static bool gt_scaffolder_graph_overlap_resolve(GtScaffolderGraphEdge *edge,
     if (align_len > max_alignment_length)
       return false;
 
-    max_error = max_edist/(float) MAX(gt_str_length(seq), gt_str_length(next_seq));
+    max_error = max_edist /
+                  (float) MAX( gt_str_length(seq), gt_str_length(next_seq) );
 
     /* initialize data for callback */
     data.best_dist = GT_UWORD_MAX;

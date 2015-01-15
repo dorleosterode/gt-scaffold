@@ -550,7 +550,8 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
     /* Debug: */
     /*GtScaffolderGraphHashmapData data;
     data.had_err = 0;
-    gt_hashmap_foreach( fasta_reader_data->hashmap, gt_scaffolder_parser_hashmap_verbose,
+    gt_hashmap_foreach( fasta_reader_data->hashmap,
+                        gt_scaffolder_parser_hashmap_verbose,
                         &data, err );*/
 
   }
@@ -656,7 +657,6 @@ int gt_scaffolder_parser_hashmap_test(GtHashmap *hashmap,
     had_err = -1;
 
   if (!had_err) {
-    //gt_scaffolder_graph_print_generic(g, f);
     data.file = file;
     data.had_err = 0;
     gt_hashmap_foreach( hashmap, gt_scaffolder_parser_hashmap_visit,
