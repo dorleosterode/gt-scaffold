@@ -4,7 +4,6 @@
 - parser: tranform asqc format to readjoiner-compatible format [Dorle]
 - parser / new module: generate DistEst file from .bam [Lukas]
 - parser: parse astat from readjoiner contig file [Lukas / Stefan]
-- test: test on e coli k12 [Stefan]
 - parser: build hashmap contig_id (headerseq after first whitespace) -> seq [Stefan]
   - filepointer?
 
@@ -19,12 +18,13 @@
   (...algorithms.c: ...mark_repeats: line 83)
 
 ## DONE
-- graph: exit, when graph only contains 1 vertex and 0 edges [Stefan]
 - output: convert scaffolds to fasta [Dorle]
   - resolve overlaps
   - fill gaps
   - global alignment [Kurtz] (not needed)
 - test: automate all tests [Stefan]
+- test: test on e coli k12 [Stefan]
+- graph: exit, when graph only contains 1 vertex and 0 edges [Stefan]
 
 --
 - test: diff-script: sga-dot and gt-scaffolder dot, sga-scaf and gt-scaffolder scaf[Lukas]
