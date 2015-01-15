@@ -41,7 +41,9 @@ int main(int argc, char **argv)
 {
   GtError *err;
   GtScaffolderGraph *graph;
-  char module[32], *contig_filename, *dist_filename, *astat_filename;
+  GtHashmap *hashmap;
+  char module[32], *contig_filename, *dist_filename, *astat_filename,
+       *hash_filename;
   int had_err = 0;
 
   if (argc == 1 || sscanf(argv[1], "%s", module) != 1) {
@@ -71,6 +73,7 @@ int main(int argc, char **argv)
       fprintf(stderr, "USAGE: <max_nof_vertices> <max_nof_edges> "
               "<init_vertices> <nof_vertices> <init_edges> <nof_edges> "
                "<print_graph> %s\n", argv[0]);
+      return EXIT_FAILURE;
     } else {
       init_vertices = init_vertices_tmp;
       init_edges = init_edges_tmp;
@@ -88,6 +91,7 @@ int main(int argc, char **argv)
   else if (strcmp(module, "parser") == 0) {
     if (argc != 3) {
       fprintf(stderr, "Usage: <DistEst file>\n");
+      return EXIT_FAILURE;
     } else {
       dist_filename = argv[2];
       had_err = gt_scaffolder_parser_read_distances_test(dist_filename,
@@ -96,17 +100,25 @@ int main(int argc, char **argv)
   }
 
   else if (strcmp(module, "scaffold") == 0) {
-    if (argc != 5) {
+    if (argc != 6) {
       fprintf(stderr, "Usage:<FASTA-file with contigs> <DistEst file> "
-                      "<astat file>\n");
+                      "<astat file> <hash outfile>\n");
+      return EXIT_FAILURE;
     } else {
       graph = NULL;
+      hashmap = NULL;
       contig_filename = argv[2];
       dist_filename = argv[3];
       astat_filename = argv[4];
+      hash_filename = argv[5];
 
       had_err = gt_scaffolder_graph_new_from_file(&graph, contig_filename,
-                MIN_CONTIG_LEN, dist_filename, err);
+                MIN_CONTIG_LEN, dist_filename, &hashmap, err);
+
+      if (had_err == 0) {
+        gt_scaffolder_parser_hashmap_test(hashmap, hash_filename, err);
+      }
+
 
       if (had_err == 0) {
         /* load astatistics and copy number from file */
@@ -159,6 +171,7 @@ int main(int argc, char **argv)
       if (had_err != 0)
         fprintf(stderr,"ERROR: %s\n",gt_error_get(err));
 
+      gt_hashmap_delete(hashmap);
       gt_scaffolder_graph_delete(graph);
     }
   }

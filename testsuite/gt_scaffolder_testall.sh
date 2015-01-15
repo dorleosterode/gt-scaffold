@@ -32,11 +32,13 @@ fi
 # usage: test.x graph <FASTA-file with contigs> <DistEst file> <astat file>
 for dir in $TESTDIRS; do
   full_dir="$TESTDATA/$dir"
-  ./test.x scaffold "$full_dir/primary-contigs.fa" "$full_dir/libPE.de" "$full_dir/libPE.astat"
+  ./test.x scaffold "$full_dir/primary-contigs.fa" "$full_dir/libPE.de" \
+    "$full_dir/libPE.astat" hashmap_out.fa
   $TESTSUITE/diff_graph_files.rb "$full_dir/07_sga_makeScaffolds.dot" \
     gt_scaffolder_algorithms_test_makescaffold.dot
 done
 
-# test expected failure
+# test graph with 1 vertex and 0 edges
 full_dir="$TESTDATA/phix"
-  ! ./test.x scaffold "$full_dir/primary-contigs.fa" "$full_dir/libPE.de" "$full_dir/libPE.astat"
+! ./test.x scaffold "$full_dir/primary-contigs.fa" "$full_dir/libPE.de" \
+   "$full_dir/libPE.astat" hashmap_out.fa
