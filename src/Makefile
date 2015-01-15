@@ -9,7 +9,7 @@ LDFLAGS=-lm
 LIBS=$(GTDIR)/lib/libgenometools.a -lpthread -lm
 OBJ=gt_scaffolder_graph.o gt_scaffolder_parser.o gt_scaffolder_algorithms.o test.o
 
-all:test.x
+all: src_check test.x
 
 # generic compilation rule which creates dependency file on the fly
 %.o: %.c
