@@ -15,6 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/hashmap_api.h"
+
 #include "gt_scaffolder_graph.h"
 
 #ifndef GT_SCAFFOLDER_PARSER_H
@@ -49,5 +51,14 @@ int gt_scaffolder_parser_count_contigs(const char *filename,
 int gt_scaffolder_parser_read_contigs(GtScaffolderGraph *graph,
                                       const char *filename,
                                       GtUword min_ctg_len,
+                                      GtHashmap *hashmap,
                                       GtError *err);
+
+/* test hashmap */
+int gt_scaffolder_parser_hashmap_test(GtHashmap *hashmap,
+                                      const char *filename,
+                                      GtError *err);
+
+void gt_scaffolder_parser_hashmap_print(GtHashmap *hashmap);
+
 #endif
