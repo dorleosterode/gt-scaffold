@@ -16,10 +16,10 @@
 */
 
 
-
+#include "core/array_api.h"
 #include "core/error.h"
 #include "core/file_api.h"
-#include "core/array_api.h"
+#include "core/hashmap_api.h"
 #include "core/str_api.h"
 #include "core/types_api.h"
 
@@ -166,6 +166,7 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
                                       const char *ctg_filename,
                                       GtUword min_ctg_len,
                                       const char *dist_filename,
+                                      GtHashmap **hashmap_par,
                                       GtError *err);
 
 /* Function to test basic graph functionality on different scenarios:

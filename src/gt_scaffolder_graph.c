@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "core/file_api.h"
+#include "core/hashmap_api.h"
 #include "core/ma_api.h"
 #include "core/str_api.h"
 
@@ -142,6 +143,8 @@ void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
 {
 
   gt_assert(graph != NULL);
+  gt_assert(graph->vertices != NULL);
+  gt_assert(vstart != NULL);
   gt_assert(graph->edges != NULL);
   gt_assert(graph->nof_edges < graph->max_nof_edges);
 
@@ -342,13 +345,16 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
                                       const char *ctg_filename,
                                       GtUword min_ctg_len,
                                       const char *dist_filename,
+                                      GtHashmap **hashmap_par,
                                       GtError *err)
 {
   GtScaffolderGraph *graph;
+  GtHashmap *hashmap;
   int had_err;
   GtUword nof_distances, nof_contigs;
 
   graph = NULL;
+  hashmap = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
 
   /* count contigs */
   had_err = gt_scaffolder_parser_count_contigs(ctg_filename, min_ctg_len,
@@ -364,7 +370,7 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
     /* parse contigs in FASTA-format and save them as vertices of
      scaffold graph */
     had_err = gt_scaffolder_parser_read_contigs(graph, ctg_filename,
-              min_ctg_len, err);
+              min_ctg_len, hashmap, err);
   }
 
   if (had_err == 0)
@@ -376,6 +382,12 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
 
   if (had_err == 0)
   {
+    if (nof_contigs == 1 && nof_distances == 0) {
+      fprintf(stderr, "Graph only contains 1 vertex and no edges: "
+                      "Did not perform scaffolding!\n");
+      exit(1);
+    }
+
     /* allocate memory for edges of scaffolder graph */
     gt_scaffolder_graph_init_edges(graph, nof_distances);
     /* parse distance information of contigs in abyss-dist-format and
@@ -391,6 +403,7 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
   }
 
   *graph_par = graph;
+  *hashmap_par = hashmap;
 
   return had_err;
 }
