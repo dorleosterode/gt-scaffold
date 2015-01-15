@@ -21,6 +21,7 @@
   (...algorithms.c: ...mark_repeats: line 83)
 
 ## DONE
+- graph: exit, when graph only contains 1 vertex and 0 edges [Stefan]
 - test: automate all tests [Stefan]
 
 --
