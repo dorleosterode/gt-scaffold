@@ -29,8 +29,8 @@ src_clean:
 test: test.x
 	../testsuite/gt_scaffolder_test.sh
 
-testall: test.x
+testall: test.x test
 	../testsuite/gt_scaffolder_testall.sh
 
 clean:
-	${RM} *.d *.dot *.o *.x *~ *.de *.scaf
+	${RM} *.d *.dot *.o *.x *~ *.de *.scaf *.fa
