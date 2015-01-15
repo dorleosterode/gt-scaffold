@@ -1,11 +1,33 @@
 ## TODO
 - output: convert scaffolds to fasta [Dorle]
   - traverse string graph
-- parser: tranform asqc format to readjoiner-compatible format [Dorle]
+- parser: tranform asqg format to readjoiner-compatible format [Dorle]
 - parser / new module: generate DistEst file from .bam [Lukas]
 - parser: parse astat from readjoiner contig file [Lukas / Stefan]
 - parser: build hashmap contig_id (headerseq after first whitespace) -> seq [Stefan]
-  - filepointer?
+  - evaluate md5 implementation using GtEncSeq
+- phix, no error [Stefan]
+
+--
+## Presentation
+  Motivation
+    - only brief reminder about assembly problem
+  Methods
+    - in-depth review of scaffolding step (NP something)
+      - intuition about single subproblems, pseudocode not necessary
+      - illustrations, e.g. subgraph from dot files
+  Results
+    - compare gt scaffold and sga
+      - time / memory (cluster, 8 GB)
+        - script/rdj-spacepeak.sh <binary>
+        - bookkeeping in sga -v?
+      - complete genomes
+        - S. cerevisiae (reason: small?)
+        - C. elegans (reason: assembly competitions? sga paper)
+  Discussion / Conclusion
+    - evaluate reasons for "another" implementation of scaffolding algorithm
+      - fewer depencencies
+      - potential future ideas / implementations
 
 ## OBSTACLES
 - algorithms: implement removeMultiEdgeScaffold function [Dorle]
@@ -21,7 +43,7 @@
 - output: convert scaffolds to fasta [Dorle]
   - resolve overlaps
   - fill gaps
-  - global alignment [Kurtz] (not needed)
+  - global alignment (not needed)
 - test: automate all tests [Stefan]
 - test: test on e coli k12 [Stefan]
 - graph: exit, when graph only contains 1 vertex and 0 edges [Stefan]
