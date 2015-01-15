@@ -9,6 +9,8 @@
 #include "core/error.h"
 #include "core/ma_api.h"
 #include "core/types_api.h"
+/* SK: Find workaround to avoid hardcoded version,
+       e.g. using extended/sam_alignment.h */
 #include "external/samtools-0.1.18/bam.h"
 #include "core/hashmap_api.h"
 
@@ -139,7 +141,7 @@ static int calc_cigar_stats(bam1_t *align,
     *target_query_start = align->core.pos - qstart;
 
   *mtarget_query_start = *target_query_start + align->core.isize;
-  
+
 
   return had_err;
 }
@@ -286,7 +288,7 @@ int create_histogram_from_file(const char *file_name,
           if (min > key)
             min = key;
           if (max < key)
-            max = key;          
+            max = key;
         }
 
         /* count keys in range*/
@@ -342,7 +344,7 @@ PmfData create_pmf(HistogramData histogram_data){
   return pmf_data;
 }
 
-/* callback function 
+/* callback function
 int compare_pmf_histogram(void *key,
                           void *value,
                           void *data,
@@ -589,7 +591,7 @@ void calculate_fragments(GtUword start_read,
   bool found;
   GtWord *pair;
 
-  /* correct start position of read, mate read 
+  /* correct start position of read, mate read
      if necessary */
   if (read_reverse)
     start_read = len_ref - start_read;
@@ -736,7 +738,7 @@ void parse_paired_info(char *bam_filename, char *hist_filename) {
            mate read and same orientation of read relative to his mate read) */
         if (last_mtid != read->mtid ||
             last_same != (read->reverse == read->mreverse)) {
-        
+
 
           nof_pairs = 0;
           /* calculate distance and nof pairs */
