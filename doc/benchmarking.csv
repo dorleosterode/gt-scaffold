@@ -1,7 +1,7 @@
 ,,,,,
 ,GC-Content [%],,Comparison SGA/,GT_SCAFFOLD,based on scaf-File
 Data sets,,# Contigs,# Unique contigs,# Scaffolds,# Singleton Scaffolds
-E. coli 4.7 MbP (K12_DH10B, Ensemble),,,,,
+E. coli 4.7 MbP (K12_DH10B; Ensemble),,,,,
 paired reads created by ART_ILLUMINA*,,,,,
 Run_1,,2570,1987/1987,805/805,323/323
 Lambda Phage 48.5 kbp (NC_001416.1),,,,,
