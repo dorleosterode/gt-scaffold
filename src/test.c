@@ -26,6 +26,7 @@
 #include "gt_scaffolder_graph.h"
 #include "gt_scaffolder_algorithms.h"
 #include "gt_scaffolder_parser.h"
+#include "gt_scaffolder_bamparser.h"
 
 /* adapted from SGA examples */
 #define MIN_CONTIG_LEN 200
@@ -37,14 +38,24 @@
 #define COPY_NUM_CUTOFF_2 1.5
 #define OVERLAP_CUTOFF 400
 
+/* default values for bam parser
+   apdapted from Abyss */
+#define MIN_QUAL 10
+#define MIN_NOF_PAIRS 10
+#define MIN_REF_LENGTH 200
+#define MIN_DIST -99
+#define MAX_DIST GT_WORD_MAX
+#define MIN_ALIGN 100
+
 int main(int argc, char **argv)
 {
   GtError *err;
   GtScaffolderGraph *graph;
   GtHashmap *hashmap;
   char module[32], *contig_filename, *dist_filename, *astat_filename,
-       *hash_filename;
+       *hash_filename, *hist_filename, *bam_filename;
   int had_err = 0;
+  DistRecords dist;
 
   if (argc == 1 || sscanf(argv[1], "%s", module) != 1) {
     fprintf(stderr,"Usage: %s <module> <arguments>\n" ,argv[0]);
@@ -173,6 +184,29 @@ int main(int argc, char **argv)
 
       gt_hashmap_delete(hashmap);
       gt_scaffolder_graph_delete(graph);
+    }
+  }
+  else if (strcmp(module, "bamparser") == 0) {
+    if (argc != 4) {
+      fprintf(stderr, "Usage:<sorted BAM file> <hist file>\n");
+      return EXIT_FAILURE;
+    } else {
+      bam_filename = argv[2];
+      hist_filename = argv[3];
+
+      /* initialize distance records */
+      init_dist_records(&dist);
+
+      /* read paired information from bam file */
+      had_err = gt_scaffolder_bamparser_read_paired_information(&dist,
+            bam_filename, hist_filename, MIN_DIST, MAX_DIST, MIN_QUAL,
+            MIN_NOF_PAIRS, MIN_REF_LENGTH, MIN_ALIGN, err);
+
+      /* write distance records */
+      write_dist_records(dist);
+
+      /* delete distance records */
+      delete_dist_records(dist);
     }
   }
   else {
