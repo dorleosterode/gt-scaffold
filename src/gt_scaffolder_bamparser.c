@@ -20,6 +20,8 @@
 #include "external/samtools-0.1.18/sam.h"
 
 #include "gt_scaffolder_bamparser.h"
+#include "gt_scaffolder_parser.h"
+
 struct GtSamAlignment{
   bam1_t       *s_alignment;
   GtAlphabet   *alphabet;
@@ -92,6 +94,59 @@ typedef struct CompareData {
   GtUword nof_pairs;
   PmfData pmf_data;
 } CompareData;
+
+void init_dist_records(DistRecords *dist) {
+  GtUword index;
+
+  dist->nof_record = 0;
+  dist->size = 50;
+  dist->record = gt_malloc(sizeof (*(dist->record)) * dist->size);
+  for (index = 0; index < dist->size; index++) {
+    dist->record[index].size = 20;
+    dist->record[index].nof_ctg = 0;
+    dist->record[index].root_ctg_id = NULL;
+    dist->record[index].ctg = gt_malloc(sizeof (*(dist->record[index].ctg))*
+                            dist->record[index].size);
+  }
+}
+
+void write_dist_records(DistRecords dist) {
+  GtUword index, index_2;
+  bool set_dir;
+
+  for (index = 0; index < dist.nof_record; index++) {
+    printf("%s",dist.record[index].root_ctg_id);
+    set_dir = false;
+    for (index_2 = 0; index_2 < dist.record[index].nof_ctg; index_2++) {
+      if (dist.record[index].ctg[index_2].same && !set_dir) {
+        printf(" ;");
+        set_dir = true;
+      }
+
+      printf(" %s%c," GT_WD "," GT_WU ",%.1f",
+                       dist.record[index].ctg[index_2].id,
+                       dist.record[index].ctg[index_2].sense ? '+' : '-',
+                       dist.record[index].ctg[index_2].dist,
+                       dist.record[index].ctg[index_2].nof_pairs,
+                       dist.record[index].ctg[index_2].std_dev);
+     }
+     if (!set_dir)
+       printf(" ;");
+     printf("\n");
+  }
+}
+
+void delete_dist_records(DistRecords dist) {
+ GtUword index, index_2;
+
+  for (index = 0; index < dist.size; index++) {
+    for (index_2 = 0; index_2 < dist.record[index].nof_ctg; index_2++)
+      gt_free(dist.record[index].ctg[index_2].id);
+      gt_free(dist.record[index].ctg);
+      gt_free(dist.record[index].root_ctg_id);
+    }
+  gt_free(dist.record);
+}
 
 /* sort read set by orientation of read relative to reference,
    reference id of mate read and orientation of read relative
@@ -834,16 +889,6 @@ static bool is_read_pair_valid(const GtSamfileIterator *bam_iterator,
     result = true;
 
   return result;
-}
-
-/* str_dup with gt_malloc */
-char *gt_strdup (const char *source)
-{
-  char *dest;
-  dest = gt_malloc (strlen (source) + 1);
-  if (dest == NULL) return NULL;
-  strcpy (dest, source);
-  return dest;
 }
 
 static int analyze_read_set(DistRecords *dist_records,

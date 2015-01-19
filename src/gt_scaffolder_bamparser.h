@@ -41,6 +41,10 @@ typedef struct {
   GtUword size;
 } DistRecords;
 
+void init_dist_records(DistRecords *dist);
+void write_dist_records(DistRecords dist);
+void delete_dist_records(DistRecords dist);
+
 /* read paired information from bam file and corresponding hist file */
 int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
                                                     const char *bam_filename,
