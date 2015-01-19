@@ -74,15 +74,69 @@
 
 
 \section{Motivation}
-
 \begin{frame}
 \setcounter{framenumber}{1}
-  \frametitle{Das Assembly-Problem}
+  \frametitle{Einführung}
+  \begin{itemize}
+  \item aufgrund von ungleichmäßigen Coverage und Wiederholungen
+    erzeugt Assemblierung Menge von Sequenzen verschiedener Länge (Contigs)
+    %hier Scaffolding.svg
+  \item Contigs werden zu Abschnitten angeordnet (Scaffolds) und
+    die Orientierung und paarweise Abstand der Contigs im Scaffold ermittelt
+    %hier Scaffolding_2.svg
+  \item Verwendung der Read-Paar Informationen, dazu gehört die
+    Fragmentgröße zwischen Read-Paar, Position der Reads auf Contigs
+  \item Read-Paare stammen aus paired-end oder mate-pair Sequenzierung
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Scaffolding Problem}
+  \begin{itemize}
+  \item Scaffolding Problem stellt ein NP-vollständiges Problem
+    dar, d.h. es lässt sich vermutlich nicht effizient lösen
+  \item Lösung des Scaffolding Problems durch Zerlegung in
+    Teilprobleme, die unabhängig voneinander gelöst werden
+  \item Beschreibung des Scaffolding Problems mit Hilfe eines
+    Graphen (Scaffold Graph), wobei deren Zusammenhangskomponenten
+    Teilprobleme darstellen
+  \item Scaffold Graph:
+    \begin{itemize}
+    \item bidirektionaler Graph
+    \item Knoten entsprechen Contigs und Kanten beschreiben Read-Paar
+      Informationen (Abstand, Reihenfolge der Contigs)
+    %hier Scaffolding_3.svg
+    \end{itemize}
+  \end{itemize}
 \end{frame}
 
 \section{Methoden}
 \begin{frame}
-  \frametitle{Scaffolding}
+  \frametitle{Allgemein}
+  \begin{itemize}
+  \item Reimplementation der Scaffolding Methode von SGA (C++) im
+    Rahmen von Genometools (C)
+  \item basiert auf Konstruktion eines Graphen über die Beziehungen
+    zwischen Contigs (Scaffold Graph)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Übersicht der Schritte}
+  \begin{itemize}
+  \item Realignierung der Read-Paare gegenüber Contigs mit Hilfe der
+    Software bwa
+  \item Erstellung des Scaffold Graph mit unique Contigs als Knoten und
+    bidirektionalen Kanten zwischen Contigs, wenn diese über ein
+    Read-Paar im Alignment verknüpft sind
+  \item Entfernung inkonsistenter Kanten und Auflösung von Zyklen
+    im Graphen
+  \item Ermittlung der Zusammenhangskomponenten mit ihren terminalen
+    Knoten im Graphen
+  \item Bestimmung aller Pfade zwischen jedem Paar von terminalen
+    Knoten, Pfad mit größter Sequenzabdeckung stellt bestes Layout
+    für Scaffold dar
+  \end{itemize}
 \end{frame}
 
 \section{Ergebnisse}
@@ -95,8 +149,17 @@
 \begin{frame}
   \frametitle{Diskussion}
   \begin{itemize}
-  \item weniger Abhängigkeiten als SGA
-  \item 
+  \item Gründe für neue Implementation
+    \begin{itemize}
+    \item geringerer Speicherplatzverbrauch, schnellere Laufzeit
+       für Gt-Scaffolder (C-Implementation) im Vergleich zu
+       SGA-Scaffolder (C++ Implementation) bei gleicher Güte
+       der Ergebnisse (quod esset demonstrandum)
+    \item geringere Abhängigkeit von fremder Software, Einbau
+      von Abyss DistEst in Gt-Scaffolder (zur Ermittlung der
+      Read-Paar Informationen) und Berechnung der A-Statistik
+      durch Read-Joiner anstelle von Pysam
+    \end{itemize}
   \end{itemize}
 \end{frame}
 
