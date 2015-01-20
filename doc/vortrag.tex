@@ -77,13 +77,35 @@
 \begin{frame}
 \setcounter{framenumber}{1}
   \frametitle{Einführung}
+
+  \begin{columns}
+    \begin{column}{.45\textwidth}
+      \begin{itemize}
+      \item aufgrund von ungleichmäßigen Coverage und Wiederholungen
+        erzeugt Assemblierung Menge von Sequenzen verschiedener Länge (Contigs)
+        %hier Scaffolding.svg
+      \item Contigs werden zu Abschnitten angeordnet (Scaffolds) und
+        die Orientierung und paarweise Abstand der Contigs im Scaffold ermittelt
+        %hier Scaffolding_2.svg
+      \end{itemize}
+    \end{column}
+    \begin{column}{.45\textwidth}
+      \begin{center}
+        \begin{figure}
+          \epsfig{scale=0.5, file=Scaffolding}
+        \end{figure}
+        \vspace{1cm}
+        \begin{figure}
+          \epsfig{scale=0.5, file=Scaffolding_2}
+        \end{figure}
+      \end{center}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Einführung}
   \begin{itemize}
-  \item aufgrund von ungleichmäßigen Coverage und Wiederholungen
-    erzeugt Assemblierung Menge von Sequenzen verschiedener Länge (Contigs)
-    %hier Scaffolding.svg
-  \item Contigs werden zu Abschnitten angeordnet (Scaffolds) und
-    die Orientierung und paarweise Abstand der Contigs im Scaffold ermittelt
-    %hier Scaffolding_2.svg
   \item Verwendung der Read-Paar Informationen, dazu gehört die
     Fragmentgröße zwischen Read-Paar, Position der Reads auf Contigs
   \item Read-Paare stammen aus paired-end oder mate-pair Sequenzierung
