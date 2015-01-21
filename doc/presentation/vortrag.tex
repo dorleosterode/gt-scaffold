@@ -1,3 +1,4 @@
+% rubber: module biber
 \documentclass[xcolor=pst]{beamer}
 \usepackage[utf8]{inputenc}
 \usepackage{ngerman}
@@ -18,7 +19,7 @@
 % bibliographie
 \usepackage[english]{cleveref}
 \usepackage[style=numeric]{biblatex}
-\addbibresource{presentation.bib}
+\addbibresource{literatur.bib}
 \usepackage{appendixnumberbeamer}
 
 \usetikzlibrary{shapes.geometric, calc}
@@ -56,7 +57,7 @@
 
 \begin{document}
 \begin{frame}[plain]
-\titlepage
+  \titlepage
 \end{frame}
 
 % keine seitenzahl auf der inhaltsangabe zeigen (theme nur fuer diese folie anpassen)
@@ -76,12 +77,13 @@
 }
 \makeatother
 \begin{frame}{Übersicht}
-\tableofcontents
+  \tableofcontents
 \end{frame}
 \egroup % ab hier das normale theme weiterverwenden
 
 
 \section{Motivation}
+\subsection{Scaffolding}
 \begin{frame}
 \setcounter{framenumber}{1}
   \frametitle{Einführung}
@@ -89,9 +91,16 @@
   \begin{columns}
     \begin{column}{.45\textwidth}
       \begin{itemize}
-      \item ungleichmäßige Coverage \& Wiederholungen $\rightarrow$
-         (Contigs)
-      \item Contigs werden zu Abschnitten angeordnet (Scaffolds)
+      \item Assemblierung $\rightarrow$ Mehrere unabhängige Contigs
+      \begin{itemize}
+        \item Ungleichmäßige Coverage
+        \item Wiederholungen
+      \end{itemize}
+      \item Motivation: Einordnung der Contigs in Scaffolds
+      \begin{itemize}
+        \item Richtung und relative Anordnung
+        \item Paarweiser Abstand
+      \end{itemize}
       \end{itemize}
     \end{column}
     \begin{column}{.45\textwidth}
@@ -99,12 +108,14 @@
         \begin{figure}[t]
           \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{figures/Scaffolding.pdf}
         \end{figure}
+        \vspace{.75cm}
         \begin{figure}[t]
           \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{figures/Scaffolding_2.pdf}
         \end{figure}
       \end{center}
     \end{column}
   \end{columns}
+  \let\thefootnote\relax\footnotetext{\cite{Pop:2009dp}}
 \end{frame}
 
 \begin{frame}
@@ -138,20 +149,35 @@
   %% \item Beschreibung des Scaffolding Problems mit Hilfe eines
   %%   Graphen (Scaffold Graph), wobei deren Zusammenhangskomponenten
   %%   Teilprobleme darstellen
-    %hier Scaffolding_3.svg
+  \end{itemize}
+  \let\thefootnote\relax\footnotetext{\cite{Huson:2002kf}}
+\end{frame}
+
+\subsection{Motivation}
+\begin{frame}
+  \frametitle{Motivation}
+  \begin{itemize}
+  \item Ziel: Entwicklung einer Scaffolding-Software
+  \begin{itemize}
+    \item Aufbauend auf Assemblierungs-Software \textit{Readjoiner} (\textit{GenomeTools})
+  \end{itemize}
+  \item Methodische Anlehnung an \textit{String Graph Assembler}
+  \begin{itemize}
+    \item Vereinfachung und Partitionierung des Scaffold-Graphen
+  \end{itemize}
   \end{itemize}
 \end{frame}
 
 \section{Methoden}
-\begin{frame}
-  \frametitle{Allgemein}
-  \begin{itemize}
-  \item Reimplementation der Scaffolding Methode von SGA (C++) im
-    Rahmen von Genometools (C)
-  \item basiert auf Konstruktion eines Graphen über die Beziehungen
-    zwischen Contigs (Scaffold Graph)
-  \end{itemize}
-\end{frame}
+% \begin{frame}
+%   \frametitle{Allgemein}
+%   \begin{itemize}
+%   \item Reimplementation der Scaffolding Methode von SGA (C++) im
+%     Rahmen von Genometools (C)
+%   \item basiert auf Konstruktion eines Graphen über die Beziehungen
+%     zwischen Contigs (Scaffold Graph)
+%   \end{itemize}
+% \end{frame}
 
 \begin{frame}
   \frametitle{Gt-Scaffolder}
@@ -160,7 +186,7 @@
     \begin{itemize}
     \item Contigs
     \item Distanzinformationen
-    \item Astatistik %spelling?
+    \item A-Statistik %spelling?
     \end{itemize}
   \item Ausgabe:
     \begin{itemize}
