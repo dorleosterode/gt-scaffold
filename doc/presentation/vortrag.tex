@@ -15,6 +15,12 @@
 \usetheme{Antibes}
 %\usepackage{multirow}
 
+% bibliographie
+\usepackage[english]{cleveref}
+\usepackage[style=numeric]{biblatex}
+\addbibresource{presentation.bib}
+\usepackage{appendixnumberbeamer}
+
 \usetikzlibrary{shapes.geometric, calc}
 
 % fusszeile so aufteilen, dass autoren und titel reinpassen und seitenzahl hinzu
@@ -31,12 +37,14 @@
   \vskip0pt%
 }
 
+% keine navigationssymbole in der fusszeile
+\beamertemplatenavigationsymbolsempty
 
 % so definiert man neue makros
 \newcommand{\IFF}{\Leftrightarrow}
 \newcommand{\todo}[1]{\textbf{\color{red}todo:\color{black}#1}}
 
-\author[Götz, Dang, Osterode]{
+\author{
   Lukas Götz, Stefan Dang \& Dorle Osterode
 }
 \title{Gt-Scaffolder: TODO}
@@ -81,23 +89,18 @@
   \begin{columns}
     \begin{column}{.45\textwidth}
       \begin{itemize}
-      \item Problem: ungleichmäßige Coverage \& Wiederholungen $\rightarrow$
+      \item ungleichmäßige Coverage \& Wiederholungen $\rightarrow$
          (Contigs)
-        %hier Scaffolding.svg
-      %\includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{Scaffolding.pdf}
       \item Contigs werden zu Abschnitten angeordnet (Scaffolds)
-        %hier Scaffolding_2.svg
-      %\includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{Scaffolding2.pdf}
       \end{itemize}
     \end{column}
     \begin{column}{.45\textwidth}
       \begin{center}
         \begin{figure}[t]
-          \epsfig{scale=0.5, file=figures/Scaffolding}
+          \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{figures/Scaffolding.pdf}
         \end{figure}
-        \vspace{.75cm}
         \begin{figure}[t]
-          \epsfig{scale=0.55, file=figuresScaffolding_2}
+          \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{figures/Scaffolding_2.pdf}
         \end{figure}
       \end{center}
     \end{column}
@@ -118,6 +121,9 @@
 
 \begin{frame}
   \frametitle{Scaffolding Problem}
+  \begin{center}
+    \includegraphics[width=0.5\textwidth,height=0.8\textheight,keepaspectratio]{figures/Scaffolding_3.pdf}
+  \end{center}
   \begin{itemize}
   \item Scaffold Graph:
     \begin{itemize}
@@ -133,7 +139,6 @@
   %%   Graphen (Scaffold Graph), wobei deren Zusammenhangskomponenten
   %%   Teilprobleme darstellen
     %hier Scaffolding_3.svg
-  \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{figures/Scaffolding_3.pdf}
   \end{itemize}
 \end{frame}
 
@@ -215,5 +220,13 @@
   \item was wir noch alles machen muessen (kann erst am ende
     ausgefuellt werden)
   \end{itemize}
+\end{frame}
+
+
+\appendix
+\section*{Bibliographie}
+\begin{frame}{Bibliographie}
+    %\nocite{Hernandez:2014jp, Hernandez:2008jw}
+    \printbibliography
 \end{frame}
 \end{document}
