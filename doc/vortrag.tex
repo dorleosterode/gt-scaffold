@@ -22,10 +22,10 @@
 {
   \leavevmode%
   \hbox{%
-  \begin{beamercolorbox}[wd=.25\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+  \begin{beamercolorbox}[wd=.6\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
     \usebeamerfont{author in head/foot}\insertshortauthor
   \end{beamercolorbox}%
-  \begin{beamercolorbox}[wd=.75\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+  \begin{beamercolorbox}[wd=.4\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
     \usebeamerfont{title in head/foot}\insertshorttitle\hspace*{2.5em}\insertframenumber
   \end{beamercolorbox}}%
   \vskip0pt%
@@ -58,10 +58,10 @@
 {
   \leavevmode%
   \hbox{%
-  \begin{beamercolorbox}[wd=.25\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+  \begin{beamercolorbox}[wd=.6\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
     \usebeamerfont{author in head/foot}\insertshortauthor
   \end{beamercolorbox}%
-  \begin{beamercolorbox}[wd=.75\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+  \begin{beamercolorbox}[wd=.4\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
     \usebeamerfont{title in head/foot}\insertshorttitle\hspace*{2.5em}
   \end{beamercolorbox}}%
   \vskip0pt%
@@ -81,8 +81,8 @@
   \begin{columns}
     \begin{column}{.45\textwidth}
       \begin{itemize}
-      \item ungleichmäßige Coverage und Wiederholungen $\rightarrow$
-        Sequenzen verschiedener Länge nach Assemblierung (Contigs)
+      \item Problem: ungleichmäßige Coverage \& Wiederholungen $\rightarrow$
+         (Contigs)
         %hier Scaffolding.svg
       \item Contigs werden zu Abschnitten angeordnet (Scaffolds)
         %hier Scaffolding_2.svg
@@ -105,8 +105,11 @@
 \begin{frame}
   \frametitle{Einführung}
   \begin{itemize}
-  \item Verwendung der Read-Paar Informationen, dazu gehört die
-    Fragmentgröße zwischen Read-Paar, Position der Reads auf Contigs
+  \item Verwendung der Read-Paar Informationen:
+    \begin{itemize}
+    \item Fragmentgröße
+    \item Position auf Contigs
+    \end{itemize}
   \item Read-Paare stammen aus paired-end oder mate-pair Sequenzierung
   \end{itemize}
 \end{frame}
@@ -114,20 +117,20 @@
 \begin{frame}
   \frametitle{Scaffolding Problem}
   \begin{itemize}
-  \item Scaffolding Problem stellt ein NP-vollständiges Problem
-    dar, d.h. es lässt sich vermutlich nicht effizient lösen
-  \item Lösung des Scaffolding Problems durch Zerlegung in
-    Teilprobleme, die unabhängig voneinander gelöst werden
-  \item Beschreibung des Scaffolding Problems mit Hilfe eines
-    Graphen (Scaffold Graph), wobei deren Zusammenhangskomponenten
-    Teilprobleme darstellen
   \item Scaffold Graph:
     \begin{itemize}
+    \item Knoten entsprechen Contigs
+    \item Kanten beschreiben Read-Paar
+      Informationen
     \item bidirektionaler Graph
-    \item Knoten entsprechen Contigs und Kanten beschreiben Read-Paar
-      Informationen (Abstand, Reihenfolge der Contigs)
-    %hier Scaffolding_3.svg
     \end{itemize}
+  \item Scaffolding ist NP-vollständig
+  \item Strategie: Zerlegung in
+    Teilprobleme, die unabhängig voneinander gelöst werden
+  %% \item Beschreibung des Scaffolding Problems mit Hilfe eines
+  %%   Graphen (Scaffold Graph), wobei deren Zusammenhangskomponenten
+  %%   Teilprobleme darstellen
+    %hier Scaffolding_3.svg
   \end{itemize}
 \end{frame}
 
@@ -143,20 +146,39 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle{Gt-Scaffolder}
+  \begin{itemize}
+  \item Eingabe:
+    \begin{itemize}
+    \item Contigs
+    \item Distanzinformationen
+    \item Astatistik %spelling?
+    \end{itemize}
+  \item Ausgabe:
+    \begin{itemize}
+    \item Scaffolds
+    \item (rekonstruierte Sequenzen)
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
   \frametitle{Übersicht der Schritte}
   \begin{itemize}
-  \item Realignierung der Read-Paare gegenüber Contigs mit Hilfe der
-    Software bwa
-  \item Erstellung des Scaffold Graph mit unique Contigs als Knoten und
-    bidirektionalen Kanten zwischen Contigs, wenn diese über ein
-    Read-Paar im Alignment verknüpft sind
-  \item Entfernung inkonsistenter Kanten und Auflösung von Zyklen
-    im Graphen
-  \item Ermittlung der Zusammenhangskomponenten mit ihren terminalen
-    Knoten im Graphen
-  \item Bestimmung aller Pfade zwischen jedem Paar von terminalen
-    Knoten, Pfad mit größter Sequenzabdeckung stellt bestes Layout
-    für Scaffold dar
+  \item Konstruktion des Scaffold Graph:
+    \begin{itemize}
+    \item nicht-repetitive Contigs als Knoten
+    \item bidirektionalen Kanten zwischen Contigs
+    \end{itemize}
+  \item Filterung des Graphen:
+    \begin{itemize}
+    \item inkonsistente Kanten
+    \item polymorphe Knoten
+    \item Zyklen
+    \end{itemize}
+  \item Ermittlung aller Zusammenhangskomponenten
+  \item Bestimmung des Pfades mit größter Sequenzabdeckung für jede
+    Zusammenhangskomponente
   \end{itemize}
 \end{frame}
 
