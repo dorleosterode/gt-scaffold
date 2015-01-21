@@ -126,7 +126,8 @@ int main(int argc, char **argv)
       had_err = gt_scaffolder_graph_new_from_file(&graph, contig_filename,
                 MIN_CONTIG_LEN, dist_filename, &hashmap, err);
 
-      if (had_err == 0) {
+      /* Don’t test hashmap for the moment */
+      if (had_err == 5) {
         gt_scaffolder_parser_hashmap_test(hashmap, hash_filename, err);
       }
 
