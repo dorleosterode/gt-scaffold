@@ -229,6 +229,21 @@
     \node[prog, below of=bam2de, yshift=-.45cm, fill=yellow!40] (pysam) {astat};
     \node[prog, below of=pysam] (scaff) {scaffold};
     \node[prog, below of=scaff] (scaf2fasta) {scaf2fasta};
+
+    \path[->]
+    (prep) edge (index)
+    (index) edge (correct)
+    (correct) edge (index2)
+    (index2) edge (filter)
+    (filter) edge (overlap)
+    (overlap) edge (assemble)
+    (assemble) edge (bindex)
+    (bindex) edge (aln)
+    (aln) edge (sampe)
+    (sampe) edge (bam2de)
+    (bam2de) edge (pysam)
+    (pysam) edge (scaff)
+    (scaff) edge (scaf2fasta);
   \end{tikzpicture}
 \end{frame}
 
