@@ -154,7 +154,7 @@ void delete_dist_records(DistRecords dist) {
 static int compare_read_order(const void *a,
                               const void *b)
 {
-  int return_val;
+  int return_val = 0; /* SD: Quick fix, check validity later!!! */
   Read *read_a = (Read*) a;
   Read *read_b = (Read*) b;
 
