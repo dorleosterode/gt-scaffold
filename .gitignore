@@ -5,12 +5,15 @@
 *.dot
 *.DS_Store
 *.dvi
+*.fa
 *.log
 *.nav
 *.o
 *.out
 *.pdf
 *.snm
+*.tags
+*.tags_sorted_by_file
 *.toc
 *.x
 *~
