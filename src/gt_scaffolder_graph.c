@@ -354,7 +354,7 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
   GtUword nof_distances, nof_contigs;
 
   graph = NULL;
-  hashmap = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
+  hashmap = NULL;
 
   /* count contigs */
   had_err = gt_scaffolder_parser_count_contigs(ctg_filename, min_ctg_len,
@@ -369,6 +369,10 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
     gt_scaffolder_graph_init_vertices(graph, nof_contigs);
     /* parse contigs in FASTA-format and save them as vertices of
      scaffold graph */
+    hashmap = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
+
+    gt_hashmap_add(hashmap, "count_contigs", "123");
+
     had_err = gt_scaffolder_parser_read_contigs(graph, ctg_filename,
               min_ctg_len, hashmap, err);
   }
@@ -385,7 +389,7 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
     if (nof_contigs == 1 && nof_distances == 0) {
       fprintf(stderr, "Graph only contains 1 vertex and no edges: "
                       "Did not perform scaffolding!\n");
-      exit(1);
+      exit(0);
     }
 
     /* allocate memory for edges of scaffolder graph */
