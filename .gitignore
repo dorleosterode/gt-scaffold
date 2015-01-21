@@ -6,9 +6,12 @@
 *.DS_Store
 *.dvi
 *.log
+*.nav
 *.o
+*.out
 *.pdf
-*.pdf
+*.snm
+*.toc
 *.x
 *~
 *.scaf
