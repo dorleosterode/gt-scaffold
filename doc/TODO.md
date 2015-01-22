@@ -6,28 +6,7 @@
 - parser: parse astat from readjoiner contig file [Lukas / Stefan]
 - parser: build hashmap contig_id (headerseq after first whitespace) -> seq [Stefan]
   - evaluate md5 implementation using GtEncSeq
-- phix, no error [Stefan]
-
---
-## Presentation
-  Motivation
-    - only brief reminder about assembly problem
-  Methods
-    - in-depth review of scaffolding step (NP something)
-      - intuition about single subproblems, pseudocode not necessary
-      - illustrations, e.g. subgraph from dot files
-  Results
-    - compare gt scaffold and sga
-      - time / memory (cluster, 8 GB)
-        - script/rdj-spacepeak.sh <binary>
-        - bookkeeping in sga -v?
-      - complete genomes
-        - S. cerevisiae (reason: small?)
-        - C. elegans (reason: assembly competitions? sga paper)
-  Discussion / Conclusion
-    - evaluate reasons for "another" implementation of scaffolding algorithm
-      - fewer depencencies
-      - potential future ideas / implementations
+- main: allow min contig length as parameter? [Stefan]
 
 ## OBSTACLES
 - algorithms: implement removeMultiEdgeScaffold function [Dorle]
