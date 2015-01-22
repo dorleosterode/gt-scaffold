@@ -501,30 +501,6 @@ static int gt_scaffolder_graph_save_seq(const char *seqpart,
   return had_err;
 }
 
-int gt_scaffolder_parser_hashmap_verbose(void *key,
-                                         void *value,
-                                         void *data,
-                                         GtError *err)
-{
-  GtScaffolderGraphHashmapData *hashmap_data =
-    (GtScaffolderGraphHashmapData *) data;
-
-  if (hashmap_data->had_err == 0) {
-    printf(">%s\n", (char *) key);
-    value = NULL;
-  } else
-    gt_error_set(err, "can not read hashmap");
-
-  return hashmap_data->had_err;
-}
-
-void gt_scaffolder_parser_hashmap_print(GtHashmap *hashmap) {
-  GtScaffolderGraphHashmapData data;
-  data.had_err = 0;
-  gt_hashmap_foreach( hashmap, gt_scaffolder_parser_hashmap_verbose,
-                      &data, NULL );
-}
-
 /* saves header, sequence length of contig to scaffolder graph
    (fasta reader callback function, gets called after fasta entry
    has been read) */
@@ -534,8 +510,9 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
 {
   int had_err;
   GtStr *cloned_gt_str;
-  GtScaffolderGraphFastaReaderData *fasta_reader_data =
-  (GtScaffolderGraphFastaReaderData*) data;
+  GtScaffolderGraphFastaReaderData *fasta_reader_data;
+
+  fasta_reader_data = (GtScaffolderGraphFastaReaderData*) data;
 
   had_err = 0;
   if (seq_length > fasta_reader_data->min_ctg_len)
@@ -543,23 +520,16 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
     cloned_gt_str = gt_str_clone(fasta_reader_data->header_seq);
     gt_scaffolder_graph_add_vertex(fasta_reader_data->graph,
     cloned_gt_str, seq_length, 0.0, 0.0);
-    gt_hashmap_add( fasta_reader_data->hashmap,
+    /*gt_hashmap_add( fasta_reader_data->hashmap,
                     (void *) gt_str_get(fasta_reader_data->header_seq),
-                    (void *) gt_str_get(fasta_reader_data->seq) );
-
-    /* Debug: */
-    /*GtScaffolderGraphHashmapData data;
-    data.had_err = 0;
-    gt_hashmap_foreach( fasta_reader_data->hashmap,
-                        gt_scaffolder_parser_hashmap_verbose,
-                        &data, err );*/
-
+                    (void *) gt_str_get(fasta_reader_data->seq) );*/
   }
 
   if (seq_length == 0) {
     gt_error_set (err , "Invalid sequence length");
     had_err = -1;
   }
+
   return had_err;
 }
 
@@ -666,4 +636,28 @@ int gt_scaffolder_parser_hashmap_test(GtHashmap *hashmap,
   }
 
   return had_err;
+}
+
+int gt_scaffolder_parser_hashmap_verbose(void *key,
+                                         void *value,
+                                         void *data,
+                                         GtError *err)
+{
+  GtScaffolderGraphHashmapData *hashmap_data =
+    (GtScaffolderGraphHashmapData *) data;
+
+  if (hashmap_data->had_err == 0) {
+    printf(">%s\n", (char *) key);
+    value = NULL;
+  } else
+    gt_error_set(err, "can not read hashmap");
+
+  return hashmap_data->had_err;
+}
+
+void gt_scaffolder_parser_hashmap_print(GtHashmap *hashmap) {
+  GtScaffolderGraphHashmapData data;
+  data.had_err = 0;
+  gt_hashmap_foreach( hashmap, gt_scaffolder_parser_hashmap_verbose,
+                      &data, NULL );
 }

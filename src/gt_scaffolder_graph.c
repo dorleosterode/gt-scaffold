@@ -371,8 +371,6 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
      scaffold graph */
     hashmap = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
 
-    gt_hashmap_add(hashmap, "count_contigs", "123");
-
     had_err = gt_scaffolder_parser_read_contigs(graph, ctg_filename,
               min_ctg_len, hashmap, err);
   }
