@@ -3,10 +3,18 @@
   - traverse string graph
 - parser: tranform asqg format to readjoiner-compatible format [Dorle]
 - parser / new module: generate DistEst file from .bam [Lukas]
+  - look into abyss estimation (paper)
 - parser: parse astat from readjoiner contig file [Lukas / Stefan]
+  - readjoiner: -astat flag
+  (- evaluate astat computation)
 - parser: build hashmap contig_id (headerseq after first whitespace) -> seq [Stefan]
   - evaluate md5 implementation using GtEncSeq
 - main: allow min contig length as parameter? [Stefan]
+- N50 [Stefan]
+  - verify SGA: gt seqstat -contigs <fasta>
+  - own: extended/assembly_stats_calculator.h
+- quast evaluation of assemblies
+- remove hashmap_out.fa
 
 ## OBSTACLES
 - algorithms: implement removeMultiEdgeScaffold function [Dorle]
