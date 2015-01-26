@@ -21,9 +21,12 @@
 \usepackage{tabularx} % page-width
 \usepackage{adjustbox}
 
+% tabulatoren in itemize
+\usepackage{tabto}
+
 % bibliographie
 \usepackage[english]{cleveref}
-\usepackage[style=numeric]{biblatex}
+\usepackage[style=authoryear-comp,backend=biber]{biblatex}
 \addbibresource{literatur.bib}
 \usepackage{appendixnumberbeamer}
 
@@ -122,7 +125,6 @@
       \end{center}
     \end{column}
   \end{columns}
-  \let\thefootnote\relax\footnotetext{\cite{Pop:2009dp}}
 \end{frame}
 
 \begin{frame}
@@ -151,32 +153,30 @@
       Informationen
     \item bidirektionaler Graph
     \end{itemize}
-  \item Scaffolding ist NP-vollständig
-  % SK: Erweitern oder Weglassen
-  \item Strategie: Zerlegung in
+  \item Scaffolding ist NP-vollständig\footnote{\cite{Huson:2002kf}}
+  \item Strategie: Zerlegung in % SK: Erweitern oder Weglassen
     Teilprobleme, die unabhängig voneinander gelöst werden
   %% \item Beschreibung des Scaffolding Problems mit Hilfe eines
   %%   Graphen (Scaffold Graph), wobei deren Zusammenhangskomponenten
   %%   Teilprobleme darstellen
   \end{itemize}
-  \let\thefootnote\relax\footnotetext{\cite{Huson:2002kf}}
 \end{frame}
 
 \begin{frame}
   \frametitle{Ziel des Projektes}
   \begin{itemize}
   \item Entwicklung einer Scaffolding-Software und ihre Evaluierung
-  \begin{itemize} % SK: basierend auf Konzepten und Infrastruktur GenomeTools
-    \item Aufbauend auf Assemblierungs-Software \textit{Readjoiner} (\textit{GenomeTools})
+  \begin{itemize}
+    \item Basierend auf Konzepten und Infrastruktur der \textit{GenomeTools}-Bibliothek\footnote{\cite{Gremme:2013}}
+    \item Aufbauend auf Assemblierungs-Software \textit{Readjoiner}\footnote{\cite{Gonnella:2012gn}}
   \end{itemize}
-  \item Methodische Anlehnung an \textit{String Graph Assembler (SGA)}
+  \item Methodische Anlehnung an \textit{SGA (String Graph Assembler)}\footnote{\cite{Simpson:2012ef}}
   \item Strategie von SGA-SCaffold
   \begin{itemize}
     \item Vereinfachung und Partitionierung eines Scaffold-Graphen
     \item Berechnung des Scaffolds als Pfad mit max. Sequenzabdeckung
   \end{itemize}
-  \end{itemize} %SK: gt zitieren
-  \let\thefootnote\relax\footnotetext{\cite{Gonnella:2012gn,Simpson:2012ef}}
+  \end{itemize}
 \end{frame}
 
 \section{Methoden}
@@ -231,33 +231,30 @@
 \section{Ergebnisse}
 
 \begin{frame} % SK: Gegenüberstlellung einfügen
-  \frametitle{Ergebnisse: gt Scaffold vs. SGA Scaffold}
+  \frametitle{gt Scaffold vs. SGA Scaffold}
   \begin{itemize}
     \item Daten: Referenzsequenzen
     \begin{itemize}
-      \item S. cerevisiae (12Mbp, Ensemble R64\-1\-1)
-      \item C. elegans (100Mbp, Ensemble WBcel235)
+      \item \textit{S. cerevisiae}       \tabto{3.5cm}~~12Mbp \tabto{5cm} Ensemble R64\-1\-1
+      \item \textit{H. sapiens}, Chr. 21 \tabto{3.5cm}~~48Mbp \tabto{5cm} Ensemble GRCh37
+      \item \textit{C. elegans}          \tabto{3.5cm}100Mbp \tabto{5cm} Ensemble WBcel235
+      \item \textit{D. melanogaster}     \tabto{3.5cm}140Mbp \tabto{5cm} Ensemble BDGP5
     \end{itemize}
-    \item Simulierte Paired-End-Reads durch \textit{art\_illumina}
+    \item Simulierte Paired-End-Reads durch \textit{art\_illumina}\footnote{\cite{Huang:2012kq}}
     \begin{itemize}
       \item Read-Länge 150 bp
       \item Coverage 20X
-      \item Fragmentlänge 400 bp
-      \item Standardabweichung 10 bp
+      \item Fragmentlänge 400 bp $\pm$ 10 bp
     \end{itemize}
-    \item Vergleich des Scaffolding-Schrittes
-    \begin{itemize}
-      \item Assemblierung der Reads durch SGA-E.coli-Beispielpipeline
-      \item TODO:\ Hardware einfügen (CPU, RAM, OS, bit)
-    \end{itemize}
+    \item Assemblierung der Reads durch SGA-Pipeline
+    \item TODO:\ Hardware einfügen (CPU, RAM, OS, bit)
   \end{itemize}
-  \let\thefootnote\relax\footnotetext{\cite{Earl:2011gt,Huang:2012kq}}
 \end{frame}
 
 
 
 \begin{frame}
-  \frametitle{Vergleichender Scaffold mit SGA:\ Ergebnisse}
+  \frametitle{Ergebnisse: gt Scaffold vs. SGA Scaffold}
   % SK: Eine Tabelle, relative Werte, Mem (MB), N50 (kb)
   % SK: Daten h.sapiens chr 21 / 22 (bis 200 MB)
   % SK: Graph
@@ -360,11 +357,4 @@
   \end{itemize}
 \end{frame}
 
-
-\appendix
-\section*{Bibliographie}
-\begin{frame}{Bibliographie}
-    %\nocite{Hernandez:2014jp, Hernandez:2008jw}
-    \printbibliography
-\end{frame}
 \end{document}
