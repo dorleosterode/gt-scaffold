@@ -91,7 +91,6 @@
 
 
 \section{Motivation}
-\subsection{Scaffolding}
 \begin{frame}
 \setcounter{framenumber}{1}
   \frametitle{Einführung}
@@ -169,7 +168,7 @@
     \item Aufbauend auf Assemblierungs-Software \textit{Readjoiner}\footnote{\cite{Gonnella:2012gn}}
   \end{itemize}
   \item Methodische Anlehnung an \textit{SGA (String Graph Assembler)}\footnote{\cite{Simpson:2012ef}}
-  \item Strategie von SGA-SCaffold
+  \item Aufklärung und Evaluation der Strategie von \textit{SGA} Scaffold
   \begin{itemize}
     \item Vereinfachung und Partitionierung eines Scaffold-Graphen
     \item Berechnung des Scaffolds als Pfad mit max. Sequenzabdeckung
@@ -193,8 +192,8 @@
 
   \begin{tikzpicture}[every node/.style={font=\footnotesize}]
     \node[] (input1) {Contigs};
-    \node[left of=input1, xshift=-1cm] (eingabe) {Eingabe:};
-    \node[below of=eingabe, yshift=-5cm] (ausgabe) {Ausgabe:};
+    \node[left of=input1, xshift=-1cm] (eingabe) {\textbf{Eingabe:}};
+    \node[below of=eingabe, yshift=-5cm] (ausgabe) {\textbf{Ausgabe:}};
     \node[right of=input1, align=center, xshift=2cm] (input2) {Distanz-\\informationen};
     \node[right of=input2, xshift=2cm] (input3) {A-Statistik};
 
@@ -222,14 +221,59 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Details der Schritte}
-  TODO:\ Illustrieren der einzelnen Schritte
+  \frametitle{Konstruktion des Graphen}
+  \begin{itemize}
+    \item Knoten entsprechenden \textit{unique} Contigs
+    \begin{itemize}
+      \item mit A-Statistik $\geq 20$
+      \item Mindestgröße, \textit{z.B. 200bp}
+    \end{itemize}
+    \item Bidirektionale Kante zwischen Contigs
+    \begin{itemize}
+      \item falls sie durch Read-Paare verbunden sind
+      \item Kantengewicht: Distanzinformation
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  % SK: Mehr Infos, Illustrationen
+  \frametitle{Selektion relevanter Knoten und Kanten}
+  \begin{itemize}
+    \item Markierung polymorpher Knoten
+    \begin{itemize}
+      \item TODO: Gute Formulierung finden
+    \end{itemize}
+    \item Markierung inkonsistenter Kanten
+    \begin{itemize}
+      \item widersprüchliche Distanzinformationen für einen einzelnen Contig
+      \item inkompatible Reihenfolge der Contigs mit paarweisen Distanzinformationen
+    \end{itemize}
+    \item Markierung gerichteter Zyklen
+    \begin{itemize}
+      \item Berechnung aller terminalen Knoten für alle ZK
+      \item Zyklendetektion über DFS ausgehend von terminalen Knoten
+      \item Markierung der Rückkanten
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Bestimmung des besten Pfades jeder ermittelten ZK}
+  \begin{itemize}
+    \item Berechnung aller Pfade zwischen allen terminalen Knoten
+    \begin{itemize}
+      \item BFS
+      \item Minimierung der Pfadlänge (Abstand) zwischen 2 Knoten
+    \end{itemize}
+    \item Scaffold: Auswahl des Pfades mit größter Contig-Gesamtlänge
+  \end{itemize}
 \end{frame}
 
 \section{Ergebnisse}
 
 \begin{frame} % SK: Gegenüberstlellung einfügen
-  \frametitle{Erstellung Testdaten}
+  \frametitle{Testbedingungen: gt Scaffold vs. SGA Scaffold}
   \begin{itemize}
     \item Referenzsequenzen
     \begin{itemize}
@@ -245,34 +289,88 @@
       \item Fragmentlänge 400 bp $\pm$ 10 bp
     \end{itemize}
     \item Assemblierung der Reads durch SGA-Pipeline
-    \item TODO:\ Hardware einfügen (CPU, RAM, OS, bit)
+    \item Workstation: Core-i7 @ 3.10GHz (8 Kerne), 8GB RAM, Linux 64 bit
   \end{itemize}
 \end{frame}
 
+\begin{frame} % SK: Abstände überarbeiten
+  \frametitle{Pipeline: gt Scaffold vs. SGA Scaffold}
+  \begin{columns}
+    \begin{column}{.45\textwidth}
+      SGA Pipeline: C++, Perl, Python
+      \begin{tikzpicture}[node distance=.75cm and 2cm]
+        \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny];
+        \node[prog] (prep) {preprocess};
+        \node[prog, below of=prep] (index) {index};
+        \node[prog, below of=index] (correct) {correct};
+        \node[prog, below of=correct] (index2) {index};
+        \node[prog, below of=index2] (filter) {filter};
+        \node[prog, below of=filter] (overlap) {overlap};
+        \node[prog, below of=overlap] (assemble) {assemble};
+        \node[prog, right of=prep, fill=red!40] (bindex) {index};
+        \node[prog, below of=bindex, fill=red!40] (aln) {align};
+        \node[prog, below of=aln, fill=red!40] (sampe) {sampe};
+        \node[prog, below of=sampe, rectangle split, rectangle split parts=3, yshift=-.45cm, rectangle split part fill={blue!40, green!40, blue!40}] (bam2de) {\nodepart{one}fixmate\nodepart{two}samtools\nodepart{three}DistanceEst};
+        \node[prog, below of=bam2de, yshift=-.45cm, fill=yellow!40] (pysam) {astat};
+        \node[prog, below of=pysam] (scaff) {scaffold};
+        \node[prog, below of=scaff] (scaf2fasta) {scaf2fasta};
 
+        \path[->]
+        (prep) edge (index)
+        (index) edge (correct)
+        (correct) edge (index2)
+        (index2) edge (filter)
+        (filter) edge (overlap)
+        (overlap) edge (assemble)
+        (assemble) edge (bindex)
+        (bindex) edge (aln)
+        (aln) edge (sampe)
+        (sampe) edge (bam2de)
+        (bam2de) edge (pysam)
+        (pysam) edge (scaff)
+        (scaff) edge (scaf2fasta);
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{.45\textwidth}
+      gt Pipeline: C
+      \begin{tikzpicture}[node distance=.75cm]
+        \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny];
+        \node[prog] (prefilter) {prefilter};
+        \node[prog, below of=prefilter] (overlap) {overlap};
+        \node[prog, below of=overlap] (assembly) {assembly};
+        \node[prog, right of=prefilter] (scaffold) {scaffold};
+
+        \path[->]
+        (prefilter) edge (overlap)
+        (overlap) edge (assembly)
+        (assembly) edge (scaffold);
+      \end{tikzpicture}
+    \end{column}
+  \end{columns}
+\end{frame}
 
 \begin{frame}
-  \frametitle{gt Scaffold vs. SGA Scaffold}
+  \frametitle{Ergebnisse: gt Scaffold vs. SGA Scaffold}
   \begin{table}
       \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
       \begin{tabular}{llccccc}
           \toprule
-          Dataset & Program name & Total span (Mbp) & \#Scaffolds & $N50$ (kb) & CPU (s) & Mem (MB) \\
+          Datensatz & Programm & Abdeckung (Mbp / \%) & \#Scaffolds & N50 (kb) & CPU (s) & RAM (MB) \\
           \midrule
           \textit{S. cerevisiae}
-                  & SGA Scaffold & 11.08            &       600   &  32.3   & 0.01      &  28.9 \\
+                  & SGA Scaffold & 11.08 / 92       &       600   &  32.3   & 0.01      &  28.9 \\
                   & gt Scaffold  &                  &       600   &         & $1\times$ &  $0.43\times$ \\
           \midrule
           \textit{H. sapiens}, Chr. 21
-                  & SGA Scaffold & 34.25            &      1368   &  54.2   & 0.04  &  27.8  \\
+                  & SGA Scaffold & 34.25 / 71       &      1368   &  54.2   & 0.04  &  27.8  \\
                   & gt Scaffold  &                  &      1368   &         & $1\times$ & $0.6\times$       \\
           \midrule
           \textit{C. elegans}
-                  & SGA Scaffold & 94.07            &      5659   &  36.9   & 0.11  &  34.9 \\
+                  & SGA Scaffold & 94.07 / 94       &      5659   &  36.9   & 0.11  &  34.9 \\
                   & gt Scaffold  &                  &      5659   &         & $0.9\times$ & $0.90\times$      \\
           \midrule
           \textit{D. melanogaster}
-                  & SGA Scaffold & 113.48           &      2281   &  126.3  & 0.11  & 29.2     \\
+                  & SGA Scaffold & 113.48 / 81      &      2281   &  126.3  & 0.11  & 29.2     \\
                   & gt Scaffold  &                  &      2281   &         & $0.9\times$ & $0.62\times$     \\
           \bottomrule
       \end{tabular}}
@@ -290,68 +388,28 @@
 \begin{frame}
   \frametitle{Diskussion}
   \begin{itemize}
-  \item Gründe für neue Implementation
+    \item Entwicklung eines Scaffolding-Programms angelehnt an SGA
     \begin{itemize}
-    \item geringerer Speicherplatzverbrauch, aehnliche Laufzeit
-       für gt Scaffold im Vergleich zu SGA Scaffold bei gleicher Güte
-       der Ergebnisse
-    \item keine externen Software-Abhängigkeiten
-      %% A-Statistik: Python-Skript auf Basis von Pysam
-      %% Distanz-Informationen: Fixmate, DistEst von Abyss, Samtools
+      \item Identische Qualität der Ergebnisse
+      \item Gleiche Laufzeit
+      \item Geringerer Speicherbedarf (10-60\%)
+      \item Implementierung der Funktionalität externer Software-Abhängigkeiten
+      \item Benutzerfreundlicher: schlanke Pipeline
+        %% A-Statistik: Python-Skript auf Basis von Pysam
+        %% Distanz-Informationen: Fixmate, DistEst von Abyss, Samtools
     \end{itemize}
   \end{itemize}
-  \begin{tikzpicture}[node distance=.75cm]
-    \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny, rotate=90];
-    \node[prog] (prep) {preprocess};
-    \node[prog, below of=prep] (index) {index};
-    \node[prog, below of=index] (correct) {correct};
-    \node[prog, below of=correct] (index2) {index};
-    \node[prog, below of=index2] (filter) {filter};
-    \node[prog, below of=filter] (overlap) {overlap};
-    \node[prog, below of=overlap] (assemble) {assemble};
-    \node[prog, below of=assemble, fill=red!40] (bindex) {index};
-    \node[prog, below of=bindex, fill=red!40] (aln) {align};
-    \node[prog, below of=aln, fill=red!40] (sampe) {sampe};
-    \node[prog, below of=sampe, rectangle split, rectangle split parts=3, yshift=-.45cm, rectangle split part fill={blue!40, green!40, blue!40}] (bam2de) {\nodepart{one}fixmate\nodepart{two}samtools\nodepart{three}DistanceEst};
-    \node[prog, below of=bam2de, yshift=-.45cm, fill=yellow!40] (pysam) {astat};
-    \node[prog, below of=pysam] (scaff) {scaffold};
-    \node[prog, below of=scaff] (scaf2fasta) {scaf2fasta};
-
-    \path[->]
-    (prep) edge (index)
-    (index) edge (correct)
-    (correct) edge (index2)
-    (index2) edge (filter)
-    (filter) edge (overlap)
-    (overlap) edge (assemble)
-    (assemble) edge (bindex)
-    (bindex) edge (aln)
-    (aln) edge (sampe)
-    (sampe) edge (bam2de)
-    (bam2de) edge (pysam)
-    (pysam) edge (scaff)
-    (scaff) edge (scaf2fasta);
-  \end{tikzpicture}
-
-  \begin{tikzpicture}[node distance=.75cm]
-    \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny, rotate=90];
-    \node[prog] (prefilter) {prefilter};
-    \node[prog, below of=prefilter] (overlap) {overlap};
-    \node[prog, below of=overlap] (assembly) {assembly};
-    \node[prog, below of=assembly] (scaffold) {scaffold};
-
-    \path[->]
-    (prefilter) edge (overlap)
-    (overlap) edge (assembly)
-    (assembly) edge (scaffold);
-  \end{tikzpicture}
 \end{frame}
 
 \begin{frame}
   \frametitle{Ausblick}
   \begin{itemize}
-  \item was wir noch alles machen muessen (kann erst am ende
-    ausgefuellt werden)
+    \item Integration in die \textit{Genome Tools}
+    \begin{itemize}
+      \item Schnittstelle zu \textit{Readjoiner}-Eingabedaten
+      \item Ausgabe der Zielsequenz
+    \end{itemize}
+    \item Weitere Evaluation der Unklarheiten im SGA-Algorithmus
   \end{itemize}
 \end{frame}
 
