@@ -308,62 +308,69 @@
 \section{Diskussion und Ausblick}
 \begin{frame}
   \frametitle{Diskussion}
+  \begin{columns}
+    \begin{column}{.75\textwidth}
   \begin{itemize}
   \item Gründe für neue Implementation
     \begin{itemize}
-    \item geringerer Speicherplatzverbrauch, aehnliche Laufzeit
-       für gt Scaffold im Vergleich zu SGA Scaffold bei gleicher Güte
+    \item geringerer Speicherplatzverbrauch, ähnliche Laufzeit
+       für gt Scaffolder im Vergleich zu SGA Scaffold bei gleicher Güte
        der Ergebnisse
     \item keine externen Software-Abhängigkeiten
       %% A-Statistik: Python-Skript auf Basis von Pysam
       %% Distanz-Informationen: Fixmate, DistEst von Abyss, Samtools
     \end{itemize}
   \end{itemize}
+  \end{column}
+    \begin{column}{.15\textwidth}
+
   \begin{tikzpicture}[node distance=.75cm]
-    \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny, rotate=90];
-    \node[prog] (prep) {preprocess};
-    \node[prog, below of=prep] (index) {index};
-    \node[prog, below of=index] (correct) {correct};
-    \node[prog, below of=correct] (index2) {index};
-    \node[prog, below of=index2] (filter) {filter};
-    \node[prog, below of=filter] (overlap) {overlap};
-    \node[prog, below of=overlap] (assemble) {assemble};
-    \node[prog, below of=assemble, fill=red!40] (bindex) {index};
+    \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny];
+    %% \node[prog] (prep) {preprocess};
+    %% \node[prog, below of=prep] (index) {index};
+    %% \node[prog, below of=index] (correct) {correct};
+    %% \node[prog, below of=correct] (index2) {index};
+    %% \node[prog, below of=index2] (filter) {filter};
+    %% \node[prog, below of=filter] (overlap) {overlap};
+    %% \node[prog, below of=overlap] (assemble) {assemble};
+    \node[prog, fill=red!40] (bindex) {index};
     \node[prog, below of=bindex, fill=red!40] (aln) {align};
     \node[prog, below of=aln, fill=red!40] (sampe) {sampe};
     \node[prog, below of=sampe, rectangle split, rectangle split parts=3, yshift=-.45cm, rectangle split part fill={blue!40, green!40, blue!40}] (bam2de) {\nodepart{one}fixmate\nodepart{two}samtools\nodepart{three}DistanceEst};
     \node[prog, below of=bam2de, yshift=-.45cm, fill=yellow!40] (pysam) {astat};
     \node[prog, below of=pysam] (scaff) {scaffold};
-    \node[prog, below of=scaff] (scaf2fasta) {scaf2fasta};
+    %% \node[prog, below of=scaff] (scaf2fasta) {scaf2fasta};
 
     \path[->]
-    (prep) edge (index)
-    (index) edge (correct)
-    (correct) edge (index2)
-    (index2) edge (filter)
-    (filter) edge (overlap)
-    (overlap) edge (assemble)
-    (assemble) edge (bindex)
+    %% (prep) edge (index)
+    %% (index) edge (correct)
+    %% (correct) edge (index2)
+    %% (index2) edge (filter)
+    %% (filter) edge (overlap)
+    %% (overlap) edge (assemble)
+    %% (assemble) edge (bindex)
     (bindex) edge (aln)
     (aln) edge (sampe)
     (sampe) edge (bam2de)
     (bam2de) edge (pysam)
-    (pysam) edge (scaff)
-    (scaff) edge (scaf2fasta);
+    (pysam) edge (scaff);
+    %% (scaff) edge (scaf2fasta);
   \end{tikzpicture}
+  \end{column}
+\end{columns}
 
-  \begin{tikzpicture}[node distance=.75cm]
-    \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny, rotate=90];
-    \node[prog] (prefilter) {prefilter};
-    \node[prog, below of=prefilter] (overlap) {overlap};
-    \node[prog, below of=overlap] (assembly) {assembly};
-    \node[prog, below of=assembly] (scaffold) {scaffold};
+  %% \begin{tikzpicture}[node distance=.75cm]
+  %%   \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny, rotate=90];
+  %%   \node[prog] (prefilter) {prefilter};
+  %%   \node[prog, below of=prefilter] (overlap) {overlap};
+  %%   \node[prog, below of=overlap] (assembly) {assembly};
+  %%   \node[prog, below of=assembly] (scaffold) {scaffold};
 
-    \path[->]
-    (prefilter) edge (overlap)
-    (overlap) edge (assembly)
-    (assembly) edge (scaffold);
-  \end{tikzpicture}
+  %%   \path[->]
+  %%   (prefilter) edge (overlap)
+  %%   (overlap) edge (assembly)
+  %%   (assembly) edge (scaffold);
+  %% \end{tikzpicture}
 \end{frame}
 
 \begin{frame}
