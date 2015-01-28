@@ -56,7 +56,7 @@
 \author{
   Lukas Götz, Stefan Dang \& Dorle Osterode
 }
-\title{gt Scaffolder}
+\title{gt Scaffold}
 \institute[]{}
 \date{2015-01-30}
 
@@ -189,7 +189,7 @@
 % \end{frame}
 
 \begin{frame}
-  \frametitle{gt Scaffolder}
+  \frametitle{Übersicht der Schritte}
 
   \begin{tikzpicture}[every node/.style={font=\footnotesize}]
     \node[] (input1) {Contigs};
@@ -222,21 +222,21 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Übersicht der Schritte}
+  \frametitle{Details der Schritte}
   TODO:\ Illustrieren der einzelnen Schritte
 \end{frame}
 
 \section{Ergebnisse}
 
 \begin{frame} % SK: Gegenüberstlellung einfügen
-  \frametitle{gt Scaffold vs. SGA Scaffold}
+  \frametitle{Erstellung Testdaten}
   \begin{itemize}
-    \item Daten: Referenzsequenzen
+    \item Referenzsequenzen
     \begin{itemize}
-      \item \textit{S. cerevisiae}       \tabto{3.5cm}~~12Mbp \tabto{5cm} Ensemble R64\-1\-1
-      \item \textit{H. sapiens}, Chr. 21 \tabto{3.5cm}~~48Mbp \tabto{5cm} Ensemble GRCh37
-      \item \textit{C. elegans}          \tabto{3.5cm}100Mbp \tabto{5cm} Ensemble WBcel235
-      \item \textit{D. melanogaster}     \tabto{3.5cm}140Mbp \tabto{5cm} Ensemble BDGP5
+      \item \textit{S. cerevisiae}       \tabto{3.5cm}~~12 Mbp \tabto{5cm} Ensembl R64-1-1
+      \item \textit{H. sapiens}, Chr. 21 \tabto{3.5cm}~~48 Mbp \tabto{5cm} Ensembl GRCh37
+      \item \textit{C. elegans}          \tabto{3.5cm}100 Mbp \tabto{5cm} Ensembl WBcel235
+      \item \textit{D. melanogaster}     \tabto{3.5cm}140 Mbp \tabto{5cm} Ensembl BDGP5
     \end{itemize}
     \item Simulierte Paired-End-Reads durch \textit{art\_illumina}\footnote{\cite{Huang:2012kq}}
     \begin{itemize}
@@ -252,7 +252,7 @@
 
 
 \begin{frame}
-  \frametitle{Ergebnisse: gt Scaffold vs. SGA Scaffold}
+  \frametitle{gt Scaffold vs. SGA Scaffold}
   \begin{table}
       \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
       \begin{tabular}{ccccccc}
@@ -292,15 +292,12 @@
   \begin{itemize}
   \item Gründe für neue Implementation
     \begin{itemize}
-    \item geringerer Speicherplatzverbrauch, schnellere Laufzeit
-       für Gt-Scaffolder (C-Implementation) im Vergleich zu
-       SGA-Scaffolder (C++ Implementation) bei gleicher Güte
-       der Ergebnisse (quod esset demonstrandum)
-    \item Keine externen Software-Abhängigkeiten:
-      %% , Einbau von
-      %% Abyss DistEst in Gt-Scaffolder (zur Ermittlung der Read-Paar
-      %% Informationen) und Berechnung der A-Statistik durch Read-Joiner
-      %% anstelle von Pysam
+    \item geringerer Speicherplatzverbrauch, aehnliche Laufzeit
+       für gt Scaffold im Vergleich zu SGA Scaffold bei gleicher Güte
+       der Ergebnisse
+    \item keine externen Software-Abhängigkeiten
+      %% A-Statistik: Python-Skript auf Basis von Pysam
+      %% Distanz-Informationen: Fixmate, DistEst von Abyss, Samtools
     \end{itemize}
   \end{itemize}
   \begin{tikzpicture}[node distance=.75cm]
