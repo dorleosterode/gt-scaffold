@@ -104,7 +104,7 @@
         \item Ungleichmäßige Coverage
         \item Wiederholungen
       \end{itemize}
-      \item Motivation: Einordnung der Contigs in Scaffolds
+      \item Motivation: Anordnung der Contigs in Scaffolds
       \begin{itemize}
         \item Richtung und relative Anordnung
         \item Paarweiser Abstand
@@ -116,12 +116,7 @@
         \begin{figure}[t]
           \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{figures/Scaffolding.pdf}
         \end{figure}
-        % SK: Paired-end erwähnen
-        \vspace{.75cm}
-        \begin{figure}[t]
-          % SK: Grafik verbessern, keine gestrichelte Linie, Aufteilung in Phasen
-          \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{figures/Scaffolding_2.pdf}
-        \end{figure}
+        % SK: Paired-end erwähnen, siehe naechste Folie
       \end{center}
     \end{column}
   \end{columns}
@@ -141,10 +136,6 @@
 
 \begin{frame}
   \frametitle{Scaffolding Problem}
-  \begin{center}
-    % SK: Bild unter Text, toy example, reales Beispiel zeigen
-    \includegraphics[width=0.5\textwidth,height=0.8\textheight,keepaspectratio]{figures/Scaffolding_3.pdf}
-  \end{center}
   \begin{itemize}
   \item Scaffold Graph:
     \begin{itemize}
@@ -160,6 +151,13 @@
   %%   Graphen (Scaffold Graph), wobei deren Zusammenhangskomponenten
   %%   Teilprobleme darstellen
   \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Scaffolding Problem}
+  \begin{center}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{figures/Scaffolding_graph.png}
+  \end{center}
 \end{frame}
 
 \begin{frame}
@@ -258,31 +256,31 @@
   % SK: Eine Tabelle, relative Werte, Mem (MB), N50 (kb)
   % SK: Daten h.sapiens chr 21 / 22 (bis 200 MB)
   % SK: Graph
-  \begin{table}
-      \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
-      \begin{tabular}{ccccccc}
-          \toprule
-          Dataset & Program name & Total span (Mbp) & \#Scaffolds & $N50$ (kb) & CPU (s) & Mem (MB) \\
-          \midrule
-          \textit{S. cerevisiae} &  &  &  &  &  &
-                  & SGA Scaffold & 11.08            &       600   &  32.3   & 0.01      &  28.9 \\
-                  & gt Scaffold  &                  &       600   &         & $1\times$ &  $0.43\times$ \\
-          \midrule
-          \textit{C. elegans} &  &  &  &  &  &
-                  & SGA Scaffold &                  &      5659   &  36.9   & 0.11  &  29.2 \\
-                  & gt Scaffold  &                  &             &         & $0.9\times$ & $0.62\times$      \\
-          \midrule
-          \textit{H. sapiens}, Chr. 21 &  &  &  &  &  &
-                  & SGA Scaffold & 34.25            &      1368   &  54.2   & 0.04  &  27.8  \\
-                  & gt Scaffold  &                  &             &         & $1\times$ & $0.6\times$       \\
-          \midrule
-          \textit{D. melanogaster} &  &  &  &  &  &
-                  & SGA Scaffold & 113.48           &      2281   &  126.3  & 0.11  & 29.2     \\
-                  & gt Scaffold  &                  &             &         & $0.9\times$ & $0.62\times$     \\
-          \midrule
-          \bottomrule
-      \end{tabular}}
-  \end{table}
+  %\begin{table}
+  %    \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
+  %    \begin{tabular}{ccccccc}
+  %        \toprule
+  %        Dataset & Program name & Total span (Mbp) & \#Scaffolds & $N50$ (kb) & CPU (s) & Mem (MB) \\
+  %        \midrule
+  %        \textit{S. cerevisiae} &  &  &  &  &  &
+  %                & SGA Scaffold & 11.08            &       600   &  32.3   & 0.01      &  28.9 \\
+  %                & gt Scaffold  &                  &       600   &         & $1\times$ &  $0.43\times$ \\
+  %        \midrule
+  %        \textit{C. elegans} &  &  &  &  &  &
+  %                & SGA Scaffold &                  &      5659   &  36.9   & 0.11  &  29.2 \\
+  %                & gt Scaffold  &                  &             &         & $0.9\times$ & $0.62\times$      \\
+  %         \midrule
+  %        \textit{H. sapiens}, Chr. 21 &  &  &  &  &  &
+  %                & SGA Scaffold & 34.25            &      1368   &  54.2   & 0.04  &  27.8  \\
+  %                & gt Scaffold  &                  &             &         & $1\times$ & $0.6\times$       \\
+  %        \midrule
+  %        \textit{D. melanogaster} &  &  &  &  &  &
+  %                & SGA Scaffold & 113.48           &      2281   &  126.3  & 0.11  & 29.2     \\
+  %                & gt Scaffold  &                  &             &         & $0.9\times$ & $0.62\times$     \\
+  %        \midrule
+  %        \bottomrule
+  %    \end{tabular}}
+  %\end{table}
 \end{frame}
 
 \section{Diskussion und Ausblick}
