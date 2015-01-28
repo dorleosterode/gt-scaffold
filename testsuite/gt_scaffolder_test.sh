@@ -46,7 +46,7 @@ diff gt_scaffolder_parser_test_read_distances.de $TESTDATA/libPE.de
 # TEST SCAFFOLD MODULE
 # usage: test.x graph <FASTA-file with contigs> <DistEst file> <astat file>
 ./test.x scaffold $TESTDATA/primary-contigs.fa $TESTDATA/libPE.de \
-  $TESTDATA/libPE.astat hashmap_out.fa
+  $TESTDATA/libPE.astat
 diff gt_scaffolder_algorithms_test_mark_repeats.dot \
   $TESTDATA/gt_scaffolder_algorithms_test_mark_repeats_expected.dot
 diff gt_scaffolder_algorithms_test_filter.dot \
