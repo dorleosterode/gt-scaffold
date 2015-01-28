@@ -30,7 +30,7 @@
 \addbibresource{literatur.bib}
 \usepackage{appendixnumberbeamer}
 
-\usetikzlibrary{shapes.geometric, calc, shapes}
+\usetikzlibrary{shapes.geometric, positioning, calc, shapes, fit, backgrounds}
 
 % fusszeile so aufteilen, dass autoren und titel reinpassen und seitenzahl hinzu
 \setbeamertemplate{footline}
@@ -56,7 +56,7 @@
 \author{
   Lukas Götz, Stefan Dang \& Dorle Osterode
 }
-\title{Gt-Scaffolder: TODO}
+\title{gt Scaffolder}
 \institute[]{}
 \date{2015-01-30}
 
@@ -191,40 +191,40 @@
 % \end{frame}
 
 \begin{frame}
-  \frametitle{Gt-Scaffolder}
-  \begin{itemize} %SK: flowchart
-  \item Eingabe:
-    \begin{itemize}
-    \item Contigs
-    \item Distanzinformationen
-    \item A-Statistik % SK: Sinn erläutern!
-    \end{itemize}
-  \item Ausgabe:
-    \begin{itemize}
-    \item Scaffolds
-    \item (rekonstruierte Sequenzen)
-    \end{itemize}
-  \end{itemize}
+  \frametitle{gt Scaffolder}
+
+  \begin{tikzpicture}[every node/.style={font=\footnotesize}]
+    \node[] (input1) {Contigs};
+    \node[left of=input1, xshift=-1cm] (eingabe) {Eingabe:};
+    \node[below of=eingabe, yshift=-5cm] (ausgabe) {Ausgabe:};
+    \node[right of=input1, align=center, xshift=2cm] (input2) {Distanz-\\informationen};
+    \node[right of=input2, xshift=2cm] (input3) {A-Statistik};
+
+    \node[below of=input1, yshift=-.5cm, anchor=west] (titel) {gt Scaffolder};
+    \node[rectangle, draw, anchor=west, below of=titel, xshift=1cm, rounded corners, fill=black!10, yshift=.25cm] (konstruktion) {Konstruktion des Graphen};
+    \node[rectangle, draw, anchor=west, below of=konstruktion, xshift=.95cm, rounded corners, fill=black!10, yshift=.25cm] (selektion) {Selektion relevanter Knoten und Kanten};
+    \node[rectangle, draw, anchor=west, below of=selektion, xshift=-1.35cm, rounded corners, fill=black!10, yshift=.25cm] (ermittlung) {Ermittlung aller ZKs};
+    \node[rectangle, draw, anchor=west, below of=ermittlung, xshift=1.55cm, rounded corners, fill=black!10, yshift=.25cm] (pfade) {Bestimmung des besten Pfades für jede ZK};
+
+    \begin{pgfonlayer}{background}
+    \node[draw, fit={(titel) (konstruktion) (selektion) (ermittlung) (pfade)}, rounded corners, fill=black!20] (back) {};
+    \end{pgfonlayer}
+
+    \node[below of=back, yshift=-2cm, xshift=-1.5cm] (output1) {Scaffolds};
+    \node[right of=output1, align=center, xshift=2cm, yshift=-.25cm] (output2) {(rekonstruierte\\Sequenzen)};
+    \node[above of=output1] (dummy) {};
+
+    \path[->, thick]
+    (input1) edge (back)
+    (input2) edge (back)
+    (input3) edge (back)
+    (back) edge (output1)
+    (back) edge (output2);
+  \end{tikzpicture}
 \end{frame}
 
 \begin{frame}
   \frametitle{Übersicht der Schritte}
-  \begin{itemize}
-  \item Konstruktion des Scaffold Graph:
-    \begin{itemize}
-    \item nicht-repetitive Contigs als Knoten
-    \item bidirektionale Kanten zwischen Contigs
-    \end{itemize}
-  \item Selektion relevanter Knoten und Kanten im  Graphen:
-    % \begin{itemize}
-    % \item inkonsistente Kanten
-    % \item polymorphe Knoten
-    % \item Zyklen
-    % \end{itemize}
-  \item Ermittlung aller Zusammenhangskomponenten
-  \item Bestimmung des Pfades mit größter Sequenzabdeckung für jede
-    Zusammenhangskomponente
-  \end{itemize}
   TODO:\ Illustrieren der einzelnen Schritte
 \end{frame}
 
