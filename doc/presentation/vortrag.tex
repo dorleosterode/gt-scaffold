@@ -56,7 +56,7 @@
 \author{
   Lukas Götz, Stefan Dang \& Dorle Osterode
 }
-\title{gt Scaffold}
+\title{gt Scaffolder}
 \institute[]{}
 \date{2015-01-30}
 
@@ -296,7 +296,7 @@
 \section{Ergebnisse}
 
 \begin{frame} % SK: Gegenüberstlellung einfügen
-  \frametitle{Testbedingungen: gt Scaffold vs. SGA Scaffold}
+  \frametitle{Testbedingungen: gt Scaffolder vs. SGA Scaffold}
   \begin{itemize}
     \item Referenzsequenzen
     \begin{itemize}
@@ -317,11 +317,19 @@
 \end{frame}
 
 \begin{frame} % SK: Abstände überarbeiten
-  \frametitle{Pipeline: gt Scaffold vs. SGA Scaffold}
+  \frametitle{Pipeline: gt Scaffolder vs. SGA Scaffold}
   \begin{columns}
     \begin{column}{.45\textwidth}
-      SGA Pipeline: C++, Perl, Python
-      \begin{tikzpicture}[node distance=.75cm and 2cm]
+      \tiny SGA Pipeline: SGA (C++, Python, Perl), Abyss (C++), Samtools (C)
+    \end{column}
+    \begin{column}{.45\textwidth}
+     \tiny gt Pipeline: GenomeTools (C)
+    \end{column}
+  \end{columns}
+
+  \begin{columns}
+    \begin{column}{.45\textwidth}
+      \begin{tikzpicture}[node distance=.75cm]
         \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny];
         \node[prog] (prep) {preprocess};
         \node[prog, below of=prep] (index) {index};
@@ -330,7 +338,7 @@
         \node[prog, below of=index2] (filter) {filter};
         \node[prog, below of=filter] (overlap) {overlap};
         \node[prog, below of=overlap] (assemble) {assemble};
-        \node[prog, right of=prep, fill=red!40] (bindex) {index};
+        \node[prog, right of=prep, xshift=1cm, fill=red!40] (bindex) {index};
         \node[prog, below of=bindex, fill=red!40] (aln) {align};
         \node[prog, below of=aln, fill=red!40] (sampe) {sampe};
         \node[prog, below of=sampe, rectangle split, rectangle split parts=3, yshift=-.45cm, rectangle split part fill={blue!40, green!40, blue!40}] (bam2de) {\nodepart{one}fixmate\nodepart{two}samtools\nodepart{three}DistanceEst};
@@ -355,13 +363,12 @@
       \end{tikzpicture}
     \end{column}
     \begin{column}{.45\textwidth}
-      gt Pipeline: C
       \begin{tikzpicture}[node distance=.75cm]
         \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny];
         \node[prog] (prefilter) {prefilter};
         \node[prog, below of=prefilter] (overlap) {overlap};
         \node[prog, below of=overlap] (assembly) {assembly};
-        \node[prog, right of=prefilter] (scaffold) {scaffold};
+        \node[prog, right of=prefilter, xshift=1cm] (scaffold) {scaffold};
 
         \path[->]
         (prefilter) edge (overlap)
@@ -373,7 +380,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Ergebnisse: gt Scaffold vs. SGA Scaffold}
+  \frametitle{Ergebnisse: gt Scaffolder vs. SGA Scaffold}
   \begin{table}
       \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
       \begin{tabular}{llccccc}
@@ -381,27 +388,27 @@
           Datensatz & Programm & Abdeckung (Mbp / \%) & \#Scaffolds & N50 (kb) & CPU (s) & RAM (MB) \\
           \midrule
           \textit{S. cerevisiae}
-                  & SGA Scaffold & 11.08 / 92       &       600   &  32.3   & 0.01      &  28.9 \\
-                  & gt Scaffold  &                  &       600   &         & $1\times$ &  $0.43\times$ \\
+                  & SGA Scaffold  & ~~11.08 / 92  &     ~~600   &  32.3   & 0.01      &  28.9 \\
+                  & gt Scaffolder &               &     ~~600   &         & $1\times$ &  $0.43\times$ \\
           \midrule
           \textit{H. sapiens}, Chr. 21
-                  & SGA Scaffold & 34.25 / 71       &      1368   &  54.2   & 0.04  &  27.8  \\
-                  & gt Scaffold  &                  &      1368   &         & $1\times$ & $0.6\times$       \\
+                  & SGA Scaffold  & ~~34.25 / 71  &      1368   &  54.2   & 0.04  &  27.8  \\
+                  & gt Scaffolder &               &      1368   &         & $1\times$ & $0.6\times$       \\
           \midrule
           \textit{C. elegans}
-                  & SGA Scaffold & 94.07 / 94       &      5659   &  36.9   & 0.11  &  34.9 \\
-                  & gt Scaffold  &                  &      5659   &         & $0.9\times$ & $0.90\times$      \\
+                  & SGA Scaffold  & ~~94.07 / 94  &      5659   &  36.9   & 0.11  &  34.9 \\
+                  & gt Scaffolder &               &      5659   &         & $0.9\times$ & $0.90\times$      \\
           \midrule
           \textit{D. melanogaster}
-                  & SGA Scaffold & 113.48 / 81      &      2281   &  126.3  & 0.11  & 29.2     \\
-                  & gt Scaffold  &                  &      2281   &         & $0.9\times$ & $0.62\times$     \\
+                  & SGA Scaffold  & 113.48 / 81 &      2281   &  126.3  & 0.11  & 29.2     \\
+                  & gt Scaffolder &             &      2281   &         & $0.9\times$ & $0.62\times$     \\
           \bottomrule
       \end{tabular}}
   \end{table}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Plot: gt Scaffold vs. SGA Scaffold}
+  \frametitle{Plot: gt Scaffolder vs. SGA Scaffold}
   \begin{figure}[t]
     \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{figures/sga_vs_gt.pdf}
   \end{figure}
@@ -410,17 +417,15 @@
 \section{Diskussion und Ausblick}
 \begin{frame}
   \frametitle{Diskussion}
+  Entwicklung des Scaffolding-Programms gt Scaffolder angelehnt an den SGA-Algorithmus
   \begin{itemize}
-    \item Entwicklung eines Scaffolding-Programms angelehnt an SGA
-    \begin{itemize}
-      \item Identische Qualität der Ergebnisse
-      \item Gleiche Laufzeit
-      \item Geringerer Speicherbedarf (10-60\%)
-      \item Implementierung der Funktionalität externer Software-Abhängigkeiten
-      \item Benutzerfreundlicher: schlanke Pipeline
-        %% A-Statistik: Python-Skript auf Basis von Pysam
-        %% Distanz-Informationen: Fixmate, DistEst von Abyss, Samtools
-    \end{itemize}
+    \item Identische Qualität der Ergebnisse
+    \item Gleiche Laufzeit
+    \item Geringerer Speicherbedarf (10-60\%)
+    \item Implementierung der Funktionalität externer Software-Abhängigkeiten
+    \item Benutzerfreundlicher: schlanke Pipeline
+      %% A-Statistik: Python-Skript auf Basis von Pysam
+      %% Distanz-Informationen: Fixmate, DistEst von Abyss, Samtools
   \end{itemize}
 \end{frame}
 
@@ -430,10 +435,10 @@
     \item Integration in die \textit{Genome Tools}
     \begin{itemize}
       \item Schnittstelle zu \textit{Readjoiner}-Eingabedaten
+      \item Implementation als Tool mit benutzerdefinierten Parametern
     \end{itemize}
     \item Ausgabe der Scaffolds im FASTA-Format
     \item Weitere Evaluation der Unklarheiten im SGA-Algorithmus
-    \item Implementierung benutzerdefinierter Optionen
     \item Zeit- und Platzbedarf optimieren
   \end{itemize}
 \end{frame}
