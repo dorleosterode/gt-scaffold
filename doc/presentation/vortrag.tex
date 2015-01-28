@@ -253,34 +253,37 @@
 
 \begin{frame}
   \frametitle{Ergebnisse: gt Scaffold vs. SGA Scaffold}
-  % SK: Eine Tabelle, relative Werte, Mem (MB), N50 (kb)
-  % SK: Daten h.sapiens chr 21 / 22 (bis 200 MB)
-  % SK: Graph
-  %\begin{table}
-  %    \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
-  %    \begin{tabular}{ccccccc}
-  %        \toprule
-  %        Dataset & Program name & Total span (Mbp) & \#Scaffolds & $N50$ (kb) & CPU (s) & Mem (MB) \\
-  %        \midrule
-  %        \textit{S. cerevisiae} &  &  &  &  &  &
-  %                & SGA Scaffold & 11.08            &       600   &  32.3   & 0.01      &  28.9 \\
-  %                & gt Scaffold  &                  &       600   &         & $1\times$ &  $0.43\times$ \\
-  %        \midrule
-  %        \textit{C. elegans} &  &  &  &  &  &
-  %                & SGA Scaffold &                  &      5659   &  36.9   & 0.11  &  29.2 \\
-  %                & gt Scaffold  &                  &             &         & $0.9\times$ & $0.62\times$      \\
-  %         \midrule
-  %        \textit{H. sapiens}, Chr. 21 &  &  &  &  &  &
-  %                & SGA Scaffold & 34.25            &      1368   &  54.2   & 0.04  &  27.8  \\
-  %                & gt Scaffold  &                  &             &         & $1\times$ & $0.6\times$       \\
-  %        \midrule
-  %        \textit{D. melanogaster} &  &  &  &  &  &
-  %                & SGA Scaffold & 113.48           &      2281   &  126.3  & 0.11  & 29.2     \\
-  %                & gt Scaffold  &                  &             &         & $0.9\times$ & $0.62\times$     \\
-  %        \midrule
-  %        \bottomrule
-  %    \end{tabular}}
-  %\end{table}
+  \begin{table}
+      \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
+      \begin{tabular}{ccccccc}
+          \toprule
+          Dataset & Program name & Total span (Mbp) & \#Scaffolds & $N50$ (kb) & CPU (s) & Mem (MB) \\
+          \midrule
+          \textit{S. cerevisiae} &  &  &  &  &  & \\
+                  & SGA Scaffold & 11.08            &       600   &  32.3   & 0.01      &  28.9 \\
+                  & gt Scaffold  &                  &       600   &         & $1\times$ &  $0.43\times$ \\
+          \midrule
+          \textit{H. sapiens}, Chr. 21 &  &  &  &  &  & \\
+                  & SGA Scaffold & 34.25            &      1368   &  54.2   & 0.04  &  27.8  \\
+                  & gt Scaffold  &                  &             &         & $1\times$ & $0.6\times$       \\
+          \midrule
+          \textit{C. elegans} &  &  &  &  &  & \\
+                  & SGA Scaffold & 94.07            &      5659   &  36.9   & 0.11  &  34.9 \\
+                  & gt Scaffold  &                  &             &         & $0.9\times$ & $0.90\times$      \\
+          \midrule
+          \textit{D. melanogaster} &  &  &  &  &  & \\
+                  & SGA Scaffold & 113.48           &      2281   &  126.3  & 0.11  & 29.2     \\
+                  & gt Scaffold  &                  &             &         & $0.9\times$ & $0.62\times$     \\
+          \bottomrule
+      \end{tabular}}
+  \end{table}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Plot: gt Scaffold vs. SGA Scaffold}
+  \begin{figure}[t]
+    \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{figures/sga_vs_gt.pdf}
+  \end{figure}
 \end{frame}
 
 \section{Diskussion und Ausblick}
