@@ -237,6 +237,13 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle{Konstruktion des Graphen}
+  \begin{center}
+    \includegraphics[scale=0.25]{figures/s_cerevisiae_parsed_graph_example_small.png}
+  \end{center}
+\end{frame}
+
+\begin{frame}
   % SK: Mehr Infos, Illustrationen
   \frametitle{Selektion relevanter Knoten und Kanten}
   \begin{itemize}
@@ -259,6 +266,14 @@
 \end{frame}
 
 \begin{frame}
+  % SK: Mehr Infos, Illustrationen
+  \frametitle{Selektion relevanter Knoten und Kanten}
+  \begin{center}
+    \includegraphics[scale=0.25]{figures/s_cerevisiae_filter_example_small.png}
+  \end{center}
+\end{frame}
+
+\begin{frame}
   \frametitle{Bestimmung des besten Pfades jeder ermittelten ZK}
   \begin{itemize}
     \item Berechnung aller Pfade zwischen allen terminalen Knoten
@@ -268,6 +283,14 @@
     \end{itemize}
     \item Scaffold: Auswahl des Pfades mit größter Contig-Gesamtlänge
   \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Bestimmung des besten Pfades jeder ermittelten ZK}
+  %% teil von s_cerevisae datensatz unter /work/stud2013/sdang/scaffolding/s_cerevisiae
+  \begin{center}
+    \includegraphics[scale=0.25]{figures/s_cerevisiae_make_scaffold_example_small.png}
+  \end{center}
 \end{frame}
 
 \section{Ergebnisse}
@@ -387,6 +410,8 @@
 \section{Diskussion und Ausblick}
 \begin{frame}
   \frametitle{Diskussion}
+  \begin{columns}
+    \begin{column}{.75\textwidth}
   \begin{itemize}
     \item Entwicklung eines Scaffolding-Programms angelehnt an SGA
     \begin{itemize}
@@ -407,9 +432,11 @@
     \item Integration in die \textit{Genome Tools}
     \begin{itemize}
       \item Schnittstelle zu \textit{Readjoiner}-Eingabedaten
-      \item Ausgabe der Zielsequenz
     \end{itemize}
+    \item Ausgabe der Scaffolds im FASTA-Format
     \item Weitere Evaluation der Unklarheiten im SGA-Algorithmus
+    \item Implementierung benutzerdefinierter Optionen
+    \item Zeit- und Platzbedarf optimieren
   \end{itemize}
 \end{frame}
 
