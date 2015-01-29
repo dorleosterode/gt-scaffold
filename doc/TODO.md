@@ -1,22 +1,16 @@
 ## TODO
 - output: convert scaffolds to fasta [Dorle]
   - traverse string graph
+  - quast evaluation [Stefan]
 - parser: tranform asqg format to readjoiner-compatible format [Dorle]
 - parser / new module: generate DistEst file from .bam [Lukas]
   - look into abyss estimation (paper)
 - parser: parse astat from readjoiner contig file [Lukas / Stefan]
   - readjoiner: -astat flag
   (- evaluate astat computation)
-- parser: build hashmap contig_id (headerseq after first whitespace) -> seq [Stefan]
-  - evaluate md5 implementation using GtEncSeq
-- main: allow min contig length as parameter? [Stefan]
-- N50 [Stefan]
-  - verify SGA: gt seqstat -contigs <fasta>
-  - own: extended/assembly_stats_calculator.h
-- quast evaluation of assemblies
-- remove hashmap_out.fa
 
 ## OBSTACLES
+- main: allow min contig length as parameter? [Stefan]
 - algorithms: implement removeMultiEdgeScaffold function [Dorle]
 - [insert line with standard deviation]
 - mark all edges of end vertex of inconsistent edge in twin direction ?
@@ -27,6 +21,13 @@
   (...algorithms.c: ...mark_repeats: line 83)
 
 ## DONE
+- ported test to gt testsuite [Stefan]
+- finalize presentation [Dorle / Lukas / Stefan]
+- N50 [Stefan]
+  - verify SGA: gt seqstat -contigs <fasta>
+  - own: extended/assembly_stats_calculator.h
+
+--
 - output: convert scaffolds to fasta [Dorle]
   - resolve overlaps
   - fill gaps

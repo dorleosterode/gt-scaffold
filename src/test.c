@@ -175,7 +175,7 @@ int main(int argc, char **argv)
           gt_scaffolder_graph_record_delete(rec);
         }
 
-        logger = gt_logger_new(true, "[scaffolder]", stderr);
+        logger = gt_logger_new(true, "[scaffolder] ", stderr);
         gt_assembly_stats_calculator_nstat(scaf_stats, 50);
         gt_assembly_stats_calculator_show(scaf_stats, logger);
 
