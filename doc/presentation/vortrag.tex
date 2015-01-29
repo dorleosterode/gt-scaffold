@@ -48,6 +48,10 @@
 
 % keine navigationssymbole in der fusszeile
 \beamertemplatenavigationsymbolsempty
+% ausgegraute fußnoten
+\setbeamercolor{footnote}{fg=gray}
+\setbeamercolor{footnote mark}{fg=gray, bg=gray}
+\setbeamerfont{footnote}{size=\tiny}
 
 % so definiert man neue makros
 \newcommand{\IFF}{\Leftrightarrow}
@@ -121,17 +125,17 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}
-  \frametitle{Einführung}
-  \begin{itemize}
-  \item Verwendung der Read-Paar Informationen:
-    \begin{itemize}
-    \item Fragmentgröße
-    \item Position auf Contigs
-    \end{itemize}
-  \item Read-Paare stammen aus paired-end oder mate-pair Sequenzierung
-  \end{itemize}
-\end{frame}
+% \begin{frame}
+%   \frametitle{Einführung}
+%   \begin{itemize}
+%   \item Verwendung der Read-Paar Informationen:
+%     \begin{itemize}
+%     \item Fragmentgröße
+%     \item Position auf Contigs
+%     \end{itemize}
+%   \item Read-Paare stammen aus paired-end oder mate-pair Sequenzierung
+%   \end{itemize}
+% \end{frame}
 
 \begin{frame}
   \frametitle{Scaffolding Problem}
@@ -312,7 +316,7 @@
       \item Fragmentlänge 400 bp $\pm$ 10 bp
     \end{itemize}
     \item Assemblierung der Reads durch SGA-Pipeline
-    \item Workstation: Core-i7 @ 3.10GHz (8 Kerne), 8GB RAM, Linux 64 bit
+    \item Workstation: Core-i7 @ 3.10GHz, 8GB RAM, Linux 64 bit
   \end{itemize}
 \end{frame}
 
@@ -320,16 +324,16 @@
   \frametitle{Pipeline: gt Scaffolder vs. SGA Scaffold}
   \begin{columns}
     \begin{column}{.45\textwidth}
-      \tiny SGA Pipeline: SGA (C++, Python, Perl), Abyss (C++), Samtools (C)
+      \footnotesize \textbf{SGA Pipeline:}\\SGA (C++, Python, Perl)\\Abyss (C++)\\Samtools (C)\\~\\
     \end{column}
     \begin{column}{.45\textwidth}
-     \tiny gt Pipeline: GenomeTools (C)
+     \footnotesize \textbf{gt Pipeline:}\\GenomeTools (C)
     \end{column}
   \end{columns}
 
   \begin{columns}
     \begin{column}{.45\textwidth}
-      \begin{tikzpicture}[node distance=.75cm]
+      \begin{tikzpicture}[node distance=.6cm]
         \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny];
         \node[prog] (prep) {preprocess};
         \node[prog, below of=prep] (index) {index};
@@ -363,7 +367,7 @@
       \end{tikzpicture}
     \end{column}
     \begin{column}{.45\textwidth}
-      \begin{tikzpicture}[node distance=.75cm]
+      \begin{tikzpicture}[node distance=.6cm]
         \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny];
         \node[prog] (prefilter) {prefilter};
         \node[prog, below of=prefilter] (overlap) {overlap};
