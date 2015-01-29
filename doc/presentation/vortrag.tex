@@ -148,8 +148,8 @@
     \item bidirektionaler Graph
     \end{itemize}
   \item Scaffolding ist NP-vollständig\footnote{\cite{Huson:2002kf}}
-  \item Strategie: Zerlegung in % SK: Erweitern oder Weglassen
-    Teilprobleme, die unabhängig voneinander gelöst werden
+  %\item Strategie: Zerlegung in % SK: Erweitern oder Weglassen
+  %  Teilprobleme, die unabhängig voneinander gelöst werden
   %% \item Beschreibung des Scaffolding Problems mit Hilfe eines
   %%   Graphen (Scaffold Graph), wobei deren Zusammenhangskomponenten
   %%   Teilprobleme darstellen
@@ -248,12 +248,12 @@
 \end{frame}
 
 \begin{frame}
-  % SK: Mehr Infos, Illustrationen
   \frametitle{Selektion relevanter Knoten und Kanten}
   \begin{itemize}
     \item Markierung polymorpher Knoten
     \begin{itemize}
-      \item TODO: Gute Formulierung finden
+      \item 2 Knoten lassen sich nicht in eindeutige Reihenfolge bringen
+      \item Entfernung des Knotens mit geringerer \#Kopien
     \end{itemize}
     \item Markierung inkonsistenter Kanten
     \begin{itemize}
@@ -270,7 +270,6 @@
 \end{frame}
 
 \begin{frame}
-  % SK: Mehr Infos, Illustrationen
   \frametitle{Selektion relevanter Knoten und Kanten}
   \begin{center}
     \includegraphics[scale=0.25]{figures/s_cerevisiae_filter_example_small.png}
@@ -299,7 +298,7 @@
 
 \section{Ergebnisse}
 
-\begin{frame} % SK: Gegenüberstlellung einfügen
+\begin{frame}
   \frametitle{Testbedingungen: gt Scaffolder vs. SGA Scaffold}
   \begin{itemize}
     \item Referenzsequenzen
@@ -320,7 +319,7 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame} % SK: Abstände überarbeiten
+\begin{frame}
   \frametitle{Pipeline: gt Scaffolder vs. SGA Scaffold}
   \begin{columns}
     \begin{column}{.45\textwidth}
@@ -392,20 +391,20 @@
           Datensatz & Programm & Abdeckung (Mbp / \%) & \#Scaffolds & N50 (kb) & CPU (s) & RAM (MB) \\
           \midrule
           \textit{S. cerevisiae}
-                  & SGA Scaffold  & ~~11.08 / 92  &     ~~600   &  32.3   & 0.01      &  28.9 \\
-                  & gt Scaffolder & ~~11.08 / 92  &     ~~600   &  32.3   & $1\times$ &  $0.43\times$ \\
+                  & SGA Scaffold  & ~~11.08 / 92  &     ~~600   &  32.3     & 0.01      &  28.9 \\
+                  & gt Scaffolder & $1\times$     &  $1\times$  & $1\times$ & $1\times$ &  $0.43\times$ \\
           \midrule
           \textit{H. sapiens}, Chr. 21
-                  & SGA Scaffold  & ~~34.25 / 71  &      1368   &  54.2   & 0.04  &  27.8  \\
-                  & gt Scaffolder & ~~34.25 / 71  &      1368   &  54.2   & $1\times$ & $0.6\times$       \\
+                  & SGA Scaffold  & ~~34.25 / 71  &      1368   &  54.2     & 0.04  &  27.8  \\
+                  & gt Scaffolder & $1\times$     &  $1\times$  & $1\times$ & $1\times$ & $0.6\times$       \\
           \midrule
           \textit{C. elegans}
-                  & SGA Scaffold  & ~~94.07 / 94  &      5659   &  36.9   & 0.11  &  34.9 \\
-                  & gt Scaffolder & ~~94.07 / 94  &      5659   &  36.9   & $0.9\times$ & $0.90\times$      \\
+                  & SGA Scaffold  & ~~94.07 / 94  &      5659   &  36.9     & 0.11  &  34.9 \\
+                  & gt Scaffolder & $1\times$     &  $1\times$  & $1\times$ & $0.9\times$ & $0.90\times$      \\
           \midrule
           \textit{D. melanogaster}
-                  & SGA Scaffold  & 113.48 / 81 &      2281   &  126.3  & 0.11  & 29.2     \\
-                  & gt Scaffolder & 113.48 / 81 &      2281   &  126.3  & $0.9\times$ & $0.62\times$     \\
+                  & SGA Scaffold  & 113.48 / 81   &      2281   &  126.3    & 0.11    & 29.2     \\
+                  & gt Scaffolder & $1\times$     &  $1\times$  & $1\times$ & $0.9\times$ & $0.62\times$     \\
           \bottomrule
       \end{tabular}}
   \end{table}
