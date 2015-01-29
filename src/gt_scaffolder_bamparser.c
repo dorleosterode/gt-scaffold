@@ -225,7 +225,7 @@ static void add_contig_dist_record(DistRecords *dist_records,
 static int compare_read_order(const void *a,
                               const void *b)
 {
-  int return_val;
+  int return_val = 0;
   Read *read_a = (Read*) a;
   Read *read_b = (Read*) b;
 
