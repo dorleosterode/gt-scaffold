@@ -160,24 +160,17 @@ int main(int argc, char **argv)
 
       if (had_err == 0) {
         GtUword i;
-        GtStr *ids, *seq;
         GtScaffolderGraphRecord *rec;
         GtArray *recs = gt_scaffolder_graph_iterate_scaffolds(graph);
 
         gt_scaffolder_graph_write_scaffold(recs, "gt_scaffolder_new_write.scaf",
           err);
 
-        ids = gt_str_new();
-        for (i = 0; i < gt_array_size(recs); i++) {
-          rec = *(GtScaffolderGraphRecord **) gt_array_get(recs, i);
-          gt_str_reset(ids);
-          seq = gt_scaffolder_graph_generate_string(rec, ids);
-          gt_str_delete(seq);
-          /* deleting all recs after stringgeneration */
-          gt_scaffolder_graph_record_delete(rec);
-        }
-        gt_array_delete(recs);
-        gt_str_delete(ids);
+	for (i = 0; i < gt_array_size(recs); i++) {
+	  rec = *(GtScaffolderGraphRecord **) gt_array_get(recs, i);
+	  gt_scaffolder_graph_record_delete(rec);
+	}
+	gt_array_delete(recs);
       }
 
       if (had_err != 0)
