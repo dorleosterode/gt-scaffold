@@ -264,17 +264,18 @@
 \begin{frame}
   \frametitle{Selektion relevanter Knoten und Kanten}
   \begin{itemize}
-    \item Polymorpher Knoten
+    \item Polymorphe Knoten
     \begin{itemize}
       \item 2 Knoten lassen sich nicht eindeutig ordnen $\rightarrow$ polymorph
       \item Markierung des Knotens mit geringerer \#Kopien des repräsentierten Contigs
     \end{itemize}
-    \item Markierung inkonsistenter Kanten
+    \item Inkonsistente Kanten
     \begin{itemize}
       \item widersprüchliche Distanzinformationen für einen einzelnen Contig
       \item inkompatible Reihenfolge der Contigs mit paarweisen Distanzinformationen
+      \item Makierung der ausgehenden Kanten des Contigs
     \end{itemize}
-    \item Markierung gerichteter Zyklen
+    \item Grichtete Zyklen
     \begin{itemize}
       \item Berechnung aller terminalen Knoten für alle ZK
       \item Zyklendetektion über DFS ausgehend von terminalen Knoten
