@@ -24,8 +24,8 @@
 
 /* write scaffold into file */
 int gt_scaffolder_graph_write_scaffold(GtArray *records,
-				       const char *file_name,
-				       GtError *err);
+                                       const char *file_name,
+                                       GtError *err);
 
 /* iterate graph to construct scaffold-records */
 GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph);
@@ -61,7 +61,7 @@ GtScaffolderGraphRecord *
 gt_scaffolder_graph_record_new(GtScaffolderGraphVertex *root);
 
 void gt_scaffolder_graph_record_add_edge(GtScaffolderGraphRecord *rec,
-					 GtScaffolderGraphEdge *edge);
+                                         GtScaffolderGraphEdge *edge);
 
 void gt_scaffolder_graph_record_delete(GtScaffolderGraphRecord *rec);
 
@@ -78,6 +78,9 @@ void gt_scaffolder_removecycles(GtScaffolderGraph *graph);
 
 /* generates the fasta-string for the given scaffold-record */
 GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
-                                           GtStr *ids);
+                                           GtStr *ids,
+                                           GtStrgraph *strgraph,
+                                           GtEncseq *encseq,
+                                           GtHashmap *contigs);
 
 #endif
