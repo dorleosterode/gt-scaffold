@@ -119,7 +119,6 @@
         \begin{figure}[t]
           \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{figures/Scaffolding.pdf}
         \end{figure}
-        % SK: Paired-end erwähnen, siehe naechste Folie
       \end{center}
     \end{column}
   \end{columns}
@@ -151,12 +150,6 @@
   %SK: Finden eines optimalen Pfades in einem Scaffolding Graphen
   % optimaler Pfad = maximales Gewicht
   % Heuristik
-
-  %\item Strategie: Zerlegung in % SK: Erweitern oder Weglassen
-  %  Teilprobleme, die unabhängig voneinander gelöst werden
-  %% \item Beschreibung des Scaffolding Problems mit Hilfe eines
-  %%   Graphen (Scaffold Graph), wobei deren Zusammenhangskomponenten
-  %%   Teilprobleme darstellen
   \end{itemize}
 \end{frame}
 
@@ -249,8 +242,10 @@
 \begin{frame}
   \frametitle{Konstruktion des Graphen}
   \begin{center}
-    \includegraphics[scale=0.25]{figures/s_cerevisiae_parsed_graph_example_small.png}
-    %\caption{ZK aus \textit{S. cerevisiae}-Graph}
+    \begin{figure}
+      \includegraphics[scale=0.25]{figures/s_cerevisiae_parsed_graph_example_small.png}
+      \caption{ZK aus \textit{S. cerevisiae}-Graph}
+    \end{figure}
   \end{center}
 \end{frame}
 
@@ -307,7 +302,7 @@
 
 \begin{frame}
   \frametitle{Testbedingungen: gt Scaffolder vs. SGA Scaffold}
-  \begin{itemize} %SK: ANzahl der Contigs
+  \begin{itemize} %SK: Anzahl der Contigs
     \item Referenzsequenzen
     \begin{itemize}
       \item \textit{S. cerevisiae}       \tabto{3.5cm}~~12 Mbp \tabto{5cm} Ensembl R64-1-1
@@ -399,18 +394,22 @@
           \midrule
           \textit{S. cerevisiae}
                   & SGA Scaffold  & ~~11.08 / 92  &     ~~600   &  32.3     & 0.01      &  28.9 \\
+            1694 contigs
                   & gt Scaffolder & $1\times$     &  $1\times$  & $1\times$ & $1\times$ &  $0.43\times$ \\
           \midrule
           \textit{H. sapiens}, Chr. 21
                   & SGA Scaffold  & ~~34.25 / 71  &      1368   &  54.2     & 0.04  &  27.8  \\
+            4817 contigs
                   & gt Scaffolder & $1\times$     &  $1\times$  & $1\times$ & $1\times$ & $0.6\times$       \\
           \midrule
           \textit{C. elegans}
                   & SGA Scaffold  & ~~94.07 / 94  &      5659   &  36.9     & 0.11  &  34.9 \\
+            11113 contigs
                   & gt Scaffolder & $1\times$     &  $1\times$  & $1\times$ & $0.9\times$ & $0.90\times$      \\
           \midrule
           \textit{D. melanogaster}
                   & SGA Scaffold  & 113.48 / 81   &      2281   &  126.3    & 0.11    & 29.2     \\
+            3970 contigs
                   & gt Scaffolder & $1\times$     &  $1\times$  & $1\times$ & $0.9\times$ & $0.62\times$     \\
           \bottomrule
       \end{tabular}}
