@@ -136,7 +136,7 @@
 %   \end{itemize}
 % \end{frame}
 
-\begin{frame} %SK: Graph als Hintergrund, Zahlen motivieren, Vergrößerung des Graphen in Übersichtsgrafik, NP vollständig näher definieren
+\begin{frame} %SK: Graph als Hintergrund, Zahlen motivieren, NP vollständig näher definieren
   \frametitle{Scaffolding Problem}
   \begin{itemize}
   \item Scaffold Graph:
@@ -155,6 +155,9 @@
 
 \begin{frame}
   \frametitle{Scaffolding Problem}
+  \begin{itemize}
+    \item Bsp.: Scaffold Graph \textit{Escherichia coli}
+  \end{itemize}
   \begin{center}
     \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{figures/Scaffolding_graph.png}
   \end{center}
@@ -177,19 +180,18 @@
   \end{itemize}
 \end{frame}
 
+\begin{frame}
+  \frametitle{Arbeitsplan}
+  \begin{itemize}
+    \item Aufklärung Algorithmus / Datenformate
+    \item Entwurf der Datenstrukturen
+    \item Implementierung
+    \item Auswählen von Testdaten
+    \item Evaluation, Dokumentation
+  \end{itemize}
+\end{frame}
+
 \section{Methoden}
-% \begin{frame}
-%   \frametitle{Allgemein}
-%   \begin{itemize}
-%   \item Reimplementation der Scaffolding Methode von SGA (C++) im
-%     Rahmen von Genometools (C)
-%   \item basiert auf Konstruktion eines Graphen über die Beziehungen
-%     zwischen Contigs (Scaffold Graph)
-%   \end{itemize}
-% \end{frame}
-
-% Arbeitsplan: Aufklärung Algorithmus / Datenformate, Entwurf der Datenstrukturen, Implementierung, Auswählen von Testdaten, Evaluation, Dokumentation
-
 \begin{frame}
   \frametitle{Übersicht der Schritte}
 
@@ -241,6 +243,9 @@
 
 \begin{frame}
   \frametitle{Konstruktion des Graphen}
+  \begin{itemize}
+    \item Bsp.: Ausschnitt Scaffold Graph \textit{Saccharomyces cerevisiae}
+  \end{itemize}
   \begin{center}
     \begin{figure}
       \includegraphics[scale=0.25]{figures/s_cerevisiae_parsed_graph_example_small.png}
@@ -273,6 +278,9 @@
 
 \begin{frame}
   \frametitle{Selektion relevanter Knoten und Kanten}
+  \begin{itemize}
+    \item Bsp.: Ausschnitt Scaffold Graph \textit{Saccharomyces cerevisiae}
+  \end{itemize}
   \begin{center}
     \includegraphics[scale=0.25]{figures/s_cerevisiae_filter_example_small.png}
   \end{center}
@@ -293,6 +301,9 @@
 \begin{frame}
   \frametitle{Bestimmung des besten Pfades jeder ermittelten ZK}
   %% teil von s_cerevisae datensatz unter /work/stud2013/sdang/scaffolding/s_cerevisiae
+  \begin{itemize}
+    \item Bsp.: Ausschnitt Scaffold Graph \textit{Saccharomyces cerevisiae}
+  \end{itemize}
   \begin{center}
     \includegraphics[scale=0.25]{figures/s_cerevisiae_make_scaffold_example_small.png}
   \end{center}
