@@ -18,6 +18,7 @@
 #include "core/array_api.h"
 
 #include "gt_scaffolder_graph.h"
+#include "extended/assembly_stats_calculator.h"
 
 #ifndef GT_SCAFFOLDER_ALGORITHMS_H
 #define GT_SCAFFOLDER_ALGORITHMS_H
@@ -28,7 +29,8 @@ int gt_scaffolder_graph_write_scaffold(GtArray *records,
 				       GtError *err);
 
 /* iterate graph to construct scaffold-records */
-GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph);
+GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph,
+                                        GtAssemblyStatsCalculator *scaf_stats);
 
 /* load astatics and copy number of every contig and mark repeated contigs */
 int gt_scaffolder_graph_mark_repeats(const char *filename,

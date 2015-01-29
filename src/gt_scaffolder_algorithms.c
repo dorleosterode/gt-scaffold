@@ -26,7 +26,7 @@
 #include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/queue_api.h"
-
+#include "extended/assembly_stats_calculator.h"
 #include "match/rdj-ovlfind-dp.h"
 
 #include "gt_scaffolder_graph.h"
@@ -888,13 +888,15 @@ void gt_scaffolder_graph_record_delete(GtScaffolderGraphRecord *rec) {
 }
 
 /* iterate over graph and return each scaffold in a scaffold record */
-GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph) {
+GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph,
+                                          GtAssemblyStatsCalculator *scaf_stats)
+{
   GtScaffolderGraphVertex *vertex, *next_edge_end;
   GtScaffolderGraphEdge *next_edge, *edge, *unmarked_edge;
   GtScaffolderGraphRecord *rec;
   GtArray *records;
   bool dir;
-  GtUword eid, nof_edges_in_dir, nof_unmarked_edges;
+  GtUword eid, nof_edges_in_dir, nof_unmarked_edges, scaf_seqlen;
 
   next_edge = NULL;
   edge = NULL;
@@ -929,6 +931,7 @@ GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph) {
     if (nof_unmarked_edges <= 1) {
       /* found new scaffold */
       rec = gt_scaffolder_graph_record_new(vertex);
+      scaf_seqlen = vertex->seq_len;
 
       vertex->state = GIS_VISITED;
 
@@ -939,8 +942,10 @@ GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph) {
         while (1) {
           /* store edge in scaffold-record */
           gt_scaffolder_graph_record_add_edge(rec, next_edge);
+          scaf_seqlen += next_edge->dist;
 
           next_edge_end = next_edge->end;
+          scaf_seqlen += next_edge_end->seq_len;
 
           if (next_edge_end->state == GIS_VISITED)
             break;
@@ -973,6 +978,7 @@ GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph) {
       }
       /* process scaffold-record rec here! */
       gt_array_add(records, rec);
+      gt_assembly_stats_calculator_add(scaf_stats, scaf_seqlen);
     }
   }
   return records;

@@ -21,7 +21,9 @@
 #include <string.h>
 
 #include "core/init_api.h"
+#include "core/logger.h"
 #include "core/types_api.h"
+#include "extended/assembly_stats_calculator.h"
 
 #include "gt_scaffolder_graph.h"
 #include "gt_scaffolder_algorithms.h"
@@ -153,7 +155,12 @@ int main(int argc, char **argv)
         GtUword i;
         GtStr *ids, *seq;
         GtScaffolderGraphRecord *rec;
-        GtArray *recs = gt_scaffolder_graph_iterate_scaffolds(graph);
+        GtLogger *logger;
+        GtArray *recs;
+        GtAssemblyStatsCalculator *scaf_stats =
+                                      gt_assembly_stats_calculator_new();
+
+        recs = gt_scaffolder_graph_iterate_scaffolds(graph, scaf_stats);
 
         gt_scaffolder_graph_write_scaffold(recs, "gt_scaffolder_new_write.scaf",
           err);
@@ -167,6 +174,13 @@ int main(int argc, char **argv)
           /* deleting all recs after stringgeneration */
           gt_scaffolder_graph_record_delete(rec);
         }
+
+        logger = gt_logger_new(true, "[scaffolder]", stderr);
+        gt_assembly_stats_calculator_nstat(scaf_stats, 50);
+        gt_assembly_stats_calculator_show(scaf_stats, logger);
+
+        gt_logger_delete(logger);
+        gt_assembly_stats_calculator_delete(scaf_stats);
         gt_array_delete(recs);
         gt_str_delete(ids);
       }
