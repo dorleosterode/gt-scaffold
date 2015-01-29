@@ -21,7 +21,6 @@
 #include <string.h>
 
 #include "core/file_api.h"
-#include "core/hashmap_api.h"
 #include "core/ma_api.h"
 #include "core/str_api.h"
 
@@ -345,16 +344,13 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
                                       const char *ctg_filename,
                                       GtUword min_ctg_len,
                                       const char *dist_filename,
-                                      GtHashmap **hashmap_par,
                                       GtError *err)
 {
   GtScaffolderGraph *graph;
-  GtHashmap *hashmap;
   int had_err;
   GtUword nof_distances, nof_contigs;
 
   graph = NULL;
-  hashmap = NULL;
 
   /* count contigs */
   had_err = gt_scaffolder_parser_count_contigs(ctg_filename, min_ctg_len,
@@ -369,10 +365,9 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
     gt_scaffolder_graph_init_vertices(graph, nof_contigs);
     /* parse contigs in FASTA-format and save them as vertices of
      scaffold graph */
-    hashmap = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
 
     had_err = gt_scaffolder_parser_read_contigs(graph, ctg_filename,
-              min_ctg_len, hashmap, err);
+              min_ctg_len, err);
   }
 
   if (had_err == 0)
@@ -405,7 +400,6 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
   }
 
   *graph_par = graph;
-  *hashmap_par = hashmap;
 
   return had_err;
 }

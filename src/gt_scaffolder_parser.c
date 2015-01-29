@@ -21,7 +21,6 @@
 #include <string.h>
 
 #include "core/fasta_reader_rec.h"
-#include "core/hashmap_api.h"
 #include "core/ma_api.h"
 
 #include "gt_scaffolder_graph.h"
@@ -35,16 +34,8 @@ typedef struct {
   GtUword nof_valid_ctg;
   GtUword min_ctg_len;
   GtStr *header_seq;
-  GtStr *seq;
   GtScaffolderGraph *graph;
-  GtHashmap *hashmap;
 } GtScaffolderGraphFastaReaderData;
-
-/* for hashmap unit test */
-typedef struct {
-  GtFile *file;
-  int had_err;
-} GtScaffolderGraphHashmapData;
 
 /* sort by lexicographic ascending order */
 static int gt_scaffolder_graph_vertices_compare(const void *a, const void *b)
@@ -180,7 +171,11 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
 
   /* sort by lexicographic ascending order */
   qsort(graph->vertices, graph->nof_vertices, sizeof (*graph->vertices),
-        gt_scaffolder_graph_vertices_compare);
+       gt_scaffolder_graph_vertices_compare);
+  /* update vertex ID
+     LG: Knoten ID eigentlich redundant? SD: Ja. LG: OK?!
+  for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++)
+    v->index = v - graph->vertices;*/
 
   file = fopen(file_name, "rb");
   if (file == NULL) {
@@ -303,7 +298,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
    save them as edges of scaffold graph
    PRECONDITION: header contains no commas and spaces */
 /* LG: check for "mate-flag"? */
-/* e.g.: Ctg1 Ctg2+,15,10,5.1 ; Ctg3-,65,10,5.1 */
+/* Bsp.: Ctg1 Ctg2+,15,10,5.1 ; Ctg3-,65,10,5.1 */
 int gt_scaffolder_parser_read_distances(const char *filename,
                                               GtScaffolderGraph *graph,
                                               bool ismatepair,
@@ -343,6 +338,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
       field = strtok(line," ");
 
       /* get vertex id corresponding to root contig header */
+      /* SK: Moeglichkeit einer set Funktion evaluieren */
       gt_str_set(gt_str_field, field);
       valid_contig = gt_scaffolder_graph_get_vertex(graph, &root_ctg,
                 gt_str_field);
@@ -355,7 +351,8 @@ int gt_scaffolder_parser_read_distances(const char *filename,
         {
           /* parse record consisting of contig header, distance,
              number of pairs, std. dev. */
-          /* SD: Use negated %[^>,] as %s does not work.)
+          /* SD: %[^>,] ist eine negierte Zeichenklasse (Workaround weil %s
+                 nicht funktioniert)
           */
           if (sscanf(field,"%[^>,]," GT_WD "," GT_WD ",%f", ctg_header, &dist,
               &num_pairs, &std_dev) == 4)
@@ -479,40 +476,17 @@ static int gt_scaffolder_graph_save_header(const char *description,
   return had_err;
 }
 
-/* Gets called for each sequence part of a fasta entry. */
-static int gt_scaffolder_graph_save_seq(const char *seqpart,
-                                        GtUword length,
-                                        void *data,
-                                        GtError *err)
-{
-  int had_err;
-  GtScaffolderGraphFastaReaderData *fasta_reader_data =
-  (GtScaffolderGraphFastaReaderData*) data;
-
-  had_err = 0;
-
-  gt_str_set(fasta_reader_data->seq, seqpart);
-
-  if (length == 0) {
-    gt_error_set (err , "Invalid sequence length");
-    had_err = -1;
-  }
-
-  return had_err;
-}
-
 /* saves header, sequence length of contig to scaffolder graph
    (fasta reader callback function, gets called after fasta entry
    has been read) */
 static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
                                         void *data,
-                                        GtError *err)
+                                        GtError* err)
 {
   int had_err;
   GtStr *cloned_gt_str;
-  GtScaffolderGraphFastaReaderData *fasta_reader_data;
-
-  fasta_reader_data = (GtScaffolderGraphFastaReaderData*) data;
+  GtScaffolderGraphFastaReaderData *fasta_reader_data =
+  (GtScaffolderGraphFastaReaderData*) data;
 
   had_err = 0;
   if (seq_length > fasta_reader_data->min_ctg_len)
@@ -520,16 +494,12 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
     cloned_gt_str = gt_str_clone(fasta_reader_data->header_seq);
     gt_scaffolder_graph_add_vertex(fasta_reader_data->graph,
     cloned_gt_str, seq_length, 0.0, 0.0);
-    /*gt_hashmap_add( fasta_reader_data->hashmap,
-                    (void *) gt_str_get(fasta_reader_data->header_seq),
-                    (void *) gt_str_get(fasta_reader_data->seq) );*/
   }
 
   if (seq_length == 0) {
     gt_error_set (err , "Invalid sequence length");
     had_err = -1;
   }
-
   return had_err;
 }
 
@@ -564,7 +534,6 @@ int gt_scaffolder_parser_count_contigs(const char *filename,
 int gt_scaffolder_parser_read_contigs(GtScaffolderGraph *graph,
                                       const char *filename,
                                       GtUword min_ctg_len,
-                                      GtHashmap *hashmap,
                                       GtError *err)
 {
   GtFastaReader* reader;
@@ -574,90 +543,15 @@ int gt_scaffolder_parser_read_contigs(GtScaffolderGraph *graph,
 
   str_filename = gt_str_new_cstr(filename);
   fasta_reader_data.header_seq = gt_str_new();
-  fasta_reader_data.seq = gt_str_new();
   fasta_reader_data.nof_valid_ctg = 0;
   fasta_reader_data.min_ctg_len = min_ctg_len;
   fasta_reader_data.graph = graph;
-  fasta_reader_data.hashmap = hashmap;
 
   reader = gt_fasta_reader_rec_new(str_filename);
   had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header,
-            gt_scaffolder_graph_save_seq, gt_scaffolder_graph_save_ctg,
-            &fasta_reader_data, err);
+            NULL, gt_scaffolder_graph_save_ctg, &fasta_reader_data, err);
   gt_fasta_reader_delete(reader);
   gt_str_delete(str_filename);
   gt_str_delete(fasta_reader_data.header_seq);
-  gt_str_delete(fasta_reader_data.seq);
-
   return had_err;
-}
-
-int gt_scaffolder_parser_hashmap_visit(void *key,
-                                       void *value,
-                                       void *data,
-                                       GtError *err)
-{
-  GtScaffolderGraphHashmapData *hashmap_data;
-
-  gt_error_check(err);
-  gt_assert(key && value && data);
-
-  hashmap_data = (GtScaffolderGraphHashmapData *) data;
-
-  if (hashmap_data->had_err == 0) {
-    gt_file_xprintf(hashmap_data->file, ">%s\n%s\n", (char *) key,
-                    (char *) value);
-  } else {
-    gt_error_set(err, "can not read hashmap");
-    hashmap_data->had_err = 1;
-  }
-
-  return hashmap_data->had_err;
-}
-
-int gt_scaffolder_parser_hashmap_test(GtHashmap *hashmap,
-                                      const char *filename,
-                                      GtError *err)
-{
-  int had_err = 0;
-  GtScaffolderGraphHashmapData data;
-
-  GtFile *file = gt_file_new(filename, "w", err);
-  if (file == NULL)
-    had_err = -1;
-
-  if (!had_err) {
-    data.file = file;
-    data.had_err = 0;
-    gt_hashmap_foreach( hashmap, gt_scaffolder_parser_hashmap_visit,
-                        &data, err );
-    had_err = data.had_err = 0;
-    gt_file_delete(file);
-  }
-
-  return had_err;
-}
-
-int gt_scaffolder_parser_hashmap_verbose(void *key,
-                                         void *value,
-                                         void *data,
-                                         GtError *err)
-{
-  GtScaffolderGraphHashmapData *hashmap_data =
-    (GtScaffolderGraphHashmapData *) data;
-
-  if (hashmap_data->had_err == 0) {
-    printf(">%s\n", (char *) key);
-    value = NULL;
-  } else
-    gt_error_set(err, "can not read hashmap");
-
-  return hashmap_data->had_err;
-}
-
-void gt_scaffolder_parser_hashmap_print(GtHashmap *hashmap) {
-  GtScaffolderGraphHashmapData data;
-  data.had_err = 0;
-  gt_hashmap_foreach( hashmap, gt_scaffolder_parser_hashmap_verbose,
-                      &data, NULL );
 }

@@ -33,7 +33,7 @@ fi
 for dir in $TESTDIRS; do
   full_dir="$TESTDATA/$dir"
   ./test.x scaffold "$full_dir/primary-contigs.fa" "$full_dir/libPE.de" \
-    "$full_dir/libPE.astat" hashmap_out.fa
+    "$full_dir/libPE.astat"
   $TESTSUITE/diff_graph_files.rb "$full_dir/07_sga_makeScaffolds.dot" \
     gt_scaffolder_algorithms_test_makescaffold.dot
 done

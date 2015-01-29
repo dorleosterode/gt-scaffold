@@ -21,7 +21,9 @@
 #include <string.h>
 
 #include "core/init_api.h"
+#include "core/logger.h"
 #include "core/types_api.h"
+#include "extended/assembly_stats_calculator.h"
 
 #include "gt_scaffolder_graph.h"
 #include "gt_scaffolder_algorithms.h"
@@ -51,13 +53,12 @@ int main(int argc, char **argv)
 {
   GtError *err;
   GtScaffolderGraph *graph;
-  GtHashmap *hashmap;
-  char module[32], *contig_filename, *dist_filename, *astat_filename,
-       *hash_filename, *hist_filename, *bam_filename;
+  char *contig_filename, *dist_filename, *astat_filename, *hist_filename,
+       *bam_filename;
   int had_err = 0;
-  DistRecords dist;
+  DistRecords *dist;
 
-  if (argc == 1 || sscanf(argv[1], "%s", module) != 1) {
+  if (argc == 1 || sscanf(argv[1], "%s", argv[1]) != 1) {
     fprintf(stderr,"Usage: %s <module> <arguments>\n" ,argv[0]);
     exit(EXIT_FAILURE);
   }
@@ -66,8 +67,7 @@ int main(int argc, char **argv)
   gt_lib_init();
   /* create error object */
   err = gt_error_new();
-
-  if (strcmp(module, "graph") == 0) {
+  if (strcmp(argv[1], "graph") == 0) {
     GtUword max_nof_vertices, max_nof_edges, nof_vertices, nof_edges;
     int init_vertices_tmp, init_edges_tmp, print_graph_tmp;
     bool init_vertices, init_edges, print_graph;
@@ -99,7 +99,7 @@ int main(int argc, char **argv)
     }
   }
 
-  else if (strcmp(module, "parser") == 0) {
+  else if (strcmp(argv[1], "parser") == 0) {
     if (argc != 3) {
       fprintf(stderr, "Usage: <DistEst file>\n");
       return EXIT_FAILURE;
@@ -110,26 +110,19 @@ int main(int argc, char **argv)
     }
   }
 
-  else if (strcmp(module, "scaffold") == 0) {
-    if (argc != 6) {
-      fprintf(stderr, "Usage:<FASTA-file with contigs> <DistEst file> "
-                      "<astat file> <hash outfile>\n");
+  else if (strcmp(argv[1], "scaffold") == 0) {
+    if (argc != 5) {
+      fprintf(stderr, "Usage: <FASTA-file with contigs> <DistEst file> "
+                      "<astat file>\n");
       return EXIT_FAILURE;
     } else {
       graph = NULL;
-      hashmap = NULL;
       contig_filename = argv[2];
       dist_filename = argv[3];
       astat_filename = argv[4];
-      hash_filename = argv[5];
 
       had_err = gt_scaffolder_graph_new_from_file(&graph, contig_filename,
-                MIN_CONTIG_LEN, dist_filename, &hashmap, err);
-
-      /* Don’t test hashmap for the moment */
-      if (had_err == 5) {
-        gt_scaffolder_parser_hashmap_test(hashmap, hash_filename, err);
-      }
+                MIN_CONTIG_LEN, dist_filename, err);
 
       if (had_err == 0) {
         /* load astatistics and copy number from file */
@@ -161,7 +154,12 @@ int main(int argc, char **argv)
       if (had_err == 0) {
         GtUword i;
         GtScaffolderGraphRecord *rec;
-        GtArray *recs = gt_scaffolder_graph_iterate_scaffolds(graph);
+        GtLogger *logger;
+        GtArray *recs;
+        GtAssemblyStatsCalculator *scaf_stats =
+                                      gt_assembly_stats_calculator_new();
+
+        recs = gt_scaffolder_graph_iterate_scaffolds(graph, scaf_stats);
 
         gt_scaffolder_graph_write_scaffold(recs, "gt_scaffolder_new_write.scaf",
           err);
@@ -171,16 +169,22 @@ int main(int argc, char **argv)
 	  gt_scaffolder_graph_record_delete(rec);
 	}
 	gt_array_delete(recs);
+
+        logger = gt_logger_new(true, "[scaffolder]", stderr);
+        gt_assembly_stats_calculator_nstat(scaf_stats, 50);
+        gt_assembly_stats_calculator_show(scaf_stats, logger);
+
+        gt_logger_delete(logger);
+        gt_assembly_stats_calculator_delete(scaf_stats);
       }
 
       if (had_err != 0)
         fprintf(stderr,"ERROR: %s\n",gt_error_get(err));
 
-      gt_hashmap_delete(hashmap);
       gt_scaffolder_graph_delete(graph);
     }
   }
-  else if (strcmp(module, "bamparser") == 0) {
+  else if (strcmp(argv[1], "bamparser") == 0) {
     if (argc != 4) {
       fprintf(stderr, "Usage:<sorted BAM file> <hist file>\n");
       return EXIT_FAILURE;
@@ -189,22 +193,24 @@ int main(int argc, char **argv)
       hist_filename = argv[3];
 
       /* initialize distance records */
-      init_dist_records(&dist);
+      dist = gt_scaffolder_bamparser_init_dist_records();
 
       /* read paired information from bam file */
-      had_err = gt_scaffolder_bamparser_read_paired_information(&dist,
+      had_err = gt_scaffolder_bamparser_read_paired_information(dist,
             bam_filename, hist_filename, MIN_DIST, MAX_DIST, MIN_QUAL,
             MIN_NOF_PAIRS, MIN_REF_LENGTH, MIN_ALIGN, err);
 
-      /* write distance records */
-      write_dist_records(dist);
+      /* print distance records */
+      had_err = gt_scaffolder_bamparser_print_dist_records(dist,
+                "gt_scaffolder_bamparser_distance_records.de", err);
 
       /* delete distance records */
-      delete_dist_records(dist);
+      gt_scaffolder_bamparser_delete_dist_records(dist);
     }
   }
   else {
-    fprintf(stderr,"Usage: %s <module> <arguments>\n" ,argv[0]);
+    fprintf(stderr, "Usage: %s <module> <arguments>\n\n"
+            "Modules:\n\ngraph\nparser\nscaffold\nbamparser", argv[0]);
     exit(EXIT_FAILURE);
   }
 

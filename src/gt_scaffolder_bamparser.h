@@ -18,7 +18,8 @@
 #ifndef GT_SCAFFOLDER_BAMPARSER_H
 #define GT_SCAFFOLDER_BAMPARSER_H
 
-/* for saving distance information */
+/* data type for saving paired information
+   between contigs according to abyss dist format */
 typedef struct {
   char *id;
   GtWord dist;
@@ -41,9 +42,16 @@ typedef struct {
   GtUword size;
 } DistRecords;
 
-void init_dist_records(DistRecords *dist);
-void write_dist_records(DistRecords dist);
-void delete_dist_records(DistRecords dist);
+/* initialize distance records */
+DistRecords *gt_scaffolder_bamparser_init_dist_records(void);
+
+/* print distance records in abyss dist format into file filename */
+int gt_scaffolder_bamparser_print_dist_records(const DistRecords *dist,
+                                               const char *filename,
+                                               GtError *err);
+
+/* delete distance records */
+void gt_scaffolder_bamparser_delete_dist_records(DistRecords *dist);
 
 /* read paired information from bam file and corresponding hist file */
 int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
