@@ -54,7 +54,7 @@ int main(int argc, char **argv)
   char *contig_filename, *dist_filename, *astat_filename, *hist_filename,
        *bam_filename;
   int had_err = 0;
-  DistRecords dist;
+  DistRecords *dist;
 
   if (argc == 1 || sscanf(argv[1], "%s", argv[1]) != 1) {
     fprintf(stderr,"Usage: %s <module> <arguments>\n" ,argv[0]);
@@ -186,18 +186,19 @@ int main(int argc, char **argv)
       hist_filename = argv[3];
 
       /* initialize distance records */
-      init_dist_records(&dist);
+      dist = gt_scaffolder_bamparser_init_dist_records();
 
       /* read paired information from bam file */
-      had_err = gt_scaffolder_bamparser_read_paired_information(&dist,
+      had_err = gt_scaffolder_bamparser_read_paired_information(dist,
             bam_filename, hist_filename, MIN_DIST, MAX_DIST, MIN_QUAL,
             MIN_NOF_PAIRS, MIN_REF_LENGTH, MIN_ALIGN, err);
 
-      /* write distance records */
-      write_dist_records(dist);
+      /* print distance records */
+      had_err = gt_scaffolder_bamparser_print_dist_records(dist,
+                "gt_scaffolder_bamparser_distance_records.de", err);
 
       /* delete distance records */
-      delete_dist_records(dist);
+      gt_scaffolder_bamparser_delete_dist_records(dist);
     }
   }
   else {
