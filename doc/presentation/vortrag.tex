@@ -99,7 +99,7 @@
 \setcounter{framenumber}{1}
   \frametitle{Einführung}
 
-  \begin{columns} %SK: Programme an Pfeile notieren
+  \begin{columns}
     \begin{column}{.45\textwidth}
       \begin{itemize}
       \item Assemblierung $\rightarrow$ Mehrere unabhängige Contigs
@@ -136,30 +136,33 @@
 %   \end{itemize}
 % \end{frame}
 
-\begin{frame} %SK: Graph als Hintergrund, Zahlen motivieren, NP vollständig näher definieren
+\begin{frame}
   \frametitle{Scaffolding Problem}
   \begin{itemize}
-  \item Scaffold Graph:
+    \item Scaffold Graph:
     \begin{itemize}
-    \item Knoten entsprechen Contigs
-    \item Kanten beschreiben Read-Paar
-      Informationen
-    \item bidirektionaler Graph
+      \item Knoten entsprechen Contigs
+      \item Kanten beschreiben Read-Paar Informationen
+      \item bidirektionaler Graph
     \end{itemize}
-  \item Scaffolding ist NP-vollständig\footnote{\cite{Huson:2002kf}}
-  %SK: Finden eines optimalen Pfades in einem Scaffolding Graphen
-  % optimaler Pfad = maximales Gewicht
-  % Heuristik
+    \item Scaffolding ist NP-vollständig\footnote{\cite{Huson:2002kf}}
+    \begin{itemize}
+      \item Finden eines optimalen Pfades in einem Scaffolding Graphen
+      \begin{itemize}
+        \item Optimal: Pfad mit maximalem Kantengewicht
+      \end{itemize}
+      \item Näherungsweise Lösung des Scaffolding Problems über Heuristik
+    \end{itemize}
   \end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{Scaffolding Problem}
-  \begin{itemize}
-    \item Bsp.: Scaffold Graph \textit{Escherichia coli}
-  \end{itemize}
   \begin{center}
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{figures/Scaffolding_graph.png}
+    \begin{figure}
+      \includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{figures/Scaffolding_graph.png}
+      \caption{Scaffold Graph mit 821 Knoten und 1392 Kanten (\textit{E. coli})}
+    \end{figure}
   \end{center}
 \end{frame}
 
@@ -182,13 +185,22 @@
 
 \begin{frame}
   \frametitle{Arbeitsplan}
-  \begin{itemize}
-    \item Aufklärung Algorithmus / Datenformate
-    \item Entwurf der Datenstrukturen
-    \item Implementierung
-    \item Auswählen von Testdaten
-    \item Evaluation, Dokumentation
-  \end{itemize}
+  \begin{center}
+    \begin{tikzpicture}[node distance=1cm]
+      \tikzstyle{prog}=[draw, rectangle, rounded corners];
+      \node[prog] (algorithm) {Aufklärung Algorithmus / Datenformate};
+      \node[prog, below of=algorithm] (datastructure) {Entwurf der Datenstrukturen};
+      \node[prog, below of=datastructure] (implementation) {Implementierung};
+      \node[prog, below of=implementation] (testdata) {Auswählen von Testdaten};
+      \node[prog, below of=testdata] (evaluation) {Evaluation, Dokumentation};
+
+      \path[->]
+      (algorithm) edge (datastructure)
+      (datastructure) edge (implementation)
+      (implementation) edge (testdata)
+      (testdata) edge (evaluation);
+    \end{tikzpicture}
+  \end{center}
 \end{frame}
 
 \section{Methoden}
@@ -205,8 +217,8 @@
     \node[below of=input1, yshift=-.5cm, anchor=west] (titel) {gt Scaffolder};
     \node[rectangle, draw, anchor=west, below of=titel, xshift=1cm, rounded corners, fill=black!10, yshift=.25cm] (konstruktion) {Konstruktion des Graphen};
     \node[rectangle, draw, anchor=west, below of=konstruktion, xshift=.95cm, rounded corners, fill=black!10, yshift=.25cm] (selektion) {Selektion relevanter Knoten und Kanten};
-    \node[rectangle, draw, anchor=west, below of=selektion, xshift=-1.35cm, rounded corners, fill=black!10, yshift=.25cm] (ermittlung) {Ermittlung aller Zusammenhangskomponenten (ZK)};
-    \node[rectangle, draw, anchor=west, below of=ermittlung, xshift=1.55cm, rounded corners, fill=black!10, yshift=.25cm] (pfade) {Bestimmung des besten Pfades für jede ZK};
+    \node[rectangle, draw, anchor=west, below of=selektion, xshift=.80cm, rounded corners, fill=black!10, yshift=.25cm] (ermittlung) {Ermittlung aller Zusammenhangskomponenten (ZK)};
+    \node[rectangle, draw, anchor=west, below of=ermittlung, xshift=-.65cm, rounded corners, fill=black!10, yshift=.25cm] (pfade) {Bestimmung des besten Pfades für jede ZK};
 
     \begin{pgfonlayer}{background}
     \node[draw, fit={(titel) (konstruktion) (selektion) (ermittlung) (pfade)}, rounded corners, fill=black!20] (back) {};
@@ -243,13 +255,10 @@
 
 \begin{frame}
   \frametitle{Konstruktion des Graphen}
-  \begin{itemize}
-    \item Bsp.: Ausschnitt Scaffold Graph \textit{Saccharomyces cerevisiae}
-  \end{itemize}
   \begin{center}
     \begin{figure}
-      \includegraphics[scale=0.25]{figures/s_cerevisiae_parsed_graph_example_small.png}
-      \caption{ZK aus \textit{S. cerevisiae}-Graph}
+      \includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{figures/s_cerevisiae_parsed_graph_example_small.png}
+      \caption{Ausschnitt (ZK) aus Scaffold Graph (\textit{S. cerevisiae})}
     \end{figure}
   \end{center}
 \end{frame}
@@ -257,17 +266,18 @@
 \begin{frame}
   \frametitle{Selektion relevanter Knoten und Kanten}
   \begin{itemize}
-    \item Polymorpher Knoten
+    \item Polymorphe Knoten
     \begin{itemize}
       \item 2 Knoten lassen sich nicht eindeutig ordnen $\rightarrow$ polymorph
       \item Markierung des Knotens mit geringerer \#Kopien des repräsentierten Contigs
     \end{itemize}
-    \item Markierung inkonsistenter Kanten
+    \item Inkonsistente Kanten
     \begin{itemize}
-      \item widersprüchliche Distanzinformationen für einen einzelnen Contig
-      \item inkompatible Reihenfolge der Contigs mit paarweisen Distanzinformationen
+      \item Konsistenz: Alle mit einem Contig $C_1$ verbundenden Contigs $C_2, \ldots, C_n$ lassen sich eindeutig ordnen
+      \item Inkonsistenz: Kanten besitzen widersprüchliche Distanzinformationen und Contigs überlappen $\geq$ 400
+      \item Markierung aller Kanten
     \end{itemize}
-    \item Markierung gerichteter Zyklen
+    \item Gerichtete Zyklen
     \begin{itemize}
       \item Berechnung aller terminalen Knoten für alle ZK
       \item Zyklendetektion über DFS ausgehend von terminalen Knoten
@@ -278,11 +288,11 @@
 
 \begin{frame}
   \frametitle{Selektion relevanter Knoten und Kanten}
-  \begin{itemize}
-    \item Bsp.: Ausschnitt Scaffold Graph \textit{Saccharomyces cerevisiae}
-  \end{itemize}
   \begin{center}
-    \includegraphics[scale=0.25]{figures/s_cerevisiae_filter_example_small.png}
+    \begin{figure}
+      \includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{figures/s_cerevisiae_filter_example_small.png}
+      \caption{Markierte Knoten und Kanten (grau) im Scaffold Graph}
+    \end{figure}
   \end{center}
 \end{frame}
 
@@ -301,11 +311,11 @@
 \begin{frame}
   \frametitle{Bestimmung des besten Pfades jeder ermittelten ZK}
   %% teil von s_cerevisae datensatz unter /work/stud2013/sdang/scaffolding/s_cerevisiae
-  \begin{itemize}
-    \item Bsp.: Ausschnitt Scaffold Graph \textit{Saccharomyces cerevisiae}
-  \end{itemize}
   \begin{center}
-    \includegraphics[scale=0.25]{figures/s_cerevisiae_make_scaffold_example_small.png}
+    \begin{figure}
+      \includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{figures/s_cerevisiae_make_scaffold_example_small.png}
+      \caption{Pfad mit größter Gesamtlänge (rot) im Scaffold Graph}
+    \end{figure}
   \end{center}
 \end{frame}
 
@@ -313,7 +323,7 @@
 
 \begin{frame}
   \frametitle{Testbedingungen: gt Scaffolder vs. SGA Scaffold}
-  \begin{itemize} %SK: Anzahl der Contigs
+  \begin{itemize}
     \item Referenzsequenzen
     \begin{itemize}
       \item \textit{S. cerevisiae}       \tabto{3.5cm}~~12 Mbp \tabto{5cm} Ensembl R64-1-1
@@ -336,7 +346,7 @@
   \frametitle{Pipeline: gt Scaffolder vs. SGA Scaffold}
   \begin{columns}
     \begin{column}{.45\textwidth}
-      \footnotesize \textbf{SGA Pipeline:}\\SGA (C++, Python, Perl)\\Abyss (C++)\\Samtools (C)\\~\\
+      \footnotesize \textbf{SGA Pipeline:}\\SGA (C++, Python, Perl)\\Abyss (C++), BWA (C)\\Samtools (C)\\~\\
     \end{column}
     \begin{column}{.45\textwidth}
      \footnotesize \textbf{gt Pipeline:}\\GenomeTools (C)
