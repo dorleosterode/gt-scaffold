@@ -21,9 +21,7 @@
 #include <string.h>
 
 #include "core/init_api.h"
-#include "core/logger.h"
 #include "core/types_api.h"
-#include "extended/assembly_stats_calculator.h"
 
 #include "gt_scaffolder_graph.h"
 #include "gt_scaffolder_algorithms.h"
@@ -153,29 +151,24 @@ int main(int argc, char **argv)
 
       if (had_err == 0) {
         GtUword i;
+        GtStr *ids, *seq;
         GtScaffolderGraphRecord *rec;
-        GtLogger *logger;
-        GtArray *recs;
-        GtAssemblyStatsCalculator *scaf_stats =
-                                      gt_assembly_stats_calculator_new();
-
-        recs = gt_scaffolder_graph_iterate_scaffolds(graph, scaf_stats);
+        GtArray *recs = gt_scaffolder_graph_iterate_scaffolds(graph);
 
         gt_scaffolder_graph_write_scaffold(recs, "gt_scaffolder_new_write.scaf",
           err);
 
-	for (i = 0; i < gt_array_size(recs); i++) {
-	  rec = *(GtScaffolderGraphRecord **) gt_array_get(recs, i);
-	  gt_scaffolder_graph_record_delete(rec);
-	}
-	gt_array_delete(recs);
-
-        logger = gt_logger_new(true, "[scaffolder] ", stderr);
-        gt_assembly_stats_calculator_nstat(scaf_stats, 50);
-        gt_assembly_stats_calculator_show(scaf_stats, logger);
-
-        gt_logger_delete(logger);
-        gt_assembly_stats_calculator_delete(scaf_stats);
+        ids = gt_str_new();
+        for (i = 0; i < gt_array_size(recs); i++) {
+          rec = *(GtScaffolderGraphRecord **) gt_array_get(recs, i);
+          gt_str_reset(ids);
+          seq = gt_scaffolder_graph_generate_string(rec, ids);
+          gt_str_delete(seq);
+          /* deleting all recs after stringgeneration */
+          gt_scaffolder_graph_record_delete(rec);
+        }
+        gt_array_delete(recs);
+        gt_str_delete(ids);
       }
 
       if (had_err != 0)
@@ -197,7 +190,8 @@ int main(int argc, char **argv)
 
       /* read paired information from bam file */
       had_err = gt_scaffolder_bamparser_read_paired_information(dist,
-            bam_filename, hist_filename, MIN_DIST, MAX_DIST, MIN_QUAL,
+            bam_filename, hist_filename, MIN_DIST,
+            MAX_DIST, MIN_QUAL,
             MIN_NOF_PAIRS, MIN_REF_LENGTH, MIN_ALIGN, err);
 
       /* print distance records */

@@ -6,6 +6,7 @@
 #include <float.h>
 #include <string.h>
 
+#include "core/unused_api.h"
 #include "core/alphabet_api.h"
 #include "core/minmax.h"
 #include "core/error.h"
@@ -42,6 +43,11 @@ struct GtSamfileIterator {
   GtUword   ref_count;
 };
 
+typedef struct ReadInfo {
+  bool isreverse;
+  GtUword isize;
+} ReadInfo;
+
 /* data type for saving information about
    reads aligned to some contig  */
 typedef struct Read {
@@ -61,9 +67,11 @@ typedef struct ReadSet {
 
 typedef struct FragmentData {
   GtWord *frag_pos;
-  GtWord *frag_size;
-  GtUword nof;
-  GtUword size;
+  GtUword *frag_size;
+  GtUword nof_frag_pos;
+  GtUword size_frag_pos;
+  GtUword nof_frag_size;
+  GtUword size_frag_size;
   GtUword ma;
 } FragmentData;
 
@@ -225,7 +233,7 @@ static void add_contig_dist_record(DistRecords *dist_records,
 static int compare_read_order(const void *a,
                               const void *b)
 {
-  int return_val = 0;
+  int return_val;
   Read *read_a = (Read*) a;
   Read *read_b = (Read*) b;
 
@@ -255,60 +263,6 @@ static void init_histogram(HistogramData *histogram_data) {
                         * histogram_data->size);
   histogram_data->values = gt_malloc(sizeof (*histogram_data->values)
                         * histogram_data->size);
-}
-
-/* create histogram based on fragment distribution */
-static void create_histogram_from_dist(FragmentData fragment_data,
-                                       GtWord factor,
-                                       HistogramData *histogram_data) {
-  GtWord sum, *size, new_size,min, max;
-  GtUword *value;
-
-  sum = 0;
-  min = GT_WORD_MAX;
-  max = GT_WORD_MIN;
-
-  /* iterate over fragment sizes */
-  for (size = fragment_data.frag_size;
-       size < fragment_data.frag_size + fragment_data.nof; size++) {
-
-    /* resize histogram hashmap  */
-    if (histogram_data->nof_pairs == histogram_data->size) {
-      histogram_data->size += 100;
-      histogram_data->values = gt_realloc(histogram_data->values,
-                     sizeof (*histogram_data->values) * histogram_data->size);
-      histogram_data->keys = gt_realloc(histogram_data->keys,
-                     sizeof (*histogram_data->keys) * histogram_data->size);
-    }
-
-    /* fill histogram hash map */
-    new_size = *size - factor;
-    value = gt_hashmap_get(histogram_data->hash_map, &new_size);
-    if (value == NULL) {
-      histogram_data->values[histogram_data->nof_pairs] = 1;
-      histogram_data->keys[histogram_data->nof_pairs] = new_size;
-      gt_hashmap_add(histogram_data->hash_map,
-                     histogram_data->keys + histogram_data->nof_pairs,
-                     histogram_data->values + histogram_data->nof_pairs);
-      histogram_data->nof_pairs++;
-    }
-    else
-      (*value)++;
-
-    sum += *size;
-
-    if (min > new_size)
-      min = new_size;
-    if (max < new_size)
-      max = new_size;
-
-  }
-
-  /* save mean */
-  histogram_data->mean = (double)sum / fragment_data.nof;
-  histogram_data->value_sum = fragment_data.nof;
-  histogram_data->min = min;
-  histogram_data->max = max;
 }
 
 static void calc_stat_of_histogram(HistogramData *histogram_data) {
@@ -504,8 +458,8 @@ static int create_histogram_from_file(const char *file_name,
         break;
       }
     }
+    fclose(file);
   }
-  fclose(file);
 
   histogram_data->lib_rf = nof_fr < nof_rf;
   histogram_data->value_sum = value_sum;
@@ -569,52 +523,56 @@ static double window(GtWord x1,
   return (double)return_val / x1;
 }
 
-/* callback function */
-static int compare_pmf_histogram(void *key,
-                                 void *value,
-                                 void *data,
-                                 GtError *err) {
-  GtWord *key_2 = (GtWord*) key;
-  GtUword *value_2 = (GtUword*) value;
-  CompareData *compare_data = (CompareData*) data;
-  double pmf_prob;
-  int had_err = 0;
-  GtWord index = *key_2 + compare_data->dist;
-
-  /* OBSTACLE: behavior for negative index ambiguously described */
-  if (index >= 0 && index < compare_data->pmf_data.nof)
-    pmf_prob = compare_data->pmf_data.dist[index];
-  else
-    pmf_prob = compare_data->pmf_data.minp;
-
-  compare_data->likelihood += *value_2 * log(pmf_prob);
-
-  if (pmf_prob > compare_data->pmf_data.minp)
-    compare_data->nof_pairs += *value_2;
-
-  if (pmf_prob < 0) {
-    gt_error_set (err , " negative probability ");
-    had_err = -1;
-  }
-
-  return had_err;
-}
-
-/* callback function */
-static int compare_order(const void *a,
-                         const void *b) {
-  GtWord *key_1 = (GtWord*) a;
-  GtWord *key_2 = (GtWord*) b;
+/* sort fragment sizes */
+static int compare_fragments(const void *a,
+                             const void *b) {
+  GtUword *fragment_a = (GtUword*) a;
+  GtUword *fragment_b = (GtUword*) b;
   int return_val;
 
-  if (*key_1 > *key_2)
-    return_val = 1;
-  else if (*key_1 < *key_2)
+  if (*(fragment_a+1) - *fragment_a < *(fragment_b+1) - *fragment_b)
     return_val = -1;
+  else if (*(fragment_a+1) - *fragment_a > *(fragment_b+1) - *fragment_b)
+    return_val = 1;
   else
     return_val = 0;
 
   return return_val;
+}
+
+/* calculate fragment size distribution */
+static void calculate_fragment_dist(FragmentData *fragment_data,
+                                    GtWord factor) {
+  GtUword size, index, next_free;
+
+  qsort(fragment_data->frag_pos, fragment_data->nof_frag_pos,
+        sizeof (GtUword)*2, compare_fragments);
+
+  fragment_data->nof_frag_size = 0;
+
+  for (index = 0; index < fragment_data->nof_frag_pos; index++) {
+    size = fragment_data->frag_pos[(index*2)+1] -
+           fragment_data->frag_pos[index*2];
+
+    /* resize fragment array */
+    if (fragment_data->nof_frag_size == fragment_data->size_frag_size) {
+      fragment_data->size_frag_size += 100;
+      fragment_data->frag_size = gt_realloc(fragment_data->frag_size,
+                                 sizeof (*(fragment_data->frag_size)) *
+                                 fragment_data->size_frag_size * 2);
+    }
+
+    if (index == 0 ||
+       (index > 0 && (size != (fragment_data->frag_pos[((index-1)*2)+1] -
+                               fragment_data->frag_pos[(index-1)*2])))) {
+      next_free = fragment_data->nof_frag_size * 2;
+      fragment_data->frag_size[next_free] = size - factor;
+      fragment_data->frag_size[next_free+1] = 1;
+      fragment_data->nof_frag_size++;
+    }
+    else
+      fragment_data->frag_size[next_free+1]++;
+  }
 }
 
 /* compute the log likelihood that these samples came from the
@@ -622,21 +580,36 @@ static int compare_order(const void *a,
 static int compute_likelihood(double *likelihood,
                               GtUword *nof_pairs,
                               GtWord theta,
-                              HistogramData histogram_data,
+                              FragmentData fragment_data,
                               PmfData pmf_data,
                               GtError *err)
 {
-  CompareData compare_data;
   int had_err = 0;
+  GtUword index;
+  GtWord new_frag_size;
+  double pmf_prob;
 
-  compare_data.likelihood = 0;
-  compare_data.nof_pairs = 0;
-  compare_data.pmf_data = pmf_data;
-  compare_data.dist = theta;
-  had_err = gt_hashmap_foreach_ordered(histogram_data.hash_map,
-            compare_pmf_histogram, &compare_data, compare_order, err);
-  *likelihood = compare_data.likelihood;
-  *nof_pairs = compare_data.nof_pairs;
+  /* iterate over fragment sizes */
+  for (index = 0; index < fragment_data.nof_frag_size; index++) {
+    new_frag_size = fragment_data.frag_size[index*2] + theta;
+
+    /* OBSTACLE: behavior for negative index ambiguously described */
+    if (new_frag_size >= 0 && new_frag_size < pmf_data.nof)
+      pmf_prob = pmf_data.dist[new_frag_size];
+    else
+      pmf_prob = pmf_data.minp;
+
+    *likelihood += fragment_data.frag_size[(index*2)+1] * log(pmf_prob);
+
+    if (pmf_prob > pmf_data.minp)
+      *nof_pairs += fragment_data.frag_size[(index*2)+1];
+
+    if (pmf_prob < 0) {
+      gt_error_set (err , " negative probability ");
+      had_err = -1;
+      break;
+    }
+  }
 
   return had_err;
 }
@@ -645,18 +618,21 @@ static int maximum_likelihood_estimate(GtWord *dist,
                                        GtUword *nof_pairs,
                                        GtWord min_dist,
                                        GtWord max_dist,
-                                       HistogramData histogram_data,
+                                       FragmentData fragment_data,
                                        PmfData pmf_data,
                                        GtUword len_ref,
                                        GtUword len_mref,
                                        GtError *err) {
   int had_err = 0;
-  GtUword best_n = 0, n;
-  GtWord best_theta = min_dist, index, theta;
+  GtUword best_n = 0, n, min_frag_size, max_frag_size, index;
+  GtWord best_theta = min_dist, theta;
   double pmf_prob, best_likelihood = (double)GT_WORD_MIN, c, likelihood;
 
-  min_dist = MAX(min_dist, 0 - histogram_data.max);
-  max_dist = MIN(max_dist, pmf_data.nof - histogram_data.min - 1);
+  min_frag_size = fragment_data.frag_size[0];
+  max_frag_size = fragment_data.frag_size[(fragment_data.nof_frag_size-1)*2];
+
+  min_dist = MAX(min_dist, 0 - min_frag_size);
+  max_dist = MIN(max_dist, pmf_data.nof - max_frag_size - 1);
 
   for (theta = min_dist; theta <= max_dist; theta++) {
   /* Calculate the normalizing constant of the PMF, f_theta(x) */
@@ -672,12 +648,15 @@ static int maximum_likelihood_estimate(GtWord *dist,
       c += pmf_prob * window(len_ref, len_mref, index - theta);
     }
 
-    had_err = compute_likelihood(&likelihood, &n, theta, histogram_data,
+    likelihood = 0;
+    n = 0;
+    had_err = compute_likelihood(&likelihood, &n, theta, fragment_data,
               pmf_data, err);
     if (had_err != 0)
       break;
 
-    likelihood -= histogram_data.value_sum * log(c);
+    likelihood -= fragment_data.nof_frag_pos * log(c);
+
     if (n > 0 && likelihood > best_likelihood) {
       best_likelihood = likelihood;
       best_theta = theta;
@@ -701,7 +680,6 @@ static int estimate_dist_using_mle(GtWord *dist,
                                    GtUword len_ref,
                                    GtUword len_mref,
                                    bool rf,
-                                   HistogramData histogram_data,
                                    GtError *err) {
 
   int had_err = 0;
@@ -719,25 +697,19 @@ static int estimate_dist_using_mle(GtWord *dist,
 
   /* library is oriented reverse-forward */
   if (rf) {
-    create_histogram_from_dist(fragment_data, 0, &histogram_data);
+    calculate_fragment_dist(&fragment_data, 0);
     had_err = maximum_likelihood_estimate(dist, nof_pairs, min_dist, max_dist,
-                            histogram_data, pmf_data, len_ref, len_mref, err);
+                            fragment_data, pmf_data, len_ref, len_mref, err);
 
   }
   /* library is oriented forward-reverse */
   /* Subtract 2*(l-1) from each sample */
   else {
-    create_histogram_from_dist(fragment_data, 2 * (fragment_data.ma - 1),
-                               &histogram_data);
+    calculate_fragment_dist(&fragment_data, 2 * (fragment_data.ma - 1));
     had_err = maximum_likelihood_estimate(dist, nof_pairs, min_dist, max_dist,
-                             histogram_data, pmf_data, len_ref, len_mref, err);
+                             fragment_data, pmf_data, len_ref, len_mref, err);
     *dist = MAX(min_dist, *dist - 2 * (GtWord)(fragment_data.ma - 1));
   }
-
-  /* reset hashmap */
-  gt_hashmap_reset(histogram_data.hash_map);
-  histogram_data.nof_pairs = 0;
-  histogram_data.value_sum = 0;
 
   return had_err;
 }
@@ -794,7 +766,8 @@ int estimate_dist_using_mean(FragmentData fragment_data,
 
 /* calculate provisional fragment size as if the contigs
    were perfectly adjacent with no overlap or gap and
-   save only fragment size if start and end point are unique */
+   save only fragment size if combination of start and
+   end point are unique */
 static void calculate_fragment(GtUword start_read,
                                bool read_reverse,
                                GtUword start_mread,
@@ -826,18 +799,18 @@ static void calculate_fragment(GtUword start_read,
   }
 
   /* resize fragment array */
-  if (fragment_data->nof == fragment_data->size) {
-    fragment_data->size += 100;
+  if (fragment_data->nof_frag_pos == fragment_data->size_frag_pos) {
+    fragment_data->size_frag_pos += 100;
     fragment_data->frag_pos = gt_realloc(fragment_data->frag_pos,
-           sizeof (*(fragment_data->frag_pos)) * fragment_data->size * 2);
-    fragment_data->frag_size = gt_realloc(fragment_data->frag_size,
-           sizeof (*(fragment_data->frag_size)) * fragment_data->size);
+           sizeof (*(fragment_data->frag_pos)) *
+                  fragment_data->size_frag_pos * 2);
   }
 
   /* check if fragment already exists */
   found = false;
   for (pair = fragment_data->frag_pos;
-       pair < fragment_data->frag_pos + (fragment_data->nof * 2); pair += 2) {
+       pair < fragment_data->frag_pos + (fragment_data->nof_frag_pos * 2);
+       pair += 2) {
     if (*pair == start_frag && *(pair+1) == end_frag) {
       found = true;
       break;
@@ -847,11 +820,9 @@ static void calculate_fragment(GtUword start_read,
   /* save fragment size with unique start and end point */
   if (!found) {
     size = end_frag - start_frag;
-    fragment_data->frag_pos[fragment_data->nof * 2] = start_frag;
-    fragment_data->frag_pos[(fragment_data->nof * 2) + 1] = end_frag;
-    fragment_data->frag_size[fragment_data->nof] = size;
-
-    fragment_data->nof++;
+    fragment_data->frag_pos[fragment_data->nof_frag_pos * 2] = start_frag;
+    fragment_data->frag_pos[(fragment_data->nof_frag_pos * 2) + 1] = end_frag;
+    fragment_data->nof_frag_pos++;
 
     if (!rf && size <= 2 * (GtWord)(fragment_data->ma - 1)) {
       align = size / 2;
@@ -881,6 +852,12 @@ int32_t gt_sam_alignment_mate_ref_num(GtSamAlignment *bam_align)
 GtUword gt_sam_alignment_insert_size(GtSamAlignment *bam_align) {
   gt_assert(bam_align != NULL);
   return (GtUword) bam_align->s_alignment->core.isize;
+}
+
+GtUword gt_sam_alignment_query_length(GtSamAlignment *sam_alignment)
+{
+  gt_assert(sam_alignment != NULL);
+  return (GtUword) sam_alignment->s_alignment->core.l_qname;
 }
 
 /* check if read pair is valid */
@@ -974,7 +951,6 @@ static int analyze_read_set(DistRecords *dist_records,
                            PmfData pmf_data,
                            bool rf,
                            GtSamfileIterator *bam_iterator,
-                           HistogramData histogram_data,
                            GtError *err) {
   GtUword nof_pairs, len_ref, len_mref = 0, index;
   GtWord dist;
@@ -1006,11 +982,10 @@ static int analyze_read_set(DistRecords *dist_records,
 
       nof_pairs = 0;
       /* calculate distance and nof pairs */
-      if (fragment_data.nof >= min_nof_pairs)
+      if (fragment_data.nof_frag_pos >= min_nof_pairs)
         had_err = estimate_dist_using_mle(&dist, &nof_pairs, min_dist,
                                          max_dist, fragment_data, pmf_data,
-                                         len_ref, len_mref, rf,
-                                         histogram_data, err);
+                                         len_ref, len_mref, rf, err);
 
       /* save record */
       if (nof_pairs >= min_nof_pairs) {
@@ -1025,7 +1000,7 @@ static int analyze_read_set(DistRecords *dist_records,
       }
 
       /* reset fragment array */
-      fragment_data.nof = 0;
+      fragment_data.nof_frag_pos = 0;
     }
 
     len_mref = gt_samfile_iterator_reference_length(bam_iterator,
@@ -1041,11 +1016,10 @@ static int analyze_read_set(DistRecords *dist_records,
 
   nof_pairs = 0;
   /* calculate distance and nof pairs */
-  if (fragment_data.nof >= min_nof_pairs)
+  if (fragment_data.nof_frag_pos >= min_nof_pairs)
     had_err = estimate_dist_using_mle(&dist, &nof_pairs, min_dist,
                                          max_dist, fragment_data, pmf_data,
-                                         len_ref, len_mref, rf,
-                                         histogram_data, err);
+                                         len_ref, len_mref, rf, err);
 
   /* save record */
   if (nof_pairs >= min_nof_pairs) {
@@ -1060,7 +1034,7 @@ static int analyze_read_set(DistRecords *dist_records,
   }
 
   /* reset fragment array */
-  fragment_data.nof = 0;
+  fragment_data.nof_frag_pos = 0;
 
   return had_err;
 }
@@ -1080,7 +1054,7 @@ int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
   GtUword last_ref_id;
   bool rf;
   FragmentData fragment_data;
-  HistogramData histogram_data, histogram_data_2;
+  HistogramData histogram_data;
   PmfData pmf_data;
   ReadSet readset;
   GtSamfileIterator *bam_iterator;
@@ -1096,17 +1070,19 @@ int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
   readset.read = gt_malloc(sizeof (*readset.read) * readset.size);
 
   /* create fragment array */
-  fragment_data.nof = 0;
-  fragment_data.size = 100;
+  fragment_data.nof_frag_pos = 0;
+  fragment_data.size_frag_pos = 100;
   fragment_data.frag_pos = gt_malloc(sizeof (*(fragment_data.frag_pos))
-                        * fragment_data.size * 2);
-  fragment_data.frag_size = gt_malloc(sizeof (*(fragment_data.frag_pos))
-                        * fragment_data.size);
+                        * fragment_data.size_frag_pos * 2);
+  fragment_data.nof_frag_size = 0;
+  fragment_data.size_frag_size = 100;
+  fragment_data.frag_size = gt_malloc(sizeof (*(fragment_data.frag_size))
+                        * fragment_data.size_frag_size * 2);
 
   /* initialize histogram and create histogram based on hist-file */
   init_histogram(&histogram_data);
-  init_histogram(&histogram_data_2);
   had_err = create_histogram_from_file(hist_filename, &histogram_data, err);
+
   /* create probability mass function (pmf) based on histogram */
   pmf_data = create_pmf(histogram_data);
 
@@ -1134,7 +1110,7 @@ int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
         readset.nof != 0) {
       had_err = analyze_read_set(dist, readset, min_nof_pairs,
                 min_dist, max_dist, fragment_data, pmf_data, rf,
-                bam_iterator, histogram_data_2, err);
+                bam_iterator, err);
       readset.nof = 0;
     }
 
@@ -1174,21 +1150,18 @@ int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
   if (readset.nof != 0) {
     had_err = analyze_read_set(dist, readset, min_nof_pairs,
               min_dist, max_dist, fragment_data, pmf_data, rf,
-              bam_iterator, histogram_data_2, err);
+              bam_iterator, err);
   }
 
   /* clean up */
   gt_sam_alignment_delete(bam_align);
   gt_samfile_iterator_delete(bam_iterator);
   gt_hashmap_delete(histogram_data.hash_map);
-  gt_hashmap_delete(histogram_data_2.hash_map);
   gt_alphabet_delete(alpha);
 
   gt_free(readset.read);
   gt_free(histogram_data.keys);
   gt_free(histogram_data.values);
-  gt_free(histogram_data_2.keys);
-  gt_free(histogram_data_2.values);
   gt_free(fragment_data.frag_pos);
   gt_free(fragment_data.frag_size);
   gt_free(pmf_data.dist);

@@ -1095,7 +1095,8 @@ static bool gt_scaffolder_graph_graph_resolve(GtScaffolderGraphEdge *edge,
   i = (GtUword) gt_hashmap_get(contigs, gt_str_get(edge->start->header_seq));
   j = (GtUword) gt_hashmap_get(contigs, gt_str_get(edge->end->header_seq));
 
-  found = gt_strgraph_traverse_from_to(strgraph, encseq, i, j, edge->dist, edge->sense, resv_seq);
+  found = gt_strgraph_traverse_from_to(strgraph, encseq, i, j,
+          edge->dist, edge->sense, resv_seq);
 
   return found;
 }
