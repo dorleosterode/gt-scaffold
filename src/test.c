@@ -164,11 +164,11 @@ int main(int argc, char **argv)
         gt_scaffolder_graph_write_scaffold(recs, "gt_scaffolder_new_write.scaf",
           err);
 
-	for (i = 0; i < gt_array_size(recs); i++) {
-	  rec = *(GtScaffolderGraphRecord **) gt_array_get(recs, i);
-	  gt_scaffolder_graph_record_delete(rec);
-	}
-	gt_array_delete(recs);
+        for (i = 0; i < gt_array_size(recs); i++) {
+          rec = *(GtScaffolderGraphRecord **) gt_array_get(recs, i);
+          gt_scaffolder_graph_record_delete(rec);
+        }
+        gt_array_delete(recs);
 
         logger = gt_logger_new(true, "[scaffolder] ", stderr);
         gt_assembly_stats_calculator_nstat(scaf_stats, 50);
