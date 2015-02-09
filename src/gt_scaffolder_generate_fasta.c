@@ -325,6 +325,8 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
                                           GT_READMODE_FORWARD);
         }
 
+	GT_FREEARRAY(&contig_seq, char);
+
         next_seq = gt_str_new_cstr(contig_seq.spacechar);
 
         if (!rel_comp) {
