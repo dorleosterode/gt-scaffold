@@ -16,8 +16,6 @@
 */
 
 #include "core/array_api.h"
-#include "core/encseq_api.h"
-#include "match/rdj-strgraph.h"
 
 #include "gt_scaffolder_graph.h"
 #include "extended/assembly_stats_calculator.h"
@@ -79,12 +77,5 @@ GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
 void gt_scaffolder_makescaffold(GtScaffolderGraph *graph);
 
 void gt_scaffolder_removecycles(GtScaffolderGraph *graph);
-
-/* generates the fasta-string for the given scaffold-record */
-GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
-                                           GtStr *ids,
-                                           GtStrgraph *strgraph,
-                                           GtEncseq *encseq,
-                                           GtHashmap *contigs);
 
 #endif
