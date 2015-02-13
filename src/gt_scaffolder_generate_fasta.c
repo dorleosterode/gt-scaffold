@@ -56,6 +56,10 @@ static char complement_base(char c) {
     case 'T': return 'A';
     case 'C': return 'G';
     case 'G': return 'C';
+    case 'a': return 't';
+    case 't': return 'a';
+    case 'c': return 'g';
+    case 'g': return 'c';
     default: return 'N';
   }
 }
@@ -126,7 +130,7 @@ static bool gt_scaffolder_graph_overlap_resolve(GtScaffolderGraphEdge *edge,
                                                 GtStr *seq,
                                                 GtStr *next_seq,
                                                 GtStr *resv_seq,
-                                                GtUword max_edist,
+                                                GT_UNUSED GtUword max_edist,
                                                 GtUword min_length) {
   GtUword upper_bound;
   /* 500 is used in sga (Algorithms/OverlapTools)*/
@@ -152,8 +156,11 @@ static bool gt_scaffolder_graph_overlap_resolve(GtScaffolderGraphEdge *edge,
     if (align_len > max_alignment_length)
       return false;
 
-    max_error = max_edist /
-                  (float) MAX( gt_str_length(seq), gt_str_length(next_seq) );
+    /* max_error = max_edist / */
+    /*               (float) MAX( gt_str_length(seq), gt_str_length(next_seq) ); */
+
+    /* TODO: test the max error rate of sga */
+    max_error = 0.05;
 
     /* initialize data for callback */
     data.best_dist = GT_UWORD_MAX;
@@ -205,19 +212,15 @@ static void gt_scaffolder_graph_introduce_gap(GtScaffolderGraphEdge *edge,
   /* overlap couldn't be resolved */
   if (edge->dist < 0) {
     GtWord overlap = edge->dist * -1;
-    /* TODO: this assertion does not hold at the moment, because
-       next_seq_len is 0! */
-    if (next_seq_len >= overlap) {
-      GtUword rest_len = next_seq_len - overlap;
-      GtUword len = min_gap_length + rest_len + 1;
-      seq = gt_malloc(len * sizeof (*seq));
+    GtUword rest_len = next_seq_len - overlap;
+    GtUword len = min_gap_length + rest_len + 1;
+    seq = gt_malloc(len * sizeof (*seq));
 
-      memset(seq, 'N', min_gap_length);
+    memset(seq, 'N', min_gap_length);
 
-      memcpy(seq + min_gap_length, next_cseq + overlap, rest_len + 1);
+    memcpy(seq + min_gap_length, next_cseq + overlap, rest_len + 1);
 
-      gt_assert(seq[len-1] == '\0');
-    }
+    gt_assert(seq[len-1] == '\0');
   }
   else {
     GtUword gap_len = MAX(edge->dist, min_gap_length);
@@ -235,21 +238,15 @@ static void gt_scaffolder_graph_introduce_gap(GtScaffolderGraphEdge *edge,
   gt_free(seq);
 }
 
-GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
-                                           GtStr *ids,
-                                           GtStrgraph *strgraph,
-                                           GtEncseq *encseq,
-                                           GtHashmap *contigs) {
-  /* SK: Filepointer statt String-Objekt verwenden */
-  GtStr *seq, *root_id;
-  GtArray *id_array;
-  GtUword pos, nof_chars, seqnum, l;
+static void gt_scaffolder_graph_get_sequence(GtEncseq *encseq,
+                                             GtUword seqnum,
+                                             GtStr *seq) {
+
+  GtUword pos, nof_chars, l;
   GtUword inc = 16384;
   GtArraychar contig_seq;
+  char *seq_cstr;
 
-  /* initialize seq with gt_str of the root-node of rec. we need
-     the sequence for that */
-  seqnum = (GtUword) gt_hashmap_get(contigs, gt_str_get(rec->root->header_seq));
   pos = gt_encseq_seqstartpos(encseq, seqnum);
   nof_chars = gt_encseq_seqlength(encseq, seqnum);
   GT_INITARRAY(&contig_seq, char);
@@ -260,12 +257,34 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
                                     GT_READMODE_FORWARD);
   }
 
-  seq = gt_str_new_cstr(contig_seq.spacechar);
-
+  seq_cstr = gt_malloc(sizeof (*seq_cstr) * (contig_seq.nextfreechar + 1));
+  memcpy(seq_cstr, contig_seq.spacechar, contig_seq.nextfreechar);
+  seq_cstr[contig_seq.nextfreechar] = '\0';
+  gt_str_set(seq, seq_cstr);
+  gt_free(seq_cstr);
   GT_FREEARRAY(&contig_seq, char);
+}
+
+GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
+                                           GtStr *ids,
+                                           GT_UNUSED GtStrgraph *strgraph,
+                                           GtEncseq *encseq,
+                                           GtHashmap *contigs) {
+  GtStr *seq, *root_id;
+  GtArray *id_array;
+  GtUword seqnum;
+
+  /* initialize seq with gt_str of the root-node of rec. we need
+     the sequence for that */
+  seqnum = (GtUword) gt_hashmap_get(contigs, gt_str_get(rec->root->header_seq));
+
+  seq = gt_str_new();
+
+  gt_scaffolder_graph_get_sequence(encseq, seqnum, seq);
 
   id_array = gt_array_new(sizeof (GtStr *));
   root_id = gt_str_clone(rec->root->header_seq);
+  gt_str_append_char(root_id, '+');
   gt_array_add(id_array, root_id);
 
   if (gt_array_size(rec->edges) > 0) {
@@ -278,6 +297,7 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
     bool rel_comp = true;
     bool prev_comp = true;
 
+    /* set root direction */
     edge = *(GtScaffolderGraphEdge **)gt_array_get(rec->edges, 0);
     root_dir = edge->sense;
 
@@ -310,29 +330,17 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
 
       /* check if the contigs overlap and resolve the overlap */
       if (!resolved) {
-        GtStr *next_seq;
+        GtStr *next_seq = gt_str_new();
 
         /* get the sequence of edge->end.  maybe this initialization
            is not needed! */
         seqnum = (GtUword) gt_hashmap_get(contigs, edge->end->header_seq);
-        pos = gt_encseq_seqstartpos(encseq, seqnum);
-        nof_chars = gt_encseq_seqlength(encseq, seqnum);
-        GT_INITARRAY(&contig_seq, char);
-        for (l = 0; l < nof_chars; l++, pos++) {
-          char *c;
-          GT_GETNEXTFREEINARRAY(c, &contig_seq, char, inc);
-          *c = gt_encseq_get_decoded_char(encseq, pos,
-                                          GT_READMODE_FORWARD);
-        }
 
-	GT_FREEARRAY(&contig_seq, char);
+        gt_scaffolder_graph_get_sequence(encseq, seqnum, next_seq);
 
-        next_seq = gt_str_new_cstr(contig_seq.spacechar);
-
-        if (!rel_comp) {
-          /* reverse complement the sequence */
+        /* reverse complement the sequence */
+        if (!rel_comp)
           gt_scaffolder_graph_reverse_complement_gt_str(next_seq);
-        }
 
         if (!root_dir)
           gt_scaffolder_graph_reverse_gt_str(next_seq);
@@ -347,10 +355,11 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
         }
 
         /* introduce a gap between the contigs */
-        if (!resolved)
-          gt_scaffolder_graph_introduce_gap(edge, 10, next_seq, resv_seq);
+        if (!resolved) {
+          /* TODO: calculate min_gap_length */
+          gt_scaffolder_graph_introduce_gap(edge, 25, next_seq, resv_seq);
+        }
 
-        /* (void)gt_scaffolder_graph_introduce_gap; */
         gt_str_delete(next_seq);
       }
 
@@ -417,10 +426,10 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
  */
 
 int gt_scaffolder_graph_generate_fasta(char *contig_file,
-				       char *spm_file,
-				       char *fasta_file,
-				       GtArray *recs,
-				       GtError *err) {
+                                       char *spm_file,
+                                       char *fasta_file,
+                                       GtArray *recs,
+                                       GtError *err) {
 
   int had_err;
 
@@ -477,33 +486,42 @@ int gt_scaffolder_graph_generate_fasta(char *contig_file,
       GtHashmap *contigs = gt_hashmap_new(GT_HASH_STRING, gt_free_func, NULL);
 
       for (seq_num = 0; seq_num < gt_encseq_num_of_sequences(encseq); seq_num ++) {
-	desc = gt_encseq_description(encseq, &desc_len, seq_num);
+        desc = gt_encseq_description(encseq, &desc_len, seq_num);
 
-	memcpy(contig, desc, desc_len);
-	contig[desc_len] = '\0';
+        memcpy(contig, desc, desc_len);
+        contig[desc_len] = '\0';
 
-	gt_hashmap_add(contigs, gt_cstr_dup(contig), (void *) seq_num);
+        gt_hashmap_add(contigs, gt_cstr_dup(contig), (void *) seq_num);
       }
 
 
       out = gt_file_new(fasta_file, "w", err);
 
       if (out == NULL)
-	return -1;
+        return -1;
 
       ids = gt_str_new();
-      for (i = 0; i < gt_array_size(recs); i++) {
-	rec = *(GtScaffolderGraphRecord **) gt_array_get(recs, i);
-	gt_str_set(ids, "> ");
-	seq = gt_scaffolder_graph_generate_string(rec, ids, strgraph, encseq, contigs);
-	/* TODO: write seq to fasta file */
-	gt_file_xfputs(gt_str_get(ids), out);
-	gt_file_xfputs("\n", out);
-	gt_file_xfputs(gt_str_get(seq), out);
-	gt_file_xfputs("\n", out);
+      /* need the mirrored sequence to generate the sequence of the
+         traversed strgraph */
+      had_err = gt_encseq_mirror(encseq, err);
 
-	gt_str_delete(seq);
-	/* deleting all recs after stringgeneration */
+      /* TODO: clean-up before return! */
+      if (had_err != 0)
+        return had_err;
+
+      for (i = 0; i < gt_array_size(recs); i++) {
+        rec = *(GtScaffolderGraphRecord **) gt_array_get(recs, i);
+        gt_str_set(ids, "> ");
+        seq = gt_scaffolder_graph_generate_string(rec, ids, strgraph, encseq, contigs);
+        /* write seq to fasta file */
+        gt_file_xfputs(gt_str_get(ids), out);
+        gt_file_xfputs("\n", out);
+        /* TODO: print 80 chars per line */
+        gt_file_xfputs(gt_str_get(seq), out);
+        gt_file_xfputs("\n", out);
+
+        gt_str_delete(seq);
+        /* deleting all recs after stringgeneration */
       }
       gt_str_delete(ids);
 
