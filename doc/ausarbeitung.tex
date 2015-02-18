@@ -1,0 +1,110 @@
+\documentclass[a4paper,10pt,parskip]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{siunitx}
+\usepackage{epsfig}
+\usepackage{tikz}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{graphicx}
+\usepackage{placeins}
+
+\usetikzlibrary{shapes.geometric, calc}
+
+\title{Projektausarbeitung \\\vspace{.5cm} \large gt Scaffolder: Eine Scaffolding-Software}
+
+\author{Dorle Osterode, Lukas Götz \& Stefan Dang}
+\date{}
+
+\begin{document}
+\maketitle{}
+\thispagestyle{empty}
+\begin{abstract}
+  TODO: wollen wir ein abstract haben?
+\end{abstract}
+
+\newpage{}
+\setcounter{page}{1}
+\section{Einleitung}
+TODO: was ist DAS scaffolding Problem?
+
+Nach der Assemblierung von Sequenzen ist das Zielgenom oftmals noch
+nicht vollständig rekonstruiert. Die rekonstruierten Sequenzabschnitte
+(Contigs) sind dabei unabhängig voneinander und die relative Anordnung
+sowie die Orientierung sind unbekannt. Diese Lücken (Gaps) in der
+Zielsequenz entstehen oft durch ungleichmäßige Abdeckung durch die
+Sequenzierung sowie repetitive Teilsequenzen. Durch repetitive
+Teilsequenzen können die Contigs nicht in eine eindeutige Reihenfolge
+gebracht werden.
+
+Durch das Scaffolding nach der Assemblierung sollen die Contigs
+relativ zueinander angeordnet werden, sodass zusätzlich auch die
+Orientierung stimmt. Um dieses Verfahren anwenden zu können müssen
+Distanzinformationen zwischen den Contigs vorhanden sein. Diese
+Informationen stammen normalerweise aus \textit{paired-end}- oder
+\textit{mate-pair}-Sequenzierung.
+
+Beim Scaffolding wird ein Graph zur Repräsentation der Beziehungen
+zwischen den Contigs verwendet. Dieser Graph enthält für jeden Contig
+einen Knoten und es gibt Kanten zwischen zwei Knoten, wenn es ein
+Read-Paar gibt, dass die durch die Knoten repräsentierten Contigs
+verbindet. Die Kanten enthält dabei Informationen über die Distanz und
+die Orientierung.
+
+Nach Huson (2002) (TODO: Zitat) ist das Scaffolding Problem
+NP-vollständig. Dabei ist das Scaffolding die Ermittlung des optimalen
+Pfades (Pfad mit maximalem Kantengewicht) jeder
+Zusammenhangskomponente des Scaffolding-Graphen. Um diese Komplexität
+zu umgehen werden Heuristiken zur Bestimmung eines guten Pfades für
+jede Zusammenhangskomponente verwendet.
+
+\section{Ziel des Projektes und Arbeitsvorgehen}
+\subsection{Ziel des Projektes}
+Ziel des Projektes war die Implementierung und Evaluierung einer
+Scaffolding-Software. Dabei sollten die in der GenomeTools-Bibliothek
+(TODO: referenz) vorhandenen Konzepte und Infrastruktur verwendet
+werden. Zusätzlich sollte die Scaffolding-Software mit den Ausgaben
+des Assemblers ReadJoiner kompatibel sein.
+
+Um diese Ziele zu erreichen wurde der Scaffolder aus der SGA-Pipeline
+(TODO: referenz) als Vorlage verwendet. Dieses Programm wurde
+ausgewählt, da es sehr gute Ergebnisse erzielt (TODO: referenz des
+benchmarking-papers). Da die SGA-Pipeline allerdings viele
+Abhängigkeiten hat und deshalb nicht einfach zu installieren ist und
+zusätzlich die Methodik des Scaffoldings nicht hinreichend
+dokumentiert ist, sollte die Methodik aufgeklärt und der
+Scaffolding-Algorithmus reimplementiert werden.
+
+\subsection{Arbeitsvorgehen}
+Zuerst wurden die verwendeten Datenformate und die Algorithmen
+aufgeklärt. Da diese nicht hinreichend dokumentiert waren, mussten
+diese Informationen aus dem Source-Code extrahiert werden.
+
+Die so erhaltene Vorlage wurde leicht modifiziert, um sowohl Laufzeit
+als auch Speicherplatz einzusparen. Unklarheiten in der Methodik wurden
+dabei weitestgehend erst übernommen, um die Ergebnisse reproduzieren
+zu können.
+
+Diese Algorithmen wurden in der Programmiersprache C
+implementiert. Dabei wurde gt Scaffolder zuerst so designet, dass es
+die gleichen Eingabedateien erforderte wie SGA-Scaffold und die
+gleichen Ausgaben produzierte, damit die Ergebnisse verglichen werden
+konnten.
+
+Um die Implementation zu testen wurden verschiedene Testdaten ausgesucht. (TODO!!!!)
+
+Anhand der Testdaten wurde gt Scaffolder evaluiert. 
+
+\section{Methoden}
+
+\section{Ergebnisse}
+
+\section{Diskussion und Ausblick}
+
+\end{document}
