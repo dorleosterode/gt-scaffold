@@ -260,6 +260,9 @@ static void gt_scaffolder_graph_get_sequence(GtEncseq *encseq,
 
   pos = gt_encseq_seqstartpos(encseq, seqnum);
   nof_chars = gt_encseq_seqlength(encseq, seqnum);
+
+  gt_assert(nof_chars > 0);
+
   GT_INITARRAY(&contig_seq, char);
   for (l = 0; l < nof_chars; l++, pos++) {
     char *c;

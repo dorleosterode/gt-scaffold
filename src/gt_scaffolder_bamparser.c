@@ -249,6 +249,8 @@ static int compare_read_order(const void *a,
     return_val = -1;
   else if (read_a->reverse == read_a->mreverse)
     return_val = 1;
+  else
+    gt_assert(!"reached");
 
   return return_val;
 }

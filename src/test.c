@@ -29,6 +29,7 @@
 #include "gt_scaffolder_algorithms.h"
 #include "gt_scaffolder_parser.h"
 #include "gt_scaffolder_bamparser.h"
+#include "gt_scaffolder_generate_fasta.h"
 
 /* adapted from SGA examples */
 #define MIN_CONTIG_LEN 200
@@ -54,7 +55,7 @@ int main(int argc, char **argv)
   GtError *err;
   GtScaffolderGraph *graph;
   char *contig_filename, *dist_filename, *astat_filename, *hist_filename,
-       *bam_filename;
+    *bam_filename, *spm_filename;
   int had_err = 0;
   DistRecords *dist;
 
@@ -111,15 +112,16 @@ int main(int argc, char **argv)
   }
 
   else if (strcmp(argv[1], "scaffold") == 0) {
-    if (argc != 5) {
+    if (argc != 6) {
       fprintf(stderr, "Usage: <FASTA-file with contigs> <DistEst file> "
-                      "<astat file>\n");
+                      "<astat file> <spm file>\n");
       return EXIT_FAILURE;
     } else {
       graph = NULL;
       contig_filename = argv[2];
       dist_filename = argv[3];
       astat_filename = argv[4];
+      spm_filename = argv[5];
 
       had_err = gt_scaffolder_graph_new_from_file(&graph, contig_filename,
                 MIN_CONTIG_LEN, dist_filename, err);
@@ -164,6 +166,15 @@ int main(int argc, char **argv)
         gt_scaffolder_graph_write_scaffold(recs, "gt_scaffolder_new_write.scaf",
           err);
 
+
+        /* test the new generate_fasta function */
+        had_err = gt_scaffolder_graph_generate_fasta(contig_filename, spm_filename,
+                                                     "generate_fasta.fa", recs, err);
+
+        if (had_err != 0)
+          fprintf(stderr, "%s\n", gt_error_get(err));
+
+
         for (i = 0; i < gt_array_size(recs); i++) {
           rec = *(GtScaffolderGraphRecord **) gt_array_get(recs, i);
           gt_scaffolder_graph_record_delete(rec);
@@ -200,9 +211,11 @@ int main(int argc, char **argv)
             bam_filename, hist_filename, MIN_DIST, MAX_DIST, MIN_QUAL,
             MIN_NOF_PAIRS, MIN_REF_LENGTH, MIN_ALIGN, err);
 
-      /* print distance records */
-      had_err = gt_scaffolder_bamparser_print_dist_records(dist,
-                "gt_scaffolder_bamparser_distance_records.de", err);
+      if (had_err == 0) {
+        /* print distance records */
+        had_err = gt_scaffolder_bamparser_print_dist_records(dist,
+                      "gt_scaffolder_bamparser_distance_records.de", err);
+      }
 
       /* delete distance records */
       gt_scaffolder_bamparser_delete_dist_records(dist);
