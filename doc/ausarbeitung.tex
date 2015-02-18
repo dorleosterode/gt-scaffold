@@ -10,12 +10,13 @@
 \usepackage{siunitx}
 \usepackage{epsfig}
 \usepackage{tikz}
-\usepackage{algpseudocode}
-\usepackage{algorithm}
+\usepackage[lined,algoruled,linesnumbered]{algorithm2e}
+%% \usepackage{algpseudocode}
+%% \usepackage{algorithm}
 \usepackage{graphicx}
 \usepackage{placeins}
 
-\usetikzlibrary{shapes.geometric, calc}
+\usetikzlibrary{shapes.geometric, positioning, calc, shapes, fit, backgrounds}
 
 \title{Projektausarbeitung \\\vspace{.5cm} \large gt Scaffolder: Eine Scaffolding-Software}
 
@@ -99,12 +100,195 @@ konnten.
 
 Um die Implementation zu testen wurden verschiedene Testdaten ausgesucht. (TODO!!!!)
 
-Anhand der Testdaten wurde gt Scaffolder evaluiert. 
+Anhand der Testdaten wurde gt Scaffolder evaluiert.
 
 \section{Methoden}
+\subsection{Übersicht der Schritte}
+
+\begin{figure}
+    \begin{tikzpicture}[every node/.style={font=\footnotesize}]
+    \node[] (input1) {Contigs};
+    \node[left of=input1, xshift=-1cm] (eingabe) {\textbf{Eingabe:}};
+    \node[below of=eingabe, yshift=-5cm] (ausgabe) {\textbf{Ausgabe:}};
+    \node[right of=input1, align=center, xshift=2cm] (input2) {Distanz-\\informationen};
+    \node[right of=input2, xshift=2cm] (input3) {A-Statistik};
+
+    \node[below of=input1, yshift=-.5cm, anchor=west] (titel) {gt Scaffolder};
+    \node[rectangle, draw, anchor=west, below of=titel, xshift=1cm, rounded corners, fill=black!10, yshift=.25cm] (konstruktion) {Konstruktion des Graphen};
+    \node[rectangle, draw, anchor=west, below of=konstruktion, xshift=.95cm, rounded corners, fill=black!10, yshift=.25cm] (selektion) {Selektion relevanter Knoten und Kanten};
+    \node[rectangle, draw, anchor=west, below of=selektion, xshift=.80cm, rounded corners, fill=black!10, yshift=.25cm] (ermittlung) {Ermittlung aller Zusammenhangskomponenten (ZK)};
+    \node[rectangle, draw, anchor=west, below of=ermittlung, xshift=-.65cm, rounded corners, fill=black!10, yshift=.25cm] (pfade) {Bestimmung des besten Pfades für jede ZK};
+
+    \begin{pgfonlayer}{background}
+    \node[draw, fit={(titel) (konstruktion) (selektion) (ermittlung) (pfade)}, rounded corners, fill=black!20] (back) {};
+    \end{pgfonlayer}
+
+    \node[below of=back, yshift=-2cm, xshift=-1.5cm] (output1) {Scaffolds};
+    \node[right of=output1, align=center, xshift=2cm, yshift=-.25cm] (output2) {(rekonstruierte\\Sequenzen)};
+    \node[above of=output1] (dummy) {};
+
+    \path[->, thick]
+    (input1) edge (back)
+    (input2) edge (back)
+    (input3) edge (back)
+    (back) edge (output1)
+    (back) edge (output2);
+  \end{tikzpicture}
+    \caption{\label{abb: gtscaffolder}Schematische Darstellung des Programmablaufs von gt Scaffolder.}
+\end{figure}
+
+In Abbildung \ref{abb: gtscaffolder} ist der Programmablauf von gt
+Scaffolder schematisch dargestellt. (TODO: kurz beschreiben!!!)
+
+\subsection{Eingabe}
+Als Eingabe werden die Contigs im FASTA-Format, die
+Distanzinformationen aus der \textit{paired-end}-
+bzw. \textit{mate-pair}-Sequenzierung und die Astatistik der einzelnen
+Contigs benötigt. gt Scaffolder benötigt dabei die
+Distanzinformationen bezogen auf die Contigs, d.h. die Read-Paare
+müssen zurück auf die Contigs gemappt und daraus die Distanz- sowie
+Orientierungsinformation für die Contigs berechnet worden sein. Die
+Astatistik ist ein statistisches Maß dafür, wie repetitiv eine Sequenz
+ist (TODO: Referenz aus Myers Paper).
+
+\subsection{Graphkonstruktion}
+Aus den Contigs und den Distanzinformationen wird der
+Scaffolding-Graph konstruiert. Dabei wird für jeden Contig, der eine
+Mindestlänge von 200 bp überschreitet und eine Astatistik größer 19
+hat, ein Knoten in den Graph eingefügt. Die Distanzinformationen
+werden genutzt um die Knoten miteinander über Kanten zu
+verbinden. Dabei werden zwischen jedem Knotenpaar, zwischen dessen
+repräsentierten Contigs eine Distanzinformation vorhanden ist, zwei
+Kanten eingefügt, die jeweils Orientierung und Distanz angeben.
+
+\subsection{Selektion relevanter Knoten und Kanten}
+In dem konstruierten Graph werden relevante Knoten und Kanten
+selektiert. Dazu werden nicht relevante Knoten und Kanten markiert und
+im späteren Vorgehen nur unmarkierte Knoten und Kanten betrachtet. Es
+werden folgende Kriterien überprüft:
+\begin{itemize}
+\item Polymorphe Knoten: Zwei Knoten werden gelten als polymorph, wenn
+  diese sich bezüglich eines gemeinsamen Vorgängerknotens nicht
+  eindeutig anordnen lassen. Zusätzlich muss die Kopiezahl beider
+  Knoten gering genug sein. Der Knoten mit der geringeren Kopiezahl
+  wird als polymorph markiert und nicht weiter betrachtet.
+\item Inkonsistente Kanten: Zwei Kanten $e_1$ und $e_2$ gelten als
+  inkonsistent, wenn sich die Endknoten $e_1.end$ und $e_2.end$ bei
+  einer Anordnung bezüglich des gemeinsamen Startknotens $e_1.start =
+  e_2.start$ mit mindestens 400 bp überlappen. Gehen von einem Knoten
+  zwei inkonsistente Kanten aus, so werden alle ausgehenden Kanten als
+  inkonsistent markiert.
+\end{itemize}
+Der Pseudocode zur Markierung polymorpher Knoten und inkonsistener
+Kanten ist in Algorithmus \ref{alg: Selektion} dargestellt.
+
+Zusätzlich werden noch gerichtete Zyklen aufgelöst. Dazu werden alle
+Zusammenhangskomponenten des Graphen berechnet. Für jede dieser
+Zusammenhangskomponente wird mit einer Tiefensuche nach Rückkanten
+gesucht. Dabei wird diese Tiefensuche von jedem terminalen Knoten, ein
+Knoten der nur ausgehende \textit{sense} oder \textit{antisense}
+Kanten hat, aus gestartet. Wird eine Rückkante gefunden, so werden die
+Kante und die durch die Kante verbundenen Knoten markiert.
+
+Da sich durch die Entfernung einer Kante die Struktur des Graphen
+verändert und immer nur ein Zyklus für jeden terminalen Knoten
+aufgelöst wird, muss diese Prozedur so lange wiederholt werden bis
+keine Zyklen mehr gefunden werden.
+
+Der Pseudocode für diesen Filterungsschritt ist in Algorithmus
+\ref{alg: Zyklen} abgebildet.
+
+\subsection{Ermittlung des besten Pfades/ Scaffolding}
+
 
 \section{Ergebnisse}
 
 \section{Diskussion und Ausblick}
+
+\section{Anhang}
+(TODO: Algorithmen anpassen!!!)
+
+\begin{algorithm}[H]
+  \ForEach{Knoten $k_0$ im Graph $G$}{
+    \ForEach{Kantenrichtung $dir$ in [ANTISENSE, SENSE]}{
+      \ForEach{Kantenpaar $(A,B)$ in Richtung $dir$}{
+        $k_1$ = $A.pend$\;
+        $k_2$ = $B.pend$\;
+        \If{AmbiguousOrdering($A,B,p\_cutoff$) {\bf and}
+           $k_1.estCopy + k_2.estCopy < cn\_cutoff$}
+          {
+            \If{$k_1.estCopy < k_2.estCopy$}{
+              markiere $k_1$ als polymorph und alle aus-
+              und eingehenden SENSE und ANTISENSE Kanten von $k_1$
+              schwarz, so dass sie im nächsten Schritt nicht
+              mitbeachtet werden.\;
+            }
+            \Else {
+              markiere $k_2$ als polymorph und alle aus-
+              und eingehenden SENSE und ANTISENSE Kanten von $k_2$
+              schwarz, so dass sie im nächsten Schritt nicht
+              mitbeachtet werden.\;
+            }
+           \tcp{bei polymorphen Knoten wird nur das erste
+             polymorphe Kantenpaar markiert}
+           \If{Knoten $k_0$ ist polymorph markiert}{
+             break\;
+           }
+          }
+        }
+      \tcp{polymorphe Knoten müssen nicht mehr auf
+        inkonsistente Kanten überprüft werden}
+       \If{Knoten $k_0$ ist polymorph}
+         {break\;}
+       \ForEach{Kantenpaar $(A,B)$ in Richtung $dir$}{
+         \If{$A$ ist nicht schwarz und $B$ ist nicht schwarz}
+            {
+              Berechne Overlap von $A$ und $B$ und speichere
+              längsten Overlap.\;
+            }
+       }
+       \If{längster Overlap $>$ 400} {
+	 Markiere alle ausgehenden Sense-/Antisensekanten
+         von $k_0$ rot\;
+      }
+    }
+  }
+  Lösche alle markierten Knoten und Kanten\;
+  \caption{\label{alg: Selektion}Zusammengefasste Filterfunktion (Schritt 4a und 4b vereinigt)}
+\end{algorithm}
+
+\begin{algorithm}[H]
+  \KwData{Kante $A$ und Kante $B$, die auf eindeutige Ordnung geprüft werden
+    sollen. Wahrscheinlichkeitsschwellenwert $p\_cutoff$}
+  \KwResult{Ob die Kanten $A$ und $B$ nicht eindeutig geordnet werden können}
+  $\mu = A.dist - B.dist$\;
+  $\sigma^2 = A.\sigma^2 + B.\sigma^2$\;
+  $t = \frac{-\mu}{\sigma\cdot\sqrt{2}}$\;
+  $P_{AB} = \frac{1}{2} \cdot \left( 1 + \frac{2}{\sqrt{\pi}} \int_{0}^{t} \exp{-x^2}\mathrm dx\right)$\;
+  $P_{BA} = 1 - P_{AB}$\;
+  \Return $\max\{P_{AB}, P_{BA}\} \leq p\_cutoff$
+  \caption{Funktion \textsc{AmbiguousOrdering}$(A, B, p\_cutoff)$}
+\end{algorithm}
+
+
+\begin{algorithm}[H]
+  \KwData{Graph}
+  \KwResult{Graph ohne Zyklen}
+  \While{noch nicht fertig}{
+  Suche alle Zusammenhangskomponenten\;
+  \ForEach{Zusammenhangskomponente}{
+    Suche alle terminalen Knoten\;
+    \ForEach{terminalen Knoten}{
+      Suche mit einer Tiefensuche nach Rückkanten zu diesem Knoten\;
+      \If{Rückkante gefunden}{
+        markiere den terminalen Knoten und den Knoten, von dem die 
+        Rückkante ausgeht, als REPEAT\;
+        }
+      }
+    }
+  Lösche alle Knoten, die als REPEAT markiert sind\;
+  }
+  \caption{\label{alg: Zyklen}Löse Zyklen auf (Schritt 5)}
+\end{algorithm}
 
 \end{document}
