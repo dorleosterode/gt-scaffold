@@ -463,21 +463,22 @@ ersichtlich wird. \todo{gehört dieser Abschnitt evtl in die Diskussion?}
 \begin{algorithm}[H]
   \KwData{Graph}
   \KwResult{Graph ohne Zyklen}
-  \While{noch nicht fertig}{
-  Suche alle Zusammenhangskomponenten\;
-  \ForEach{Zusammenhangskomponente}{
-    Suche alle terminalen Knoten\;
-    \ForEach{terminalen Knoten}{
-      Suche mit einer Tiefensuche nach Rückkanten zu diesem Knoten\;
+  \While{Zyklus gefunden wurde}{
+  Suche alle Zusammenhangskomponenten $CC$\;
+  \ForEach{Zusammenhangskomponente $C_0 \in CC$}{
+    Suche alle terminalen Knoten $T$\;
+    \ForEach{terminalen Knoten $t_0 \in T$}{
+      Suche mit einer Tiefensuche von dem Knoten $t_0$ aus in der
+      Richtung $t_0.edges[0].sense$ nach Rückkanten\;
       \If{Rückkante gefunden}{
-        markiere den terminalen Knoten und den Knoten, von dem die 
-        Rückkante ausgeht, als REPEAT\;
+        Markiere die Rückkante und die dadurch verbundenen Knoten
+        als zyklisch\;
         }
       }
     }
-  Lösche alle Knoten, die als REPEAT markiert sind\;
   }
-  \caption{\label{alg: Zyklen}Löse Zyklen auf (Schritt 5)}
+  \caption{\label{alg: Zyklen}Löse alle Zyklen für jede
+    Zusammenhangskomponente auf}
 \end{algorithm}
 
 \begin{algorithm}[H]
