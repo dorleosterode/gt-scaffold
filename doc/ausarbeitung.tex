@@ -21,6 +21,9 @@
 \usepackage{tabularx} % page-width
 \usepackage{adjustbox}
 
+% coole inline-todos :)
+\usepackage[colorinlistoftodos,prependcaption]{todonotes}
+
 \renewcommand{\arraystretch}{1.5}
 
 \usetikzlibrary{shapes.geometric, positioning, calc, shapes, fit, backgrounds}
@@ -34,13 +37,13 @@
 \maketitle{}
 \thispagestyle{empty}
 \begin{abstract}
-  TODO: wollen wir ein abstract haben?
+  \todo{wollen wir ein abstract haben?}
 \end{abstract}
 
 \newpage{}
 \setcounter{page}{1}
 \section{Einleitung}
-TODO: was ist DAS scaffolding Problem?
+\todo{was ist DAS scaffolding Problem?}
 
 Nach der Assemblierung von Sequenzen ist das Zielgenom oftmals noch
 nicht vollständig rekonstruiert. Die rekonstruierten Sequenzabschnitte
@@ -65,7 +68,7 @@ Read-Paar gibt, dass die durch die Knoten repräsentierten Contigs
 verbindet. Die Kanten enthält dabei Informationen über die Distanz und
 die Orientierung.
 
-Nach Huson (2002) (TODO: Zitat) ist das Scaffolding Problem
+Nach Huson (2002) (\todo{Zitat}) ist das Scaffolding Problem
 NP-vollständig. Dabei ist das Scaffolding die Ermittlung des optimalen
 Pfades (Pfad mit maximalem Kantengewicht) jeder
 Zusammenhangskomponente des Scaffolding-Graphen. Um diese Komplexität
@@ -76,14 +79,14 @@ jede Zusammenhangskomponente verwendet.
 \subsection{Ziel des Projektes}
 Ziel des Projektes war die Implementierung und Evaluierung einer
 Scaffolding-Software. Dabei sollten die in der GenomeTools-Bibliothek
-(TODO: referenz) vorhandenen Konzepte und Infrastruktur verwendet
+(\todo{referenz}) vorhandenen Konzepte und Infrastruktur verwendet
 werden. Zusätzlich sollte die Scaffolding-Software mit den Ausgaben
 des Assemblers ReadJoiner kompatibel sein.
 
 Um diese Ziele zu erreichen wurde der Scaffolder aus der SGA-Pipeline
-(TODO: referenz) als Vorlage verwendet. Dieses Programm wurde
-ausgewählt, da es sehr gute Ergebnisse erzielt (TODO: referenz des
-benchmarking-papers). Da die SGA-Pipeline allerdings viele
+(\todo{referenz}) als Vorlage verwendet. Dieses Programm wurde
+ausgewählt, da es sehr gute Ergebnisse erzielt (\todo{referenz des
+benchmarking-papers}). Da die SGA-Pipeline allerdings viele
 Abhängigkeiten hat und deshalb nicht einfach zu installieren ist und
 zusätzlich die Methodik des Scaffoldings nicht hinreichend
 dokumentiert ist, sollte die Methodik aufgeklärt und der
@@ -105,7 +108,7 @@ die gleichen Eingabedateien erforderte wie SGA-Scaffold und die
 gleichen Ausgaben produzierte, damit die Ergebnisse verglichen werden
 konnten.
 
-Um die Implementation zu testen wurden verschiedene Testdaten ausgesucht. (TODO!!!!)
+Um die Implementation zu testen wurden verschiedene Testdaten ausgesucht. (\todo{!!!!?})
 
 Anhand der Testdaten wurde gt Scaffolder evaluiert.
 
@@ -145,7 +148,7 @@ Anhand der Testdaten wurde gt Scaffolder evaluiert.
 \end{figure}
 
 In Abbildung \ref{abb: gtscaffolder} ist der Programmablauf von gt
-Scaffolder schematisch dargestellt. (TODO: kurz beschreiben!!!)
+Scaffolder schematisch dargestellt. (\todo{kurz beschreiben!!!})
 
 \subsection{Eingabe}
 Als Eingabe werden die Contigs im FASTA-Format, die
@@ -156,7 +159,7 @@ Distanzinformationen bezogen auf die Contigs, d.h. die Read-Paare
 müssen zurück auf die Contigs gemappt und daraus die Distanz- sowie
 Orientierungsinformation für die Contigs berechnet worden sein. Die
 Astatistik ist ein statistisches Maß dafür, wie repetitiv eine Sequenz
-ist (TODO: Referenz aus Myers Paper).
+ist (\todo{Referenz aus Myers Paper}).
 
 \subsection{Graphkonstruktion}
 Aus den Contigs und den Distanzinformationen wird der
@@ -232,8 +235,8 @@ Startcontigs. Für die darauffolgenden Contigs werden folgende
 Informationen mit Kommata getrennt angegeben: Id des Contigs, Distanz
 zu dem vorherigen Contig, Standardabweichung der Distanz, Orientierung
 zu dem vorherigen Contig (0: gleicher Strang, 1: entgegengesetzter
-Strang), (TODO: Information über die Lage des Reads aus dem Readpaar,
-0: gleicher Strang, 1: entgegengesetzter Strang )
+Strang), (\todo{Information über die Lage des Reads aus dem Readpaar,
+0: gleicher Strang, 1: entgegengesetzter Strang} )
 
 \begin{figure}
 \begin{verbatim}
@@ -249,7 +252,7 @@ ebenfalls ein seperater Schritt. Um die Sequenzqualität zu verbessern
 wird dabei versucht Überlappungen durch Sequenzalignments aufzulösen
 und Lücken zwischen den Contigs durch Pfade im Stringgraph zu
 schließen. Der verwendete Stringgraph ist dabei der bei der
-Assemblierung entstandene Stringgraph. (TODO: evtl mehr dazu schreiben!!)
+Assemblierung entstandene Stringgraph. (\todo{evtl mehr dazu schreiben!!})
 
 \section{Ergebnisse}
 
@@ -276,7 +279,7 @@ Größen haben. Die Größen decken einen Bereich von ca. 10 Mbp bis 140
 Mbp ab, so dass die Entwicklung des Laufzeitverhaltens und des
 Speicherplatzbedarfs über die Länge des Genoms betrachtet werden kann.
 
-Mit dem Sequenzierungssimulator ART (TODO: Referenz!!) wurde für jedes
+Mit dem Sequenzierungssimulator ART (\todo{Referenz!!}) wurde für jedes
 der Genome eine \textit{paired-end}-Sequenzierung mit einem Illumina
 Sequenzierer simuliert. Dabei wurde die Read-Länge auf 150 bp, die
 Fragmentlänge auf 400 bp $\pm$ 10 bp und die Coverage wurde auf 20X
@@ -333,8 +336,8 @@ Scaffoldgraphen zu skizzieren.
     SGA-Scaffold.}
 \end{table}
 
-Die verglichenen Aspekte sind: Die Abdeckung des (TODO: welche
-Abdeckung wurde betrachtet?!) in Mbp und Prozent, die Anzahl an
+Die verglichenen Aspekte sind: Die Abdeckung des (\todo{welche
+Abdeckung wurde betrachtet?!}) in Mbp und Prozent, die Anzahl an
 berechneten Scaffolds, der N50 Wert der berechneten Scaffolds in kb,
 die benötigte CPU-Zeit in Sekunden und der maximal benötigte
 Speicherplatzbedarf in MB.
@@ -358,7 +361,7 @@ als SGA Scaffold.
 
 \section*{Anhang}
 \subsection*{Pseudocode}
-(TODO: Algorithmen anpassen!!!)
+(\todo{Algorithmen anpassen!!!})
 
 \begin{algorithm}[H]
   \ForEach{Knoten $k_0$ im Graph $G$}{
