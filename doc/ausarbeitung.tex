@@ -68,7 +68,7 @@ Read-Paar gibt, dass die durch die Knoten repräsentierten Contigs
 verbindet. Die Kanten enthält dabei Informationen über die Distanz und
 die Orientierung.
 
-Nach Huson (2002) (\todo{Zitat}) ist das Scaffolding Problem
+Nach Huson (2002) \cite{Huson:2002kf} ist das Scaffolding Problem
 NP-vollständig. Dabei ist das Scaffolding die Ermittlung des optimalen
 Pfades (Pfad mit maximalem Kantengewicht) jeder
 Zusammenhangskomponente des Scaffolding-Graphen. Um diese Komplexität
@@ -79,18 +79,17 @@ jede Zusammenhangskomponente verwendet.
 \subsection{Ziel des Projektes}
 Ziel des Projektes war die Implementierung und Evaluierung einer
 Scaffolding-Software. Dabei sollten die in der GenomeTools-Bibliothek
-(\todo{referenz}) vorhandenen Konzepte und Infrastruktur verwendet
+\cite{Gremme:2013} vorhandenen Konzepte und Infrastruktur verwendet
 werden. Zusätzlich sollte die Scaffolding-Software mit den Ausgaben
 des Assemblers ReadJoiner kompatibel sein.
 
 Um diese Ziele zu erreichen wurde der Scaffolder aus der SGA-Pipeline
-(\todo{referenz}) als Vorlage verwendet. Dieses Programm wurde
-ausgewählt, da es sehr gute Ergebnisse erzielt (\todo{referenz des
-benchmarking-papers}). Da die SGA-Pipeline allerdings viele
-Abhängigkeiten hat und deshalb nicht einfach zu installieren ist und
-zusätzlich die Methodik des Scaffoldings nicht hinreichend
-dokumentiert ist, sollte die Methodik aufgeklärt und der
-Scaffolding-Algorithmus reimplementiert werden.
+\cite{Simpson:2012ef} als Vorlage verwendet. Dieses Programm wurde
+ausgewählt, da es sehr gute Ergebnisse erzielt \cite{Hunt:2014dh}. Da
+die SGA-Pipeline allerdings viele Abhängigkeiten hat und deshalb nicht
+einfach zu installieren ist und zusätzlich die Methodik des
+Scaffoldings nicht hinreichend dokumentiert ist, sollte die Methodik
+aufgeklärt und der Scaffolding-Algorithmus reimplementiert werden.
 
 \subsection{Arbeitsvorgehen}
 Zuerst wurden die verwendeten Datenformate und die Algorithmen
@@ -108,7 +107,8 @@ die gleichen Eingabedateien erforderte wie SGA-Scaffold und die
 gleichen Ausgaben produzierte, damit die Ergebnisse verglichen werden
 konnten.
 
-Um die Implementation zu testen wurden verschiedene Testdaten ausgesucht. (\todo{!!!!?})
+Um die Implementation zu testen wurden verschiedene Testdaten
+ausgesucht. (\todo{hier mehr dazu schreiben!!!})
 
 Anhand der Testdaten wurde gt Scaffolder evaluiert.
 
@@ -159,7 +159,7 @@ Distanzinformationen bezogen auf die Contigs, d.h. die Read-Paare
 müssen zurück auf die Contigs gemappt und daraus die Distanz- sowie
 Orientierungsinformation für die Contigs berechnet worden sein. Die
 Astatistik ist ein statistisches Maß dafür, wie repetitiv eine Sequenz
-ist (\todo{Referenz aus Myers Paper}).
+ist \cite{Myers:2005iq}.
 
 \subsection{Graphkonstruktion}
 Aus den Contigs und den Distanzinformationen wird der
@@ -279,7 +279,7 @@ Größen haben. Die Größen decken einen Bereich von ca. 10 Mbp bis 140
 Mbp ab, so dass die Entwicklung des Laufzeitverhaltens und des
 Speicherplatzbedarfs über die Länge des Genoms betrachtet werden kann.
 
-Mit dem Sequenzierungssimulator ART (\todo{Referenz!!}) wurde für jedes
+Mit dem Sequenzierungssimulator ART \cite{Huang:2012kq} wurde für jedes
 der Genome eine \textit{paired-end}-Sequenzierung mit einem Illumina
 Sequenzierer simuliert. Dabei wurde die Read-Länge auf 150 bp, die
 Fragmentlänge auf 400 bp $\pm$ 10 bp und die Coverage wurde auf 20X
@@ -534,5 +534,8 @@ ersichtlich wird. \todo{gehört dieser Abschnitt evtl in die Diskussion?}
   }
   \caption{Berechnung der Walks (Schritt 6.1)}
 \end{algorithm}
+
+\bibliography{presentation/literatur}
+\bibliographystyle{alpha}
 
 \end{document}
