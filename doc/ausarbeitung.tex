@@ -16,6 +16,11 @@
 \usepackage{graphicx}
 \usepackage{placeins}
 
+% an seitenbreite angepasste tabellen
+\usepackage{booktabs}
+\usepackage{tabularx} % page-width
+\usepackage{adjustbox}
+
 \renewcommand{\arraystretch}{1.5}
 
 \usetikzlibrary{shapes.geometric, positioning, calc, shapes, fit, backgrounds}
@@ -287,6 +292,65 @@ technischen Daten sind: Core-i7 @ 3.10GHz, 8GB RAM, Linux 64 bit.
 \subsection{Vergleich der Pipelines}
 
 \subsection{Evaluation der Ergebnisse}
+
+In Tabelle \ref{tab: Vergleich} sind die Ergebnisse der Evaluation
+dargestellt. Jeweils zwei Zeilen enthalten die Angaben zu einem
+Referenzdatensatz. Dabei sind immer zuerst die Ergebnisse von SGA
+Scaffold aufgetragen und in der Zeile darunter die Ergebnisse von gt
+Scaffolder als Faktor. Zu jedem Datensatz ist in der ersten Spalte die
+Anzahl an Contigs dargestellt, um die Größe des jeweiligen
+Scaffoldgraphen zu skizzieren.
+
+\begin{table}
+  \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
+    \begin{tabular}{llccccc}
+      \toprule
+      Datensatz & Programm & Abdeckung (Mbp / \%) & \#Scaffolds & N50 (kb) & CPU (s) & RAM (MB) \\
+      \midrule
+      \textit{S. cerevisiae}
+      & SGA Scaffold  & ~~11.08 / 92  &     ~~600   &  32.3     & 0.01      &  28.9 \\
+      1694 contigs
+      & gt Scaffolder & $1\times$     &  $1\times$  & $1\times$ & $1\times$ &  $0.43\times$ \\
+      \midrule
+      \textit{H. sapiens}, Chr. 21
+      & SGA Scaffold  & ~~34.25 / 71  &      1368   &  54.2     & 0.04  &  27.8  \\
+      4817 contigs
+      & gt Scaffolder & $1\times$     &  $1\times$  & $1\times$ & $1\times$ & $0.6\times$       \\
+      \midrule
+      \textit{C. elegans}
+      & SGA Scaffold  & ~~94.07 / 94  &      5659   &  36.9     & 0.11  &  34.9 \\
+      11113 contigs
+      & gt Scaffolder & $1\times$     &  $1\times$  & $1\times$ & $0.9\times$ & $0.90\times$      \\
+      \midrule
+      \textit{D. melanogaster}
+      & SGA Scaffold  & 113.48 / 81   &      2281   &  126.3    & 0.11    & 29.2     \\
+      3970 contigs
+      & gt Scaffolder & $1\times$     &  $1\times$  & $1\times$ & $0.9\times$ & $0.62\times$     \\
+      \bottomrule
+  \end{tabular}}
+  \caption{\label{tab: Vergleich}Vergleich der Ergebnisse, der
+    Laufzeit und des Speicherplatzbedarfs von gt Scaffolder und
+    SGA-Scaffold.}
+\end{table}
+
+Die verglichenen Aspekte sind: Die Abdeckung des (TODO: welche
+Abdeckung wurde betrachtet?!) in Mbp und Prozent, die Anzahl an
+berechneten Scaffolds, der N50 Wert der berechneten Scaffolds in kb,
+die benötigte CPU-Zeit in Sekunden und der maximal benötigte
+Speicherplatzbedarf in MB.
+
+Der Faktor $1\times$ in den Spalten Abdeckung, \# Scaffolds und N50
+zeigt an, dass gt Scaffolder und SGA Scaffold bei allen
+Testdatensätzen die gleichen Ergebnisse produziert haben.
+
+Bei der Laufzeit ist gt Scaffolder ungefähr genauso schnell wie SGA Scaffold. Der Faktor
+$0.1\times$ um den gt Scaffolder bei den Testdatensätzen von
+\textit{C. elegans} und \textit{D. melanogaster} schneller ist, ist
+bei dieser Größenordnung nicht signifikant.
+
+gt Scaffolder benötigt maximal um einen Faktor $0.1\times$ bis
+$0.57\times$ weniger Speicherplatz bei der Berechnung der Scaffolds,
+als SGA Scaffold.
 
 \subsection{Vergleich der Laufzeit und des Speicherplatzbedarfs}
 
