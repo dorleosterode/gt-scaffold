@@ -356,6 +356,38 @@ $0.57\times$ weniger Speicherplatz bei der Berechnung der Scaffolds,
 als SGA Scaffold.
 
 \subsection{Vergleich der Laufzeit und des Speicherplatzbedarfs}
+\begin{figure}[t]
+  \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{presentation/figures/sga_vs_gt.pdf}
+  \caption{\label{abb: Zeit}Auftragung der Laufzeit und des
+    Speicherplatzbedarfs von gt Scaffolder und SGA Scaffold für
+    unterschiedliche Testdatensätze}
+\end{figure}
+
+In Abbildung \ref{abb: Zeit} sind die Laufzeiten und der
+Speicherplatzbedarf der Programme gt Scaffolder und SGA Scaffold für
+die verschiedenen Testdatensätze dargestellt. Die Testdatensätze sind
+dabei der Größe nach von links nach rechts geordnet. Die Ergebnisse
+von SGA Scaffold sind jeweils in rot dargestellt während die
+Ergebnisse von gt Scaffolder grün eingefärbt sind.
+
+Die Grafik verdeutlicht, dass gt Scaffolder sowohl bei der Laufzeit
+als auch bei dem maximalen Speicherplatzbedarf entweder gleichauf mit
+SGA Scaffold oder sogar besser ist.
+
+Ebenfalls ist zu erkennen, dass die Laufzeit und der
+Speicherplatzbedarf nicht mit der Größe der Referenzgenome
+zusammenhängt. Allerdings hängen diese Punkte \todo{Punkte
+  umformulieren?} auch nicht direkt von der Größe des Scaffoldgraphen
+ab. In Tabelle \ref{tab: Vergleich} sind zu den Datensätzen die Anzahl
+an Knoten in dem Scaffoldgraph dargestellt. So ist die Anzahl an
+Knoten für den \textit{D. melanogaster} Datensatz mit $3970$ geringer
+als für den \textit{H. sapiens} Chr. 21 Datensatz mit $4817$
+Knoten. Trotzdem wird zur Berechnung der Scaffolds für den
+\textit{D. melanogaster} Datensatz sowohl von SGA Scaffold als auch
+von gt Scaffolder mehr Laufzeit und mehr Speicheplatz benötigt, wie
+aus Tabelle \ref{tab: Vergleich} und Abbildung \ref{abb: Zeit}
+ersichtlich wird. \todo{gehört dieser Abschnitt evtl in die Diskussion?}
+
 
 \section{Diskussion und Ausblick}
 
