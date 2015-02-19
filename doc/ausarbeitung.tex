@@ -200,12 +200,30 @@ Der Pseudocode für diesen Filterungsschritt ist in Algorithmus
 
 \subsection{Ermittlung des besten Pfades/ Scaffolding}
 
+Nach der Reinigung des Graphen wird das eigentliche Scaffolding
+durchgeführt. Dazu werden alle Zusammenhangskomponenten des Graphen
+bestimmt, um für jede Zusammenhangskomponente die beste Anordnung der
+repräsentierten Contigs zu berechnen. Für jede Zusammenhangskomponente
+werden die kürzesten Pfade bezüglich der Kantengewichte zwischen
+terminalen Knoten mit einer Breitensuche berechnet. Der kürzeste Pfad
+mit der meisten Sequenzabdeckung wird als Scaffold für die
+Zusammenhangskomponente gewählt.
+
+Contigs, deren repräsentierende Knoten keine oder nur markierte Kanten
+haben, werden ebenfalls als Scaffolds gewählt.
+
+Der Pseudocode für die Berechnung des Scaffolds ist in Algorithmus
+\ref{alg: Scaffold} dargestellt.
+
+\subsection{Ausgabe}
+
 
 \section{Ergebnisse}
 
 \section{Diskussion und Ausblick}
 
-\section{Anhang}
+\section*{Anhang}
+\subsection*{Pseudocode}
 (TODO: Algorithmen anpassen!!!)
 
 \begin{algorithm}[H]
@@ -289,6 +307,63 @@ Der Pseudocode für diesen Filterungsschritt ist in Algorithmus
   Lösche alle Knoten, die als REPEAT markiert sind\;
   }
   \caption{\label{alg: Zyklen}Löse Zyklen auf (Schritt 5)}
+\end{algorithm}
+
+\begin{algorithm}[H]
+  \SetAlgoLined
+  \KwData{Graph $G$}
+  \KwResult{Graph $G$ ohne Knoten, die nicht zum bestem Walk gehören}
+  Markiere alle Kanten aus $G$ schwarz\;
+  Berechnung der Menge $C$ aller Connected Components von $G$\;
+  \ForEach{Connected Component $c_0$ aus der Menge $C$}{
+    Berechne Menge der terminalen Knoten $T$ (mit ausschließlich SENSE
+    oder ANTISENSE Kanten) für die Connected Component $c_0$\;
+    \ForEach{Terminaler Knoten $t_0$ aus der Menge $T$}{
+      Berechne die Menge $W$ aller Walks durch die Connected
+      Component $c_0$ von $t_0$ aus\;
+      \ForEach{Walk $w_0$ aus $W$}{
+        \If{Contig-Gesamtlänge > bislang beste Contig-Gesamtlänge}{
+          Setze aktuellen Walk $w_0$ als bestWalk\;
+        }
+      }
+    }
+  }
+  Setze alle Kanten des bestWalk weiß\;
+  Lösche alle schwarzen Kanten\;
+  \caption{\label{alg: Scaffold}Berechnung der Scaffolds (Schritt 6)}
+\end{algorithm}
+
+\begin{algorithm}[H]
+  \SetAlgoLined
+  \KwData{terminaler Startknoten $t_0$}
+  \KwResult{Alle von diesem Knoten möglichen Walks}
+  Konstruktionsrichtung = Richtung der vom terminalen Knoten $t_0$ ausgehenden Kanten\;
+  \ForEach{Kante $A$ vom Knoten $t_0$ ausgehend (in Konstruktionsrichtung)}{
+    $k_0$ = $A.pend$\;
+    Speichere Startkante $A$ und Distanz $A.dist$ in Map an Position
+    $k_0$ (für spätere Traversierung)\;
+    Schiebe Startkante $A$ und Distanz $A.dist$ in Queue\;
+  }
+  \While{BFS über Queue nicht beendet}{
+    Poppe Kante $A$ und Distanz $A.dist$ aus der Queue\;
+    $k_0$ = $A.pend$\;
+    \ForEach{Kante $B$ in Konstruktionsrichtung von $k_0$ aus} {
+      $k_1$ = $B.pend$\;
+      \If{Distanz zu aktuell betrachtetem Knoten $k_1$ $<$
+        bisher ermittelte Distanz zu $k_1$ {\bf OR} Knoten $k_1$
+        noch unbetrachtet}{
+        Speichere Kante $B$ und Distanz $B.dist$ in Map an Position $k_1$\;
+        Schiebe Kante $B$ und Distanz $B.dist$ in Queue\;
+      }
+    }
+    \If{$k_0$ hat keine Kanten in Konstruktionsrichtung}{
+      Schiebe Knoten $k_0$ in terminalSet\;
+    }
+  }
+  \ForEach{Knoten $k_0$ in terminalSet}{
+    Erzeuge Walk mithilfe einer Traversierung über die Map
+  }
+  \caption{Berechnung der Walks (Schritt 6.1)}
 \end{algorithm}
 
 \end{document}
