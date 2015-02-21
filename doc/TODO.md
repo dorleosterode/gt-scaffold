@@ -2,9 +2,8 @@
 - output: convert scaffolds to fasta [Dorle]
   - evaluate and test the implementation
   - quast evaluation [Stefan]
-- parser: parse astat from readjoiner contig file [Lukas / Stefan]
-  - readjoiner: -astat flag
-  (- evaluate astat computation)
+- create scaffold graph based on dist record instead of parsing dist file [Lukas]
+- create gt scaffold tool
 - graph / parser: error message not assertion, if distance-estimates are empty
 
 ## OBSTACLES
@@ -19,6 +18,9 @@
   (...algorithms.c: ...mark_repeats: line 83)
 
 ## DONE
+- evaluate astat computation (DIFFERENT)
+- parser: parse astat from readjoiner contig file [Lukas]
+  - readjoiner: -astat flag
 - parser / new module: generate DistEst file from .bam [Lukas]
   - look into abyss estimation (paper) (does not exist)
 - ported test to gt testsuite [Stefan]
