@@ -886,7 +886,6 @@ static bool is_read_pair_valid(const GtSamfileIterator *bam_iterator,
 /* calculate reference and mate reference position at read start */
 static int calc_read_start(GtSamAlignment *bam_align,
                            GtWord *ref_read_start,
-                           GtWord *mref_read_start,
                            GtError *err) {
   int had_err = 0;
   GtUchar op;
@@ -937,8 +936,6 @@ static int calc_read_start(GtSamAlignment *bam_align,
                       tspan + (qlen - qspan - qstart);
   else
     *ref_read_start = gt_sam_alignment_pos(bam_align) - qstart;
-
-  *mref_read_start = *ref_read_start + gt_sam_alignment_insert_size(bam_align);
 
   return had_err;
 }
