@@ -227,46 +227,6 @@ static void add_contig_dist_record(DistRecords *dist_records,
   dist_records->record[current_record].nof_ctg++;
 }
 
-/* sort read set by orientation of read relative to reference,
-   reference id of mate read and orientation of read relative
-   to his mate read */
-static int compare_read_order(const void *a,
-                              const void *b)
-{
-  int return_val;
-  Read *read_a = (Read*) a;
-  Read *read_b = (Read*) b;
-
-  if (read_a->reverse && !read_b->reverse)
-    return_val = 1;
-  else if (!read_a->reverse && read_b->reverse)
-    return_val = -1;
-  else if (read_a->mtid > read_b->mtid)
-    return_val = 1;
-  else if (read_a->mtid < read_b->mtid)
-    return_val = -1;
-  else if (read_a->reverse != read_a->mreverse)
-    return_val = -1;
-  else if (read_a->reverse == read_a->mreverse)
-    return_val = 1;
-  else
-    gt_assert(!"reached");
-
-  return return_val;
-}
-
-/* initialize histogram */
-static void init_histogram(HistogramData *histogram_data) {
-  histogram_data->hash_map = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
-  histogram_data->nof_pairs = 0;
-  histogram_data->size = 1000;
-  histogram_data->value_sum = 0;
-  histogram_data->keys = gt_malloc(sizeof (*histogram_data->keys)
-                        * histogram_data->size);
-  histogram_data->values = gt_malloc(sizeof (*histogram_data->values)
-                        * histogram_data->size);
-}
-
 static void calc_stat_of_histogram(HistogramData *histogram_data) {
   GtUword index, value, value_sum;
   GtWord key, squares, total, min, max;
