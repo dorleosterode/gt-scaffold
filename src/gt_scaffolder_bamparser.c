@@ -862,27 +862,6 @@ GtUword gt_sam_alignment_query_length(GtSamAlignment *sam_alignment)
   return (GtUword) sam_alignment->s_alignment->core.l_qname;
 }
 
-/* check if read pair is valid */
-static bool is_read_pair_valid(const GtSamfileIterator *bam_iterator,
-                               GtSamAlignment *bam_align,
-                               GtUword min_ref_length,
-                               GtUword min_qual) {
-  bool result;
-  if (gt_sam_alignment_is_unmapped(bam_align) ||
-      gt_sam_alignment_mate_is_unmapped(bam_align) ||
-      (gt_sam_alignment_ref_num(bam_align) ==
-       gt_sam_alignment_mate_ref_num(bam_align)) ||
-      !gt_sam_alignment_is_paired(bam_align) ||
-      (gt_samfile_iterator_reference_length(bam_iterator,
-       gt_sam_alignment_ref_num(bam_align)) < min_ref_length) ||
-      (gt_sam_alignment_mapping_quality(bam_align) < min_qual))
-    result = false;
-  else
-    result = true;
-
-  return result;
-}
-
 /* calculate reference and mate reference position at read start */
 static int calc_read_start(GtSamAlignment *bam_align,
                            GtWord *ref_read_start,
