@@ -1135,6 +1135,39 @@ static int load_read_set(ReadSet *readset,
   return had_err;
 }
 
+static int compare_fragment(const void *a,
+                            const void *b)
+{
+  GtUword *fragement_a = (GtUword*) a;
+  GtUword *fragement_b = (GtUword*) b;
+
+  if (*fragement_a > *fragement_b)
+    return 1;
+  else if (*fragement_a < *fragement_b)
+    return -1;
+  else
+    return 0;
+}
+
+/* correct strand orientation and mapping status of mate read,
+   set insert size of read pair */
+static void fixmate(Read *read_0,
+                    Read *read_1) {
+
+  read_0->is_munmapped = false;
+  read_0->is_mreverse = false;
+
+  if (read_1->is_unmapped)
+    read_0->is_munmapped = true;
+  if (read_1->is_reverse)
+    read_0->is_mreverse = true;
+
+  if (read_0->is_munmapped)
+    read_0->isize = 0;
+  else
+    read_0->isize = read_1->ref_read_start - read_0->ref_read_start;
+}
+
 /* create histogram based on fragment sizes of reads */
 static void create_histogram(HistogramData *histogram_data,
                              ReadSet readset) {
@@ -1264,6 +1297,52 @@ static void create_histogram(HistogramData *histogram_data,
   calc_stat_of_histogram(histogram_data);
 
   gt_free(fragment_set);
+}
+
+/* callback function to sort reads by query name */
+static int compare_read_2(const void *a,
+                          const void *b)
+{
+  Read *read_a = (Read*) a;
+  Read *read_b = (Read*) b;
+
+  return strcmp(read_a->query_name, read_b->query_name);
+}
+
+/* callback function to sort reads by reference id and orientation
+   of read relative to reference, reference id of mate read,
+   orientation of read relative to his mate read, alignment pos */
+static int compare_read_3(const void *a,
+                          const void *b)
+{
+  Read *read_a = (Read*) a;
+  Read *read_b = (Read*) b;
+  int return_val;
+
+  if (read_a->tid < read_b->tid)
+    return_val = -1;
+  else if (read_a->tid > read_b->tid)
+    return_val = 1;
+  else {
+    if (read_a->is_reverse && !read_b->is_reverse)
+      return_val = 1;
+    else if (!read_a->is_reverse && read_b->is_reverse)
+      return_val = -1;
+    else if (read_a->mtid > read_b->mtid)
+      return_val = 1;
+    else if (read_a->mtid < read_b->mtid)
+      return_val = -1;
+    else if (read_a->is_reverse != read_a->is_mreverse)
+      return_val = -1;
+    else if (read_a->is_reverse == read_a->is_mreverse)
+      return_val = 1;
+    else if (read_a->pos < read_b->pos)
+      return_val = -1;
+    else
+      return_val = 1;
+  }
+
+  return return_val;
 }
 
 /* read paired information from bam file and corresponding hist file */
