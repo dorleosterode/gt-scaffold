@@ -166,6 +166,7 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
                                       const char *ctg_filename,
                                       GtUword min_ctg_len,
                                       const char *dist_filename,
+                                      bool astat_is_annotated,
                                       GtError *err);
 
 /* Function to test basic graph functionality on different scenarios:

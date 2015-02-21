@@ -344,6 +344,7 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
                                       const char *ctg_filename,
                                       GtUword min_ctg_len,
                                       const char *dist_filename,
+                                      bool astat_is_annotated,
                                       GtError *err)
 {
   GtScaffolderGraph *graph;
@@ -367,7 +368,7 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
      scaffold graph */
 
     had_err = gt_scaffolder_parser_read_contigs(graph, ctg_filename,
-              min_ctg_len, err);
+              min_ctg_len, astat_is_annotated, err);
   }
 
   if (had_err == 0)

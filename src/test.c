@@ -50,6 +50,9 @@
 #define MAX_DIST GT_WORD_MAX
 #define MIN_ALIGN 100
 
+/* if astat is annotated in contig header */
+#define ASTAT_IS_ANNOTATED true
+
 int main(int argc, char **argv)
 {
   GtError *err;
@@ -124,9 +127,9 @@ int main(int argc, char **argv)
       spm_filename = argv[5];
 
       had_err = gt_scaffolder_graph_new_from_file(&graph, contig_filename,
-                MIN_CONTIG_LEN, dist_filename, err);
+                MIN_CONTIG_LEN, dist_filename, ASTAT_IS_ANNOTATED, err);
 
-      if (had_err == 0) {
+      if (!ASTAT_IS_ANNOTATED && had_err == 0) {
         /* load astatistics and copy number from file */
         had_err = gt_scaffolder_graph_mark_repeats(astat_filename, graph,
                   COPY_NUM_CUTOFF, ASTAT_NUM_CUTOFF, err);
