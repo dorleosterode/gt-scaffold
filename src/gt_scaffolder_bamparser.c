@@ -943,103 +943,101 @@ static int calc_read_start(GtSamAlignment *bam_align,
   return had_err;
 }
 
-/* analyze read set (characterized by same reference id) */
+/* analyze read set */
 static int analyze_read_set(DistRecords *dist_records,
-                           ReadSet readset,
-                           GtUword min_nof_pairs,
-                           GtWord min_dist,
-                           GtWord max_dist,
-                           FragmentData fragment_data,
-                           PmfData pmf_data,
-                           bool rf,
-                           GtSamfileIterator *bam_iterator,
-                           GtError *err) {
-  GtUword nof_pairs, len_ref, len_mref = 0, index;
+                            ReadSet read_set,
+                            GtUword min_nof_pairs,
+                            GtWord min_dist,
+                            GtWord max_dist,
+                            FragmentData *fragment_data,
+                            PmfData pmf_data,
+                            bool rf,
+                            GtError *err) {
+  GtUword nof_pairs;
   GtWord dist;
   double std_dev;
-  bool sense, same;
-  char *ctg_id, *root_ctg_id;
+  bool sense, same, first_contig, new_contig;
+  char *ctg_id;
+  Read *read;
   int had_err = 0;
 
-  /* sort read set by orientation of read relative to reference,
-     reference id of mate read and orientation of read relative
-     to his mate read */
-  qsort(readset.read, readset.nof, sizeof (*readset.read), compare_read_order);
-  len_ref = gt_samfile_iterator_reference_length(bam_iterator,
-                                                 readset.read[0].tid);
+  first_contig = true;
+  new_contig = false;
 
-  /* save reference name */
-  root_ctg_id = (char*)gt_samfile_iterator_reference_name(
-                bam_iterator,readset.read[0].tid);
-  create_dist_record(dist_records, root_ctg_id);
+  /* iterate over reads */
+  for (read = read_set.read; read < read_set.read+read_set.nof; read++) {
 
-  /* iterate over (sorted) read set (characterized by same reference id) */
-  for (index = 0; index < readset.nof; index++) {
+    /* analyze read subset */
+    if (read != read_set.read && fragment_data->nof_frag_pos != 0 &&
+        (read->tid != (read-1)->tid ||
+         read->mtid != (read-1)->mtid ||
+         read->is_reverse != (read-1)->is_reverse)) {
 
-    /* analyze sub read set (characterized by same reference id of
-       mate read and same orientation of read relative to his mate read) */
-    if (index > 0 &&
-       (readset.read[index].mtid != readset.read[index-1].mtid ||
-        readset.read[index].reverse != readset.read[index-1].reverse)) {
+      /* start new record if switch of contig (reference) occurred or
+         first contig (reference) is present */
+      if (first_contig || new_contig) {
+        create_dist_record(dist_records, (read-1)->ref_name);
+        first_contig = false;
+        new_contig = false;
+      }
 
       nof_pairs = 0;
       /* calculate distance and nof pairs */
-      if (fragment_data.nof_frag_pos >= min_nof_pairs)
+      if (fragment_data->nof_frag_pos >= min_nof_pairs)
         had_err = estimate_dist_using_mle(&dist, &nof_pairs, min_dist,
                                          max_dist, fragment_data, pmf_data,
-                                         len_ref, len_mref, rf, err);
+                                      read->ref_len, read->mref_len, rf, err);
 
-      /* save record */
+      /*  append new entry to current record */
       if (nof_pairs >= min_nof_pairs) {
-        ctg_id = (char*)gt_samfile_iterator_reference_name(
-                 bam_iterator, readset.read[index-1].mtid);
+        ctg_id = (read-1)->mref_name;
         std_dev = pmf_data.std_dev / sqrt(nof_pairs);
-        sense = readset.read[index-1].reverse !=
-                readset.read[index-1].mreverse;
-        same = readset.read[index-1].reverse;
+        sense = (read-1)->is_reverse != (read-1)->is_mreverse;
+        same = (read-1)->is_reverse;
         add_contig_dist_record(dist_records, ctg_id, std_dev, dist, nof_pairs,
-                              sense, same);
+                               sense, same);
       }
 
       /* reset fragment array */
-      fragment_data.nof_frag_pos = 0;
+      fragment_data->nof_frag_pos = 0;
     }
 
-    len_mref = gt_samfile_iterator_reference_length(bam_iterator,
-               readset.read[index].mtid);
-    /* calculate fragment size and save it if start and
-       end point are unique */
-    calculate_fragment(readset.read[index].ref_read_start,
-                       readset.read[index].reverse,
-                       readset.read[index].mref_read_start,
-                       readset.read[index].mreverse,
-                       len_ref, len_mref, &fragment_data, rf);
+    /* check if switch of contig (reference) occurred */
+    if (read != read_set.read && read->tid != (read-1)->tid)
+      new_contig = true;
+
+    /* check if read is valid */
+    if (!read->is_munmapped && read->is_valid) {
+
+      /* calculate fragment size and save it if start and
+         end point are unique */
+      calculate_fragment(read->ref_read_start, read->is_reverse,
+                         read->ref_read_start+read->isize, read->is_mreverse,
+                         read->ref_len, read->mref_len, fragment_data, rf);
+
+    }
   }
 
   nof_pairs = 0;
   /* calculate distance and nof pairs */
-  if (fragment_data.nof_frag_pos >= min_nof_pairs)
+  if (fragment_data->nof_frag_pos >= min_nof_pairs)
     had_err = estimate_dist_using_mle(&dist, &nof_pairs, min_dist,
-                                         max_dist, fragment_data, pmf_data,
-                                         len_ref, len_mref, rf, err);
+                                      max_dist, fragment_data, pmf_data,
+                                      read->ref_len, read->mref_len, rf, err);
 
-  /* save record */
+  /*  append new entry to current record */
   if (nof_pairs >= min_nof_pairs) {
-    ctg_id = (char*)gt_samfile_iterator_reference_name(
-            bam_iterator, readset.read[index-1].mtid);
+    ctg_id = (read-1)->mref_name;
     std_dev = pmf_data.std_dev / sqrt(nof_pairs);
-    sense = readset.read[index-1].reverse !=
-           readset.read[index-1].mreverse;
-    same = readset.read[index-1].reverse;
+    sense = (read-1)->is_reverse != (read-1)->is_mreverse;
+    same = (read-1)->is_reverse;
     add_contig_dist_record(dist_records, ctg_id, std_dev, dist, nof_pairs,
-                          sense, same);
+                           sense, same);
   }
-
-  /* reset fragment array */
-  fragment_data.nof_frag_pos = 0;
 
   return had_err;
 }
+
 
 /* read paired information from bam file and corresponding hist file */
 int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
