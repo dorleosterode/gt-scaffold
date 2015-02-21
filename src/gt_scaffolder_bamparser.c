@@ -23,6 +23,9 @@
 #include "gt_scaffolder_bamparser.h"
 #include "gt_scaffolder_parser.h"
 
+#define INCREMENT_SIZE 1024
+#define INCREMENT_SIZE_2 64
+
 struct GtSamAlignment{
   bam1_t       *s_alignment;
   GtAlphabet   *alphabet;
@@ -42,11 +45,6 @@ struct GtSamfileIterator {
   void           *aux;
   GtUword   ref_count;
 };
-
-typedef struct ReadInfo {
-  bool isreverse;
-  GtUword isize;
-} ReadInfo;
 
 /* data type for saving information about
    reads aligned to some contig  */
@@ -185,7 +183,7 @@ static void create_dist_record(DistRecords *dist_records,
 
   /* resize */
   if (dist_records->nof_record == dist_records->size) {
-    dist_records->size += 50;
+    dist_records->size += INCREMENT_SIZE_2;
     dist_records->record = gt_realloc(dist_records->record,
            sizeof (*(dist_records->record)) * dist_records->size);
     for (index = dist_records->nof_record; index < dist_records->size;
@@ -218,7 +216,7 @@ static void add_contig_dist_record(DistRecords *dist_records,
   /* resize */
   if (dist_records->record[current_record].nof_ctg ==
       dist_records->record[current_record].size) {
-    dist_records->record[current_record].size += 100;
+    dist_records->record[current_record].size += INCREMENT_SIZE_2;
     dist_records->record[current_record].ctg = gt_realloc(
            dist_records->record[current_record].ctg,
            sizeof (*(dist_records->record[current_record].ctg)) *
@@ -444,7 +442,7 @@ static void calculate_fragment_dist(FragmentData *fragment_data,
 
     /* resize fragment array */
     if (fragment_data->nof_frag_size == fragment_data->size_frag_size) {
-      fragment_data->size_frag_size += 100;
+      fragment_data->size_frag_size += INCREMENT_SIZE;
       fragment_data->frag_size = gt_realloc(fragment_data->frag_size,
                                  sizeof (*(fragment_data->frag_size)) *
                                  fragment_data->size_frag_size * 2);
@@ -688,7 +686,7 @@ static void calculate_fragment(GtUword start_read,
 
   /* resize fragment array */
   if (fragment_data->nof_frag_pos == fragment_data->size_frag_pos) {
-    fragment_data->size_frag_pos += 100;
+    fragment_data->size_frag_pos += INCREMENT_SIZE;
     fragment_data->frag_pos = gt_realloc(fragment_data->frag_pos,
            sizeof (*(fragment_data->frag_pos)) *
                   fragment_data->size_frag_pos * 2);
