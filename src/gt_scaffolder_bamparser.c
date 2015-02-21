@@ -1135,6 +1135,138 @@ static int load_read_set(ReadSet *readset,
   return had_err;
 }
 
+/* create histogram based on fragment sizes of reads */
+static void create_histogram(HistogramData *histogram_data,
+                             ReadSet readset) {
+  GtUword *fragment_set, fragment_set_nof, fragment_set_size,
+           next_free, *fragment, insert_size, *value,
+           nof_rf, nof_fr, value_sum;
+  GtWord *key;
+  Read *read;
+
+  fragment_set = NULL;
+  fragment_set_nof = 0;
+  fragment_set_size = 0;
+
+  /* iterate over reads pairs and save their fragment sizes */
+  for (read = readset.read; read < readset.read+readset.nof; read++) {
+
+    /* check if sequential reads are a read pair */
+    if (read+1 < readset.read+readset.nof &&
+        strcmp(read->query_name, (read+1)->query_name) == 0) {
+
+      fixmate(read, read+1);
+      fixmate(read+1, read);
+
+      /* check if read pair is valid */
+      if (!read->is_unmapped && !(read+1)->is_unmapped &&
+           read->tid == (read+1)->tid &&
+           read->is_reverse != (read+1)->is_reverse) {
+
+        if (read->is_reverse)
+          insert_size = (read+1)->isize;
+        else
+          insert_size = read->isize;
+
+        /* resize fragment array */
+        if (fragment_set_nof == fragment_set_size) {
+          fragment_set_size += INCREMENT_SIZE;
+          fragment_set = gt_realloc(fragment_set,
+                                 sizeof (*fragment_set) * fragment_set_size);
+        }
+
+        /* save insert size of read pair */
+        fragment_set[fragment_set_nof] = insert_size;
+        fragment_set_nof++;
+      }
+    }
+  }
+
+  /* sort fragments by their sizes */
+  qsort(fragment_set, fragment_set_nof, sizeof (*fragment_set),
+        compare_fragment);
+
+  histogram_data->hash_map = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
+  histogram_data->nof_pairs = 0;
+  histogram_data->size = 0;
+  histogram_data->values = NULL;
+  histogram_data->keys = NULL;
+  next_free = 0;
+
+  /* iterate over sorted fragments and count their frequencies */
+  for (fragment = fragment_set; fragment < fragment_set+fragment_set_nof;
+       fragment++) {
+
+    /* resize histogram hashmap */
+    if (histogram_data->nof_pairs == histogram_data->size) {
+      histogram_data->size += INCREMENT_SIZE;
+      histogram_data->values = gt_realloc(histogram_data->values,
+                    sizeof (*histogram_data->values) * histogram_data->size);
+      histogram_data->keys = gt_realloc(histogram_data->keys,
+                    sizeof (*histogram_data->keys) * histogram_data->size);
+    }
+
+    /* check if first fragment is present or fragment changed */
+    if (fragment == fragment_set || *fragment != *(fragment-1)) {
+
+      /* ignore fragments with frequency lower than 2 */
+      if (fragment != fragment_set && *fragment != *(fragment-1) &&
+          histogram_data->values[next_free] < 3)
+        histogram_data->nof_pairs--;
+
+      next_free = histogram_data->nof_pairs;
+      histogram_data->keys[next_free] = *fragment;
+      histogram_data->values[next_free] = 1;
+      histogram_data->nof_pairs++;
+    }
+    else
+      histogram_data->values[next_free]++;
+  }
+
+  /* ignore fragments with frequency lower than 2 */
+  if (histogram_data->values[next_free] < 3)
+    histogram_data->nof_pairs--;
+
+  nof_rf = 0;
+  nof_fr = 0;
+  value_sum = 0;
+  /* save fragment frequencies in hashmap */
+  for (key = histogram_data->keys, value = histogram_data->values;
+       key < histogram_data->keys+histogram_data->nof_pairs; key++, value++) {
+
+    /* count keys in respective range */
+    if (*key >= INT_MIN && *key <= 0)
+      nof_rf++;
+    if (*key >= 1 && *key <= INT_MAX)
+      nof_fr++;
+    value_sum += *value;
+
+    gt_hashmap_add(histogram_data->hash_map, key, value);
+    /* printf("" GT_WD "\t" GT_WU " \n", *key, *value); */
+  }
+
+  histogram_data->lib_rf = nof_fr < nof_rf;
+  histogram_data->value_sum = value_sum;
+
+  /* remove noise */
+  remove_noise_in_histogram(histogram_data);
+  /* calculate statistics */
+  calc_stat_of_histogram(histogram_data);
+
+  /* remove outlier */
+  remove_outliers_in_histogram(histogram_data);
+  /* calculate statistics */
+  calc_stat_of_histogram(histogram_data);
+
+  /* trim off fraction */
+  trim_fraction_of_histogram(histogram_data, 0.0001);
+  /* calculate statistics */
+  calc_stat_of_histogram(histogram_data);
+
+  gt_free(fragment_set);
+}
+
+
 
 
 /* read paired information from bam file and corresponding hist file */
