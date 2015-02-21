@@ -1038,6 +1038,104 @@ static int analyze_read_set(DistRecords *dist_records,
   return had_err;
 }
 
+/* load reads from bam-file */
+static int load_read_set(ReadSet *readset,
+                         const char *bam_filename,
+                         GtUword min_ref_length,
+                         GtUword min_qual,
+                         GtError *err) {
+
+  int had_err;
+  GtAlphabet *alpha;
+  GtSamfileIterator *bam_iterator;
+  GtSamAlignment *bam_align;
+  GtWord ref_read_start;
+  GtUword next_free;
+
+  had_err = 0;
+  alpha = gt_alphabet_new_dna();
+  bam_iterator = gt_samfile_iterator_new_bam(bam_filename, alpha, NULL);
+
+  /* iterate over reads and save them */
+  while (gt_samfile_iterator_next(bam_iterator, &bam_align) > 0) {
+
+    had_err = calc_read_start(bam_align, &ref_read_start, err);
+    if (had_err == 0) {
+
+      /* resize read set */
+      if (readset->nof == readset->size) {
+        readset->size += INCREMENT_SIZE;
+        readset->read = gt_realloc(readset->read,
+                                sizeof (*readset->read) * readset->size);
+      }
+
+      next_free = readset->nof;
+
+      /* save query name of read */
+      readset->read[next_free].query_name =
+                gt_strdup((char*) gt_sam_alignment_identifier(bam_align));
+      readset->read[next_free].is_unmapped =
+                              gt_sam_alignment_is_unmapped(bam_align);
+      readset->read[next_free].is_reverse =
+                              gt_sam_alignment_is_reverse(bam_align);
+      readset->read[next_free].ref_read_start = ref_read_start;
+      readset->read[next_free].pos = gt_sam_alignment_pos(bam_align);
+
+      /* save id of reference and mate reference */
+      readset->read[next_free].tid = gt_sam_alignment_ref_num(bam_align);
+      readset->read[next_free].mtid = gt_sam_alignment_mate_ref_num(bam_align);
+
+      /* save name und length of reference */
+      if (readset->read[next_free].tid >= 0) {
+        readset->read[next_free].ref_name =
+                 gt_strdup((char*)gt_samfile_iterator_reference_name(
+                         bam_iterator, readset->read[next_free].tid));
+        readset->read[next_free].ref_len =
+                         gt_samfile_iterator_reference_length(
+                         bam_iterator, readset->read[next_free].tid);
+
+      }
+      else {
+        readset->read[next_free].ref_name = NULL;
+        readset->read[next_free].ref_len = 0;
+      }
+
+      /* save name und length of mate reference */
+      if (readset->read[next_free].mtid >= 0) {
+        readset->read[next_free].mref_name =
+                 gt_strdup((char*)gt_samfile_iterator_reference_name(
+                         bam_iterator, readset->read[next_free].mtid));
+        readset->read[next_free].mref_len =
+                 gt_samfile_iterator_reference_length(
+                  bam_iterator, readset->read[next_free].mtid);
+
+      }
+      else {
+        readset->read[next_free].mref_name = NULL;
+        readset->read[next_free].mref_len = 0;
+      }
+
+      /* check if read is valid */
+      if (readset->read[next_free].ref_len < min_ref_length ||
+          gt_sam_alignment_mapping_quality(bam_align) < min_qual ||
+          !gt_sam_alignment_is_paired(bam_align) ||
+          readset->read[next_free].tid == readset->read[next_free].mtid ||
+          readset->read[next_free].is_unmapped)
+        readset->read[next_free].is_valid = false;
+      else
+        readset->read[next_free].is_valid = true;
+
+      readset->nof++;
+    }
+  }
+
+  gt_samfile_iterator_delete(bam_iterator);
+  gt_alphabet_delete(alpha);
+
+  return had_err;
+}
+
+
 
 /* read paired information from bam file and corresponding hist file */
 int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
