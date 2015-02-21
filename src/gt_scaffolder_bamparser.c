@@ -466,7 +466,7 @@ static void calculate_fragment_dist(FragmentData *fragment_data,
 static int compute_likelihood(double *likelihood,
                               GtUword *nof_pairs,
                               GtWord theta,
-                              FragmentData fragment_data,
+                              FragmentData *fragment_data,
                               PmfData pmf_data,
                               GtError *err)
 {
@@ -476,8 +476,8 @@ static int compute_likelihood(double *likelihood,
   double pmf_prob;
 
   /* iterate over fragment sizes */
-  for (index = 0; index < fragment_data.nof_frag_size; index++) {
-    new_frag_size = fragment_data.frag_size[index*2] + theta;
+  for (index = 0; index < fragment_data->nof_frag_size; index++) {
+    new_frag_size = fragment_data->frag_size[index*2] + theta;
 
     /* OBSTACLE: behavior for negative index ambiguously described */
     if (new_frag_size >= 0 && new_frag_size < pmf_data.nof)
@@ -485,10 +485,10 @@ static int compute_likelihood(double *likelihood,
     else
       pmf_prob = pmf_data.minp;
 
-    *likelihood += fragment_data.frag_size[(index*2)+1] * log(pmf_prob);
+    *likelihood += fragment_data->frag_size[(index*2)+1] * log(pmf_prob);
 
     if (pmf_prob > pmf_data.minp)
-      *nof_pairs += fragment_data.frag_size[(index*2)+1];
+      *nof_pairs += fragment_data->frag_size[(index*2)+1];
 
     if (pmf_prob < 0) {
       gt_error_set (err , " negative probability ");
@@ -504,7 +504,7 @@ static int maximum_likelihood_estimate(GtWord *dist,
                                        GtUword *nof_pairs,
                                        GtWord min_dist,
                                        GtWord max_dist,
-                                       FragmentData fragment_data,
+                                       FragmentData *fragment_data,
                                        PmfData pmf_data,
                                        GtUword len_ref,
                                        GtUword len_mref,
@@ -514,8 +514,8 @@ static int maximum_likelihood_estimate(GtWord *dist,
   GtWord best_theta = min_dist, theta;
   double pmf_prob, best_likelihood = (double)GT_WORD_MIN, c, likelihood;
 
-  min_frag_size = fragment_data.frag_size[0];
-  max_frag_size = fragment_data.frag_size[(fragment_data.nof_frag_size-1)*2];
+  min_frag_size = fragment_data->frag_size[0];
+  max_frag_size = fragment_data->frag_size[(fragment_data->nof_frag_size-1)*2];
 
   min_dist = MAX(min_dist, 0 - min_frag_size);
   max_dist = MIN(max_dist, pmf_data.nof - max_frag_size - 1);
@@ -541,7 +541,7 @@ static int maximum_likelihood_estimate(GtWord *dist,
     if (had_err != 0)
       break;
 
-    likelihood -= fragment_data.nof_frag_pos * log(c);
+    likelihood -= fragment_data->nof_frag_pos * log(c);
 
     if (n > 0 && likelihood > best_likelihood) {
       best_likelihood = likelihood;
@@ -561,7 +561,7 @@ static int estimate_dist_using_mle(GtWord *dist,
                                    GtUword *nof_pairs,
                                    GtWord min_dist,
                                    GtWord max_dist,
-                                   FragmentData fragment_data,
+                                   FragmentData *fragment_data,
                                    PmfData pmf_data,
                                    GtUword len_ref,
                                    GtUword len_mref,
@@ -571,8 +571,8 @@ static int estimate_dist_using_mle(GtWord *dist,
   int had_err = 0;
   GtUword temp;
 
-  len_ref -= fragment_data.ma - 1;
-  len_mref -= fragment_data.ma - 1;
+  len_ref -= fragment_data->ma - 1;
+  len_mref -= fragment_data->ma - 1;
 
   /* swap reference and mate reference length */
   if (len_ref > len_mref) {
@@ -583,7 +583,7 @@ static int estimate_dist_using_mle(GtWord *dist,
 
   /* library is oriented reverse-forward */
   if (rf) {
-    calculate_fragment_dist(&fragment_data, 0);
+    calculate_fragment_dist(fragment_data, 0);
     had_err = maximum_likelihood_estimate(dist, nof_pairs, min_dist, max_dist,
                             fragment_data, pmf_data, len_ref, len_mref, err);
 
@@ -591,10 +591,10 @@ static int estimate_dist_using_mle(GtWord *dist,
   /* library is oriented forward-reverse */
   /* Subtract 2*(l-1) from each sample */
   else {
-    calculate_fragment_dist(&fragment_data, 2 * (fragment_data.ma - 1));
+    calculate_fragment_dist(fragment_data, 2 * (fragment_data->ma - 1));
     had_err = maximum_likelihood_estimate(dist, nof_pairs, min_dist, max_dist,
                              fragment_data, pmf_data, len_ref, len_mref, err);
-    *dist = MAX(min_dist, *dist - 2 * (GtWord)(fragment_data.ma - 1));
+    *dist = MAX(min_dist, *dist - 2 * (GtWord)(fragment_data->ma - 1));
   }
 
   return had_err;
