@@ -2,8 +2,6 @@
 - output: convert scaffolds to fasta [Dorle]
   - evaluate and test the implementation
   - quast evaluation [Stefan]
-- parser / new module: generate DistEst file from .bam [Lukas]
-  - look into abyss estimation (paper)
 - parser: parse astat from readjoiner contig file [Lukas / Stefan]
   - readjoiner: -astat flag
   (- evaluate astat computation)
@@ -21,6 +19,8 @@
   (...algorithms.c: ...mark_repeats: line 83)
 
 ## DONE
+- parser / new module: generate DistEst file from .bam [Lukas]
+  - look into abyss estimation (paper) (does not exist)
 - ported test to gt testsuite [Stefan]
 - finalize presentation [Dorle / Lukas / Stefan]
 - N50 [Stefan]
