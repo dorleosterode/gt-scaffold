@@ -52,5 +52,6 @@ int gt_scaffolder_parser_count_contigs(const char *filename,
 int gt_scaffolder_parser_read_contigs(GtScaffolderGraph *graph,
                                       const char *filename,
                                       GtUword min_ctg_len,
+                                      bool astat_is_annotated,
                                       GtError *err);
 #endif

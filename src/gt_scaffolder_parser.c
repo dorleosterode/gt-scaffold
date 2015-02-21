@@ -35,6 +35,8 @@ typedef struct {
   GtUword min_ctg_len;
   GtStr *header_seq;
   GtScaffolderGraph *graph;
+  bool astat_is_annotated;
+  float astat;
 } GtScaffolderGraphFastaReaderData;
 
 /* sort by lexicographic ascending order */
@@ -458,8 +460,24 @@ static int gt_scaffolder_graph_save_header(const char *description,
   char *writeable_description, *space_ptr;
   GtScaffolderGraphFastaReaderData *fasta_reader_data =
   (GtScaffolderGraphFastaReaderData*) data;
+  char part_1[BUFSIZE], part_2[BUFSIZE];
+  GtWord num_1, num_2;
+  float astat;
 
   had_err = 0;
+
+  fasta_reader_data->astat = 0.0;
+  /* check if astat is annotated in contig header and if so parse it */
+  if (fasta_reader_data->astat_is_annotated) {
+    if (sscanf(description,"%s length=" GT_WD " depth=" GT_WD " astat=%f"
+        "%s", part_1, &num_1, &num_2, &astat, part_2) == 5)
+      fasta_reader_data->astat = astat;
+    else {
+      gt_error_set (err , "No astat was found in header");
+      had_err = -1;
+    }
+  }
+
   writeable_description = gt_strdup(description);
   /* cut header sequence after first space */
   space_ptr = strchr(writeable_description, ' ');
@@ -490,10 +508,10 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
 
   had_err = 0;
   if (seq_length > fasta_reader_data->min_ctg_len)
-  {
+  {      
     cloned_gt_str = gt_str_clone(fasta_reader_data->header_seq);
     gt_scaffolder_graph_add_vertex(fasta_reader_data->graph,
-    cloned_gt_str, seq_length, 0.0, 0.0);
+    cloned_gt_str, seq_length, fasta_reader_data->astat, 0.0);
   }
 
   if (seq_length == 0) {
@@ -534,6 +552,7 @@ int gt_scaffolder_parser_count_contigs(const char *filename,
 int gt_scaffolder_parser_read_contigs(GtScaffolderGraph *graph,
                                       const char *filename,
                                       GtUword min_ctg_len,
+                                      bool astat_is_annotated,
                                       GtError *err)
 {
   GtFastaReader* reader;
@@ -546,6 +565,7 @@ int gt_scaffolder_parser_read_contigs(GtScaffolderGraph *graph,
   fasta_reader_data.nof_valid_ctg = 0;
   fasta_reader_data.min_ctg_len = min_ctg_len;
   fasta_reader_data.graph = graph;
+  fasta_reader_data.astat_is_annotated = astat_is_annotated;
 
   reader = gt_fasta_reader_rec_new(str_filename);
   had_err = gt_fasta_reader_run(reader, gt_scaffolder_graph_save_header,
