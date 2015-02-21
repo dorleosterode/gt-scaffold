@@ -56,7 +56,6 @@ void gt_scaffolder_bamparser_delete_dist_records(DistRecords *dist);
 /* read paired information from bam file and corresponding hist file */
 int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
                                                     const char *bam_filename,
-                                                    const char *hist_filename,
                                                     GtWord min_dist,
                                                     GtWord max_dist,
                                                     GtUword min_qual,
