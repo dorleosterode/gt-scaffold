@@ -51,12 +51,22 @@ typedef struct ReadInfo {
 /* data type for saving information about
    reads aligned to some contig  */
 typedef struct Read {
-  bool reverse;
-  bool mreverse;
-  GtUword tid;
-  GtUword mtid;
+  bool is_reverse;
+  bool is_mreverse;
+  bool is_unmapped;
+  bool is_munmapped;
+  bool is_valid;
+  int tid;
+  int mtid;
+  GtUword pos;
   GtWord ref_read_start;
   GtWord mref_read_start;
+  GtWord isize;
+  char *query_name;
+  char *ref_name;
+  char *mref_name;
+  GtUword ref_len;
+  GtUword mref_len;
 } Read;
 
 typedef struct ReadSet {
