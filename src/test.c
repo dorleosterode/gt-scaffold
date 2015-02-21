@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 {
   GtError *err;
   GtScaffolderGraph *graph;
-  char *contig_filename, *dist_filename, *astat_filename, *hist_filename,
+  char *contig_filename, *dist_filename, *astat_filename,
     *bam_filename, *spm_filename;
   int had_err = 0;
   DistRecords *dist;
@@ -196,26 +196,23 @@ int main(int argc, char **argv)
     }
   }
   else if (strcmp(argv[1], "bamparser") == 0) {
-    if (argc != 4) {
-      fprintf(stderr, "Usage:<sorted BAM file> <hist file>\n");
+    if (argc != 3) {
+      fprintf(stderr, "Usage:<BAM file>\n");
       return EXIT_FAILURE;
     } else {
       bam_filename = argv[2];
-      hist_filename = argv[3];
 
       /* initialize distance records */
       dist = gt_scaffolder_bamparser_init_dist_records();
 
       /* read paired information from bam file */
       had_err = gt_scaffolder_bamparser_read_paired_information(dist,
-            bam_filename, hist_filename, MIN_DIST, MAX_DIST, MIN_QUAL,
+            bam_filename, MIN_DIST, MAX_DIST, MIN_QUAL,
             MIN_NOF_PAIRS, MIN_REF_LENGTH, MIN_ALIGN, err);
 
-      if (had_err == 0) {
-        /* print distance records */
-        had_err = gt_scaffolder_bamparser_print_dist_records(dist,
-                      "gt_scaffolder_bamparser_distance_records.de", err);
-      }
+      /* print distance records */
+      had_err = gt_scaffolder_bamparser_print_dist_records(dist,
+                "gt_scaffolder_bamparser_distance_records.de", err);
 
       /* delete distance records */
       gt_scaffolder_bamparser_delete_dist_records(dist);
