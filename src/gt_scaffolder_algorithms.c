@@ -428,13 +428,14 @@ is_twin(const GtScaffolderGraphEdge *e1, const GtScaffolderGraphEdge *e2) {
 }
 
 /* DFS to detect Cycles given a starting vertex */
-GtScaffolderGraphEdge
-*gt_scaffolder_detect_cycle(GtScaffolderGraphVertex *v,
-                            bool dir,
-                            GtArray *visited) {
+GtScaffolderGraphEdge *
+gt_scaffolder_detect_cycle(GtScaffolderGraphVertex *v,
+                           bool dir,
+                           GtArray *visited) {
   GtUword eid, beid;
   GtScaffolderGraphEdge *back;
   GtArray *stack;
+  bool cur_dir;
 
   gt_assert(v != NULL);
 
@@ -457,8 +458,14 @@ GtScaffolderGraphEdge
           }
           back->end->state = GIS_VISITED;
           gt_array_add(visited, back->end);
+          /* SGA: set cur_dir to !back->twin->dir */
+          if (back->same)
+            cur_dir = back->sense;
+          else
+            cur_dir = !back->sense;
+
           for (beid = 0; beid < back->end->nof_edges; beid++) {
-            if (back->end->edges[beid]->sense == dir &&
+            if (back->end->edges[beid]->sense == cur_dir &&
                 !edge_is_marked(back->end->edges[beid]) &&
                 !is_twin(back, back->end->edges[beid]))
               gt_array_add(stack, back->end->edges[beid]);
@@ -537,9 +544,8 @@ void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
 
           if (back_edge != NULL) {
             found_cycle = true;
-            back_edge->state = GIS_CYCLIC;
-            back_edge->start->state = GIS_CYCLIC;
-            back_edge->end->state = GIS_CYCLIC;
+            mark_vertex(back_edge->start, GIS_CYCLIC);
+            mark_vertex(back_edge->end, GIS_CYCLIC);
           }
         }
       }
