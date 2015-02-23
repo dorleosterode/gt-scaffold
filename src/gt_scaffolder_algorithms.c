@@ -171,16 +171,17 @@ gt_scaffolder_graph_ambiguousorder(const GtScaffolderGraphEdge *edge1,
   gt_assert(edge1 != NULL);
   gt_assert(edge2 != NULL);
 
-  float expval, variance, interval, prob12, prob21;
+  float expval, variance, interval, prob12, prob21, p_wrong;
 
   expval = edge1->dist - edge2->dist;
-  variance = 2 * (edge1->std_dev * edge1->std_dev) -
-             (edge2->std_dev * edge2->std_dev);
-  interval = -expval / sqrt(variance);
+  variance = 2 * ((edge1->std_dev * edge1->std_dev) +
+                  (edge2->std_dev * edge2->std_dev));
+  interval = (0 - expval) / sqrt(variance);
   prob12 = 0.5 * (1 + erf(interval) );
   prob21 = 1.0 - prob12;
 
-  return (prob12 <= cutoff && prob21 <= cutoff) ? true : false;
+  p_wrong = 1.0 - MAX(prob12, prob21);
+  return (p_wrong > cutoff) ? true : false;
 }
 
 /* LG:overlap can be negative!? */
