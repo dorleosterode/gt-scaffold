@@ -430,56 +430,47 @@ is_twin(const GtScaffolderGraphEdge *e1, const GtScaffolderGraphEdge *e2) {
 
 /* DFS to detect Cycles given a starting vertex */
 GtScaffolderGraphEdge *
-gt_scaffolder_detect_cycle(GtScaffolderGraphVertex *v,
-                           bool dir,
-                           GtArray *visited) {
-  GtUword eid, beid;
+gt_scaffolder_detect_cycle_recursive(GtScaffolderGraphVertex *v,
+				     GtScaffolderGraphVertex *p,
+                                     bool dir,
+                                     GtArray *visited) {
+  GtUword eid;
   GtScaffolderGraphEdge *back;
-  GtArray *stack;
-  bool cur_dir;
+  bool next_dir;
 
   gt_assert(v != NULL);
-
-  stack = gt_array_new(sizeof (GtScaffolderGraphEdge *));
 
   gt_array_add(visited, v);
   v->state = GIS_VISITED;
 
   for (eid = 0; eid < v->nof_edges; eid++) {
-    if (v->edges[eid]->sense == dir &&
-        !edge_is_marked(v->edges[eid])) {
-      gt_array_add(stack, v->edges[eid]);
+    back = v->edges[eid];
+    if (back->sense == dir &&
+        !edge_is_marked(back) &&
+	back->end != p) {
 
-      while (gt_array_size(stack) != 0) {
-        back = *(GtScaffolderGraphEdge **) gt_array_pop(stack);
-        if (!vertex_is_marked(back->end)) {
-          if (back->end->state == GIS_VISITED) {
-            gt_array_delete(stack);
-            return back;
-          }
-          back->end->state = GIS_VISITED;
-          gt_array_add(visited, back->end);
-          /* SGA: set cur_dir to !back->twin->dir */
-          if (back->same)
-            cur_dir = back->sense;
-          else
-            cur_dir = !back->sense;
+      if (!vertex_is_marked(back->end)) {
+	if (back->end->state == GIS_VISITED)
+	  return back;
 
-          for (beid = 0; beid < back->end->nof_edges; beid++) {
-            if (back->end->edges[beid]->sense == cur_dir &&
-                !edge_is_marked(back->end->edges[beid]) &&
-                !is_twin(back, back->end->edges[beid]))
-              gt_array_add(stack, back->end->edges[beid]);
-          }
-        }
+	if (back->end->state == GIS_UNVISITED) {
+	  /* SGA: set cur_dir to !back->twin->dir */
+	  if (back->same)
+	    next_dir = back->sense ? true : false;
+	  else
+	    next_dir = back->sense ? false : true;
+
+	  back = gt_scaffolder_detect_cycle_recursive(back->end, v, next_dir, visited);
+
+	  if (back != NULL)
+	    return back;
+	}
       }
     }
   }
 
-  gt_array_delete(stack);
-
+  v->state = GIS_PROCESSED;
   return NULL;
-
 }
 
 /*  remove cycles */
@@ -532,8 +523,8 @@ void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
           if (vertex_is_marked(start))
             continue;
 
-          back_edge = gt_scaffolder_detect_cycle(start,
-                      dir, visited);
+          back_edge = gt_scaffolder_detect_cycle_recursive(start, NULL,
+							   dir, visited);
 
           /* mark all visited vertices as unvisited for the next search */
           for (k = 0; k < gt_array_size(visited); k++) {
