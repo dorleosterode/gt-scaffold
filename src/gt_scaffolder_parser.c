@@ -174,10 +174,6 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
   /* sort by lexicographic ascending order */
   qsort(graph->vertices, graph->nof_vertices, sizeof (*graph->vertices),
        gt_scaffolder_graph_vertices_compare);
-  /* update vertex ID
-     LG: Knoten ID eigentlich redundant? SD: Ja. LG: OK?!
-  for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices); v++)
-    v->index = v - graph->vertices;*/
 
   file = fopen(file_name, "rb");
   if (file == NULL) {
@@ -277,6 +273,11 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
       }
     }
     fclose(file);
+  }
+
+  if (record_counter == 0) {
+    had_err = -1;
+    gt_error_set(err,"distance file %s is empty", file_name);
   }
 
   if (had_err != -1) {
