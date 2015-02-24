@@ -614,7 +614,7 @@ GtScaffolderGraphWalk
   GtUword lengthbestwalk, lengthcwalk, eid, i;
   GtScaffolderGraphWalk *bestwalk, *currentwalk;
   float distance, *distancemap;
-  GtScaffolderGraphNode initial_node, current_node, *node;
+  GtScaffolderGraphNode *node;
   bool dir;
   lengthbestwalk = 0;
   /* bool set_dir = false; */
@@ -659,6 +659,7 @@ GtScaffolderGraphWalk
     if (!edge_is_marked(edge) &&
         !vertex_is_marked(edge->end))
     {
+      GtScaffolderGraphNode *initial_node = gt_malloc(sizeof (*initial_node));
       endvertex = edge->end;
 
       /* SK: genometools hashes verwenden, Dichte evaluieren
@@ -668,10 +669,10 @@ GtScaffolderGraphWalk
       distancemap[endvertex_index] = edge->dist;
       edgemap[endvertex_index] = edge;
 
-      initial_node.edge = edge;
-      initial_node.dist = edge->dist;
+      initial_node->edge = edge;
+      initial_node->dist = edge->dist;
 
-      gt_queue_add(wqueue, &initial_node);
+      gt_queue_add(wqueue, initial_node);
     }
   }
 
@@ -709,17 +710,19 @@ GtScaffolderGraphWalk
           if (distancemap[next_endvertex_index] == GT_WORD_MAX ||
               distancemap[next_endvertex_index] > distance)
             {
+              GtScaffolderGraphNode *current_node = gt_malloc(sizeof (*current_node));
               distancemap[next_endvertex_index] = distance;
               edgemap[next_endvertex_index] = nextedge;
 
-              current_node.edge = nextedge;
-              current_node.dist = distance;
+              current_node->edge = nextedge;
+              current_node->dist = distance;
 
-              gt_queue_add(wqueue, &current_node);
+              gt_queue_add(wqueue, current_node);
             }
         }
       }
     }
+    gt_free(node);
   }
 
   /* Ruecktraversierung durch EdgeMap für alle terminalen Knoten
@@ -835,11 +838,11 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
       bestwalk->edges[bestwalk->nof_edges - 1]->start->state = GIS_SCAFFOLD;
       for (id = (bestwalk->nof_edges - 1); id >= 0; id--) {
         bestwalk->edges[id]->state = GIS_SCAFFOLD;
-	/* mark also the twin edges! */
-	for (ed = 0; ed < bestwalk->edges[id]->end->nof_edges; ed++) {
-	  if (is_twin(bestwalk->edges[id], bestwalk->edges[id]->end->edges[ed]))
-	      bestwalk->edges[id]->end->edges[ed]->state = GIS_SCAFFOLD;
-	}
+        /* mark also the twin edges! */
+        for (ed = 0; ed < bestwalk->edges[id]->end->nof_edges; ed++) {
+          if (is_twin(bestwalk->edges[id], bestwalk->edges[id]->end->edges[ed]))
+              bestwalk->edges[id]->end->edges[ed]->state = GIS_SCAFFOLD;
+        }
         bestwalk->edges[id]->end->state = GIS_SCAFFOLD;
       }
     }
@@ -929,10 +932,10 @@ GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph,
     for (eid = 0; eid < vertex->nof_edges; eid++) {
       edge = vertex->edges[eid];
       if (!edge_is_marked(edge)) {
-	if (edge->state == GIS_SCAFFOLD) {
-	  nof_scaffold_edges++;
-	  unmarked_edge = edge;
-	}
+        if (edge->state == GIS_SCAFFOLD) {
+          nof_scaffold_edges++;
+          unmarked_edge = edge;
+        }
       }
     }
 
