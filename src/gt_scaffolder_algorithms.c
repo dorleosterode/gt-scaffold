@@ -431,7 +431,7 @@ is_twin(const GtScaffolderGraphEdge *e1, const GtScaffolderGraphEdge *e2) {
 /* DFS to detect Cycles given a starting vertex */
 GtScaffolderGraphEdge *
 gt_scaffolder_detect_cycle_recursive(GtScaffolderGraphVertex *v,
-				     GtScaffolderGraphVertex *p,
+                                     GtScaffolderGraphVertex *p,
                                      bool dir,
                                      GtArray *visited) {
   GtUword eid;
@@ -447,24 +447,24 @@ gt_scaffolder_detect_cycle_recursive(GtScaffolderGraphVertex *v,
     back = v->edges[eid];
     if (back->sense == dir &&
         !edge_is_marked(back) &&
-	back->end != p) {
+        back->end != p) {
 
       if (!vertex_is_marked(back->end)) {
-	if (back->end->state == GIS_VISITED)
-	  return back;
+        if (back->end->state == GIS_VISITED)
+          return back;
 
-	if (back->end->state == GIS_UNVISITED) {
-	  /* SGA: set cur_dir to !back->twin->dir */
-	  if (back->same)
-	    next_dir = back->sense ? true : false;
-	  else
-	    next_dir = back->sense ? false : true;
+        if (back->end->state == GIS_UNVISITED) {
+          /* SGA: set cur_dir to !back->twin->dir */
+          if (back->same)
+            next_dir = back->sense ? true : false;
+          else
+            next_dir = back->sense ? false : true;
 
-	  back = gt_scaffolder_detect_cycle_recursive(back->end, v, next_dir, visited);
+          back = gt_scaffolder_detect_cycle_recursive(back->end, v, next_dir, visited);
 
-	  if (back != NULL)
-	    return back;
-	}
+          if (back != NULL)
+            return back;
+        }
       }
     }
   }
@@ -507,7 +507,7 @@ void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
         /* search for a cycle, if terminal vertex has edges */
         if (start->nof_edges > 0) {
           GtUword eid;
-          bool dir;
+          bool dir = true;
           bool set_dir = false;
 
           for (eid = 0; eid < start->nof_edges; eid++) {
@@ -524,7 +524,7 @@ void gt_scaffolder_removecycles(GtScaffolderGraph *graph) {
             continue;
 
           back_edge = gt_scaffolder_detect_cycle_recursive(start, NULL,
-							   dir, visited);
+                                                           dir, visited);
 
           /* mark all visited vertices as unvisited for the next search */
           for (k = 0; k < gt_array_size(visited); k++) {
@@ -636,6 +636,8 @@ GtScaffolderGraphWalk
 
   /* check if node has edges */
   if (start->nof_edges == 0) {
+    gt_free(edgemap);
+    gt_free(distancemap);
     return NULL;
   }
 
@@ -739,7 +741,7 @@ GtScaffolderGraphWalk
     }
 
     /* Ermittelung Contig-Gesamtlaenge des aktuellen Walks  */
-    lengthcwalk = currentwalk->total_contig_len;
+    lengthcwalk = currentwalk->total_contig_len + start->seq_len;
 
     if (lengthcwalk > lengthbestwalk) {
       gt_scaffolder_walk_delete(bestwalk);
@@ -749,7 +751,6 @@ GtScaffolderGraphWalk
     else
       gt_scaffolder_walk_delete(currentwalk);
   }
-
   gt_free(distancemap);
   gt_free(edgemap);
   gt_array_delete(terminal_vertices);
