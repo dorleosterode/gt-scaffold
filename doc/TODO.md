@@ -2,8 +2,9 @@
 - output: convert scaffolds to fasta [Dorle]
   - evaluate and test the implementation
   - quast evaluation [Stefan]
-- create scaffold graph based on dist record instead of parsing dist file [Lukas]
-- graph / parser: error message not assertion, if distance-estimates are empty
+- copy number is missing in contigs of readjoiner, astat of readjoiner different
+  to astat of SGA [Lukas]
+- creation of bam-file from aligned reads of readjoiner [Lukas]
 
 ## OBSTACLES
 - [insert line with standard deviation]
@@ -19,7 +20,6 @@
 - algorithms: mark twin edge as GIS_SCAFFOLD -> (implement
   removeMultiEdgeScaffold function not needed) [Dorle]
 - create gt scaffold tool [dorle]
-- evaluate astat computation (DIFFERENT)
 - parser: parse astat from readjoiner contig file [Lukas]
   - readjoiner: -astat flag
 - parser / new module: generate DistEst file from .bam [Lukas]
