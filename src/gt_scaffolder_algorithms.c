@@ -741,7 +741,8 @@ GtScaffolderGraphWalk
     }
 
     /* Ermittelung Contig-Gesamtlaenge des aktuellen Walks  */
-    lengthcwalk = currentwalk->total_contig_len + start->seq_len;
+    currentwalk->total_contig_len += start->seq_len;
+    lengthcwalk = currentwalk->total_contig_len;
 
     if (lengthcwalk > lengthbestwalk) {
       gt_scaffolder_walk_delete(bestwalk);
