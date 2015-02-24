@@ -96,64 +96,67 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
   GtScaffolderGraphVertex *ctg;
 
   had_err = 0;
-  gt_str_field = gt_str_new();
-  file = fopen(filename, "rb");
-  if (file == NULL) {
-    had_err = -1;
-    gt_error_set(err, "can not read file %s", filename);
-  }
-  if (had_err != -1)
-  {
-    /* iterate over each line of file until eof (contig record) */
-    while (fgets(line, BUFSIZE_2, file) != NULL) {
 
-      /* remove '\n' from end of line */
-      line[strlen(line)-1] = '\0';
+  if (strlen(filename) != 0) {
+    gt_str_field = gt_str_new();
+    file = fopen(filename, "rb");
+    if (file == NULL) {
+      had_err = -1;
+      gt_error_set(err, "can not read file %s", filename);
+    }
+    if (had_err != -1)
+    {
+      /* iterate over each line of file until eof (contig record) */
+      while (fgets(line, BUFSIZE_2, file) != NULL) {
 
-      num1 = 0;
-      num2 = 0;
-      num3 = 0;
-      copy_num = 0.0;
-      astat = 0.0;
+        /* remove '\n' from end of line */
+        line[strlen(line)-1] = '\0';
 
-      /* parse record consisting of ctg_header, a-statistics and copy number */
-      /* SD: %[^>,] failed, parsed the whole line instead */
-      if (sscanf(line,"%s\t" GT_WD "\t" GT_WD "\t" GT_WD "\t%f\t%f",
+        num1 = 0;
+        num2 = 0;
+        num3 = 0;
+        copy_num = 0.0;
+        astat = 0.0;
+
+        /* parse record consisting of ctg_header, a-statistics and copy number */
+        /* SD: %[^>,] failed, parsed the whole line instead */
+        if (sscanf(line,"%s\t" GT_WD "\t" GT_WD "\t" GT_WD "\t%f\t%f",
           ctg_header, &num1, &num2, &num3, &copy_num, &astat) == 6)
-      {
-        /* get vertex id corresponding to root contig header */
-        gt_str_set(gt_str_field, ctg_header);
-        /* gt_scaffolder_graph_get_vertex_id in if Statement schieben */
-        valid_contig = gt_scaffolder_graph_get_vertex(graph, &ctg,
+        {
+          /* get vertex id corresponding to root contig header */
+          gt_str_set(gt_str_field, ctg_header);
+          /* gt_scaffolder_graph_get_vertex_id in if Statement schieben */
+          valid_contig = gt_scaffolder_graph_get_vertex(graph, &ctg,
                      gt_str_field);
 
-        if (valid_contig) {
-          /* SK: Evaluieren, ob Knoten hier als Repeat gesetzt werden können */
-          ctg->astat = astat;
-          ctg->copy_num = copy_num;
+          if (valid_contig) {
+            /* SK: Evaluieren, ob Knoten hier als Repeat gesetzt werden können */
+            ctg->astat = astat;
+            ctg->copy_num = copy_num;
+          }
+        }
+        else {
+          had_err = -1;
+          gt_error_set(err, "Invalid record in A-statistic file %s", filename);
+          break;
         }
       }
-      else {
-        had_err = -1;
-        gt_error_set(err, "Invalid record in astat file %s",
-                           filename);
-        break;
-      }
+      fclose(file);
     }
-    fclose(file);
+    gt_str_delete(gt_str_field);
   }
-  gt_str_delete(gt_str_field);
 
   if (had_err != -1)
   {
     GtScaffolderGraphVertex *vertex;
 
-    /* iterate over all vertices */
+    /* iterate over all vertices and mark them as repeats if cutoff is exceeded */
     for (vertex = graph->vertices;
       vertex < (graph->vertices + graph->nof_vertices); vertex++)
     {
       /* SK: Cutoffs und Bedingungen nochmal evaluieren */
-      if (vertex->astat <= astat_cutoff || vertex->copy_num < copy_num_cutoff)
+      if (vertex->astat <= astat_cutoff || 
+          (strlen(filename) != 0 && vertex->copy_num < copy_num_cutoff))
         mark_vertex(vertex, GIS_REPEAT);
     }
   }
