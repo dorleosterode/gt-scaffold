@@ -150,8 +150,10 @@ int gt_scaffolder_bamparser_print_dist_records(const DistRecords *dist,
   int had_err = 0;
 
   file = gt_file_new(filename, "w", err);
-  if (file == NULL)
+  if (file == NULL) {
+    gt_error_set (err , "distance file can not be created");
     had_err = -1;
+  }
 
   if (!had_err) {
     for (index = 0; index < dist->nof_record; index++) {
@@ -386,24 +388,21 @@ static void remove_noise_in_histogram(HistogramData *histogram_data) {
 }
 
 /* create probability mass function (pmf) based on histogram */
-static PmfData create_pmf(HistogramData histogram_data) {
-  PmfData pmf_data;
+static void create_pmf(PmfData *pmf_data, HistogramData histogram_data) {
   GtUword key, *nof;
 
-  pmf_data.mean = histogram_data.mean;
-  pmf_data.std_dev = histogram_data.std_dev;
-  pmf_data.minp = 1.0 / histogram_data.value_sum;
-  pmf_data.dist = gt_malloc(sizeof (*pmf_data.dist) * (histogram_data.max + 1));
-  pmf_data.nof = histogram_data.max + 1;
+  pmf_data->mean = histogram_data.mean;
+  pmf_data->std_dev = histogram_data.std_dev;
+  pmf_data->minp = 1.0 / histogram_data.value_sum;
+  pmf_data->dist = gt_malloc(sizeof (*pmf_data->dist) * (histogram_data.max + 1));
+  pmf_data->nof = histogram_data.max + 1;
   for (key = 0; key <= histogram_data.max; key++) {
     nof = gt_hashmap_get(histogram_data.hash_map, &key);
     if (nof != NULL && *nof > 0)
-      pmf_data.dist[key] = (double)*nof / histogram_data.value_sum;
+      pmf_data->dist[key] = (double)*nof / histogram_data.value_sum;
     else
-      pmf_data.dist[key] = pmf_data.minp;
+      pmf_data->dist[key] = pmf_data->minp;
   }
-
-  return pmf_data;
 }
 
 static double window(GtWord x1,
@@ -508,7 +507,7 @@ static int compute_likelihood(double *likelihood,
       *nof_pairs += fragment_data->frag_size[(index*2)+1];
 
     if (pmf_prob < 0) {
-      gt_error_set (err , " negative probability ");
+      gt_error_set (err , "negative probability");
       had_err = -1;
       break;
     }
@@ -931,82 +930,88 @@ static int load_read_set(ReadSet *readset,
 
   had_err = 0;
   alpha = gt_alphabet_new_dna();
-  bam_iterator = gt_samfile_iterator_new_bam(bam_filename, alpha, NULL);
+  bam_iterator = gt_samfile_iterator_new_bam(bam_filename, alpha, err);
 
-  /* iterate over reads and save them */
-  while (gt_samfile_iterator_next(bam_iterator, &bam_align) > 0) {
+  if (bam_iterator == NULL)
+    had_err = -1;
+  
+  if (had_err == 0) {
+    /* iterate over reads and save them */
+    while (gt_samfile_iterator_next(bam_iterator, &bam_align) > 0) {
 
-    had_err = calc_read_start(bam_align, &ref_read_start, err);
-    if (had_err == 0) {
+      had_err = calc_read_start(bam_align, &ref_read_start, err);
+      if (had_err == 0) {
 
-      /* resize read set */
-      if (readset->nof == readset->size) {
-        readset->size += INCREMENT_SIZE;
-        readset->read = gt_realloc(readset->read,
+        /* resize read set */
+        if (readset->nof == readset->size) {
+          readset->size += INCREMENT_SIZE;
+          readset->read = gt_realloc(readset->read,
                                 sizeof (*readset->read) * readset->size);
-      }
+        }
 
-      next_free = readset->nof;
+        next_free = readset->nof;
 
-      /* save query name of read */
-      readset->read[next_free].query_name =
+        /* save query name of read */
+        readset->read[next_free].query_name =
                 gt_strdup((char*) gt_sam_alignment_identifier(bam_align));
-      readset->read[next_free].is_unmapped =
+        readset->read[next_free].is_unmapped =
                               gt_sam_alignment_is_unmapped(bam_align);
-      readset->read[next_free].is_reverse =
+        readset->read[next_free].is_reverse =
                               gt_sam_alignment_is_reverse(bam_align);
-      readset->read[next_free].ref_read_start = ref_read_start;
-      readset->read[next_free].pos = gt_sam_alignment_pos(bam_align);
+        readset->read[next_free].ref_read_start = ref_read_start;
+        readset->read[next_free].pos = gt_sam_alignment_pos(bam_align);
 
-      /* save id of reference and mate reference */
-      readset->read[next_free].tid = gt_sam_alignment_ref_num(bam_align);
-      readset->read[next_free].mtid = gt_sam_alignment_mate_ref_num(bam_align);
+        /* save id of reference and mate reference */
+        readset->read[next_free].tid = gt_sam_alignment_ref_num(bam_align);
+        readset->read[next_free].mtid = 
+                                 gt_sam_alignment_mate_ref_num(bam_align);
 
-      /* save name und length of reference */
-      if (readset->read[next_free].tid >= 0) {
-        readset->read[next_free].ref_name =
+        /* save name und length of reference */
+        if (readset->read[next_free].tid >= 0) {
+          readset->read[next_free].ref_name =
                  gt_strdup((char*)gt_samfile_iterator_reference_name(
                          bam_iterator, readset->read[next_free].tid));
-        readset->read[next_free].ref_len =
+          readset->read[next_free].ref_len =
                          gt_samfile_iterator_reference_length(
                          bam_iterator, readset->read[next_free].tid);
 
-      }
-      else {
-        readset->read[next_free].ref_name = NULL;
-        readset->read[next_free].ref_len = 0;
-      }
+        }
+        else {
+          readset->read[next_free].ref_name = NULL;
+          readset->read[next_free].ref_len = 0;
+        }
 
-      /* save name und length of mate reference */
-      if (readset->read[next_free].mtid >= 0) {
-        readset->read[next_free].mref_name =
+        /* save name und length of mate reference */
+        if (readset->read[next_free].mtid >= 0) {
+          readset->read[next_free].mref_name =
                  gt_strdup((char*)gt_samfile_iterator_reference_name(
                          bam_iterator, readset->read[next_free].mtid));
-        readset->read[next_free].mref_len =
+          readset->read[next_free].mref_len =
                  gt_samfile_iterator_reference_length(
                   bam_iterator, readset->read[next_free].mtid);
 
-      }
-      else {
-        readset->read[next_free].mref_name = NULL;
-        readset->read[next_free].mref_len = 0;
-      }
+        }
+        else {
+          readset->read[next_free].mref_name = NULL;
+          readset->read[next_free].mref_len = 0;
+        }
 
-      /* check if read is valid */
-      if (readset->read[next_free].ref_len < min_ref_length ||
-          gt_sam_alignment_mapping_quality(bam_align) < min_qual ||
-          !gt_sam_alignment_is_paired(bam_align) ||
-          readset->read[next_free].tid == readset->read[next_free].mtid ||
-          readset->read[next_free].is_unmapped)
-        readset->read[next_free].is_valid = false;
-      else
-        readset->read[next_free].is_valid = true;
+        /* check if read is valid */
+        if (readset->read[next_free].ref_len < min_ref_length ||
+            gt_sam_alignment_mapping_quality(bam_align) < min_qual ||
+            !gt_sam_alignment_is_paired(bam_align) ||
+            readset->read[next_free].tid == readset->read[next_free].mtid ||
+            readset->read[next_free].is_unmapped)
+          readset->read[next_free].is_valid = false;
+        else
+          readset->read[next_free].is_valid = true;
 
-      readset->nof++;
+        readset->nof++;
+      }
     }
+    gt_samfile_iterator_delete(bam_iterator);
   }
 
-  gt_samfile_iterator_delete(bam_iterator);
   gt_alphabet_delete(alpha);
 
   return had_err;
@@ -1096,11 +1101,6 @@ static void create_histogram(HistogramData *histogram_data,
   qsort(fragment_set, fragment_set_nof, sizeof (*fragment_set),
         compare_fragment);
 
-  histogram_data->hash_map = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
-  histogram_data->nof_pairs = 0;
-  histogram_data->size = 0;
-  histogram_data->values = NULL;
-  histogram_data->keys = NULL;
   next_free = 0;
 
   /* iterate over sorted fragments and count their frequencies */
@@ -1253,38 +1253,53 @@ int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
   fragment_data.size_frag_size = 0;
   fragment_data.frag_size = NULL;
 
+  /* initialize hashmap */
+  histogram_data.hash_map = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
+  histogram_data.nof_pairs = 0;
+  histogram_data.size = 0;
+  histogram_data.values = NULL;
+  histogram_data.keys = NULL;
+
+  /* initialize pmf */
+  pmf_data.dist = NULL;
+  pmf_data.nof = 0;
+
   /* load reads from bam-file */
   had_err = load_read_set(&read_set, bam_filename, min_ref_length,
                           min_qual, err);
 
-  /* sort reads by query name */
-  qsort(read_set.read, read_set.nof, sizeof (*read_set.read), compare_read_2);
+  if (had_err == 0) {
+    /* sort reads by query name */
+    qsort(read_set.read, read_set.nof, sizeof (*read_set.read),
+    compare_read_2);
+  
+    /* create histogram based on fragment sizes of reads */
+    create_histogram(&histogram_data, read_set);
 
-  /* create histogram based on fragment sizes of reads */
-  create_histogram(&histogram_data, read_set);
+    /* create probability mass function (pmf) based on histogram */
+    create_pmf(&pmf_data, histogram_data);
 
-  /* create probability mass function (pmf) based on histogram */
-  pmf_data = create_pmf(histogram_data);
+    /* default cutoff values */
+    max_dist = pmf_data.nof-1;
+    fragment_data.ma = min_align;
 
-  /* default cutoff values */
-  max_dist = pmf_data.nof-1;
-  fragment_data.ma = min_align;
-
-  /* determine the orientation of the library */
-  rf = histogram_data.lib_rf;
-  /* TODO
-     if (rf)
+    /* determine the orientation of the library */
+    rf = histogram_data.lib_rf;
+    /* TODO
+       if (rf)
        negate each element of histogram
-  */
+    */
 
-  /* sort reads by reference id and orientation of read relative to reference,
-     reference id of mate read, orientation of read relative
-     to his mate read, alignment pos */
-  qsort(read_set.read, read_set.nof, sizeof (*read_set.read), compare_read_3);
+    /* sort reads by reference id and orientation of read relative to 
+       reference, reference id of mate read, orientation of read relative
+       to his mate read, alignment pos */
+    qsort(read_set.read, read_set.nof, sizeof (*read_set.read),
+                                       compare_read_3);
 
-  analyze_read_set(dist, read_set, min_nof_pairs, min_dist, max_dist,
+    analyze_read_set(dist, read_set, min_nof_pairs, min_dist, max_dist,
                    &fragment_data, pmf_data, rf, err);
 
+  }
   /* clean up */
   for (read = read_set.read; read < read_set.read+read_set.nof; read++) {
     gt_free(read->query_name);
