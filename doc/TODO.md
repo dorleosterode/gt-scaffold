@@ -3,12 +3,9 @@
   - evaluate and test the implementation
   - quast evaluation [Stefan]
 - create scaffold graph based on dist record instead of parsing dist file [Lukas]
-- create gt scaffold tool
 - graph / parser: error message not assertion, if distance-estimates are empty
 
 ## OBSTACLES
-- main: allow min contig length as parameter? [Stefan]
-- algorithms: implement removeMultiEdgeScaffold function [Dorle]
 - [insert line with standard deviation]
 - mark all edges of end vertex of inconsistent edge in twin direction ?
   (ScaffoldVisitors.cpp: ScaffoldLinkValidator::visit: line 188)
@@ -18,11 +15,17 @@
   (...algorithms.c: ...mark_repeats: line 83)
 
 ## DONE
+- allow min contig length as parameter [dorle]
+- algorithms: mark twin edge as GIS_SCAFFOLD -> (implement
+  removeMultiEdgeScaffold function not needed) [Dorle]
+- create gt scaffold tool [dorle]
 - evaluate astat computation (DIFFERENT)
 - parser: parse astat from readjoiner contig file [Lukas]
   - readjoiner: -astat flag
 - parser / new module: generate DistEst file from .bam [Lukas]
   - look into abyss estimation (paper) (does not exist)
+
+--
 - ported test to gt testsuite [Stefan]
 - finalize presentation [Dorle / Lukas / Stefan]
 - N50 [Stefan]
