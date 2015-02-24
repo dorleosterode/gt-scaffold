@@ -831,9 +831,15 @@ void gt_scaffolder_makescaffold(GtScaffolderGraph *graph)
     /* mark all nodes and edges in the best walk as GIS_SCAFFOLD */
     if (bestwalk != NULL) {
       GtWord id;
+      GtUword ed;
       bestwalk->edges[bestwalk->nof_edges - 1]->start->state = GIS_SCAFFOLD;
       for (id = (bestwalk->nof_edges - 1); id >= 0; id--) {
         bestwalk->edges[id]->state = GIS_SCAFFOLD;
+	/* mark also the twin edges! */
+	for (ed = 0; ed < bestwalk->edges[id]->end->nof_edges; ed++) {
+	  if (is_twin(bestwalk->edges[id], bestwalk->edges[id]->end->edges[ed]))
+	      bestwalk->edges[id]->end->edges[ed]->state = GIS_SCAFFOLD;
+	}
         bestwalk->edges[id]->end->state = GIS_SCAFFOLD;
       }
     }
@@ -896,7 +902,7 @@ GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph,
   GtScaffolderGraphRecord *rec;
   GtArray *records;
   bool dir;
-  GtUword eid, nof_edges_in_dir, nof_unmarked_edges, scaf_seqlen;
+  GtUword eid, nof_edges_in_dir, scaf_seqlen, nof_scaffold_edges;
 
   next_edge = NULL;
   edge = NULL;
@@ -907,7 +913,7 @@ GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph,
   /* initialize all vertices as not visited */
   for (vertex = graph->vertices;
        vertex < (graph->vertices + graph->nof_vertices); vertex++) {
-    if (!vertex_is_marked(vertex))
+    if (!vertex_is_marked(vertex) && vertex->state != GIS_SCAFFOLD)
       vertex->state = GIS_UNVISITED;
   }
 
@@ -919,23 +925,25 @@ GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph,
       continue;
 
     /* count unmarked edges and save one of them */
-    nof_unmarked_edges = 0;
+    nof_scaffold_edges = 0;
     for (eid = 0; eid < vertex->nof_edges; eid++) {
       edge = vertex->edges[eid];
       if (!edge_is_marked(edge)) {
-        nof_unmarked_edges++;
-        unmarked_edge = edge;
+	if (edge->state == GIS_SCAFFOLD) {
+	  nof_scaffold_edges++;
+	  unmarked_edge = edge;
+	}
       }
     }
 
-    if (nof_unmarked_edges <= 1) {
+    if (nof_scaffold_edges <= 1) {
       /* found new scaffold */
       rec = gt_scaffolder_graph_record_new(vertex);
       scaf_seqlen = vertex->seq_len;
 
       vertex->state = GIS_VISITED;
 
-      if (nof_unmarked_edges == 1) {
+      if (nof_scaffold_edges == 1) {
 
         next_edge = unmarked_edge;
 
@@ -964,7 +972,7 @@ GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph,
           for (eid = 0; eid < next_edge_end->nof_edges; eid++) {
             edge = next_edge_end->edges[eid];
             if (edge->sense == dir && !edge_is_marked(edge)
-                && !is_twin(next_edge, edge)) {
+                && !is_twin(next_edge, edge) && edge->state == GIS_SCAFFOLD) {
               nof_edges_in_dir++;
               unmarked_edge = edge;
             }
