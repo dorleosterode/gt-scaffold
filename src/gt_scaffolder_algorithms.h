@@ -59,23 +59,35 @@ void gt_scaffolder_walk_delete(GtScaffolderGraphWalk *walk);
 void gt_scaffolder_walk_addegde(GtScaffolderGraphWalk *walk,
                                        GtScaffolderGraphEdge *edge);
 
+/* create new scaffold-record with root-node <*root> */
 GtScaffolderGraphRecord *
 gt_scaffolder_graph_record_new(GtScaffolderGraphVertex *root);
 
+/* add edge to scaffold-record */
 void gt_scaffolder_graph_record_add_edge(GtScaffolderGraphRecord *rec,
                                          GtScaffolderGraphEdge *edge);
 
+/* delete scaffold-record */
 void gt_scaffolder_graph_record_delete(GtScaffolderGraphRecord *rec);
 
+/* traverse the graph and calculate all connected components. all
+   terminal vertices for each connected component are stored in an
+   GtArray. all GtArray for the terminial vertices are stored in
+   ccs. */
 void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
                                          GtArray *ccs);
 
+/* creates all minimal walks with respect to edge->dist from start to
+   every other terminal vertex in the current cc. the walk with the
+   greatest total contig length is returned */
 GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
                  GtScaffolderGraphVertex *start);
 
-/* Konstruktion des Scaffolds mit groesster Contig-Gesamtlaenge */
+/* constructs the scaffolds for every cc. all vertices and edges in a
+   scaffold are marked as GIS_SCAFFOLD. */
 void gt_scaffolder_makescaffold(GtScaffolderGraph *graph);
 
+/* removes cycles in every cc. */
 void gt_scaffolder_removecycles(GtScaffolderGraph *graph);
 
 #endif
