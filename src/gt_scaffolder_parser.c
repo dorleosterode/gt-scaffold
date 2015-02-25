@@ -308,7 +308,6 @@ int gt_scaffolder_parser_read_distances(const char *filename,
                                               GtError *err)
 {
   FILE *file;
-  /* SD: Konstante setzen? */
   char line[BUFSIZE+1], *field, ctg_header[BUFSIZE+1];
   GtUword ctg_header_len;
   GtWord dist, num_pairs;
@@ -341,12 +340,9 @@ int gt_scaffolder_parser_read_distances(const char *filename,
       field = strtok(line," ");
 
       /* get vertex id corresponding to root contig header */
-      /* SK: Moeglichkeit einer set Funktion evaluieren */
       gt_str_set(gt_str_field, field);
       valid_contig = gt_scaffolder_graph_get_vertex(graph, &root_ctg,
                 gt_str_field);
-
-      /* Debbuging: printf("rootctgid: %s\n",field);*/
 
       if (valid_contig) {
         /* iterate over space delimited records */
@@ -354,9 +350,6 @@ int gt_scaffolder_parser_read_distances(const char *filename,
         {
           /* parse record consisting of contig header, distance,
              number of pairs, std. dev. */
-          /* SD: %[^>,] ist eine negierte Zeichenklasse (Workaround weil %s
-                 nicht funktioniert)
-          */
           if (sscanf(field,"%[^>,]," GT_WD "," GT_WD ",%f", ctg_header, &dist,
               &num_pairs, &std_dev) == 4)
           {
@@ -379,14 +372,13 @@ int gt_scaffolder_parser_read_distances(const char *filename,
               edge = gt_scaffolder_graph_find_edge(root_ctg, ctg);
               if (edge != NULL)
               {
-                /*  LG: laut SGA edge->std_dev < std_dev,  korrekt? */
+                /* SGA: edge->std_dev < std_dev ? */
                 if (!ismatepair && edge->std_dev < std_dev)
                 {
-                  /* LG: Ueberpruefung Kantenrichtung notwendig? */
+                  /* need for checking edge direction? */
                   gt_scaffolder_graph_alter_edge(edge, dist, std_dev,
                                                num_pairs,sense, same);
                 }
-                /*else { Conflicting-Flag? }*/
               }
               else {
                 /* set edge with corresponding twin edge, as dist format does
@@ -509,7 +501,7 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
 
   had_err = 0;
   if (seq_length > fasta_reader_data->min_ctg_len)
-  {      
+  {
     cloned_gt_str = gt_str_clone(fasta_reader_data->header_seq);
     gt_scaffolder_graph_add_vertex(fasta_reader_data->graph,
     cloned_gt_str, seq_length, fasta_reader_data->astat, 0.0);
