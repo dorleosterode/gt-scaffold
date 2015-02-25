@@ -4,18 +4,31 @@
   - quast evaluation [Stefan]
 - copy number is missing in contigs of readjoiner, astat of readjoiner different
   to astat of SGA [Lukas]
+  - copy number:
+    - gt readjoiner prefilter -copynum (> *.rcn)
+    - gt readjoiner assembly -copynum -astat
 - creation of bam-file from aligned reads of readjoiner [Lukas]
+  - alternative: custom format containing fragment sizes, paired-end information
+- finish testsuite [Stefan]
+- tidy code [Dorle, Lukas, Stefan]
+- documentation [Dorle, Lukas, Stefan], 15-20 pages
+  - UML diagram
+  - bamparser
+  - up-to-date results
+  - potential discussion: C vs script languages
+    - possibilities: traverse string graph etc
 
 ## OBSTACLES
 - [insert line with standard deviation]
 - mark all edges of end vertex of inconsistent edge in twin direction ?
   (ScaffoldVisitors.cpp: ScaffoldLinkValidator::visit: line 188)
   (...algorithms.c: ...filter: line 314)
-- mark vertex as repeat if copy number below cutoff ?
+- mark vertex as repeat if copy number below cutoff ? -> untrusted
   (ScaffoldVisitors.cpp: ScaffoldAStatisticVisitor::visit: line 86)
   (...algorithms.c: ...mark_repeats: line 83)
 
 ## DONE
+- build tool architecture [Dorle]
 - allow min contig length as parameter [dorle]
 - algorithms: mark twin edge as GIS_SCAFFOLD -> (implement
   removeMultiEdgeScaffold function not needed) [Dorle]
