@@ -499,6 +499,8 @@ int gt_scaffolder_graph_generate_fasta(char *contig_file,
       GtUword desc_len;
       char contig[1025];
       GtWord seq_num;
+      const char *cseq;
+      GtUword len;
       struct GtScaffolderGraphResolveStats stats;
       GtHashmap *contigs = gt_hashmap_new(GT_HASH_STRING, gt_free_func, NULL);
 
@@ -549,9 +551,15 @@ int gt_scaffolder_graph_generate_fasta(char *contig_file,
         /* write seq to fasta file */
         gt_file_xfputs(gt_str_get(ids), out);
         gt_file_xfputs("\n", out);
-        /* TODO: print 80 chars per line */
-        gt_file_xfputs(gt_str_get(seq), out);
-        gt_file_xfputs("\n", out);
+
+	/* print 80 chars per line */
+	len = gt_str_length(seq);
+	cseq = gt_str_get(seq);
+	while (len > 0) {
+	  gt_file_xprintf(out, "%.80s\n", cseq);
+	  cseq += 80;
+	  len -= MIN(80, len);
+	}
 
         gt_str_delete(seq);
         /* deleting all recs after stringgeneration */
