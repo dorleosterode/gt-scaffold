@@ -934,7 +934,7 @@ static int load_read_set(ReadSet *readset,
 
   if (bam_iterator == NULL)
     had_err = -1;
-  
+
   if (had_err == 0) {
     /* iterate over reads and save them */
     while (gt_samfile_iterator_next(bam_iterator, &bam_align) > 0) {
@@ -963,7 +963,7 @@ static int load_read_set(ReadSet *readset,
 
         /* save id of reference and mate reference */
         readset->read[next_free].tid = gt_sam_alignment_ref_num(bam_align);
-        readset->read[next_free].mtid = 
+        readset->read[next_free].mtid =
                                  gt_sam_alignment_mate_ref_num(bam_align);
 
         /* save name und length of reference */
@@ -1272,7 +1272,7 @@ int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
     /* sort reads by query name */
     qsort(read_set.read, read_set.nof, sizeof (*read_set.read),
     compare_read_2);
-  
+
     /* create histogram based on fragment sizes of reads */
     create_histogram(&histogram_data, read_set);
 
@@ -1290,7 +1290,7 @@ int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
        negate each element of histogram
     */
 
-    /* sort reads by reference id and orientation of read relative to 
+    /* sort reads by reference id and orientation of read relative to
        reference, reference id of mate read, orientation of read relative
        to his mate read, alignment pos */
     qsort(read_set.read, read_set.nof, sizeof (*read_set.read),
