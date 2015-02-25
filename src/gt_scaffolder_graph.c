@@ -140,14 +140,13 @@ void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
                                   bool dir,
                                   bool same)
 {
+  GtUword nextfree = graph->nof_edges;
 
   gt_assert(graph != NULL);
   gt_assert(graph->vertices != NULL);
   gt_assert(vstart != NULL);
   gt_assert(graph->edges != NULL);
   gt_assert(graph->nof_edges < graph->max_nof_edges);
-
-  GtUword nextfree = graph->nof_edges;
 
   /* Inititalize edge */
   graph->edges[nextfree].start = vstart;
@@ -181,7 +180,6 @@ GtScaffolderGraphEdge
 }
 
 /* determines corresponding vertex to contig header */
-/* SD: Binaersuche separat testen */
 bool gt_scaffolder_graph_get_vertex(const GtScaffolderGraph *graph,
                                     GtScaffolderGraphVertex **vertex,
                                     const GtStr *header_seq)
@@ -246,11 +244,12 @@ int gt_scaffolder_graph_print(const GtScaffolderGraph *g,
                               const char *filename,
                               GtError *err)
 {
+  int had_err = 0;
+  GtFile *f;
+
   gt_assert(g != NULL);
 
-  int had_err = 0;
-
-  GtFile *f = gt_file_new(filename, "w", err);
+  f = gt_file_new(filename, "w", err);
   if (f == NULL)
     had_err = -1;
 
@@ -266,8 +265,6 @@ int gt_scaffolder_graph_print(const GtScaffolderGraph *g,
 void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
                                        GtFile *f)
 {
-  gt_assert(g != NULL);
-
   GtScaffolderGraphVertex *v;
   GtScaffolderGraphEdge *e;
   /* 0: GIS_UNVISITED, 1: GIS_POLYMORPHIC, 2: GIS_INCONSISTENT,
@@ -275,6 +272,8 @@ void gt_scaffolder_graph_print_generic(const GtScaffolderGraph *g,
      7: GIS_CYCLIC */
   const char *color_array[] = {"black", "gray80", "gainsboro", "ivory3", "red",
                                "green", "magenta", "blue"};
+
+  gt_assert(g != NULL);
 
   /* print first line into f */
   gt_file_xprintf(f, "digraph {\n");
@@ -439,11 +438,12 @@ int gt_scaffolder_graph_test(GtUword max_nof_vertices,
 
   /* Init vertex portion of graph. <nof_vertices> Create vertices. */
   if (init_vertices) {
+    unsigned i;
+
     gt_scaffolder_graph_init_vertices(graph, max_nof_vertices);
     if (graph->vertices == NULL)
       had_err = -1;
 
-    unsigned i;
     for (i = 0; i < nof_vertices; i++) {
       gt_scaffolder_graph_add_vertex(graph, gt_str_new_cstr("foobar"),
                                      100, 20, 40);
@@ -459,6 +459,7 @@ int gt_scaffolder_graph_test(GtUword max_nof_vertices,
   <nof_edges> is reached. */
   if (init_edges) {
     GtScaffolderGraphVertex *vertex1, *vertex2;
+    unsigned i;
     vertex1 = graph->vertices;
     vertex2 = graph->vertices;
 
@@ -468,7 +469,6 @@ int gt_scaffolder_graph_test(GtUword max_nof_vertices,
       had_err = -1;
 
     /* Connect 1st vertex with every other vertex, then 2nd one, etc */
-    unsigned i;
     for (i = 0; i < nof_edges; i++) {
       if (vertex2-graph->vertices < nof_vertices - 1)
         vertex2++;
