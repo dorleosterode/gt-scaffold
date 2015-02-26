@@ -475,8 +475,7 @@ int gt_scaffolder_graph_generate_fasta(char *contig_file,
 
     memcpy(spm_complete, spm_file, strlen(spm_file));
     memcpy(spm_complete + strlen(spm_file), ".0.spm", 6);
-
-    gt_assert(spm_complete[strlen(spm_complete)] == '\0');
+    spm_complete[strlen(spm_file) + 6] = '\0';
 
     had_err = gt_spmlist_parse(spm_complete, 0, gt_spmproc_strgraph_count,
                                (void *)strgraph, err);
