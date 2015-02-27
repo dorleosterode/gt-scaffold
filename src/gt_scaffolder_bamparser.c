@@ -182,16 +182,17 @@ int gt_scaffolder_bamparser_print_dist_records(const DistRecords *dist,
   return had_err;
 }
 
-/* initialize distance records */
+/* delete distance records */
 void gt_scaffolder_bamparser_delete_dist_records(DistRecords *dist) {
  GtUword index, index_2;
 
   for (index = 0; index < dist->size; index++) {
     for (index_2 = 0; index_2 < dist->record[index].nof_ctg; index_2++)
-      gt_free(dist->record[index].ctg[index_2].id);
-      gt_free(dist->record[index].ctg);
-      gt_free(dist->record[index].root_ctg_id);
-    }
+      gt_str_delete(dist->record[index].ctg[index_2].id);
+
+    gt_free(dist->record[index].ctg);
+    gt_str_delete(dist->record[index].root_ctg_id);
+  }
   gt_free(dist->record);
   gt_free(dist);
 }
@@ -908,7 +909,7 @@ static int analyze_read_set(DistRecords *dist_records,
     same = (read-1)->is_reverse;
     add_contig_dist_record(dist_records, ctg_id, std_dev, dist, nof_pairs,
                            sense, same);
-  }
+  }  
 
   return had_err;
 }
@@ -1304,9 +1305,9 @@ int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
   }
   /* clean up */
   for (read = read_set.read; read < read_set.read+read_set.nof; read++) {
-    gt_free(read->query_name);
-    gt_free(read->ref_name);
-    gt_free(read->mref_name);
+    gt_str_delete(read->query_name);
+    gt_str_delete(read->ref_name);
+    gt_str_delete(read->mref_name);
   }
   gt_free(read_set.read);
 
