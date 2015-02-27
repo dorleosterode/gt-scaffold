@@ -22,6 +22,7 @@
 
 #include "core/fasta_reader_rec.h"
 #include "core/ma_api.h"
+#include "core/cstr_api.h"
 
 #include "gt_scaffolder_graph.h"
 #include "gt_scaffolder_parser.h"
@@ -471,7 +472,7 @@ static int gt_scaffolder_graph_save_header(const char *description,
     }
   }
 
-  writeable_description = gt_strdup(description);
+  writeable_description = gt_cstr_dup(description);
   /* cut header sequence after first space */
   space_ptr = strchr(writeable_description, ' ');
   if (space_ptr != NULL)
