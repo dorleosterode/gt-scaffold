@@ -23,6 +23,7 @@
 #include <float.h>
 #include <string.h>
 
+#include "core/str_api.h"
 #include "core/unused_api.h"
 #include "core/alphabet_api.h"
 #include "core/minmax.h"
@@ -77,9 +78,9 @@ typedef struct Read {
   GtWord ref_read_start;
   GtWord mref_read_start;
   GtWord isize;
-  char *query_name;
-  char *ref_name;
-  char *mref_name;
+  GtStr *query_name;
+  GtStr *ref_name;
+  GtStr *mref_name;
   GtUword ref_len;
   GtUword mref_len;
 } Read;
@@ -157,7 +158,7 @@ int gt_scaffolder_bamparser_print_dist_records(const DistRecords *dist,
 
   if (!had_err) {
     for (index = 0; index < dist->nof_record; index++) {
-      gt_file_xprintf(file, "%s",dist->record[index].root_ctg_id);
+      gt_file_xprintf(file, "%s",gt_str_get(dist->record[index].root_ctg_id));
       set_dir = false;
       for (index_2 = 0; index_2 < dist->record[index].nof_ctg; index_2++) {
         if (dist->record[index].ctg[index_2].same && !set_dir) {
@@ -166,7 +167,7 @@ int gt_scaffolder_bamparser_print_dist_records(const DistRecords *dist,
         }
 
         gt_file_xprintf(file," %s%c," GT_WD "," GT_WU ",%.1f",
-                       dist->record[index].ctg[index_2].id,
+                       gt_str_get(dist->record[index].ctg[index_2].id),
                        dist->record[index].ctg[index_2].sense ? '+' : '-',
                        dist->record[index].ctg[index_2].dist,
                        dist->record[index].ctg[index_2].nof_pairs,
@@ -197,7 +198,7 @@ void gt_scaffolder_bamparser_delete_dist_records(DistRecords *dist) {
 
 /* create new distance record */
 static void create_dist_record(DistRecords *dist_records,
-                               const char *root_ctg_id) {
+                               GtStr *root_ctg_id) {
   GtUword index;
 
   /* resize */
@@ -214,14 +215,13 @@ static void create_dist_record(DistRecords *dist_records,
     }
   }
 
-  dist_records->record[dist_records->nof_record].root_ctg_id =
-                                       gt_strdup(root_ctg_id);
+  dist_records->record[dist_records->nof_record].root_ctg_id = root_ctg_id;
   dist_records->nof_record++;
 }
 
 /* add contig to existing distance record */
 static void add_contig_dist_record(DistRecords *dist_records,
-                                  const char *ctg_id,
+                                  GtStr *ctg_id,
                                   double std_dev,
                                   GtWord dist,
                                   GtUword nof_pairs,
@@ -242,8 +242,7 @@ static void add_contig_dist_record(DistRecords *dist_records,
            dist_records->record[current_record].size);
   }
 
-  dist_records->record[current_record].ctg[next_free_ctg].id =
-                                              gt_strdup(ctg_id);
+  dist_records->record[current_record].ctg[next_free_ctg].id = ctg_id;
   dist_records->record[current_record].ctg[next_free_ctg].std_dev =
                                               std_dev;
   dist_records->record[current_record].ctg[next_free_ctg].dist = dist;
@@ -833,7 +832,7 @@ static int analyze_read_set(DistRecords *dist_records,
   GtWord dist;
   double std_dev;
   bool sense, same, first_contig, new_contig;
-  char *ctg_id;
+  GtStr *ctg_id;
   Read *read;
   int had_err = 0;
 
@@ -852,7 +851,7 @@ static int analyze_read_set(DistRecords *dist_records,
       /* start new record if switch of contig (reference) occurred or
          first contig (reference) is present */
       if (first_contig || new_contig) {
-        create_dist_record(dist_records, (read-1)->ref_name);
+        create_dist_record(dist_records, gt_str_clone((read-1)->ref_name));
         first_contig = false;
         new_contig = false;
       }
@@ -866,7 +865,7 @@ static int analyze_read_set(DistRecords *dist_records,
 
       /*  append new entry to current record */
       if (nof_pairs >= min_nof_pairs) {
-        ctg_id = (read-1)->mref_name;
+        ctg_id = gt_str_clone((read-1)->mref_name);
         std_dev = pmf_data.std_dev / sqrt(nof_pairs);
         sense = (read-1)->is_reverse != (read-1)->is_mreverse;
         same = (read-1)->is_reverse;
@@ -903,7 +902,7 @@ static int analyze_read_set(DistRecords *dist_records,
 
   /*  append new entry to current record */
   if (nof_pairs >= min_nof_pairs) {
-    ctg_id = (read-1)->mref_name;
+    ctg_id = gt_str_clone((read-1)->mref_name);
     std_dev = pmf_data.std_dev / sqrt(nof_pairs);
     sense = (read-1)->is_reverse != (read-1)->is_mreverse;
     same = (read-1)->is_reverse;
@@ -927,9 +926,11 @@ static int load_read_set(ReadSet *readset,
   GtSamAlignment *bam_align;
   GtWord ref_read_start;
   GtUword next_free;
+  GtStr *name;
 
   had_err = 0;
   alpha = gt_alphabet_new_dna();
+  name = gt_str_new();
   bam_iterator = gt_samfile_iterator_new_bam(bam_filename, alpha, err);
 
   if (bam_iterator == NULL)
@@ -952,8 +953,8 @@ static int load_read_set(ReadSet *readset,
         next_free = readset->nof;
 
         /* save query name of read */
-        readset->read[next_free].query_name =
-                gt_strdup((char*) gt_sam_alignment_identifier(bam_align));
+        gt_str_set(name, gt_sam_alignment_identifier(bam_align));
+        readset->read[next_free].query_name = gt_str_clone(name);
         readset->read[next_free].is_unmapped =
                               gt_sam_alignment_is_unmapped(bam_align);
         readset->read[next_free].is_reverse =
@@ -968,9 +969,9 @@ static int load_read_set(ReadSet *readset,
 
         /* save name und length of reference */
         if (readset->read[next_free].tid >= 0) {
-          readset->read[next_free].ref_name =
-                 gt_strdup((char*)gt_samfile_iterator_reference_name(
+          gt_str_set(name, gt_samfile_iterator_reference_name(
                          bam_iterator, readset->read[next_free].tid));
+          readset->read[next_free].ref_name = gt_str_clone(name);
           readset->read[next_free].ref_len =
                          gt_samfile_iterator_reference_length(
                          bam_iterator, readset->read[next_free].tid);
@@ -983,9 +984,9 @@ static int load_read_set(ReadSet *readset,
 
         /* save name und length of mate reference */
         if (readset->read[next_free].mtid >= 0) {
-          readset->read[next_free].mref_name =
-                 gt_strdup((char*)gt_samfile_iterator_reference_name(
+          gt_str_set(name, gt_samfile_iterator_reference_name(
                          bam_iterator, readset->read[next_free].mtid));
+          readset->read[next_free].mref_name = gt_str_clone(name);
           readset->read[next_free].mref_len =
                  gt_samfile_iterator_reference_length(
                   bam_iterator, readset->read[next_free].mtid);
@@ -1013,6 +1014,7 @@ static int load_read_set(ReadSet *readset,
   }
 
   gt_alphabet_delete(alpha);
+  gt_str_delete(name);
 
   return had_err;
 }
@@ -1068,7 +1070,7 @@ static void create_histogram(HistogramData *histogram_data,
 
     /* check if sequential reads are a read pair */
     if (read+1 < readset.read+readset.nof &&
-        strcmp(read->query_name, (read+1)->query_name) == 0) {
+        gt_str_cmp(read->query_name, (read+1)->query_name) == 0) {
 
       fixmate(read, read+1);
       fixmate(read+1, read);
@@ -1183,7 +1185,7 @@ static int compare_read_2(const void *a,
   Read *read_a = (Read*) a;
   Read *read_b = (Read*) b;
 
-  return strcmp(read_a->query_name, read_b->query_name);
+  return gt_str_cmp(read_a->query_name, read_b->query_name);
 }
 
 /* callback function to sort reads by reference id and orientation
