@@ -31,6 +31,8 @@
 
 struct GtScaffolderGraphResolveStats {
   GtUword graph_resolved;
+  GtUword graph_to_much_nodes;
+  GtUword graph_to_much_paths;
   GtUword num_solutions;
   GtUword no_path;
   GtUword num_gaps;
@@ -94,13 +96,13 @@ void gt_scaffolder_graph_reverse_complement_gt_str(GtStr *str) {
   }
 }
 
-static bool gt_scaffolder_graph_graph_resolve(GtScaffolderGraphEdge *edge,
-                                              GtStr *resv_seq,
-                                              GtStrgraph *strgraph,
-                                              GtEncseq *encseq,
-                                              GtHashmap *contigs) {
+static GtUword gt_scaffolder_graph_graph_resolve(GtScaffolderGraphEdge *edge,
+						 GtStr *resv_seq,
+						 GtStrgraph *strgraph,
+						 GtEncseq *encseq,
+						 GtHashmap *contigs) {
   GtUword i, j;
-  bool found;
+  GtUword ret;
 
   gt_assert(edge != NULL);
   gt_assert(resv_seq != NULL);
@@ -108,10 +110,10 @@ static bool gt_scaffolder_graph_graph_resolve(GtScaffolderGraphEdge *edge,
   i = (GtUword) gt_hashmap_get(contigs, gt_str_get(edge->start->header_seq));
   j = (GtUword) gt_hashmap_get(contigs, gt_str_get(edge->end->header_seq));
 
-  found = gt_strgraph_traverse_from_to(strgraph, encseq, i, j,
+  ret = gt_strgraph_traverse_from_to(strgraph, encseq, i, j,
           edge->dist, edge->sense, resv_seq);
 
-  return found;
+  return ret;
 }
 
 typedef struct GtScaffolderGraphAlignmentData {
@@ -300,7 +302,8 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
     GtScaffolderGraphEdge *edge;
     GtStr *resv_seq = gt_str_new();
     GtStr *out_id;
-    bool resolved;
+    bool resolved = false;
+    GtUword ret;
     bool root_dir;
     bool rel_comp = true;
     bool prev_comp = true;
@@ -323,10 +326,10 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
         rel_comp = rel_comp ? false : true;
 
       /* try to find unique walk through graph to resolve the gap */
-      resolved = gt_scaffolder_graph_graph_resolve(edge, resv_seq,
-                                                   strgraph, encseq, contigs);
+      ret = gt_scaffolder_graph_graph_resolve(edge, resv_seq,
+					      strgraph, encseq, contigs);
 
-      if (resolved) {
+      if (ret == 3) {
         stats->graph_resolved++;
         /* check if we have to reverse complement the sequence */
         if (!prev_comp) {
@@ -336,10 +339,14 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
 
         if (!root_dir)
           gt_scaffolder_graph_reverse_gt_str(resv_seq);
+      } else if(ret == 2) {
+	stats->graph_to_much_paths++;
+      } else if(ret == 1) {
+	stats->graph_to_much_nodes++;
       }
 
       /* check if the contigs overlap and resolve the overlap */
-      if (!resolved) {
+      if (ret != 3) {
         GtStr *next_seq = gt_str_new();
 
         /* get the sequence of edge->end.  maybe this initialization
@@ -364,7 +371,7 @@ GtStr *gt_scaffolder_graph_generate_string(GtScaffolderGraphRecord *rec,
         }
 
         /* introduce a gap between the contigs */
-        if (!resolved) {
+        if (!resolved && ret != 3) {
           /* TODO: calculate min_gap_length */
           gt_scaffolder_graph_introduce_gap(edge, 25, next_seq, resv_seq);
           stats->unresolved++;
@@ -515,6 +522,8 @@ int gt_scaffolder_graph_generate_fasta(char *contig_file,
 
       /* prepare stats */
       stats.graph_resolved = 0;
+      stats.graph_to_much_paths = 0;
+      stats.graph_to_much_nodes = 0;
       stats.overlap_resolved = 0;
       stats.overlap_try = 0;
       stats.unresolved = 0;
@@ -533,11 +542,11 @@ int gt_scaffolder_graph_generate_fasta(char *contig_file,
 
       /* clean-up and return! */
       if (had_err != 0) {
-	gt_str_delete(ids);
-	gt_file_delete(out);
-	gt_hashmap_delete(contigs);
-	gt_encseq_delete(encseq);
-	gt_strgraph_delete(strgraph);
+        gt_str_delete(ids);
+        gt_file_delete(out);
+        gt_hashmap_delete(contigs);
+        gt_encseq_delete(encseq);
+        gt_strgraph_delete(strgraph);
 
         return had_err;
       }
@@ -572,10 +581,131 @@ int gt_scaffolder_graph_generate_fasta(char *contig_file,
       /* print stats */
       printf("number of gaps attempted: %lu\n", stats.num_gaps);
       printf("resolved with graph: %lu\n", stats.graph_resolved);
+      printf("graph to much paths: %lu\n", stats.graph_to_much_paths);
+      printf("graph to much nodes: %lu\n", stats.graph_to_much_nodes);
       printf("tried to solve with overlap: %lu\n", stats.overlap_try);
       printf("resolved with overlap: %lu\n", stats.overlap_resolved);
       printf("unresolved: %lu\n", stats.unresolved);
       printf("singletons: %lu\n", stats.singletons);
+    }
+    gt_encseq_delete(encseq);
+    gt_strgraph_delete(strgraph);
+  }
+
+  return had_err;
+}
+
+int test_strgraph(char *contig_file,
+		  char *spm_file,
+		  GtError *err) {
+  int had_err;
+
+  /* prepare the whole strgraph and stuff */
+  GtStrArray *files = gt_str_array_new();
+  GtEncseqEncoder *enc = gt_encseq_encoder_new();
+
+  gt_str_array_add_cstr(files, contig_file);
+
+  gt_encseq_encoder_set_input_dna(enc);
+  gt_encseq_encoder_clip_desc(enc);
+  had_err = gt_encseq_encoder_encode(enc, files, contig_file, err);
+
+  gt_encseq_encoder_delete(enc);
+  gt_str_array_delete(files);
+
+  if (had_err == 0) {
+    GtEncseq *encseq;
+    GtStrgraph *strgraph;
+    char spm_complete[1025];
+    GtEncseqLoader *load = gt_encseq_loader_new();
+    encseq = gt_encseq_loader_load(load, contig_file, err);
+
+    gt_encseq_loader_delete(load);
+    if (encseq == NULL) {
+      return -1;
+    }
+
+    /* had_err = gt_encseq_mirror(encseq, err); */
+
+    strgraph = gt_strgraph_new(gt_encseq_num_of_sequences(encseq));
+
+    memcpy(spm_complete, spm_file, strlen(spm_file));
+    memcpy(spm_complete + strlen(spm_file), ".0.spm", 6);
+    spm_complete[strlen(spm_file) + 6] = '\0';
+
+    had_err = gt_spmlist_parse(spm_complete, 0, gt_spmproc_strgraph_count,
+                               (void *)strgraph, err);
+
+    if (had_err == 0) {
+
+      gt_strgraph_allocate_graph(strgraph, 0, encseq);
+
+      had_err = gt_strgraph_load_spm_from_file(strgraph, 0,
+                                               false, NULL,
+                                               spm_file, 1, ".spm", err);
+      gt_strgraph_show(strgraph, GT_STRGRAPH_DOT, "test_strgraph", ".dot", false);
+    }
+
+    if (had_err == 0) {
+      const char *desc;
+      GtFile *out;
+      GtStr *ids, *seq;
+      GtUword desc_len;
+      char contig[1025];
+      GtWord seq_num;
+      const char *cseq;
+      GtUword len;
+
+      GtHashmap *contigs = gt_hashmap_new(GT_HASH_STRING, gt_free_func, NULL);
+
+      for (seq_num = 0; seq_num < gt_encseq_num_of_sequences(encseq);
+           seq_num ++) {
+        desc = gt_encseq_description(encseq, &desc_len, seq_num);
+
+        memcpy(contig, desc, desc_len);
+        contig[desc_len] = '\0';
+
+        gt_hashmap_add(contigs, gt_cstr_dup(contig), (void *) seq_num);
+      }
+
+      out = gt_file_new("test_strgraph.fa", "w", err);
+
+      if (out == NULL)
+        return -1;
+
+      ids = gt_str_new();
+
+      gt_str_set(ids, "> ");
+
+      had_err = gt_encseq_mirror(encseq, err);
+
+      /* TODO: check for paths i=0 to j=2 and i=2 to j=0 */
+      seq = gt_str_new();
+      bool found = gt_strgraph_traverse_from_to(strgraph, encseq, 5, 7,
+          300, true, seq);
+      if (found) {
+	printf("found sequence!");
+	/* write seq to fasta file */
+	gt_file_xfputs(gt_str_get(ids), out);
+	gt_file_xfputs("\n", out);
+
+	/* print 80 chars per line */
+	len = gt_str_length(seq);
+	cseq = gt_str_get(seq);
+	while (len > 0) {
+	  gt_file_xprintf(out, "%.80s\n", cseq);
+	  cseq += 80;
+	  len -= MIN(80, len);
+	}
+      }
+
+      gt_str_delete(seq);
+      gt_str_delete(ids);
+
+      gt_file_delete(out);
+
+      gt_hashmap_delete(contigs);
+
     }
     gt_encseq_delete(encseq);
     gt_strgraph_delete(strgraph);

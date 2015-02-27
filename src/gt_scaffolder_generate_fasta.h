@@ -20,3 +20,5 @@ int gt_scaffolder_graph_generate_fasta(char *contig_file,
 				       char *fasta_file,
 				       GtArray *recs,
 				       GtError *err);
+
+int test_strgraph(char *contig_file, char *spm_file, GtError *err);
