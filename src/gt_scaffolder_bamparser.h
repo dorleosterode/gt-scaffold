@@ -21,7 +21,7 @@
 /* data type for saving paired information
    between contigs according to abyss dist format */
 typedef struct {
-  char *id;
+  GtStr *id;
   GtWord dist;
   GtUword nof_pairs;
   float std_dev;
@@ -30,7 +30,7 @@ typedef struct {
 } Ctg;
 
 typedef struct {
-  char *root_ctg_id;
+  GtStr *root_ctg_id;
   Ctg *ctg;
   GtUword nof_ctg;
   GtUword size;

@@ -22,6 +22,7 @@
 
 #include "core/fasta_reader_rec.h"
 #include "core/ma_api.h"
+#include "core/cstr_api.h"
 
 #include "gt_scaffolder_graph.h"
 #include "gt_scaffolder_parser.h"
@@ -432,16 +433,6 @@ static int gt_scaffolder_graph_count_ctg(GtUword length,
   return had_err;
 }
 
-/* str_dup with gt_malloc */
-char *gt_strdup (const char *source)
-{
-  char *dest;
-  dest = gt_malloc (strlen (source) + 1);
-  if (dest == NULL) return NULL;
-  strcpy (dest, source);
-  return dest;
-}
-
 /* saves header to callback data
    (fasta reader callback function, gets called for each description
     of fasta entry) */
@@ -471,7 +462,7 @@ static int gt_scaffolder_graph_save_header(const char *description,
     }
   }
 
-  writeable_description = gt_strdup(description);
+  writeable_description = gt_cstr_dup(description);
   /* cut header sequence after first space */
   space_ptr = strchr(writeable_description, ' ');
   if (space_ptr != NULL)

@@ -20,9 +20,6 @@
 #ifndef GT_SCAFFOLDER_PARSER_H
 #define GT_SCAFFOLDER_PARSER_H
 
-/* gt equivalent to strdup */
-char *gt_strdup (const char *source);
-
 /* test parsing distance records */
 int gt_scaffolder_parser_read_distances_test(const char *filename,
                                              char *output_filename,
