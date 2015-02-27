@@ -34,35 +34,11 @@
 #include "extended/sam_alignment.h"
 #include "extended/samfile_iterator.h"
 
-/* for definition of functions missing in genometools */
-#include "external/samtools-0.1.18/bam.h"
-#include "external/samtools-0.1.18/sam.h"
-
 #include "gt_scaffolder_bamparser.h"
 #include "gt_scaffolder_parser.h"
 
 #define INCREMENT_SIZE 1024
 #define INCREMENT_SIZE_2 64
-
-struct GtSamAlignment{
-  bam1_t       *s_alignment;
-  GtAlphabet   *alphabet;
-  GtUchar      *seq_buffer,
-               *qual_buffer;
-  GtUword s_bufsize,
-                q_bufsize,
-                rightmost;
-};
-
-struct GtSamfileIterator {
-  GtAlphabet     *alphabet;
-  GtSamAlignment *current_alignment;
-  char           *filename,
-                 *mode;
-  samfile_t      *samfile;
-  void           *aux;
-  GtUword   ref_count;
-};
 
 /* data type for saving information about
    reads aligned to some contig  */
@@ -71,7 +47,7 @@ typedef struct Read {
   bool is_mreverse;
   bool is_unmapped;
   bool is_munmapped;
-  bool is_valid;
+  int qual;
   int tid;
   int mtid;
   GtUword pos;
@@ -733,35 +709,6 @@ static void calculate_fragment(GtUword start_read,
   }
 }
 
-/* !functions missing in genometools! */
-
-/* determine length of reference */
-GtUword gt_samfile_iterator_reference_length(const GtSamfileIterator *s_iter,
-                                             int32_t reference_num) {
-  gt_assert(reference_num >= 0);
-  gt_assert(reference_num < s_iter->samfile->header->n_targets);
-  return s_iter->samfile->header->target_len[reference_num];
-}
-
-/* determine id of mate reference */
-int32_t gt_sam_alignment_mate_ref_num(GtSamAlignment *bam_align)
-{
-  gt_assert(bam_align != NULL);
-  return bam_align->s_alignment->core.mtid;
-}
-
-/* determine insert size of read pair */
-GtUword gt_sam_alignment_insert_size(GtSamAlignment *bam_align) {
-  gt_assert(bam_align != NULL);
-  return (GtUword) bam_align->s_alignment->core.isize;
-}
-
-GtUword gt_sam_alignment_query_length(GtSamAlignment *sam_alignment)
-{
-  gt_assert(sam_alignment != NULL);
-  return (GtUword) sam_alignment->s_alignment->core.l_qname;
-}
-
 /* calculate reference and mate reference position at read start */
 static int calc_read_start(GtSamAlignment *bam_align,
                            GtWord *ref_read_start,
@@ -827,6 +774,8 @@ static int analyze_read_set(DistRecords *dist_records,
                             GtWord max_dist,
                             FragmentData *fragment_data,
                             PmfData pmf_data,
+                            GtUword min_ref_length,
+                            GtUword min_qual,
                             bool rf,
                             GtError *err) {
   GtUword nof_pairs;
@@ -883,7 +832,11 @@ static int analyze_read_set(DistRecords *dist_records,
       new_contig = true;
 
     /* check if read is valid */
-    if (!read->is_munmapped && read->is_valid) {
+    if (read->mtid != -1 &&
+       !read->is_munmapped && !read->is_unmapped &&
+        read->tid != read->mtid &&
+        read->ref_len >= min_ref_length &&
+        read->qual >= min_qual) {
 
       /* calculate fragment size and save it if start and
          end point are unique */
@@ -917,8 +870,6 @@ static int analyze_read_set(DistRecords *dist_records,
 /* load reads from bam-file */
 static int load_read_set(ReadSet *readset,
                          const char *bam_filename,
-                         GtUword min_ref_length,
-                         GtUword min_qual,
                          GtError *err) {
 
   int had_err;
@@ -965,8 +916,7 @@ static int load_read_set(ReadSet *readset,
 
         /* save id of reference and mate reference */
         readset->read[next_free].tid = gt_sam_alignment_ref_num(bam_align);
-        readset->read[next_free].mtid =
-                                 gt_sam_alignment_mate_ref_num(bam_align);
+        readset->read[next_free].mtid = -1;
 
         /* save name und length of reference */
         if (readset->read[next_free].tid >= 0) {
@@ -983,30 +933,12 @@ static int load_read_set(ReadSet *readset,
           readset->read[next_free].ref_len = 0;
         }
 
-        /* save name und length of mate reference */
-        if (readset->read[next_free].mtid >= 0) {
-          gt_str_set(name, gt_samfile_iterator_reference_name(
-                         bam_iterator, readset->read[next_free].mtid));
-          readset->read[next_free].mref_name = gt_str_clone(name);
-          readset->read[next_free].mref_len =
-                 gt_samfile_iterator_reference_length(
-                  bam_iterator, readset->read[next_free].mtid);
+        readset->read[next_free].mref_name = NULL;
+        readset->read[next_free].mref_len = 0;
 
-        }
-        else {
-          readset->read[next_free].mref_name = NULL;
-          readset->read[next_free].mref_len = 0;
-        }
-
-        /* check if read is valid */
-        if (readset->read[next_free].ref_len < min_ref_length ||
-            gt_sam_alignment_mapping_quality(bam_align) < min_qual ||
-            !gt_sam_alignment_is_paired(bam_align) ||
-            readset->read[next_free].tid == readset->read[next_free].mtid ||
-            readset->read[next_free].is_unmapped)
-          readset->read[next_free].is_valid = false;
-        else
-          readset->read[next_free].is_valid = true;
+        /* save read quality */
+        readset->read[next_free].qual = 
+                      gt_sam_alignment_mapping_quality(bam_align);
 
         readset->nof++;
       }
@@ -1046,6 +978,11 @@ static void fixmate(Read *read_0,
     read_0->is_munmapped = true;
   if (read_1->is_reverse)
     read_0->is_mreverse = true;
+
+  read_0->mtid = read_1->tid;
+  read_0->mref_name = read_1->ref_name == NULL ?
+                      NULL : gt_str_clone(read_1->ref_name);
+  read_0->mref_len = read_1->ref_len;
 
   if (read_0->is_munmapped)
     read_0->isize = 0;
@@ -1268,8 +1205,7 @@ int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
   pmf_data.nof = 0;
 
   /* load reads from bam-file */
-  had_err = load_read_set(&read_set, bam_filename, min_ref_length,
-                          min_qual, err);
+  had_err = load_read_set(&read_set, bam_filename, err);
 
   if (had_err == 0) {
     /* sort reads by query name */
@@ -1300,7 +1236,7 @@ int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
                                        compare_read_3);
 
     analyze_read_set(dist, read_set, min_nof_pairs, min_dist, max_dist,
-                   &fragment_data, pmf_data, rf, err);
+                &fragment_data, pmf_data, min_ref_length, min_qual, rf, err);
 
   }
   /* clean up */
