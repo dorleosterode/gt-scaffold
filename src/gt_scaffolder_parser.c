@@ -433,16 +433,6 @@ static int gt_scaffolder_graph_count_ctg(GtUword length,
   return had_err;
 }
 
-/* str_dup with gt_malloc */
-char *gt_strdup (const char *source)
-{
-  char *dest;
-  dest = gt_malloc (strlen (source) + 1);
-  if (dest == NULL) return NULL;
-  strcpy (dest, source);
-  return dest;
-}
-
 /* saves header to callback data
    (fasta reader callback function, gets called for each description
     of fasta entry) */
