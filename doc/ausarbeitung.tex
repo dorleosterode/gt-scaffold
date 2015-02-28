@@ -279,14 +279,25 @@ schließen. Die Rekonstruktion der Sequenzen ist in Abschnitt \ref{sec:
 Zur Rekonstruktion der Sequenzen der berechneten Scaffolds werden drei
 Schritte für alle aufeinander folgende Contigs durchlaufen. Zuerst
 wird versucht die Lücke (Gap) zwischen den Contigs anhand eines Pfades
-in dem Stringgraph zu schließen. Für diesen Schritt wird der
-Stringgraph aller Contigs verwendet. Konnte kein eindeutiger Pfad nach
+in dem String-Graph zu schließen. Für diesen Schritt wird der
+String-Graph aller Contigs verwendet. Konnte kein eindeutiger Pfad nach
 bestimmten Kriterien gefunden werden, so wird überprüft, ob die
 Contigs sich überlappen. Ist die Distanz zwischen den Contigs negativ,
-so werden die sich überlappenden Ende aligniert. Wenn kein Alignment
+so werden die sich überlappenden Enden aligniert. Wenn kein Alignment
 gefunden wurde, wird die Lücke mit Wiederholungen des Buchstaben 'N'
-aufgefüllt. \todo{schreiben, das für jeden Contig im Scaffold ein
-  String konstruiert wird und so} Im Folgenden werden die einzelnen
+aufgefüllt.
+
+Die gesamte Sequenz eines Scaffolds wird anhand dieser drei Schritte
+folgendermaßen rekonstruiert. Die komplette Sequenz des ersten Contigs
+wird übernommen. Danach wird für den jeweils nächsten Contig versucht
+einen eindeutigen Pfad der richtigen Länge zwischen dem vorherigen und
+diesem Contig im String-Graph zu finden. Anschließend wird versucht
+bei negativer Distanz zwischen den Contigs ein Alignment zu finden,
+sonst wird die Lücke zwischen den Contigs mit einer Reihe von
+'N'-Symbolen aufgefüllt. Bei diesem Vorgang wird die relative
+Orientierung der Contigs zueinander und zum ersten Contig beachtet und
+die Sequenzen dementsprechend umgedreht \todo{anderes wort!}
+bzw. komplementiert. Im Folgenden werden die einzelnen
 Schritte näher beschrieben.
 
 \subsubsection{Traversierung des Stringgraphen}
