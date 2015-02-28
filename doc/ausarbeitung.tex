@@ -254,6 +254,125 @@ und Lücken zwischen den Contigs durch Pfade im Stringgraph zu
 schließen. Der verwendete Stringgraph ist dabei der bei der
 Assemblierung entstandene Stringgraph. (\todo{evtl mehr dazu schreiben!!})
 
+\section{Implementation}
+\subsection{Eingabe parsen oder so [Lukas]}
+\todo{text! text! text! :)}
+
+\subsection{Rekonstruktion der Sequenz}
+Zur Rekonstruktion der Sequenzen der berechneten Scaffolds werden drei
+Schritte für alle aufeinander folgende Contigs durchlaufen. Zuerst
+wird versucht die Lücke (Gap) zwischen den Contigs anhand eines Pfades
+in dem Stringgraph zu schließen. Für diesen Schritt wird der
+Stringgraph aller Contigs verwendet. Konnte kein eindeutiger Pfad nach
+bestimmten Kriterien gefunden werden, so wird überprüft, ob die
+Contigs sich überlappen. Ist die Distanz zwischen den Contigs negativ,
+so werden die sich überlappenden Ende aligniert. Wenn kein Alignment
+gefunden wurde, wird die Lücke mit Wiederholungen des Buchstaben 'N'
+aufgefüllt. \todo{schreiben, das für jeden Contig im Scaffold ein
+  String konstruiert wird und so} Im Folgenden werden die einzelnen
+Schritte näher beschrieben.
+
+\subsubsection{Traversierung des Stringgraphen}
+Nach der Assemblierung wird in SGA ein String-Graph im \textit{.asqg}
+Format (\todo{referenz auf die github-seite, wo das erklaert ist})
+ausgegeben. Dieser String-Graph wird mit einem Python-Skript in das
+\textit{.spm} Format umgeschrieben.
+
+Wie in Abbildung \ref{abb: spm} dargestellt, ist das \textit{.spm}
+Format ein Zeilenbasiertes Format. In jeder Zeile ist ein
+Suffix-Präfix-Match eingetragen. Die erste Zahl repräsentiert den
+einen Contig oder Read, das folgende Zeichen gibt den Strang an ('+'
+steht für den sense-Strang und '-' für den antisense-Strang), die
+zweite Zahl repräsentiert den zweiten Contig oder Read, das folgende
+Zeichen gibt den Strang an und die letzte Zahl entspricht der Länge
+der Überlappung. Die Zahlen für die Contigs oder Reads entsprechen
+dabei der Sequenznummer des Contigs oder Reads in einer GtEncseq.
+
+\begin{figure}
+  \centering
+\begin{verbatim}
+24129 + 0 + 148
+1 + 85225 - 123
+39261 - 1 + 137
+2 + 27698 + 149
+\end{verbatim}
+\caption{\label{abb: spm}Beispielzeilen aus der \textit{.spm}-Datei des
+  String-Graphen für den \textit{C. elegans} Testdatensatz.}
+\end{figure}
+
+Mit dieser Repräsentation des String-Graphen, der aus der
+Assemblierung resultiert, wird der String-Graph wieder aufgebaut, in
+dem die \textit{.spm}-Datei mit Infrastruktur, die in den Readjoiner
+zugrundeliegenden Bibliotheken vorhanden ist, eingelesen wird.
+
+Der String-Graph wird anschließend für jedes Paar an
+aufeinanderfolgende Contigs $c_1$, $c_2$ in jedem Scaffold mit einer
+Breitensuche traversiert. Es wird versucht einen eindeutigen Pfad von
+Contig $c_1$ zu Contig $c_2$ in dem String-Graph zu finden. Dabei wird
+überprüft, ob die Distanz zwischen den Contigs, die im Scaffolding
+ermittelte Distanz nicht überschreitet. Um eine Traversierung des
+gesamten String-Graphen zu verhindern, wird die Suche nach \num{10000}
+besuchten Knoten abgebrochen. Ein gefundener Pfad wird dabei
+verworfen, da die Eindeutigkeit nicht garantiert werden kann. Wird
+mehr als ein Pfad zwischen den Contigs gefunden, wird die Suche
+ebenfalls ohne Ergebnis abgebrochen.
+
+Wurde ein eindeutiger Pfad gefunden, so wird der Pfad von $c_1$ zu
+$c_2$ gespeichert und anschließend die Sequenz des Pfades anhand einer
+GtEncseq der Contigs rekonstruiert. Diese rekonstruierte Sequenz wird
+schließlich zurückgegeben.
+
+\subsubsection{Berechnung von Alignments}
+Ist die Distanz zwischen zwei im Scaffold benachbarten Contigs $c_1$
+und $c_2$ negativ, so überlappen sich die Contigs theoretisch. Um
+diese Überlappung in der Sequenz aufzulösen, wird ein Alignment
+zwischen den Contigs $c_1$ und $c_2$ berechnet. Dabei wird das beste
+Alignment genutzt, um die Sequenz zu rekonstruieren.
+
+Es wird eine schon vorhandene Implementation des
+Smith-Waterman-Algorithmus für lokale Alignments \todo{Referenz?} verwendet. Der
+Sequenzbereich der Contigs, in dem Alignments gesucht werden, wird
+dabei durch die im Scaffolding ermittelte Distanz und das dreifache
+der Standardabweichung festgelegt. Der Sequenzbereich wird natürlich
+auch durch die Länge der beiden Contigs mit festgelegt. Maximal werden
+allerdings höchsten je 500 Basen zur Berechnung des Alignments
+verwendet, um zu hohen Rechenaufwand zu vermeiden. Diese Maximallänge
+wurde von SGA übernommen.
+
+Nur Suffix-Präfix-Überlappungen von Contig $c_1$ mit Contig $c_2$
+werden betrachtet, wenn Contig $c_1$ im Scaffold direkt vor Contig
+$c_2$ kommt. Die maximale erlaubte Fehlerrate (ergibt sich aus der
+maximal erlaubten Edit-Distanz des Alignments und der Länge der
+längsten eingehenden Sequenz) ist $max\_error = 0.05$ nach dem
+standardmäßig bei SGA verwendeten Wert. Ebenso wurde die Mindestlänge
+eines Alignments auf 20 Basen festgelegt.
+
+Von allen gefundenen den Kriterien entsprechenden Alignments, wird das
+Alignment mit der kleinsten Edit-Distanz gewählt. Ist $l$ die Länge
+des besten Alignments und $seq_{c_2}$ die Sequenz des Contigs $c_2$,
+so wird die Sequenz ab der Position $l$ ($seq_{c_2}[l:|seq_{c_2}|]$)
+zurückgegeben. Falls kein hinreichendes Alignment gefunden werden
+konnte, muss der nächste Schritt durchgeführt werden.
+
+\subsubsection{Lücke schließen}
+Konnte die Lücke zwischen zwei Contigs $c_1$ und $c_2$ nicht durch
+eine Graph-Traversierung oder ein Alignment geschloßen werden, so wird
+in diesem Schritt die Sequenz mit 'N's aufgefüllt. Dabei gibt es eine
+Fallunterscheidung anhand der Distanz.
+
+Ist die ermittelte Distanz zwischen $c_1$ und $c_2$ positiv, so wird
+die Sequenz von $c_2$ nicht verändert. Vor die Sequenz werden der
+Distanz entsprechend viele 'N'-Symbole geschrieben, jedoch mindestens
+25.
+
+Ist die ermittelte Distanz zwischen $c_1$ und $c_2$ negativ, so wird
+der Präfix von $c_2$ der Länge 25 durch die gleiche Anzahl an
+'N'-Symbolen ersetzt.
+
+\section{gt Scaffolder als Tool in den GenomeTools}
+
+\section{Änderungen zu bzw.\,komische Dinge in SGA Scaffold}
+
 \section{Ergebnisse}
 
 Zum Evaluieren und Testen der Implementierten Software wurden
