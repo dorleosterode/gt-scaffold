@@ -152,7 +152,18 @@ Anhand der Testdaten wurde gt Scaffolder evaluiert.
 \end{figure}
 
 In Abbildung \ref{abb: gtscaffolder} ist der Programmablauf von gt
-Scaffolder schematisch dargestellt. (\todo{kurz beschreiben!!!})
+Scaffolder schematisch dargestellt. Als Eingabe werden drei Dateien
+benötigt. Diese Dateien enthalten die Informationen zu den Contigs und
+den Distanzen, die gebraucht werden um den Scaffold-Graph konstruieren
+zu können. Mit dieser Eingabe wird zuerst der Graph
+konstruiert. Anschließend die relevanten Knoten und Kanten selektiert,
+indem die übrigen Knoten und Kanten markiert werden. Nach der
+Ermittlung aller Zusammenhangskomponenten des Scaffold-Graph, wird für
+jede Zusammenhangskomponente ein Pfad berechnet, der als Scaffold
+ausgegeben wird.
+
+Die einzelnen Schritte werden im Folgenden näher
+beschrieben.
 
 \subsection{Eingabe}
 Als Eingabe werden die Contigs im FASTA-Format, die
