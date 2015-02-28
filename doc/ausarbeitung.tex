@@ -42,6 +42,8 @@
 \end{abstract}
 
 \newpage{}
+\tableofcontents{}
+\newpage{}
 \setcounter{page}{1}
 \section{Einleitung}
 \todo{was ist DAS scaffolding Problem?}
@@ -457,6 +459,43 @@ Sequenzkonstruktion mittels Traversierung noch nicht in die
 GenomeTools übernommen wurde.
 
 \section{Änderungen zu bzw.\,komische Dinge in SGA Scaffold}
+
+SGA benutzt eine relativ konservative Strategie, um vermeintlich
+fehlerhafte Knoten und Kanten aus dem Scaffolding-Graph zu
+entfernen. D.h. korrekte Knoten und Kanten werden lieber als
+fehlerhaft eingestuft und entfernt, als dass fehlerhafte Knoten oder
+Kanten nicht erkannt werden und in dem Endergebnis enthalten sein
+könnten. Einige nicht sofort ersichtlichen Strategien von SGA wurden
+zuerst in gt Scaffolder übernommen, um eine Vergleichbarkeit der
+Ergebnisse der beiden Programme zu erhalten. Die Güte der Strategie
+?\todo{wurde/muss/sollte was denn jetzt?} evaluiert werden.
+
+Es folgt eine ungeordnete Auflistung solcher Strategien, teilweise um
+mögliche Erklärungen ergänzt.
+\begin{itemize}
+\item Bei der Entfernung inkonsistenter Kanten eines Knoten $k_0$
+  werden alle Kanten von den Nachbarknoten, die in der gleichen
+  Richtung verlaufen wie die Kante vom Nachbarknoten zu $k_0$,
+  ebenfalls entfernt. \\
+  Mögliche Erklärung: Potentiell enthalten auch
+  diese Kanten Inkonsistenzen und sollten deshalb nicht weiter
+  betrachtet werden.
+\item Bei der Konstruktion des Graphen wird zwischen zwei Knoten
+  jeweils nur eine Kante eingefügt. Wenn es mehr als eine Kante geben
+  würde wird die Kante mit der größten Standardabweichung
+  gewählt. \\
+  Mögliche Erklärung: keine.
+\item Bei der Klassifikation der Knoten als repetitiv oder eindeutig
+  wird zusätzlich zu der Astatistik auch die berechnete Anzahl an
+  Kopien für jeden repräsentierten Contig betrachtet. Ein Knoten wird
+  dabei als repetitiv markiert und später entfernt, wenn der die
+  berechnete Anzahl an Kopien für den repräsentierten Contig zu gering
+  ist. \\
+  Mögliche Erklärung: Die Contigs mit einer zu geringen
+  Kopiezahl sind potentiell fehlerhaft und sollten nicht betrachtet
+  werden. Die Markierung als repetitiv ist dabei semantisch falsch und
+  dient nur der späteren Entfernung des zugehörigen Knoten.
+\end{itemize}
 
 \section{Ergebnisse}
 
