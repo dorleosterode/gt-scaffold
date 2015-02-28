@@ -93,8 +93,8 @@ jede Zusammenhangskomponente verwendet.
 Die Implementierung und Evaluierung einer Scaffolding-Software stellte
 das allgemeine Projektziel dar. Dabei sollten die in der GenomeTools-Bibliothek
 \cite{Gremme:2013} vorhandenen Konzepte und Infrastruktur verwendet
-werden und eine Kompatibilität mit den Ausgaben des Assemblers ReadJoiner
-\cite{Gonnella:2012} gewährleistet sein. Zusätzlich sollte der Scaffolder aus
+und eine Kompatibilität mit den Ausgaben des Assemblers ReadJoiner
+\cite{Gonnella:2012} gewährleistet werden. Zusätzlich sollte der Scaffolder aus
 dem SGA-Softwarepaket\cite{Simpson:2012ef} als Vorlage dienen. Da diese
 Software im Rahmen einer Untersuchung \cite{Hunt:2014dh} verschiedener
 Scaffolding-Programme Ergebnisse mit besonders hoher Qualität lieferte.
@@ -281,10 +281,23 @@ und Lücken zwischen den Contigs durch Pfade im String-Graph zu
 schließen. Die Rekonstruktion der Sequenzen ist in Abschnitt \ref{sec:
   Rekonstruktion} näher beschrieben.
 
+% LG: "Implementation" wuerde ich in die Methoden verschieben?
 \section{Implementation}
 \label{sec: Implementation}
-\subsection{Eingabe parsen oder so [Lukas]}
-\todo{text! text! text! :)}
+\subsection{Erstellen der Distanzinformationen}
+In gt Scaffolder können die Distanzinformationen explizit durch eine
+Datei im ABySS-Distance-Format (*.de) angegeben werden. Eine solche
+Datei wird durch das Programm DistEst von ABySS nach dem Assemblierungs-
+und Read-Mapping Schritt in der SGA-Pipeline erstellt und dient als
+Eingabe der Distanzinformationen für SGA-Scaffold. In der Evaluierung wurde diese Option für Vergleiche zwischen gt Scaffolder und SGA-Scaffold
+verwendet.
+
+Des Weiteren besteht die Möglichkeit, die Distanzinformationen aus
+einer Datei im BAM-Format (*.bam) mit Hilfe eines Moduls zu
+extrahieren. Dafür wurde das Programm DistEst von ABySS in C nach
+implementiert. Aus Zeitgründen ist es nicht gelungen ein Modul zu
+entwickeln zur Erzeugung der BAM-Datei auf Basis des String-Graphen. Stattdessen muss ein Read-Mapping separat nach der Assemblierung
+durchgeführt werden.
 
 \subsection{Rekonstruktion der Sequenz}
 \label{sec: Rekonstruktion}
