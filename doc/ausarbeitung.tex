@@ -265,9 +265,9 @@ Zusätzlich wurde ein Modul geschrieben um die Sequenzen der
 berechneten Scaffolds rekonstruieren zu können. Bei SGA ist dies
 ebenfalls ein seperater Schritt. Um die Sequenzqualität zu verbessern
 wird dabei versucht Überlappungen durch Sequenzalignments aufzulösen
-und Lücken zwischen den Contigs durch Pfade im Stringgraph zu
-schließen. Der verwendete Stringgraph ist dabei der bei der
-Assemblierung entstandene Stringgraph. (\todo{evtl mehr dazu schreiben!!})
+und Lücken zwischen den Contigs durch Pfade im String-Graph zu
+schließen. Die Rekonstruktion der Sequenzen ist in Abschnitt \ref{sec:
+  Rekonstruktion} näher beschrieben.
 
 \section{Implementation}
 \label{sec: Implementation}
@@ -275,6 +275,7 @@ Assemblierung entstandene Stringgraph. (\todo{evtl mehr dazu schreiben!!})
 \todo{text! text! text! :)}
 
 \subsection{Rekonstruktion der Sequenz}
+\label{sec: Rekonstruktion}
 Zur Rekonstruktion der Sequenzen der berechneten Scaffolds werden drei
 Schritte für alle aufeinander folgende Contigs durchlaufen. Zuerst
 wird versucht die Lücke (Gap) zwischen den Contigs anhand eines Pfades
