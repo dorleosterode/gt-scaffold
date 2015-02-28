@@ -90,19 +90,21 @@ jede Zusammenhangskomponente verwendet.
 
 \section{Ziel des Projektes und Arbeitsvorgehen}
 \subsection{Ziel des Projektes}
-Ziel des Projektes war die Implementierung und Evaluierung einer
-Scaffolding-Software. Dabei sollten die in der GenomeTools-Bibliothek
+Die Implementierung und Evaluierung einer Scaffolding-Software stellte
+das allgemeine Projektziel dar. Dabei sollten die in der GenomeTools-Bibliothek
 \cite{Gremme:2013} vorhandenen Konzepte und Infrastruktur verwendet
-werden. Zusätzlich sollte die Scaffolding-Software mit den Ausgaben
-des Assemblers ReadJoiner kompatibel sein.
-
-Um diese Ziele zu erreichen wurde der Scaffolder aus der SGA-Pipeline
-\cite{Simpson:2012ef} als Vorlage verwendet. Dieses Programm wurde
-ausgewählt, da es sehr gute Ergebnisse erzielt \cite{Hunt:2014dh}. Da
-die SGA-Pipeline allerdings viele Abhängigkeiten hat und deshalb nicht
-einfach zu installieren ist und zusätzlich die Methodik des
-Scaffoldings nicht hinreichend dokumentiert ist, sollte die Methodik
-aufgeklärt und der Scaffolding-Algorithmus reimplementiert werden.
+werden und eine Kompatibilität mit den Ausgaben des Assemblers ReadJoiner
+\cite{Gonnella:2012} gewährleistet sein. Zusätzlich sollte der Scaffolder aus
+dem SGA-Softwarepaket\cite{Simpson:2012ef} als Vorlage dienen. Da diese
+Software im Rahmen einer Untersuchung \cite{Hunt:2014dh} verschiedener
+Scaffolding-Programme Ergebnisse mit besonders hoher Qualität lieferte.
+Andererseits weist SGA-Scaffold zahlreiche Abhängigkeiten von fremder
+nicht-Standardsoftware auf, die durch die Reimplementierung minimiert werden
+sollten. Dazu gehört, dass zur Ermittelung der Distanzinformationen eine
+Zuordnung der Reads zu den Contigs auf Basis des String-Graphen erfolgt anstelle
+eines Read-Mappings durch BWA\cite{Li:2009}. Des Weiteren existiert keine
+hinreichende Dokumentation der Methodik von SGA-Scaffold, so dass dessen
+Aufklärung einen zentralen Teil des Projektes umfasste.
 
 \subsection{Arbeitsvorgehen}
 Zuerst wurden die verwendeten Datenformate und die Algorithmen
