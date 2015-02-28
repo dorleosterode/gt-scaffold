@@ -51,7 +51,7 @@
 #define MIN_ALIGN 100
 
 /* if astat is annotated in contig header */
-#define ASTAT_IS_ANNOTATED true
+#define ASTAT_IS_ANNOTATED false
 
 int main(int argc, char **argv)
 {
