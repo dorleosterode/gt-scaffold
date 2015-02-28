@@ -332,14 +332,14 @@ zwischen den Contigs $c_1$ und $c_2$ berechnet. Dabei wird das beste
 Alignment genutzt, um die Sequenz zu rekonstruieren.
 
 Es wird eine schon vorhandene Implementation des
-Smith-Waterman-Algorithmus für lokale Alignments \todo{Referenz?} verwendet. Der
-Sequenzbereich der Contigs, in dem Alignments gesucht werden, wird
-dabei durch die im Scaffolding ermittelte Distanz und das dreifache
-der Standardabweichung festgelegt. Der Sequenzbereich wird natürlich
-auch durch die Länge der beiden Contigs mit festgelegt. Maximal werden
-allerdings höchsten je 500 Basen zur Berechnung des Alignments
-verwendet, um zu hohen Rechenaufwand zu vermeiden. Diese Maximallänge
-wurde von SGA übernommen.
+Smith-Waterman-Algorithmus für lokale Alignments \cite{smith}
+verwendet. Der Sequenzbereich der Contigs, in dem Alignments gesucht
+werden, wird dabei durch die im Scaffolding ermittelte Distanz und das
+dreifache der Standardabweichung festgelegt. Der Sequenzbereich wird
+natürlich auch durch die Länge der beiden Contigs mit
+festgelegt. Maximal werden allerdings höchsten je 500 Basen zur
+Berechnung des Alignments verwendet, um zu hohen Rechenaufwand zu
+vermeiden. Diese Maximallänge wurde von SGA übernommen.
 
 Nur Suffix-Präfix-Überlappungen von Contig $c_1$ mit Contig $c_2$
 werden betrachtet, wenn Contig $c_1$ im Scaffold direkt vor Contig
