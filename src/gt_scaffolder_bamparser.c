@@ -862,7 +862,7 @@ static int analyze_read_set(DistRecords *dist_records,
     same = (read-1)->is_reverse;
     add_contig_dist_record(dist_records, ctg_id, std_dev, dist, nof_pairs,
                            sense, same);
-  }  
+  }
 
   return had_err;
 }
@@ -923,9 +923,12 @@ static int load_read_set(ReadSet *readset,
           gt_str_set(name, gt_samfile_iterator_reference_name(
                          bam_iterator, readset->read[next_free].tid));
           readset->read[next_free].ref_name = gt_str_clone(name);
-          readset->read[next_free].ref_len =
-                         gt_samfile_iterator_reference_length(
+          readset->read[next_free].ref_len = 0;
+        /*              SK: DOES NOT COMPILE OTHERWISE
+
+                        gt_samfile_iterator_reference_length(
                          bam_iterator, readset->read[next_free].tid);
+        */
 
         }
         else {
@@ -937,7 +940,7 @@ static int load_read_set(ReadSet *readset,
         readset->read[next_free].mref_len = 0;
 
         /* save read quality */
-        readset->read[next_free].qual = 
+        readset->read[next_free].qual =
                       gt_sam_alignment_mapping_quality(bam_align);
 
         readset->nof++;
