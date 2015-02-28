@@ -42,6 +42,7 @@
 \end{abstract}
 
 \newpage{}
+\thispagestyle{empty}
 \tableofcontents{}
 \newpage{}
 \setcounter{page}{1}
@@ -161,7 +162,18 @@ Anhand der Testdaten wurde gt Scaffolder evaluiert.
 \end{figure}
 
 In Abbildung \ref{abb: gtscaffolder} ist der Programmablauf von gt
-Scaffolder schematisch dargestellt. (\todo{kurz beschreiben!!!})
+Scaffolder schematisch dargestellt. Als Eingabe werden drei Dateien
+benötigt. Diese Dateien enthalten die Informationen zu den Contigs und
+den Distanzen, die gebraucht werden um den Scaffold-Graph konstruieren
+zu können. Mit dieser Eingabe wird zuerst der Graph
+konstruiert. Anschließend die relevanten Knoten und Kanten selektiert,
+indem die übrigen Knoten und Kanten markiert werden. Nach der
+Ermittlung aller Zusammenhangskomponenten des Scaffold-Graph, wird für
+jede Zusammenhangskomponente ein Pfad berechnet, der als Scaffold
+ausgegeben wird.
+
+Die einzelnen Schritte werden im Folgenden näher
+beschrieben.
 
 \subsection{Eingabe}
 Als Eingabe werden die Contigs im FASTA-Format, die
@@ -263,9 +275,9 @@ Zusätzlich wurde ein Modul geschrieben um die Sequenzen der
 berechneten Scaffolds rekonstruieren zu können. Bei SGA ist dies
 ebenfalls ein seperater Schritt. Um die Sequenzqualität zu verbessern
 wird dabei versucht Überlappungen durch Sequenzalignments aufzulösen
-und Lücken zwischen den Contigs durch Pfade im Stringgraph zu
-schließen. Der verwendete Stringgraph ist dabei der bei der
-Assemblierung entstandene Stringgraph. (\todo{evtl mehr dazu schreiben!!})
+und Lücken zwischen den Contigs durch Pfade im String-Graph zu
+schließen. Die Rekonstruktion der Sequenzen ist in Abschnitt \ref{sec:
+  Rekonstruktion} näher beschrieben.
 
 \section{Implementation}
 \label{sec: Implementation}
@@ -273,17 +285,29 @@ Assemblierung entstandene Stringgraph. (\todo{evtl mehr dazu schreiben!!})
 \todo{text! text! text! :)}
 
 \subsection{Rekonstruktion der Sequenz}
+\label{sec: Rekonstruktion}
 Zur Rekonstruktion der Sequenzen der berechneten Scaffolds werden drei
 Schritte für alle aufeinander folgende Contigs durchlaufen. Zuerst
 wird versucht die Lücke (Gap) zwischen den Contigs anhand eines Pfades
-in dem Stringgraph zu schließen. Für diesen Schritt wird der
-Stringgraph aller Contigs verwendet. Konnte kein eindeutiger Pfad nach
+in dem String-Graph zu schließen. Für diesen Schritt wird der
+String-Graph aller Contigs verwendet. Konnte kein eindeutiger Pfad nach
 bestimmten Kriterien gefunden werden, so wird überprüft, ob die
 Contigs sich überlappen. Ist die Distanz zwischen den Contigs negativ,
-so werden die sich überlappenden Ende aligniert. Wenn kein Alignment
+so werden die sich überlappenden Enden aligniert. Wenn kein Alignment
 gefunden wurde, wird die Lücke mit Wiederholungen des Buchstaben 'N'
-aufgefüllt. \todo{schreiben, das für jeden Contig im Scaffold ein
-  String konstruiert wird und so} Im Folgenden werden die einzelnen
+aufgefüllt.
+
+Die gesamte Sequenz eines Scaffolds wird anhand dieser drei Schritte
+folgendermaßen rekonstruiert. Die komplette Sequenz des ersten Contigs
+wird übernommen. Danach wird für den jeweils nächsten Contig versucht
+einen eindeutigen Pfad der richtigen Länge zwischen dem vorherigen und
+diesem Contig im String-Graph zu finden. Anschließend wird versucht
+bei negativer Distanz zwischen den Contigs ein Alignment zu finden,
+sonst wird die Lücke zwischen den Contigs mit einer Reihe von
+'N'-Symbolen aufgefüllt. Bei diesem Vorgang wird die relative
+Orientierung der Contigs zueinander und zum ersten Contig beachtet und
+die Sequenzen dementsprechend umgedreht \todo{anderes wort!}
+bzw. komplementiert. Im Folgenden werden die einzelnen
 Schritte näher beschrieben.
 
 \subsubsection{Traversierung des Stringgraphen}
@@ -444,8 +468,8 @@ BAM-Datei die Distanzinformationen berechnet und in dem erforderlichen
 Format gespeichert. Diese neuerzeugte Datei wird anschließend
 eingelesen und die enthaltenen Informationen verwendet. Durch die
 Möglichkeit eine BAM-Datei anzugeben wird die Abhängigkeit zu einem
-Mapping-Programm (z.B. BWA \todo{Referenz?}) und einem Teil des
-Assemblers ABySS \todo{Referenz?} durchbrochen. Aus dem in den
+Mapping-Programm (z.B. BWA \cite{BWA}) und einem Teil des
+Assemblers ABySS \cite{abyss} durchbrochen. Aus dem in den
 GenomeTools vorhandenen String-Graph Assembler Readjoiner können die
 Informationen, welche Reads mit den Contigs aligniert werden können ,
 direkt ausgegeben und somit als Eingabe für gt Scaffolder verwendet
