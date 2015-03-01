@@ -231,7 +231,7 @@ dem die Wahrscheinlichkeitssumme ein Maximum erreicht.
 \subsection{Konstruktion des Graphen}
 Aus den Contigs und den Distanzinformationen wird der Scaffold-Graph
 konstruiert. Dabei wird für jeden Contig, der eine Mindestlänge von
-200 bp überschreitet, eine Astatistik größer 19 und eine berechnete
+200 bp überschreitet, eine A-Statistik größer 19 und eine berechnete
 Anzahl an Kopien von mindestens \num{0.3} hat, ein Knoten in den Graph
 eingefügt. Die Distanzinformationen werden genutzt um die Knoten
 miteinander durch Kanten zu verbinden. Dabei werden zwischen jedem
@@ -263,7 +263,7 @@ werden folgende Kriterien überprüft:
   haben, als inkonsistent markiert. Alle markierten Kanten werden
   nicht weiter betrachtet.
 \end{itemize}
-Der Pseudocode zur Markierung polymorpher Knoten und inkonsistener
+Der Pseudocode zur Markierung polymorpher Knoten und inkonsistenter
 Kanten ist in Algorithmus \ref{alg: Selektion} dargestellt.
 
 Zusätzlich werden gerichtete Zyklen aufgelöst. Dazu werden alle
@@ -323,7 +323,7 @@ contig-100070  contig-34044,-99,2.500000,0,1,  contig-29023,-23,3.700000,0,0,
 
 Zusätzlich wurde ein Modul geschrieben um die Sequenzen der
 berechneten Scaffolds rekonstruieren zu können. Bei SGA ist dies
-ebenfalls ein seperater Schritt. Um die Sequenzqualität zu verbessern
+ebenfalls ein separater Schritt. Um die Sequenzqualität zu verbessern
 wird dabei versucht Überlappungen durch Sequenzalignments aufzulösen
 und Lücken zwischen den Contigs durch Pfade im String-Graph zu
 schließen. Die Rekonstruktion der Sequenzen ist in Abschnitt \ref{sec:
@@ -389,8 +389,8 @@ wird der String-Graph wieder aufgebaut. Dazu wird die Datei im
 SPM-Format mit Infrastruktur eingelesen, die in den Readjoiner
 zugrundeliegenden Bibliotheken vorhanden ist.
 
-Der String-Graph wird anschließend für jedes Paar an
-aufeinanderfolgende Contigs $c_1$, $c_2$ in jedem Scaffold mit einer
+Der String-Graph wird anschließend für jedes Paar
+aufeinanderfolgender Contigs $c_1$, $c_2$ in jedem Scaffold mit einer
 Breitensuche traversiert. Es wird versucht einen eindeutigen Pfad von
 Contig $c_1$ zu Contig $c_2$ in dem String-Graph zu finden. Dabei wird
 überprüft, ob die Distanz zwischen den Contigs die im Scaffolding
@@ -440,7 +440,7 @@ konnte, muss der nächste Schritt durchgeführt werden.
 
 \subsubsection{Die Lücke zwischen zwei Contigs schließen}
 Konnte die Lücke zwischen zwei Contigs $c_1$ und $c_2$ nicht durch
-eine Graph-Traversierung oder ein Alignment geschloßen werden, so wird
+eine Graph-Traversierung oder ein Alignment geschlossen werden, so wird
 in diesem Schritt die Sequenz mit 'N's aufgefüllt. Dabei gibt es eine
 Fallunterscheidung anhand der Distanz.
 
@@ -515,7 +515,7 @@ erforderlichen Format übergeben, so wird diese eingelesen und die
 Informationen verwendet. Wird mit der Option -bam eine BAM-Datei mit
 Alignments der Reads zu den Contigs übergeben, so werden aus der
 BAM-Datei die Distanzinformationen berechnet und in dem erforderlichen
-Format gespeichert. Diese neuerzeugte Datei wird anschließend
+Format gespeichert. Diese neu erzeugte Datei wird anschließend
 eingelesen und die enthaltenen Informationen verwendet. Durch die
 Möglichkeit eine BAM-Datei anzugeben wird die Abhängigkeit zu einem
 Mapping-Programm (z.\,B. BWA) und einem Teil des Assemblers ABySS
@@ -527,13 +527,13 @@ ausgegeben und aus Zeitgründen konnte kein Modul zur Ausgabe
 der Informationen im richtigen Format implementiert werden.
 
 Mit der Option -astat kann zusätzlich eine Datei mit Informationen
-über die Astatistik und die berechneten Kopiezahlen der Contigs
-übergeben werden. Diese Option wird für die Kompabilität mit der
+über die A-Statistik und die berechneten Kopiezahlen der Contigs
+übergeben werden. Diese Option wird für die Kompatibilität mit der
 Eingabe von SGA Scaffold benötigt. Sollen Contigs aus einer
 Assemblierung mit Readjoiner verwendet werden, so kann mit den
 Optionen -astat und -copy$\_$num von Readjoiner direkt die Information
 in der FASTA-Datei der Contigs mit angegeben werden. Wird gt
-Scaffolder ohne eine extra Astatistik-Datei aufgerufen, so wird
+Scaffolder ohne eine extra A-Statistik-Datei aufgerufen, so wird
 angenommen, dass diese Information in der FASTA-Datei der Contigs
 enthalten ist.
 
@@ -566,11 +566,11 @@ mögliche Erklärungen ergänzt.
   Inkonsistenzen und sollten deshalb nicht weiter betrachtet werden.
 \item Bei der Konstruktion des Graphen werden zwischen zwei Knoten
   jeweils nur zwei Kante eingefügt, eine Hin- und eine Rückkante.
-  Wenn es mehr als ein mögliches Kantepaar gibt, wird das Kantenpaar mit der
+  Wenn es mehr als ein mögliches Kantenpaar gibt, wird das Kantenpaar mit der
   größten Standardabweichung gewählt. \\
   Mögliche Erklärung: keine.
 \item Bei der Klassifikation der Knoten als repetitiv oder eindeutig
-  wird zusätzlich zu der Astatistik auch die berechnete Anzahl an
+  wird zusätzlich zu der A-Statistik auch die berechnete Anzahl an
   Kopien für jeden repräsentierten Contig betrachtet. Ein Knoten wird
   dabei als repetitiv markiert und später entfernt, wenn die
   berechnete Anzahl an Kopien für den repräsentierten Contig zu gering
@@ -792,7 +792,7 @@ dargestellt. So ist die Anzahl an Knoten für den
 \textit{H. sapiens} Chr. 21 Datensatz mit $4817$ Knoten. Trotzdem wird
 zur Berechnung der Scaffolds für den \textit{D. melanogaster}
 Datensatz sowohl von SGA Scaffold als auch von gt Scaffolder mehr
-Laufzeit und mehr Speicheplatz benötigt, wie aus Tabelle \ref{tab:
+Laufzeit und mehr Speicherplatz benötigt, wie aus Tabelle \ref{tab:
   Vergleich} und Abbildung \ref{abb: Zeit} ersichtlich
 wird. \todo{gehört dieser Abschnitt evtl in die Diskussion?}
 
