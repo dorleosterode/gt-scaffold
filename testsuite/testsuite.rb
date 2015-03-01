@@ -77,9 +77,7 @@ $rootdir=File.join(Dir.pwd , "..", "")
 $testdata=File.join(Dir.pwd , "..", "testdata", "")
 $bin=File.join(Dir.pwd , "..", "src", "")
 
-require '../testsuite/graph_include'
-require '../testsuite/parser_include'
-require '../testsuite/scaffold_include'
+require '../testsuite/scaffolder_include'
 
 #we now have all tests in $testsuite.
 
