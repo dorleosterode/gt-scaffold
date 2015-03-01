@@ -175,45 +175,29 @@ eine Evaluation der Ergebnisse.
 \end{figure}
 
 In Abbildung \ref{abb: gtscaffolder} ist der Programmablauf von gt
-Scaffolder schematisch dargestellt. Als Eingabe werden drei Dateien
-benötigt. Diese Dateien enthalten die Informationen zu den Contigs und
-den Distanzen, die gebraucht werden um den Scaffold-Graph konstruieren
-zu können. Mit dieser Eingabe wird zuerst der Graph
-konstruiert. Anschließend die relevanten Knoten und Kanten selektiert,
-indem die nicht relevanten Knoten und Kanten  markiert werden. Nach der
-Ermittlung aller Zusammenhangskomponenten des Scaffold-Graph, wird für
-jede Zusammenhangskomponente ein Pfad berechnet, der als Scaffold
-ausgegeben wird.
+Scaffolder schematisch dargestellt. Als Eingabe dienen Dateien,
+die die Repetitivität, die Sequenz und die Distanzinformationen der Contigs
+beschreiben. Mit Hilfe dieser Eingaben erfolgt zunächst die Konstruktion des
+Scaffold-Graphen. Im Anschluss werden die relevanten Knoten
+und Kanten selektiert und deren Zusammenhangskomponenten ermittelt.
+Danach wird für jede Zusammenhangskomponente ein Pfad berechnet,
+der als Scaffold ausgegeben wird.
 
-Die einzelnen Schritte werden im Folgenden näher
-beschrieben.
+Die einzelnen Schritte werden in den folgenden Abschnitten näher erläutert.
 
 \subsection{Eingabe}
 Als Eingabe werden die Contigs im FASTA-Format, die
 Distanzinformationen aus der \textit{Paired-End}-
-bzw. \textit{Mate-Pair}-Sequenzierung und die Astatistik der einzelnen
-Contigs benötigt. gt Scaffolder benötigt dabei die
-Distanzinformationen bezogen auf die Contigs, d.\,h. die Read-Paare
-müssen zurück auf die Contigs gemappt und daraus die Distanz- sowie
-Orientierungsinformation für die Contigs berechnet worden sein. Die
-Astatistik ist ein statistisches Maß dafür, wie repetitiv eine Sequenz
-ist~\cite{Myers:2005iq}.
-
-Zusätzlich ist es möglich die Mapping-Informationen direkt zu
-übergeben. Daraus können die benötigten Distanz- und
-Orientierungsinformationen berechnet werden. Die Astatistik kann auch
-als Annotation der Contigs im FASTA-Format enthalten sein.
-
-\subsection{Erstellen der Distanzinformationen}
+bzw. \textit{Mate-Pair}-Sequenzierung und die A-Statistik der einzelnen
+Contigs benötigt.
+ 
 In gt Scaffolder können die Distanzinformationen explizit durch eine
 Datei im ABySS-Distance-Format (*.de) angegeben werden. Eine solche
 Datei wird durch das Programm DistEst von ABySS nach dem Assemblierungs-
 und Read-Mapping Schritt in der SGA-Pipeline erstellt und dient als
 Eingabe der Distanzinformationen für SGA-Scaffold. In der Evaluierung
 wurde diese Option für Vergleiche zwischen gt Scaffolder und SGA-Scaffold
-verwendet.
-
-Des Weiteren besteht die Möglichkeit, die Distanzinformationen aus
+verwendet. Des Weiteren besteht die Möglichkeit, die Distanzinformationen aus
 einer Datei im BAM-Format (*.bam) mit Hilfe eines Moduls zu
 extrahieren. Dafür diente die Methode des Programms DistEst von ABySS
 als Vorlage. Aus Zeitgründen ist es nicht gelungen ein Modul zu
@@ -221,6 +205,11 @@ entwickeln zur Erzeugung der BAM-Datei auf Basis des String-Graphen.
 Stattdessen muss ein Read-Mapping separat nach der Assemblierung
 durchgeführt werden.
 
+Die A-Statistik ist ein statistisches Maß und beschreibt die Repetitivität
+einer Sequenz~\cite{Myers:2005iq}. Die A-Statistik kann in Form einer
+separaten Datei oder als Annotation in den Contigs angeführt werden.
+
+\subsection{Erstellen der Distanzinformationen}
 Die Methode, die das Programm DistEst verwendet, durchläuft folgende
 Schritte. Zunächst werden alle Reads aus der BAM-Datei geladen und
 die Read-Paare ermittelt. Anschließend berechnet man die Fragmentlängen 
@@ -465,7 +454,7 @@ der Präfix von $c_2$ der Länge 25 durch die gleiche Anzahl an
 'N'-Symbolen ersetzt.
 
 \section{Datenstrukturen}
-\label{sec: Implementation}
+\label{sec: Datenstrukturen}
 
 \section{gt Scaffolder als Tool in den GenomeTools}
 Die in dem Abschnitt \ref{sec: Methoden} vorgestellte Funktionalität
