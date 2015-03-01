@@ -202,25 +202,29 @@ Zusätzlich ist es möglich die Mapping-Informationen direkt zu
 Orientierungsinformationen berechnet werden. Die Astatistik kann auch
 als Annotation der Contigs im FASTA-Format enthalten sein.
 
+\section{Implementation}
+\label{sec: Implementation}
 \subsection{Erstellen der Distanzinformationen}
 In gt Scaffolder können die Distanzinformationen explizit durch eine
 Datei im ABySS-Distance-Format (*.de) angegeben werden. Eine solche
-Datei wird durch das Programm DistEst von ABySS~\cite{abyss} nach dem
-Assemblierungs- und Read-Mapping Schritt in der SGA-Pipeline erstellt
-(vergleiche Abbildung \ref{abb: Pipeline}) und dient als Eingabe der
-Distanzinformationen für SGA-Scaffold. In der Evaluierung wurde diese
-Option für Vergleiche zwischen gt Scaffolder und SGA-Scaffold
+Datei wird durch das Programm DistEst von ABySS nach dem Assemblierungs-
+und Read-Mapping Schritt in der SGA-Pipeline erstellt und dient als
+Eingabe der Distanzinformationen für SGA-Scaffold. In der Evaluierung wurde diese Option für Vergleiche zwischen gt Scaffolder und SGA-Scaffold
 verwendet.
 
 Des Weiteren besteht die Möglichkeit, die Distanzinformationen aus
 einer Datei im BAM-Format (*.bam) mit Hilfe eines Moduls zu
-extrahieren. Dafür wurde das Programm DistEst von ABySS in C
-reimplementiert. Aus Zeitgründen ist es nicht gelungen ein Modul zur
-Erzeugung der BAM-Datei auf Basis des String-Graphen zu
-entwickeln. Dieses Modul wäre nötig, da Readjoiner die noch
-gespeicherten Mapping-Informationen nicht direkt im BAM-Format
-ausgeben kann. Stattdessen muss ein Read-Mapping separat nach der
-Assemblierung durchgeführt werden.
+extrahieren. Dafür diente die Methode des Programms DistEst von ABySS als Vorlage. Aus Zeitgründen ist es nicht gelungen ein Modul zu
+entwickeln zur Erzeugung der BAM-Datei auf Basis des String-Graphen. Stattdessen muss ein Read-Mapping separat nach der Assemblierung
+durchgeführt werden.
+
+Die Methode, die das Programm DistEst verwendet, durchläuft folgende
+Schritte. Zunächst werden alle Reads aus der BAM-Datei geladen und
+die Read-Paare ermittelt. Anschließend berechnet man die Fragmentlängen 
+aller Read-Paare, die gegenüber dem gleichen Contig angeordnet sind,
+und erstellt auf deren Basis eine Häufigkeitsverteilung.
+Danach wird von der Verteilung eine Wahrscheinlichkeitsfunktion für die Fragmentlängen abgeleitet. Im nächsten Schritt versucht man, den paarweisen Abstand der Contigs durch eine Maximum-Likelihood-Methode abzuschätzen.
+Dabei werden für ein Contig-Paar die zugehörigen Read-Paare ermittelt und deren Fragmentlänge berechnet unter der Annahme, dass die beiden Contigs ohne Lücke direkt aneinander angrenzen. Als nächstes durchläuft man mehrere Iterationen, bei der jeweils die Fragmentlängen um einen Faktor (min\_dist bis max\_dist) korrigiert werden. Des Weiteren erfolgt eine Aufsummierung der logarithmischen Wahrscheinlichkeiten (log odds) der korrigierten Fragmentlängen multipliziert mit dessen Häufigkeiten in jedem Durchlauf. Schließlich wählt man als Abstand zwischen den Contigs den Faktor, bei dem die Wahrscheinlichkeitssumme ein Maximum erreicht.
 
 \subsection{Konstruktion des Graphen}
 Aus den Contigs und den Distanzinformationen wird der Scaffold-Graph
