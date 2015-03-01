@@ -49,44 +49,40 @@
 \section{Einleitung}
 \todo{Das Scaffolding Problem}
 
-Das Ziel einer DNA-Sequenzierung ist die Bestimmung der Basen-Abfolge der vorliegenden DNA. Moderne Sequenzierungstechniken, auch Sequenzierung der zweiten Generation genannt, liefern typischerweise Reads als Paare. Dabei wird jeweils vom Ende eines DNA-Fragments sequenziert. Abhängig vom verwendeten Sequenzierungsprotokoll überbrücken gepaarte Reads Lücken (Inserts) variabler Größe.
+Das Ziel einer DNA-Sequenzierung ist die Bestimmung der Basen-Abfolge
+der vorliegenden DNA. Moderne Sequenzierungstechniken, auch
+Sequenzierung der zweiten Generation genannt, liefern typischerweise
+Reads als Paare. Dabei wird jeweils vom Ende eines DNA-Fragments
+sequenziert. Abhängig vom verwendeten Sequenzierungsprotokoll
+überbrücken gepaarte Reads Lücken (Inserts) variabler Größe.
 
-Zur Rekonstruktion der Zielsequenz aus den Reads unabhängig von einer Referenzsequenz kann eine \textit{de novo} Assemblierung durchgeführt werden. Typischerweise wird hierbei in zwei Schritten vorgegangen: Zunächst werden die einzelnen Reads zu durchgängigen Sequenzen (Contigs) assembliert. Dabei kann das Zielgenom oftmals noch nicht vollständig rekonstruiert werden. Aufgrund teilweise unzureichender Abdeckung durch die Sequenzierung sowie repititive Teilsequenzen entstehen Lücken (Gaps), welche zu unabhängigen Contigs zu führen, deren relative Anordnung und Orientierung zueinander nicht bestimmt werden kann.
+Zur Rekonstruktion der Zielsequenz aus den Reads unabhängig von einer
+Referenzsequenz kann eine \textit{de novo} Assemblierung durchgeführt
+werden. Typischerweise wird hierbei in zwei Schritten vorgegangen:
+Zunächst werden die einzelnen Reads zu durchgängigen Sequenzen
+(Contigs) assembliert. Dabei kann das Zielgenom oftmals noch nicht
+vollständig rekonstruiert werden. Aufgrund teilweise unzureichender
+Abdeckung durch die Sequenzierung sowie repititive Teilsequenzen
+entstehen Lücken (Gaps), welche zu unabhängigen Contigs zu führen,
+deren relative Anordnung und Orientierung zueinander nicht bestimmt
+werden kann.
 
-Durch \textit{Paired-End}- oder \textit{Mate-Pair}-Sequenzierung gewonnene Reads können hierbei mehrere Contigs überbrücken und so eine Beziehung zwischen diesen herstellen. Im zweiten Schritt einer \textit{de novo} Assemblierung können diese Distanzinformationen dazu verwendet werden, um die Contigs in Scaffolds anzuordnen. Dies erhöht die Durchgängigkeit der assemblierten Sequenz.
-Das Scaffolding Problem kann als graphentheoretisches Problem formuliert werden. Dabei repräsentieren die Knoten des Graphen die einzelnen Contigs. Zwischen zwei Knoten existiert eine Kante, falls ein Read-Paar existiert, welches die beiden Contigs verbindet. Kanten enthalten dabei Informationen über die Distanz und die Orientierung der Read-Paare zueinander. Die Ermittlung eines Scaffolds, nämlich des optimalen Pfades (Pfad mit maximalem Kantengewicht) jeder Zusammenhangskomponente des Scaffolding Graphen, ist NP-schwer~\cite{Huson:2002kf}. Daher verwenden aktuelle Strategien eine Heuristik, um einen ausreichend guten Pfad zu bestimmen.
-
-(\todo{Alternativer Vorschlag})
-
-Nach der Assemblierung von Sequenzen ist das Zielgenom oftmals noch
-nicht vollständig rekonstruiert. Die rekonstruierten Sequenzabschnitte
-(Contigs) sind dabei unabhängig voneinander und die relative Anordnung
-sowie die Orientierung sind unbekannt. Diese Lücken (Gaps) in der
-Zielsequenz entstehen oft durch ungleichmäßige Abdeckung durch die
-Sequenzierung sowie repetitive Teilsequenzen. Durch repetitive
-Teilsequenzen können die Contigs nicht in eine eindeutige Reihenfolge
-gebracht werden.
-
-Durch das Scaffolding nach der Assemblierung sollen die Contigs
-relativ zueinander angeordnet werden, sodass zusätzlich auch die
-Orientierung stimmt. Um dieses Verfahren anwenden zu können müssen
-Distanzinformationen zwischen den Contigs vorhanden sein. Diese
-Informationen stammen normalerweise aus \textit{paired-end}- oder
-\textit{mate-pair}-Sequenzierung.
-
-Beim Scaffolding wird ein Graph zur Repräsentation der Beziehungen
-zwischen den Contigs verwendet. Dieser Graph enthält für jeden Contig
-einen Knoten und es gibt Kanten zwischen zwei Knoten, wenn es ein
-Read-Paar gibt, dass die durch die Knoten repräsentierten Contigs
-verbindet. Die Kanten enthält dabei Informationen über die Distanz und
-die Orientierung.
-
-Nach Huson (2002) \cite{Huson:2002kf} ist das Scaffolding Problem
-NP-vollständig. Dabei ist das Scaffolding die Ermittlung des optimalen
+Durch \textit{Paired-End}- oder \textit{Mate-Pair}-Sequenzierung
+gewonnene Reads können hierbei mehrere Contigs überbrücken und so eine
+Beziehung zwischen diesen herstellen. Im zweiten Schritt einer
+\textit{de novo} Assemblierung können diese Distanzinformationen dazu
+verwendet werden, um die Contigs in Scaffolds anzuordnen. Dies erhöht
+die Durchgängigkeit der assemblierten Sequenz.  Das Scaffolding
+Problem kann als graphentheoretisches Problem formuliert werden. Dabei
+repräsentieren die Knoten des Graphen die einzelnen Contigs. Zwischen
+zwei Knoten existiert eine Kante, falls ein Read-Paar existiert,
+welches die beiden Contigs verbindet. Kanten enthalten dabei
+Informationen über die Distanz und die Orientierung der Read-Paare
+zueinander. Die Ermittlung eines Scaffolds, nämlich des optimalen
 Pfades (Pfad mit maximalem Kantengewicht) jeder
-Zusammenhangskomponente des Scaffolding-Graphen. Um diese Komplexität
-zu umgehen werden Heuristiken zur Bestimmung eines guten Pfades für
-jede Zusammenhangskomponente verwendet.
+Zusammenhangskomponente des Scaffolding Graphen, ist
+NP-schwer~\cite{Huson:2002kf}. Daher verwenden aktuelle Strategien
+eine Heuristik, um einen ausreichend guten Pfad zu bestimmen.
 
 \section{Ziel des Projektes und Arbeitsvorgehen}
 \subsection{Ziel des Projektes}
