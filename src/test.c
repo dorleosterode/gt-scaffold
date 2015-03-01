@@ -63,7 +63,7 @@ int main(int argc, char **argv)
   DistRecords *dist;
 
   if (argc == 1 || sscanf(argv[1], "%s", argv[1]) != 1) {
-    fprintf(stderr,"Usage: %s <module> <arguments>\n" ,argv[0]);
+    fprintf(stderr,"Usage: %s <module> <arguments>\n", argv[0]);
     exit(EXIT_FAILURE);
   }
 
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 
   else if (strcmp(argv[1], "parser") == 0) {
     if (argc != 3) {
-      fprintf(stderr, "Usage: <DistEst file>\n");
+      fprintf(stderr, "Usage: <DistEst> <Contigs>\n");
       return EXIT_FAILURE;
     } else {
       dist_filename = argv[2];
@@ -171,8 +171,9 @@ int main(int argc, char **argv)
 
 
         /* test the new generate_fasta function */
-        had_err = gt_scaffolder_graph_generate_fasta(contig_filename, spm_filename,
-                                                     "generate_fasta.fa", recs, err);
+        if (strcmp(spm_filename, "false") != 0)
+          had_err = gt_scaffolder_graph_generate_fasta(contig_filename,
+                      spm_filename, "generate_fasta.fa", recs, err);
 
         if (had_err != 0)
           fprintf(stderr, "%s\n", gt_error_get(err));

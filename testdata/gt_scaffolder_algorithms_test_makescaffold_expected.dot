@@ -49,12 +49,12 @@ digraph {
 47 [color="magenta" label="contig-980"];
 48 [color="magenta" label="contig-984"];
 49 [color="magenta" label="contig-987"];
-38 -> 7 [color="black" label="1011" arrowhead="normal"];
+38 -> 7 [color="magenta" label="1011" arrowhead="normal"];
 7 -> 38 [color="magenta" label="1011" arrowhead="inv"];
-20 -> 31 [color="black" label="13" arrowhead="inv"];
+20 -> 31 [color="magenta" label="13" arrowhead="inv"];
 31 -> 20 [color="magenta" label="13" arrowhead="inv"];
 42 -> 30 [color="magenta" label="1828" arrowhead="normal"];
-30 -> 42 [color="black" label="1828" arrowhead="inv"];
-26 -> 41 [color="black" label="-99" arrowhead="inv"];
+30 -> 42 [color="magenta" label="1828" arrowhead="inv"];
+26 -> 41 [color="magenta" label="-99" arrowhead="inv"];
 41 -> 26 [color="magenta" label="-99" arrowhead="normal"];
 }
