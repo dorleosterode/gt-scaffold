@@ -196,14 +196,15 @@ Orientierungsinformationen berechnet werden. Die Astatistik kann auch
 als Annotation der Contigs im FASTA-Format enthalten sein.
 
 \subsection{Graphkonstruktion}
-Aus den Contigs und den Distanzinformationen wird der
-Scaffolding-Graph konstruiert. Dabei wird für jeden Contig, der eine
-Mindestlänge von 200 bp überschreitet und eine Astatistik größer 19
-hat, ein Knoten in den Graph eingefügt. Die Distanzinformationen
-werden genutzt um die Knoten miteinander über Kanten zu
-verbinden. Dabei werden zwischen jedem Knotenpaar, zwischen dessen
-repräsentierten Contigs eine Distanzinformation vorhanden ist, zwei
-Kanten eingefügt, die jeweils Orientierung und Distanz angeben.
+Aus den Contigs und den Distanzinformationen wird der Scaffold-Graph
+konstruiert. Dabei wird für jeden Contig, der eine Mindestlänge von
+200 bp überschreitet, eine Astatistik größer 19 und eine berechnete
+Anzahl an Kopien von mindestens \num{0.3} hat, ein Knoten in den Graph
+eingefügt. Die Distanzinformationen werden genutzt um die Knoten
+miteinander durch Kanten zu verbinden. Dabei werden zwischen jedem
+Knotenpaar, zwischen dessen repräsentierten Contigs eine
+Distanzinformation anhand von Read-Paaren vorhanden ist, zwei Kanten
+eingefügt. Die Kanten geben jeweils Orientierung und Distanz an.
 
 \subsection{Selektion relevanter Knoten und Kanten}
 In dem konstruierten Graph werden relevante Knoten und Kanten
