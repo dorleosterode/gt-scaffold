@@ -817,11 +817,6 @@ wird. \todo{gehört dieser Abschnitt evtl in die Diskussion?}
               von $k_2$ als polymorph, wenn $k_2$ noch nicht markiert
               ist\;
             }
-           \tcp{bei polymorphen Knoten wird nur das erste
-             polymorphe Kantenpaar markiert}
-           \If{Knoten $k_0$ ist polymorph markiert}{
-             break\;
-           }
           }
         }
       \tcp{polymorphe Knoten müssen nicht mehr auf
@@ -847,7 +842,6 @@ wird. \todo{gehört dieser Abschnitt evtl in die Diskussion?}
     \textit{AmbigousOrdering} ist in Algorithmus \ref{alg: Order}
     dargestellt.}
 \end{algorithm}
-\todo{Zeile 13-15: das machen wir im code nicht!!! evtl wollen wir das aber machen!!!}
 
 \begin{algorithm}[H]
   \KwData{Kante $e_0$ und Kante $e_1$, die auf eindeutige Ordnung geprüft werden
