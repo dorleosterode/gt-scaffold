@@ -116,25 +116,27 @@ keine hinreichende Dokumentation der Methodik von SGA-Scaffold, so
 dass dessen Aufklärung einen zentralen Teil des Projektes umfasste.
 
 \subsection{Arbeitsvorgehen}
-Zuerst wurden die verwendeten Datenformate und die Algorithmen
-aufgeklärt. Da diese nicht hinreichend dokumentiert waren, mussten
-diese Informationen aus dem Source-Code~\cite{source} extrahiert werden.
+Die erste Aufgabe bestand darin, die Datenformate und Algorithmen
+von SGA-Scaffold aufzuklären. Die benötigten Informationen
+wurden direkt aus dem Quelltext von SGA extrahiert, der über die
+Plattform GitHub freizugänglich ist~\cite{source}.
 
-Die so erhaltene Vorlage wurde leicht modifiziert, um sowohl Laufzeit
-als auch Speicherplatz einzusparen. Unklarheiten in der Methodik wurden
-dabei weitestgehend erst übernommen, um die Ergebnisse reproduzieren
-zu können.
+Die Datenformate und Algorithmen wurden leicht modifiziert und in
+der Programmiersprache C neu implementiert, um sowohl Laufzeit
+als auch Speicherplatz einzusparen. Mehrere Unklarheiten in der
+Methodik wurden zunächst übernommen, um die gleichen Resultate wie
+SGA-Scaffold erzeugen zu können. Des Weiteren verwendete man die
+Eingabeformate von SGA-Scaffold, damit die Ergebnisse von gt Scaffolder
+und SGA-Scaffold verglichen werden konnten.
 
-Diese Algorithmen wurden in der Programmiersprache C
-implementiert. Dabei wurde gt Scaffolder zuerst so designt, dass es
-die gleichen Eingabedateien erforderte wie SGA-Scaffold und die
-gleichen Ausgaben produzierte, damit die Ergebnisse verglichen werden
-konnten.
-
-Um die Implementation zu testen wurden verschiedene Testdaten
-ausgesucht. (\todo{hier mehr dazu schreiben!!!})
-
-Anhand der Testdaten wurde gt Scaffolder evaluiert.
+Als nächstes simulierte man eine \textit{Paired-End}-Sequenzierung mit
+einem Illumina Sequenzierer für verschiedene Referenzsequenzen
+(\textit{S. cerevisiae}, \textit{H. sapiens}, \textit{C. elegans}
+ \textit{D. melanogaster}) durch die Software ART~\cite{Huang:2012kq}.
+Danach wurde eine Genomassemblierung für die \textit{Paired-End}
+Bibliotheken mit der SGA-Pipeline und der Scaffolding-Schritt
+mit gt Scaffolder und SGA-Scaffold durchgeführt. Schließlich erfolgte
+eine Evaluation der Ergebnisse.
 
 \section{Methoden}
 \label{sec: Methoden}
@@ -209,13 +211,16 @@ In gt Scaffolder können die Distanzinformationen explizit durch eine
 Datei im ABySS-Distance-Format (*.de) angegeben werden. Eine solche
 Datei wird durch das Programm DistEst von ABySS nach dem Assemblierungs-
 und Read-Mapping Schritt in der SGA-Pipeline erstellt und dient als
-Eingabe der Distanzinformationen für SGA-Scaffold. In der Evaluierung wurde diese Option für Vergleiche zwischen gt Scaffolder und SGA-Scaffold
+Eingabe der Distanzinformationen für SGA-Scaffold. In der Evaluierung
+wurde diese Option für Vergleiche zwischen gt Scaffolder und SGA-Scaffold
 verwendet.
 
 Des Weiteren besteht die Möglichkeit, die Distanzinformationen aus
 einer Datei im BAM-Format (*.bam) mit Hilfe eines Moduls zu
-extrahieren. Dafür diente die Methode des Programms DistEst von ABySS als Vorlage. Aus Zeitgründen ist es nicht gelungen ein Modul zu
-entwickeln zur Erzeugung der BAM-Datei auf Basis des String-Graphen. Stattdessen muss ein Read-Mapping separat nach der Assemblierung
+extrahieren. Dafür diente die Methode des Programms DistEst von ABySS
+als Vorlage. Aus Zeitgründen ist es nicht gelungen ein Modul zu
+entwickeln zur Erzeugung der BAM-Datei auf Basis des String-Graphen.
+Stattdessen muss ein Read-Mapping separat nach der Assemblierung
 durchgeführt werden.
 
 Die Methode, die das Programm DistEst verwendet, durchläuft folgende
@@ -223,8 +228,18 @@ Schritte. Zunächst werden alle Reads aus der BAM-Datei geladen und
 die Read-Paare ermittelt. Anschließend berechnet man die Fragmentlängen 
 aller Read-Paare, die gegenüber dem gleichen Contig angeordnet sind,
 und erstellt auf deren Basis eine Häufigkeitsverteilung.
-Danach wird von der Verteilung eine Wahrscheinlichkeitsfunktion für die Fragmentlängen abgeleitet. Im nächsten Schritt versucht man, den paarweisen Abstand der Contigs durch eine Maximum-Likelihood-Methode abzuschätzen.
-Dabei werden für ein Contig-Paar die zugehörigen Read-Paare ermittelt und deren Fragmentlänge berechnet unter der Annahme, dass die beiden Contigs ohne Lücke direkt aneinander angrenzen. Als nächstes durchläuft man mehrere Iterationen, bei der jeweils die Fragmentlängen um einen Faktor (min\_dist bis max\_dist) korrigiert werden. Des Weiteren erfolgt eine Aufsummierung der logarithmischen Wahrscheinlichkeiten (log odds) der korrigierten Fragmentlängen multipliziert mit dessen Häufigkeiten in jedem Durchlauf. Schließlich wählt man als Abstand zwischen den Contigs den Faktor, bei dem die Wahrscheinlichkeitssumme ein Maximum erreicht.
+Danach wird von der Verteilung eine Wahrscheinlichkeitsfunktion für die
+Fragmentlängen abgeleitet. Im nächsten Schritt versucht man, den paarweisen
+Abstand der Contigs durch eine Maximum-Likelihood-Methode abzuschätzen.
+Dabei werden für ein Contig-Paar die zugehörigen Read-Paare ermittelt und
+deren Fragmentlänge berechnet unter der Annahme, dass die beiden Contigs
+ohne Lücke direkt aneinander angrenzen. Als nächstes durchläuft man mehrere
+Iterationen, bei der jeweils die Fragmentlängen um einen Faktor (min\_dist
+bis max\_dist) korrigiert werden. Des Weiteren erfolgt eine Aufsummierung
+der logarithmischen Wahrscheinlichkeiten (log odds) der korrigierten
+Fragmentlängen multipliziert mit dessen Häufigkeiten in jedem Durchlauf.
+Schließlich wählt man als Abstand zwischen den Contigs den Faktor, bei
+dem die Wahrscheinlichkeitssumme ein Maximum erreicht.
 
 \subsection{Konstruktion des Graphen}
 Aus den Contigs und den Distanzinformationen wird der Scaffold-Graph
