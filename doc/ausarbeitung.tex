@@ -309,17 +309,19 @@ schließen. Die Rekonstruktion der Sequenzen ist in Abschnitt \ref{sec:
 \subsection{Erstellen der Distanzinformationen}
 In gt Scaffolder können die Distanzinformationen explizit durch eine
 Datei im ABySS-Distance-Format (*.de) angegeben werden. Eine solche
-Datei wird durch das Programm DistEst von ABySS nach dem Assemblierungs-
-und Read-Mapping Schritt in der SGA-Pipeline erstellt und dient als
-Eingabe der Distanzinformationen für SGA-Scaffold. In der Evaluierung wurde diese Option für Vergleiche zwischen gt Scaffolder und SGA-Scaffold
-verwendet.
+Datei wird durch das Programm DistEst von ABySS nach dem
+Assemblierungs- und Read-Mapping Schritt in der SGA-Pipeline erstellt
+und dient als Eingabe der Distanzinformationen für SGA-Scaffold. In
+der Evaluierung wurde diese Option für Vergleiche zwischen gt
+Scaffolder und SGA-Scaffold verwendet.
 
 Des Weiteren besteht die Möglichkeit, die Distanzinformationen aus
 einer Datei im BAM-Format (*.bam) mit Hilfe eines Moduls zu
 extrahieren. Dafür wurde das Programm DistEst von ABySS in C nach
 implementiert. Aus Zeitgründen ist es nicht gelungen ein Modul zu
-entwickeln zur Erzeugung der BAM-Datei auf Basis des String-Graphen. Stattdessen muss ein Read-Mapping separat nach der Assemblierung
-durchgeführt werden.
+entwickeln zur Erzeugung der BAM-Datei auf Basis des
+String-Graphen. Stattdessen muss ein Read-Mapping separat nach der
+Assemblierung durchgeführt werden.
 
 \subsection{Rekonstruktion der Sequenz}
 \label{sec: Rekonstruktion}
