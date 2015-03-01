@@ -881,25 +881,22 @@ wird. \todo{gehört dieser Abschnitt evtl in die Diskussion?}
 \begin{algorithm}[H]
   \SetAlgoLined
   \KwData{Graph $G$}
-  \KwResult{Graph $G$ ohne Knoten, die nicht zum bestem Walk gehören}
-  Markiere alle Kanten aus $G$ schwarz\;
-  Berechnung der Menge $C$ aller Connected Components von $G$\;
-  \ForEach{Connected Component $c_0$ aus der Menge $C$}{
-    Berechne Menge der terminalen Knoten $T$ (mit ausschließlich SENSE
-    oder ANTISENSE Kanten) für die Connected Component $c_0$\;
-    \ForEach{Terminaler Knoten $t_0$ aus der Menge $T$}{
-      Berechne die Menge $W$ aller Walks durch die Connected
-      Component $c_0$ von $t_0$ aus\;
-      \ForEach{Walk $w_0$ aus $W$}{
+  \KwResult{Graph $G$ mit Knoten der Scaffolds markiert}
+  Suche alle Zusammenhangskomponenten $CC$\;
+  \ForEach{Zusammenhangskomponente $C_0\in CC$}{
+    Berechne die Menge der terminalen Knoten $T$ für $C_0$\;
+    \ForEach{terminalen Knoten $t_0  \in T$}{
+      Berechne die Menge $W$ aller Pfade durch $C_0$ von $t_0$ aus\;
+      \ForEach{Pfad $w_0$ aus $W$}{
         \If{Contig-Gesamtlänge > bislang beste Contig-Gesamtlänge}{
-          Setze aktuellen Walk $w_0$ als bestWalk\;
+          Setze aktuellen Pfad $w_0$ als besten Pfad\;
         }
       }
     }
+    Markiere alle Knoten und Kanten entlang des besten Pfades als Scaffold\;
   }
-  Setze alle Kanten des bestWalk weiß\;
-  Lösche alle schwarzen Kanten\;
-  \caption{\label{alg: Scaffold}Berechnung der Scaffolds (Schritt 6)}
+  \caption{\label{alg: Scaffold}Berechnung der Scaffolds. Die
+    Berechnung aller Pfade ist in Algorithmus \ref{alg: Pfade} dargestellt.}
 \end{algorithm}
 
 \begin{algorithm}[H]
@@ -932,7 +929,7 @@ wird. \todo{gehört dieser Abschnitt evtl in die Diskussion?}
   \ForEach{Knoten $k_0$ in terminalSet}{
     Erzeuge Walk mithilfe einer Traversierung über die Map
   }
-  \caption{Berechnung der Walks (Schritt 6.1)}
+  \caption{\label{alg: Pfade}Berechnung der Walks (Schritt 6.1)}
 \end{algorithm}
 
 \bibliography{presentation/literatur}
