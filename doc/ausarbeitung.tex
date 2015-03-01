@@ -902,34 +902,38 @@ wird. \todo{gehört dieser Abschnitt evtl in die Diskussion?}
 \begin{algorithm}[H]
   \SetAlgoLined
   \KwData{terminaler Startknoten $t_0$}
-  \KwResult{Alle von diesem Knoten möglichen Walks}
-  Konstruktionsrichtung = Richtung der vom terminalen Knoten $t_0$ ausgehenden Kanten\;
-  \ForEach{Kante $A$ vom Knoten $t_0$ ausgehend (in Konstruktionsrichtung)}{
-    $k_0$ = $A.pend$\;
-    Speichere Startkante $A$ und Distanz $A.dist$ in Map an Position
-    $k_0$ (für spätere Traversierung)\;
-    Schiebe Startkante $A$ und Distanz $A.dist$ in Queue\;
+  \KwResult{Alle von diesem Knoten möglichen Pfade}
+  Konstruktionsrichtung = $t_0.edges[0].sense$\;
+  \ForEach{Kante $e_1$ vom Knoten $t_0$ ausgehend}{
+    $k_0$ = $e_1.end$\;
+    Speichere Startkante $e_1$ und Distanz $e_1.dist$ in Map an Position
+    $k_0$\;
+    Schiebe Startkante $e_1$ und Distanz $e_1.dist$ in Queue\;
   }
   \While{BFS über Queue nicht beendet}{
-    Poppe Kante $A$ und Distanz $A.dist$ aus der Queue\;
-    $k_0$ = $A.pend$\;
-    \ForEach{Kante $B$ in Konstruktionsrichtung von $k_0$ aus} {
-      $k_1$ = $B.pend$\;
-      \If{Distanz zu aktuell betrachtetem Knoten $k_1$ $<$
+    Poppe Kante $e$ und Distanz $dist$ aus der Queue\;
+    $k$ = $e.end$\;
+    \ForEach{Kante $e_2$ in Konstruktionsrichtung von $k$ aus} {
+      $k_1$ = $e_2.end$\;
+      \If{Distanz ($e_2.dist + dist$) zu aktuell betrachtetem Knoten $k_1$ $<$
         bisher ermittelte Distanz zu $k_1$ {\bf OR} Knoten $k_1$
         noch unbetrachtet}{
-        Speichere Kante $B$ und Distanz $B.dist$ in Map an Position $k_1$\;
-        Schiebe Kante $B$ und Distanz $B.dist$ in Queue\;
+        Speichere Kante $e_2$ und Distanz $e_2.dist + dist$ in Map an Position $k_1$\;
+        Schiebe Kante $e_2$ und Distanz $e_2.dist + dist$ in Queue\;
       }
+      neue Konstruktionrichtung = $e_2.twin.sense$\;
     }
-    \If{$k_0$ hat keine Kanten in Konstruktionsrichtung}{
-      Schiebe Knoten $k_0$ in terminalSet\;
+    \If{$k$ hat keine Kanten in Konstruktionsrichtung {\bf AND}
+    $k$ ist terminal}{
+      Schiebe Knoten $k$ in terminalSet $S$\;
     }
   }
-  \ForEach{Knoten $k_0$ in terminalSet}{
-    Erzeuge Walk mithilfe einer Traversierung über die Map
+  \ForEach{Knoten $k\in S$}{
+    Erzeuge Pfad von $t_0$ zu $k$ mithilfe einer Rücktraversierung über die Map\;
   }
-  \caption{\label{alg: Pfade}Berechnung der Walks (Schritt 6.1)}
+  \caption{\label{alg: Pfade}Berechnung aller Pfad zwischen einem
+    terminalen Knoten und allen anderen terminalen Knoten einer
+    Zusammenhangskomponente}
 \end{algorithm}
 
 \bibliography{presentation/literatur}
