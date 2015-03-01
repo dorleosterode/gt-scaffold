@@ -327,12 +327,12 @@ schließen. Die Rekonstruktion der Sequenzen ist in Abschnitt \ref{sec:
 \label{sec: Rekonstruktion}
 Zur Rekonstruktion der Sequenzen der berechneten Scaffolds werden drei
 Schritte für alle aufeinander folgende Contigs durchlaufen. Zuerst
-wird versucht die Lücke (Gap) zwischen den Contigs anhand eines Pfades
+wird versucht die Lücke zwischen den Contigs anhand eines Pfades
 in dem String-Graph zu schließen. Für diesen Schritt wird der
 String-Graph aller Contigs verwendet. Konnte kein eindeutiger Pfad nach
 bestimmten Kriterien gefunden werden, so wird überprüft, ob die
 Contigs sich überlappen. Ist die Distanz zwischen den Contigs negativ,
-so werden die sich überlappenden Enden aligniert. Wenn kein Alignment
+werden die sich überlappenden Enden aligniert. Wenn kein Alignment
 gefunden wurde, wird die Lücke mit Wiederholungen des Buchstaben 'N'
 aufgefüllt.
 
@@ -340,14 +340,13 @@ Die gesamte Sequenz eines Scaffolds wird anhand dieser drei Schritte
 folgendermaßen rekonstruiert. Die komplette Sequenz des ersten Contigs
 wird übernommen. Danach wird für den jeweils nächsten Contig versucht
 einen eindeutigen Pfad der richtigen Länge zwischen dem vorherigen und
-diesem Contig im String-Graph zu finden. Anschließend wird versucht
-bei negativer Distanz zwischen den Contigs ein Alignment zu finden,
-sonst wird die Lücke zwischen den Contigs mit einer Reihe von
-'N'-Symbolen aufgefüllt. Bei diesem Vorgang wird die relative
-Orientierung der Contigs zueinander und zum ersten Contig beachtet und
-die Sequenzen dementsprechend umgedreht \todo{anderes wort!}
-bzw. komplementiert. Im Folgenden werden die einzelnen
-Schritte näher beschrieben.
+diesem Contig im String-Graph zu finden. War dies nicht erfolgreich
+wird bei negativer Distanz versucht zwischen den Contigs ein Alignment
+zu finden. Ansonst wird die Lücke zwischen den Contigs mit einer Reihe
+von 'N'-Symbolen aufgefüllt. Bei diesem Vorgang wird die relative
+Orientierung der Contigs zueinander und zum ersten Contig
+beachtet. Dementsprechend wird jeweils die normale, die reverse oder
+revers-komplementierte Sequenz verwendet.
 
 \subsubsection{Traversierung des Stringgraphen}
 Nach der Assemblierung wird in SGA ein String-Graph im \textit{.asqg}
