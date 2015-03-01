@@ -574,7 +574,7 @@ mögliche Erklärungen ergänzt.
 
 \section{Ergebnisse}
 
-Zum Evaluieren und Testen der Implementierten Software wurden
+Zum Evaluieren und Testen der implementierten Software wurden
 verschiedene Testdatensätze ausgewählt. Die verwendeten Referenzgenome
 sind in Tabelle \ref{tab: Referenzgenome} dargestellt.
 
@@ -596,16 +596,20 @@ Es wurden diese Referenzgenome gewählt, da sie sehr unterschiedliche
 Größen haben. Die Größen decken einen Bereich von ca. 10 Mbp bis 140
 Mbp ab, so dass die Entwicklung des Laufzeitverhaltens und des
 Speicherplatzbedarfs über die Länge des Genoms betrachtet werden kann.
+Zusätzlich sind die Referenzgenome hinreichend groß um ein
+interessantes Problem darzustellen. Kleinere Genome konnten teilweise
+von der SGA-Pipeline schon bei der Assemblierung vollständig
+rekonstruiert werden.
 
-Mit dem Sequenzierungssimulator ART~\cite{Huang:2012kq} wurde für jedes
-der Genome eine \textit{paired-end}-Sequenzierung mit einem Illumina
-Sequenzierer simuliert. Dabei wurde die Read-Länge auf 150 bp, die
-Fragmentlänge auf 400 bp $\pm$ 10 bp und die Coverage wurde auf 20X
+Mit dem Sequenzierungssimulator ART~\cite{Huang:2012kq} wurde für
+jedes der Genome eine \textit{Paired-End}-Sequenzierung mit einem
+Illumina Sequenzierer simuliert. Dabei wurde die Read-Länge auf 150
+bp, die Fragmentlänge auf 400 bp $\pm$ 10 bp und die Coverage auf 20X
 festgelegt.
 
-Die so simulierten \textit{paired-end}-Reads wurden mit der
-SGA-Pipeline assembliert und das so erhaltene Ergebnis für das
-Scaffolding verwendet.
+Die so erhaltenen \textit{Paired-End}-Reads wurden mit der
+SGA-Pipeline assembliert und das Ergebnis für das Scaffolding
+verwendet.
 
 Die Berechnungen wurden auf einer Workstation durchgeführt. Die
 technischen Daten sind: Core-i7 @ 3.10GHz, 8GB RAM, Linux 64 bit.
