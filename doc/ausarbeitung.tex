@@ -205,18 +205,21 @@ als Annotation der Contigs im FASTA-Format enthalten sein.
 \subsection{Erstellen der Distanzinformationen}
 In gt Scaffolder können die Distanzinformationen explizit durch eine
 Datei im ABySS-Distance-Format (*.de) angegeben werden. Eine solche
-Datei wird durch das Programm DistEst von ABySS nach dem
+Datei wird durch das Programm DistEst von ABySS~\cite{abyss} nach dem
 Assemblierungs- und Read-Mapping Schritt in der SGA-Pipeline erstellt
-und dient als Eingabe der Distanzinformationen für SGA-Scaffold. In
-der Evaluierung wurde diese Option für Vergleiche zwischen gt
-Scaffolder und SGA-Scaffold verwendet.
+(vergleiche Abbildung \ref{abb: Pipeline}) und dient als Eingabe der
+Distanzinformationen für SGA-Scaffold. In der Evaluierung wurde diese
+Option für Vergleiche zwischen gt Scaffolder und SGA-Scaffold
+verwendet.
 
 Des Weiteren besteht die Möglichkeit, die Distanzinformationen aus
 einer Datei im BAM-Format (*.bam) mit Hilfe eines Moduls zu
-extrahieren. Dafür wurde das Programm DistEst von ABySS in C nach
-implementiert. Aus Zeitgründen ist es nicht gelungen ein Modul zu
-entwickeln zur Erzeugung der BAM-Datei auf Basis des
-String-Graphen. Stattdessen muss ein Read-Mapping separat nach der
+extrahieren. Dafür wurde das Programm DistEst von ABySS in C
+reimplementiert. Aus Zeitgründen ist es nicht gelungen ein Modul zur
+Erzeugung der BAM-Datei auf Basis des String-Graphen zu
+entwickeln. Dieses Modul wäre nötig, da Readjoiner die noch
+gespeicherten Mapping-Informationen nicht direkt im BAM-Format
+ausgeben kann. Stattdessen muss ein Read-Mapping separat nach der
 Assemblierung durchgeführt werden.
 
 \subsection{Konstruktion des Graphen}
