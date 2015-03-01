@@ -80,13 +80,14 @@ relative Orientierung festgelegt werden.
 Das Scaffolding Problem kann als graphentheoretisches Problem
 formuliert werden. Dabei repräsentieren die Knoten des Graphen die
 einzelnen Contigs. Zwischen zwei Knoten existiert eine Kante, falls
-ein Read-Paar existiert, welches die beiden Contigs verbindet. Kanten
-enthalten dabei Informationen über die Distanz und die Orientierung
-der Read-Paare zueinander. Die Ermittlung eines Scaffolds, nämlich des
-optimalen Pfades (Pfad mit maximalem Kantengewicht) jeder
-Zusammenhangskomponente des Scaffolding Graphen, ist
-NP-schwer~\cite{Huson:2002kf}. Daher verwenden aktuelle Strategien
-eine Heuristik, um einen ausreichend guten Pfad zu bestimmen.
+ein Read-Paar die beiden repräsentierten Contigs verbindet. Kanten
+enthalten dabei Informationen über die Distanz der verbundenen Contigs
+und die Orientierung der Read-Paare zueinander. Die Ermittlung eines
+Scaffolds, eines optimalen Pfades (Pfad mit maximalem Kantengewicht)
+jeder Zusammenhangskomponente des Scaffolding Graphen, ist
+NP-vollständig~\cite{Huson:2002kf}. Daher verwenden aktuelle
+Strategien eine Heuristik, um einen ausreichend guten Pfad zu
+bestimmen.
 
 \section{Ziel des Projektes und Arbeitsvorgehen}
 \subsection{Ziel des Projektes}
