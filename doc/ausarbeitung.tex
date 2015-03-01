@@ -212,28 +212,35 @@ selektiert. Dazu werden nicht relevante Knoten und Kanten markiert und
 im späteren Vorgehen nur unmarkierte Knoten und Kanten betrachtet. Es
 werden folgende Kriterien überprüft:
 \begin{itemize}
-\item Polymorphe Knoten: Zwei Knoten werden gelten als polymorph, wenn
-  diese sich bezüglich eines gemeinsamen Vorgängerknotens nicht
-  eindeutig anordnen lassen. Zusätzlich muss die Kopiezahl beider
-  Knoten gering genug sein. Der Knoten mit der geringeren Kopiezahl
-  wird als polymorph markiert und nicht weiter betrachtet.
+\item Polymorphe Knoten: Zwei Knoten gelten als polymorph, wenn diese
+  sich bezüglich eines gemeinsamen Vorgängerknotens anhand ihrer
+  Distanz nicht eindeutig anordnen lassen. Zusätzlich muss die
+  Kopiezahl beider Knoten gering genug sein. Der Knoten mit der
+  geringeren Kopiezahl und dessen eingehenden und ausgehenden Kanten
+  werden als polymorph markiert und nicht weiter betrachtet.
 \item Inkonsistente Kanten: Zwei Kanten $e_1$ und $e_2$ gelten als
   inkonsistent, wenn sich die Endknoten $e_1.end$ und $e_2.end$ bei
-  einer Anordnung bezüglich des gemeinsamen Startknotens $e_1.start =
-  e_2.start$ mit mindestens 400 bp überlappen. Gehen von einem Knoten
-  zwei inkonsistente Kanten aus, so werden alle ausgehenden Kanten als
-  inkonsistent markiert.
+  einer Anordnung anhand ihrer Distanz bezüglich des gemeinsamen
+  Startknotens $e_1.start = e_2.start$ mit mindestens 400 bp
+  überlappen. Gehen von einem Knoten zwei inkonsistente Kanten aus, so
+  werden alle ausgehenden Kanten des Knotens sowie ihre Rückkanten als
+  inkonsistent markiert. Zusätzlich werden alle Kanten der über
+  inkonsistente Kanten erreichbaren Knoten, die die gleiche Richtung
+  (\textit{sense} oder \textit{antisense}) wie die markierte Rückkante
+  haben, als inkonsistent markiert. Alle markierten Kanten werden
+  nicht weiter betrachtet.
 \end{itemize}
 Der Pseudocode zur Markierung polymorpher Knoten und inkonsistener
 Kanten ist in Algorithmus \ref{alg: Selektion} dargestellt.
 
-Zusätzlich werden noch gerichtete Zyklen aufgelöst. Dazu werden alle
+Zusätzlich werden gerichtete Zyklen aufgelöst. Dazu werden alle
 Zusammenhangskomponenten des Graphen berechnet. Für jede dieser
-Zusammenhangskomponente wird mit einer Tiefensuche nach Rückkanten
-gesucht. Dabei wird diese Tiefensuche von jedem terminalen Knoten, ein
-Knoten der nur ausgehende \textit{sense} oder \textit{antisense}
-Kanten hat, aus gestartet. Wird eine Rückkante gefunden, so werden die
-Kante und die durch die Kante verbundenen Knoten markiert.
+Zusammenhangskomponente wird mit einer rekursiven Tiefensuche nach
+Rückkanten gesucht. Dabei wird diese Tiefensuche von jedem terminalen
+Knoten, ein Knoten der nur ausgehende \textit{sense} oder
+\textit{antisense} Kanten hat, aus gestartet. Wird eine Rückkante
+gefunden, so werden die Kante und die durch die Kante verbundenen
+Knoten als zyklisch markiert und nicht weiter betrachtet.
 
 Da sich durch die Entfernung einer Kante die Struktur des Graphen
 verändert und immer nur ein Zyklus für jeden terminalen Knoten
