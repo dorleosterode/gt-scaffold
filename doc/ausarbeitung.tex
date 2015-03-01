@@ -93,25 +93,25 @@ bestimmen.
 \subsection{Ziel des Projektes}
 Die Implementierung und Evaluierung einer Scaffolding-Software stellte
 das allgemeine Projektziel dar. Dabei sollten die in der
-GenomeTools-Bibliothek \cite{Gremme:2013} vorhandenen Konzepte und
+GenomeTools-Bibliothek~\cite{Gremme:2013} vorhandenen Konzepte und
 Infrastruktur verwendet und eine Kompatibilität mit den Ausgaben des
-Assemblers Readjoiner \cite{Gonnella:2012gn} gewährleistet werden. Der
-Scaffolder aus dem SGA-Softwarepaket \cite{Simpson:2012ef} sollte als
+Assemblers Readjoiner~\cite{Gonnella:2012gn} gewährleistet werden. Der
+Scaffolder aus dem SGA-Softwarepaket~\cite{Simpson:2012ef} sollte als
 Vorlage dienen, da diese Software im Rahmen einer Untersuchung
 verschiedener Scaffolding-Programme Ergebnisse mit besonders hoher
-Qualität lieferte \cite{Hunt:2014dh}. Andererseits enthält
+Qualität lieferte~\cite{Hunt:2014dh}. Andererseits enthält
 SGA-Scaffold zahlreiche Abhängigkeiten zu nicht-Standardsoftware, die
 durch die Reimplementierung minimiert werden sollten. Dazu gehört zum
 Beispiel, dass zur Ermittelung der Distanzinformationen eine Zuordnung
 der Reads zu den Contigs auf Basis des String-Graphen erfolgt anstelle
-eines Read-Mappings durch BWA \cite{Li:2009}. Des Weiteren existiert
+eines Read-Mappings durch BWA~\cite{Li:2009}. Des Weiteren existiert
 keine hinreichende Dokumentation der Methodik von SGA-Scaffold, so
 dass dessen Aufklärung einen zentralen Teil des Projektes umfasste.
 
 \subsection{Arbeitsvorgehen}
 Zuerst wurden die verwendeten Datenformate und die Algorithmen
 aufgeklärt. Da diese nicht hinreichend dokumentiert waren, mussten
-diese Informationen aus dem Source-Code \cite{source} extrahiert werden.
+diese Informationen aus dem Source-Code~\cite{source} extrahiert werden.
 
 Die so erhaltene Vorlage wurde leicht modifiziert, um sowohl Laufzeit
 als auch Speicherplatz einzusparen. Unklarheiten in der Methodik wurden
@@ -188,7 +188,7 @@ Distanzinformationen bezogen auf die Contigs, d.h. die Read-Paare
 müssen zurück auf die Contigs gemappt und daraus die Distanz- sowie
 Orientierungsinformation für die Contigs berechnet worden sein. Die
 Astatistik ist ein statistisches Maß dafür, wie repetitiv eine Sequenz
-ist \cite{Myers:2005iq}.
+ist~\cite{Myers:2005iq}.
 
 \subsection{Graphkonstruktion}
 Aus den Contigs und den Distanzinformationen wird der
@@ -329,7 +329,7 @@ Schritte näher beschrieben.
 
 \subsubsection{Traversierung des Stringgraphen}
 Nach der Assemblierung wird in SGA ein String-Graph im \textit{.asqg}
-Format (siehe \cite{asqg}) ausgegeben. Dieser String-Graph wird mit
+Format (siehe~\cite{asqg}) ausgegeben. Dieser String-Graph wird mit
 einem Python-Skript in das \textit{.spm} Format umgeschrieben.
 
 Wie in Abbildung \ref{abb: spm} dargestellt, ist das \textit{.spm}
@@ -384,7 +384,7 @@ zwischen den Contigs $c_1$ und $c_2$ berechnet. Dabei wird das beste
 Alignment genutzt, um die Sequenz zu rekonstruieren.
 
 Es wird eine schon vorhandene Implementation des
-Smith-Waterman-Algorithmus für lokale Alignments \cite{smith}
+Smith-Waterman-Algorithmus für lokale Alignments~\cite{smith}
 verwendet. Der Sequenzbereich der Contigs, in dem Alignments gesucht
 werden, wird dabei durch die im Scaffolding ermittelte Distanz und das
 dreifache der Standardabweichung festgelegt. Der Sequenzbereich wird
@@ -485,8 +485,8 @@ BAM-Datei die Distanzinformationen berechnet und in dem erforderlichen
 Format gespeichert. Diese neuerzeugte Datei wird anschließend
 eingelesen und die enthaltenen Informationen verwendet. Durch die
 Möglichkeit eine BAM-Datei anzugeben wird die Abhängigkeit zu einem
-Mapping-Programm (z.B. BWA \cite{BWA}) und einem Teil des
-Assemblers ABySS \cite{abyss} durchbrochen. Aus dem in den
+Mapping-Programm (z.B. BWA~\cite{BWA}) und einem Teil des
+Assemblers ABySS~\cite{abyss} durchbrochen. Aus dem in den
 GenomeTools vorhandenen String-Graph Assembler Readjoiner können die
 Informationen, welche Reads mit den Contigs aligniert werden können ,
 direkt ausgegeben und somit als Eingabe für gt Scaffolder verwendet
@@ -572,7 +572,7 @@ Größen haben. Die Größen decken einen Bereich von ca. 10 Mbp bis 140
 Mbp ab, so dass die Entwicklung des Laufzeitverhaltens und des
 Speicherplatzbedarfs über die Länge des Genoms betrachtet werden kann.
 
-Mit dem Sequenzierungssimulator ART \cite{Huang:2012kq} wurde für jedes
+Mit dem Sequenzierungssimulator ART~\cite{Huang:2012kq} wurde für jedes
 der Genome eine \textit{paired-end}-Sequenzierung mit einem Illumina
 Sequenzierer simuliert. Dabei wurde die Read-Länge auf 150 bp, die
 Fragmentlänge auf 400 bp $\pm$ 10 bp und die Coverage wurde auf 20X
