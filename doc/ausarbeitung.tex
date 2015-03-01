@@ -537,13 +537,13 @@ Traversierung des String-Graphen noch nicht in die GenomeTools
 \section{Wunderliche Strategien in SGA Scaffold}
 
 SGA benutzt eine relativ konservative Strategie, um vermeintlich
-fehlerhafte Knoten und Kanten aus dem Scaffolding-Graph zu
-entfernen. D.h. korrekte Knoten und Kanten werden lieber als
+fehlerhafte Knoten und Kanten aus dem Scaffold-Graph zu
+entfernen. D.\,h. korrekte Knoten und Kanten werden lieber als
 fehlerhaft eingestuft und entfernt, als dass fehlerhafte Knoten oder
 Kanten nicht erkannt werden und in dem Endergebnis enthalten sein
-könnten. Einige nicht sofort ersichtlichen Strategien von SGA wurden
+könnten. Einige nicht sofort ersichtliche Strategien von SGA wurden
 zuerst in gt Scaffolder übernommen, um eine Vergleichbarkeit der
-Ergebnisse der beiden Programme zu erhalten. Die Güte der Strategie
+Ergebnisse der beiden Programme zu erhalten. Die Güte der Strategien
 ?\todo{wurde/muss/sollte was denn jetzt?} evaluiert werden.
 
 Es folgt eine ungeordnete Auflistung solcher Strategien, teilweise um
@@ -551,20 +551,19 @@ mögliche Erklärungen ergänzt.
 \begin{itemize}
 \item Bei der Entfernung inkonsistenter Kanten eines Knoten $k_0$
   werden alle Kanten von den Nachbarknoten, die in der gleichen
-  Richtung verlaufen wie die Kante vom Nachbarknoten zu $k_0$,
-  ebenfalls entfernt. \\
-  Mögliche Erklärung: Potentiell enthalten auch
-  diese Kanten Inkonsistenzen und sollten deshalb nicht weiter
-  betrachtet werden.
-\item Bei der Konstruktion des Graphen wird zwischen zwei Knoten
-  jeweils nur eine Kante eingefügt. Wenn es mehr als eine Kante geben
-  würde wird die Kante mit der größten Standardabweichung
-  gewählt. \\
+  Richtung (\textit{sense} oder \textit{antisense}) verlaufen wie die
+  Kante vom Nachbarknoten zu $k_0$, ebenfalls entfernt. \\
+  Mögliche Erklärung: Potentiell enthalten auch diese Kanten
+  Inkonsistenzen und sollten deshalb nicht weiter betrachtet werden.
+\item Bei der Konstruktion des Graphen werden zwischen zwei Knoten
+  jeweils nur zwei Kante eingefügt, eine Hin- und eine Rückkante.
+  Wenn es mehr als ein mögliches Kantepaar gibt, wird das Kantenpaar mit der
+  größten Standardabweichung gewählt. \\
   Mögliche Erklärung: keine.
 \item Bei der Klassifikation der Knoten als repetitiv oder eindeutig
   wird zusätzlich zu der Astatistik auch die berechnete Anzahl an
   Kopien für jeden repräsentierten Contig betrachtet. Ein Knoten wird
-  dabei als repetitiv markiert und später entfernt, wenn der die
+  dabei als repetitiv markiert und später entfernt, wenn die
   berechnete Anzahl an Kopien für den repräsentierten Contig zu gering
   ist. \\
   Mögliche Erklärung: Die Contigs mit einer zu geringen
