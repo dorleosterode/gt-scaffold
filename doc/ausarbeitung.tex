@@ -202,6 +202,23 @@ Zusätzlich ist es möglich die Mapping-Informationen direkt zu
 Orientierungsinformationen berechnet werden. Die Astatistik kann auch
 als Annotation der Contigs im FASTA-Format enthalten sein.
 
+\subsection{Erstellen der Distanzinformationen}
+In gt Scaffolder können die Distanzinformationen explizit durch eine
+Datei im ABySS-Distance-Format (*.de) angegeben werden. Eine solche
+Datei wird durch das Programm DistEst von ABySS nach dem
+Assemblierungs- und Read-Mapping Schritt in der SGA-Pipeline erstellt
+und dient als Eingabe der Distanzinformationen für SGA-Scaffold. In
+der Evaluierung wurde diese Option für Vergleiche zwischen gt
+Scaffolder und SGA-Scaffold verwendet.
+
+Des Weiteren besteht die Möglichkeit, die Distanzinformationen aus
+einer Datei im BAM-Format (*.bam) mit Hilfe eines Moduls zu
+extrahieren. Dafür wurde das Programm DistEst von ABySS in C nach
+implementiert. Aus Zeitgründen ist es nicht gelungen ein Modul zu
+entwickeln zur Erzeugung der BAM-Datei auf Basis des
+String-Graphen. Stattdessen muss ein Read-Mapping separat nach der
+Assemblierung durchgeführt werden.
+
 \subsection{Konstruktion des Graphen}
 Aus den Contigs und den Distanzinformationen wird der Scaffold-Graph
 konstruiert. Dabei wird für jeden Contig, der eine Mindestlänge von
@@ -302,26 +319,6 @@ wird dabei versucht Überlappungen durch Sequenzalignments aufzulösen
 und Lücken zwischen den Contigs durch Pfade im String-Graph zu
 schließen. Die Rekonstruktion der Sequenzen ist in Abschnitt \ref{sec:
   Rekonstruktion} näher beschrieben.
-
-% LG: "Implementation" wuerde ich in die Methoden verschieben?
-\section{Implementation}
-\label{sec: Implementation}
-\subsection{Erstellen der Distanzinformationen}
-In gt Scaffolder können die Distanzinformationen explizit durch eine
-Datei im ABySS-Distance-Format (*.de) angegeben werden. Eine solche
-Datei wird durch das Programm DistEst von ABySS nach dem
-Assemblierungs- und Read-Mapping Schritt in der SGA-Pipeline erstellt
-und dient als Eingabe der Distanzinformationen für SGA-Scaffold. In
-der Evaluierung wurde diese Option für Vergleiche zwischen gt
-Scaffolder und SGA-Scaffold verwendet.
-
-Des Weiteren besteht die Möglichkeit, die Distanzinformationen aus
-einer Datei im BAM-Format (*.bam) mit Hilfe eines Moduls zu
-extrahieren. Dafür wurde das Programm DistEst von ABySS in C nach
-implementiert. Aus Zeitgründen ist es nicht gelungen ein Modul zu
-entwickeln zur Erzeugung der BAM-Datei auf Basis des
-String-Graphen. Stattdessen muss ein Read-Mapping separat nach der
-Assemblierung durchgeführt werden.
 
 \subsection{Rekonstruktion der Sequenz}
 \label{sec: Rekonstruktion}
@@ -446,11 +443,11 @@ der Präfix von $c_2$ der Länge 25 durch die gleiche Anzahl an
 'N'-Symbolen ersetzt.
 
 \section{gt Scaffolder als Tool in den GenomeTools}
-Die in den Abschnitten \ref{sec: Methoden} und \ref{sec:
-  Implementation} vorgestellte Funktionalität wurde in Form eines
-Tools in die GenomeTools eingebunden. In Abbildung \ref{abb: help} ist
-die Hilfe-Ausgabe des Tools gt Scaffolder dargestellt. Dabei sind alle
-einstellbaren Parameter mit ihren standardmäßigen Belegungen zu sehen.
+Die in dem Abschnitt \ref{sec: Methoden} und vorgestellte
+Funktionalität wurde in Form eines Tools in die GenomeTools
+eingebunden. In Abbildung \ref{abb: help} ist die Hilfe-Ausgabe des
+Tools gt Scaffolder dargestellt. Dabei sind alle einstellbaren
+Parameter mit ihren standardmäßigen Belegungen zu sehen.
 
 \begin{figure}
 \begin{verbatim}
