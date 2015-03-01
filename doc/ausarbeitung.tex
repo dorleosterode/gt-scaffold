@@ -402,30 +402,30 @@ Diese rekonstruierte Sequenz wird schließlich zurückgegeben.
 
 \subsubsection{Berechnung von Alignments}
 Ist die Distanz zwischen zwei im Scaffold benachbarten Contigs $c_1$
-und $c_2$ negativ, so überlappen sich die Contigs theoretisch. Um
-diese Überlappung in der Sequenz aufzulösen, wird ein Alignment
-zwischen den Contigs $c_1$ und $c_2$ berechnet. Dabei wird das beste
-Alignment genutzt, um die Sequenz zu rekonstruieren.
+und $c_2$ negativ, so überlappen sich die Contigs. Um diese
+Überlappung in der Sequenz aufzulösen, wird ein Alignment zwischen den
+Contigs $c_1$ und $c_2$ berechnet. Dabei wird das beste Alignment
+genutzt, um die Sequenz zu rekonstruieren.
 
-Es wird eine schon vorhandene Implementation des
+Es wird eine in den GenomeTools schon vorhandene Implementation des
 Smith-Waterman-Algorithmus für lokale Alignments~\cite{smith}
 verwendet. Der Sequenzbereich der Contigs, in dem Alignments gesucht
 werden, wird dabei durch die im Scaffolding ermittelte Distanz und das
 dreifache der Standardabweichung festgelegt. Der Sequenzbereich wird
 natürlich auch durch die Länge der beiden Contigs mit
-festgelegt. Maximal werden allerdings höchsten je 500 Basen zur
+eingeschränkt. Maximal werden allerdings je 500 Basen zur
 Berechnung des Alignments verwendet, um zu hohen Rechenaufwand zu
 vermeiden. Diese Maximallänge wurde von SGA übernommen.
 
 Nur Suffix-Präfix-Überlappungen von Contig $c_1$ mit Contig $c_2$
 werden betrachtet, wenn Contig $c_1$ im Scaffold direkt vor Contig
-$c_2$ kommt. Die maximale erlaubte Fehlerrate (ergibt sich aus der
-maximal erlaubten Edit-Distanz des Alignments und der Länge der
-längsten eingehenden Sequenz) ist $max\_error = 0.05$ nach dem
-standardmäßig bei SGA verwendeten Wert. Ebenso wurde die Mindestlänge
-eines Alignments auf 20 Basen festgelegt.
+$c_2$ kommt. Die maximale erlaubte Fehlerrate (für Sequenzen $u$ und
+$v$ und die maximale Edit-Distanz $max\_edist$ ergibt sie sich aus:
+$max\_error = max\_edist \cdot \text{MAX}(u,v)$) ist $max\_error =
+0.05$ nach dem standardmäßig bei SGA verwendeten Wert. Ebenso wurde
+die Mindestlänge eines Alignments auf 20 Basen festgelegt.
 
-Von allen gefundenen den Kriterien entsprechenden Alignments, wird das
+Von allen gefundenen, den Kriterien entsprechenden Alignments, wird das
 Alignment mit der kleinsten Edit-Distanz gewählt. Ist $l$ die Länge
 des besten Alignments und $seq_{c_2}$ die Sequenz des Contigs $c_2$,
 so wird die Sequenz ab der Position $l$ ($seq_{c_2}[l:|seq_{c_2}|]$)
