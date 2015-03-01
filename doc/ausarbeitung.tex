@@ -91,25 +91,26 @@ jede Zusammenhangskomponente verwendet.
 \section{Ziel des Projektes und Arbeitsvorgehen}
 \subsection{Ziel des Projektes}
 Die Implementierung und Evaluierung einer Scaffolding-Software stellte
-das allgemeine Projektziel dar. Dabei sollten die in der GenomeTools-Bibliothek
-\cite{Gremme:2013} vorhandenen Konzepte und Infrastruktur verwendet
-und eine Kompatibilität mit den Ausgaben des Assemblers ReadJoiner
-\cite{Gonnella:2012} gewährleistet werden. Zusätzlich sollte der Scaffolder aus
-dem SGA-Softwarepaket\cite{Simpson:2012ef} als Vorlage dienen. Da diese
-Software im Rahmen einer Untersuchung \cite{Hunt:2014dh} verschiedener
-Scaffolding-Programme Ergebnisse mit besonders hoher Qualität lieferte.
-Andererseits weist SGA-Scaffold zahlreiche Abhängigkeiten von fremder
-nicht-Standardsoftware auf, die durch die Reimplementierung minimiert werden
-sollten. Dazu gehört, dass zur Ermittelung der Distanzinformationen eine
-Zuordnung der Reads zu den Contigs auf Basis des String-Graphen erfolgt anstelle
-eines Read-Mappings durch BWA\cite{Li:2009}. Des Weiteren existiert keine
-hinreichende Dokumentation der Methodik von SGA-Scaffold, so dass dessen
-Aufklärung einen zentralen Teil des Projektes umfasste.
+das allgemeine Projektziel dar. Dabei sollten die in der
+GenomeTools-Bibliothek \cite{Gremme:2013} vorhandenen Konzepte und
+Infrastruktur verwendet und eine Kompatibilität mit den Ausgaben des
+Assemblers Readjoiner \cite{Gonnella:2012gn} gewährleistet werden. Der
+Scaffolder aus dem SGA-Softwarepaket \cite{Simpson:2012ef} sollte als
+Vorlage dienen, da diese Software im Rahmen einer Untersuchung
+verschiedener Scaffolding-Programme Ergebnisse mit besonders hoher
+Qualität lieferte \cite{Hunt:2014dh}. Andererseits enthält
+SGA-Scaffold zahlreiche Abhängigkeiten zu nicht-Standardsoftware, die
+durch die Reimplementierung minimiert werden sollten. Dazu gehört zum
+Beispiel, dass zur Ermittelung der Distanzinformationen eine Zuordnung
+der Reads zu den Contigs auf Basis des String-Graphen erfolgt anstelle
+eines Read-Mappings durch BWA \cite{Li:2009}. Des Weiteren existiert
+keine hinreichende Dokumentation der Methodik von SGA-Scaffold, so
+dass dessen Aufklärung einen zentralen Teil des Projektes umfasste.
 
 \subsection{Arbeitsvorgehen}
 Zuerst wurden die verwendeten Datenformate und die Algorithmen
 aufgeklärt. Da diese nicht hinreichend dokumentiert waren, mussten
-diese Informationen aus dem Source-Code extrahiert werden.
+diese Informationen aus dem Source-Code \cite{source} extrahiert werden.
 
 Die so erhaltene Vorlage wurde leicht modifiziert, um sowohl Laufzeit
 als auch Speicherplatz einzusparen. Unklarheiten in der Methodik wurden
