@@ -600,65 +600,6 @@ mögliche Erklärungen ergänzt.
 \label{sec: Ergebnisse}
 \subsection{Vergleich der Pipelines \todo{präzisere Überschrift finden}}
 
-\begin{figure}
-  \centering
-  \begin{minipage}{.45\textwidth}
-      \begin{tikzpicture}[node distance=.6cm]
-        \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny];
-        \node[prog] (prep) {preprocess};
-        \node[prog, below of=prep] (index) {index};
-        \node[prog, below of=index] (correct) {correct};
-        \node[prog, below of=correct] (index2) {index};
-        \node[prog, below of=index2] (filter) {filter};
-        \node[prog, below of=filter] (overlap) {overlap};
-        \node[prog, below of=overlap] (assemble) {assemble};
-        \node[prog, right of=prep, xshift=1.5cm, fill=red!40] (bindex) {index};
-        \node[prog, below of=bindex, fill=red!40] (aln) {align};
-        \node[prog, below of=aln, fill=red!40] (sampe) {sampe};
-        \node[prog, below of=sampe, rectangle split, rectangle split parts=3, yshift=-.45cm, rectangle split part fill={blue!40, green!40, blue!40}] (bam2de) {\nodepart{one}fixmate\nodepart{two}samtools\nodepart{three}DistanceEst};
-        \node[prog, below of=bam2de, yshift=-.45cm, fill=yellow!40] (pysam) {astat};
-        \node[prog, below of=pysam] (scaff) {scaffold};
-        \node[prog, below of=scaff] (scaf2fasta) {scaf2fasta};
-
-        \path[->]
-        (prep) edge (index)
-        (index) edge (correct)
-        (correct) edge (index2)
-        (index2) edge (filter)
-        (filter) edge (overlap)
-        (overlap) edge (assemble)
-        (assemble.east) edge[in=180, out=0] (bindex.west)
-        (bindex) edge (aln)
-        (aln) edge (sampe)
-        (sampe) edge (bam2de)
-        (bam2de) edge (pysam)
-        (pysam) edge (scaff)
-        (scaff) edge (scaf2fasta);
-      \end{tikzpicture}
-    \end{minipage}
-    \begin{minipage}{2cm}
-      \begin{tikzpicture}[node distance=.6cm]
-        \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny];
-        \node[prog] (prefilter) {prefilter};
-        \node[prog, below of=prefilter] (overlap) {overlap};
-        \node[prog, below of=overlap] (assembly) {assembly};
-        \node[prog, right of=prefilter, xshift=1cm] (scaffold) {scaffold};
-
-        \path[->]
-        (prefilter) edge (overlap)
-        (overlap) edge (assembly)
-        (assembly.east) edge[in=180, out=0] (scaffold.west);
-      \end{tikzpicture}
-    \end{minipage}
-    \caption{\label{abb: Pipeline}Vergleich der Assemblierungs- und
-      Scaffolding-Pipelines von SGA (links) und gt Scaffolder
-      (rechts). Externe Abhängigkeiten zu unterschiedlichen Programmen
-      oder Bibliotheken sind jeweils in unterschiedlichen Farben
-      hervorgehoben. Innerhalb jeder Pipeline sind die zur Assemblierung
-      notwendigen Schritte links, die für das Scaffolding ausgeführten Schritte
-      rechts angeordnet. \todo{tikz auf Seitenbreite groß ziehen?}}
-\end{figure}
-
 Auf der jeweils linken Seite sind die notwendigen Schritte zur
 Assemblierung dargestellt und auf der rechten Seite die Schritte für
 das Scaffolding. In der linken Abbildung ist die SGA-Pipeline zu sehen
@@ -802,13 +743,60 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
 \subsection{Vergleich der Laufzeit und des Speicherplatzbedarfs}
 \begin{figure}[t]
   \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{presentation/figures/sga_vs_gt.pdf}
-  \caption{\label{abb: Zeit}Auftragung der Laufzeit und des
-    Speicherplatzbedarfs von gt Scaffolder und SGA Scaffold für
-    unterschiedliche Testdatensätze}
+  \caption{\label{abb: Zeit}Graphische Darstellung der Laufzeit (Graphen) und
+  des Speicherplatzbedarfs (Balkendiagramme) von gt Scaffolder (grün) und SGA
+  Scaffold (rot) für die nach Größe geordneten Testdatensätze. }
 \end{figure}
 
 \subsubsection*{Ergebnisse der Sequenz-Rekonstruktion}
 
+\begin{table}
+  \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
+    \begin{tabular}{llccccc}
+      \toprule
+      Datensatz & Programm & Gesamtlänge & Abdeckung (\%) & N50 (kb)
+      & \#Missassemblierungen & Unaligniert (Mbp)
+      (MB) \\
+      \midrule
+      \textit{S. cerevisiae}
+      & SGA scaffold2fasta  & 10.91  &    88.9     &  7.9        &
+      2 & 0\\
+      & gt Scaffolder & $1.1\times$  & $0.4\times$ & $1.2\times$ &
+      $1587.5\times$ & \\
+      \midrule
+      \textit{H. sapiens}, Chr. 21
+      & SGA scaffold2fasta  & 34.32  &      73.1   &  54.3       &
+      1 & 535\\
+      & gt Scaffolder & $0.3\times$  & $0.3\times$ & $0.2\times$ &
+      $2114\times$ & $1\times$\\
+      \midrule
+      \textit{C. elegans}
+      & SGA scaffold2fasta  & 94.78  &      90.3   &  37.4       &
+      13 & 3301 \\
+      & gt Scaffolder & $0.5\times$  & $0.5\times$ & $0.4\times$ &
+      $167.9\times$ & $18.2\times$\\
+      \midrule
+      \textit{D. melanogaster}
+      & SGA scaffold2fasta  & 113.50 &      94.2   &  126.4      &
+      1  & 0 \\
+      & gt Scaffolder & $0.6\times$  & $0.6\times$ & $0.6\times$ &
+      $471\times$ & $21871\times$\\
+      \bottomrule
+  \end{tabular}}
+  \caption{\label{tab: Vergleich}Ergebnisse der Sequenz-Rekonstruktion.
+  Datensatz bezeichnet die Testdatensätze mit zugehöriger Anzahl der
+  assemblierten Contigs, um die Größe des jeweiligen Scaffold-Graphen zu
+  skizzieren. Für jeden Datensatz wurden die zunächst die durch SGA erzielten
+  Ergebnisse aufgetragen in der ersten Zeile als absolute Werte aufgetragen,
+  denen die Ergebnisse von gt Scaffolder in der zweiten Zeile als relative
+  Faktoren folgen. Abdeckung bezeichnet Gesamtlänge aller Scaffolds, Abdeckung
+  die prozentuale Abdeckung der Zielsequenz \todo{bessere Beschreibung für
+  Abdeckung ausdenken} und N50 die Länge, sodass alle Scaffolds mit gleicher
+  oder größerer Länge mindestens die Hälfte der Gesamtlänge ausmachen.
+  \#Missassemblierungen bezeichnet die Anzahl der Missassemblierungen nach
+  Plantagora \cite{Gurevich:2013je}, Unaligniert die Gesamtlänge nicht
+  alignierter Regionen der Assemblierungen.}
+\end{table}
 
 
 \section{Diskussion}
