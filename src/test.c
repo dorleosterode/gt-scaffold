@@ -169,7 +169,6 @@ int main(int argc, char **argv)
         gt_scaffolder_graph_write_scaffold(recs, "gt_scaffolder_new_write.scaf",
           err);
 
-
         /* test the new generate_fasta function */
         if (strcmp(spm_filename, "false") != 0)
           had_err = gt_scaffolder_graph_generate_fasta(contig_filename,
@@ -177,7 +176,6 @@ int main(int argc, char **argv)
 
         if (had_err != 0)
           fprintf(stderr, "%s\n", gt_error_get(err));
-
 
         for (i = 0; i < gt_array_size(recs); i++) {
           rec = *(GtScaffolderGraphRecord **) gt_array_get(recs, i);
