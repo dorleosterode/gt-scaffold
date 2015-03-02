@@ -287,7 +287,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
     for (v = graph->vertices; v < (graph->vertices + graph->nof_vertices);
          v++) {
       if (edge_counter[gt_scaffolder_graph_get_vertex_id(graph, v)] != 0)
-        v->edges = gt_malloc(sizeof(*v->edges) *
+        v->edges = gt_malloc(sizeof (*v->edges) *
          edge_counter[gt_scaffolder_graph_get_vertex_id(graph, v)]);
     }
     *nof_distances = record_counter;
@@ -451,14 +451,17 @@ static int gt_scaffolder_graph_save_header(const char *description,
 
   had_err = 0;
 
-/*>contig_1 length=307 depth=3 k=1.00 astat=20.373520 6B-(67)->43919B-(90)->156572E*/
+/*>contig_1 length=307 depth=3 k=1.00 astat=20.373520
+6B-(67)->43919B-(90)->156572E*/
 
   fasta_reader_data->astat = 0.0;
   fasta_reader_data->copynum = 0.0;
   /* check if astat is annotated in contig header and if so parse it */
   if (fasta_reader_data->astat_is_annotated) {
-    if (sscanf(description,"%s length=" GT_WD " depth=" GT_WD " k=%f astat=%f"
-        , part_1, &num_1, &num_2, &copynum, &astat) == 5) {
+    if (sscanf(description,
+               "%s length=" GT_WD " depth=" GT_WD " k=%f astat=%f",
+               part_1, &num_1, &num_2, &copynum, &astat) == 5)
+    {
       fasta_reader_data->astat = astat;
       fasta_reader_data->copynum = copynum;
     }
