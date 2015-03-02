@@ -892,6 +892,23 @@ die durch gt Scaffolder erzeugten Scaffolds im SCAF-Format genutzt
 werden. Die Strategie um die Sequenzen zu rekonstruieren kann dabei
 von SGA adaptiert werden oder eine andere Strategie genutzt werden.
 
+Die Ausgaben des in den GenomeTools enthaltenen Assemblers Readjoiner
+müssen teilweise noch verändert werden um eine Nutzung mit gt
+Scaffolder in einer Pipeline zu ermöglichen. So müssen die
+Mapping-Informationen über die Reads zu den Contigs in das BAM-Format
+übertragen werden. Dabei ist das BAM-Format ein Standardformat und es
+könnte sowohl Readjoiner um eine Ausgabe im BAM-Format erweitert oder
+ein Skript zur Transformation der Information in das benötigte Format
+genutzt werden.
+
+Die Standardwerte für die einzelnen Parameter müssen bei einer
+Benutzung mit Readjoiner auf dessen Ergebnisse eingestellt werden. Die
+momentan verwendeten Standardwerte sind von SGA übernommen und
+dementsprechend auf die Ergebnisse der SGA-Pipeline optimiert. Da
+Readjoiner z.\,B. andere Ergebnisse bei der Berechnung der A-Statistik
+erreicht, müsste der Schwellenwert zur Klassifikation als nicht
+repetitive Sequenz angepasst werden.
+
 \section*{Anhang}
 \subsection*{Pseudocode}
 (\todo{Algorithmen anpassen!!!})
