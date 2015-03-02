@@ -661,7 +661,7 @@ static void calculate_fragment(GtUword start_read,
   }
 }
 
-/* calculate reference and mate reference position at read start */
+/* calculate reference position at read start */
 static int calc_read_start(GtSamAlignment *bam_align,
                            GtWord *ref_read_start,
                            GtError *err) {
@@ -921,8 +921,8 @@ static int compare_fragment(const void *a,
     return 0;
 }
 
-/* correct strand orientation and mapping status of mate read,
-   set insert size of read pair */
+/* set strand orientation, mapping status, reference id, reference name
+   of mate read and set insert size of read pair */
 static void fixmate(Read *read_0,
                     Read *read_1) {
 
@@ -1116,7 +1116,7 @@ static int compare_read_3(const void *a,
   return return_val;
 }
 
-/* read paired information from bam file and corresponding hist file */
+/* read paired information from bam file */
 int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
                                                     const char *bam_filename,
                                                     GtWord min_dist,
@@ -1134,27 +1134,21 @@ int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
   ReadSet read_set;
   Read *read;
 
-  /* initialize read set */
+  /* initialize */
   read_set.size = 0;
   read_set.nof = 0;
   read_set.read = NULL;
-
-  /* initialize fragment array */
   fragment_data.nof_frag_pos = 0;
   fragment_data.size_frag_pos = 0;
   fragment_data.frag_pos = NULL;
   fragment_data.nof_frag_size = 0;
   fragment_data.size_frag_size = 0;
   fragment_data.frag_size = NULL;
-
-  /* initialize hashmap */
   histogram_data.hash_map = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
   histogram_data.nof_pairs = 0;
   histogram_data.size = 0;
   histogram_data.values = NULL;
   histogram_data.keys = NULL;
-
-  /* initialize pmf */
   pmf_data.dist = NULL;
   pmf_data.nof = 0;
 
@@ -1178,10 +1172,8 @@ int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
 
     /* determine the orientation of the library */
     rf = histogram_data.lib_rf;
-    /* TODO
-       if (rf)
-       negate each element of histogram
-    */
+
+    /* TODO if (rf) true, negate each element of histogram */
 
     /* sort reads by reference id and orientation of read relative to
        reference, reference id of mate read, orientation of read relative

@@ -53,7 +53,7 @@ int gt_scaffolder_bamparser_print_dist_records(const DistRecords *dist,
 /* delete distance records */
 void gt_scaffolder_bamparser_delete_dist_records(DistRecords *dist);
 
-/* read paired information from bam file and corresponding hist file */
+/* read paired information from bam file */
 int gt_scaffolder_bamparser_read_paired_information(DistRecords *dist,
                                                     const char *bam_filename,
                                                     GtWord min_dist,
