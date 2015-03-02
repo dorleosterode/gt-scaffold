@@ -444,7 +444,7 @@ static int gt_scaffolder_graph_save_header(const char *description,
       fasta_reader_data->copynum = copynum;
     }
     else {
-      gt_error_set (err , "No A-statisitc/copy number was found in header");
+      gt_error_set (err , "No A-statistic/copy number was found in header");
       had_err = -1;
     }
   }
