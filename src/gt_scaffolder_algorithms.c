@@ -32,7 +32,6 @@
 #include "gt_scaffolder_graph.h"
 
 /* increment size for realloc of walk */
-/* SK: Increment evaluieren, zB mit Faktor 1.2 multiplizieren */
 #define INCREMENT_SIZE 32
 
 /* Check if vertex already has been filtered out of the graph */
@@ -127,7 +126,7 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
         copy_num = 0.0;
         astat = 0.0;
 
-        /* parse record consisting of ctg_header, a-statistics and copy number */
+        /*parse record consisting of ctg_header, a-statistics and copy number*/
         if (sscanf(line,"%s\t" GT_WD "\t" GT_WD "\t" GT_WD "\t%f\t%f",
           ctg_header, &num1, &num2, &num3, &copy_num, &astat) == 6)
         {
@@ -157,7 +156,7 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
   {
     GtScaffolderGraphVertex *vertex;
 
-    /* iterate over all vertices and mark them as repeats if cutoff is exceeded */
+    /*iterate over all vertices and mark them as repeats if cutoff is exceeded*/
     for (vertex = graph->vertices;
       vertex < (graph->vertices + graph->nof_vertices); vertex++)
     {
@@ -450,7 +449,8 @@ GtScaffolderGraphEdge *
 gt_scaffolder_detect_cycle_recursive(GtScaffolderGraphVertex *v,
                                      GtScaffolderGraphVertex *p,
                                      bool dir,
-                                     GtArray *visited) {
+                                     GtArray *visited)
+{
   GtUword eid;
   GtScaffolderGraphEdge *back;
   bool next_dir;
@@ -477,7 +477,8 @@ gt_scaffolder_detect_cycle_recursive(GtScaffolderGraphVertex *v,
           else
             next_dir = back->sense ? false : true;
 
-          back = gt_scaffolder_detect_cycle_recursive(back->end, v, next_dir, visited);
+          back = gt_scaffolder_detect_cycle_recursive(back->end, v, next_dir,
+                                                      visited);
 
           if (back != NULL)
             return back;
@@ -711,7 +712,7 @@ GtScaffolderGraphWalk
               distancemap[next_endvertex_index] > distance)
             {
               GtScaffolderGraphNode *current_node =
-		gt_malloc(sizeof (*current_node));
+              gt_malloc(sizeof (*current_node));
               distancemap[next_endvertex_index] = distance;
               edgemap[next_endvertex_index] = nextedge;
 
@@ -873,14 +874,15 @@ gt_scaffolder_graph_record_new(GtScaffolderGraphVertex *root) {
 
   gt_assert(root != NULL);
 
-  rec = gt_malloc(sizeof(*rec));
+  rec = gt_malloc(sizeof (*rec));
   rec->root = root;
-  rec->edges = gt_array_new(sizeof(GtScaffolderGraphEdge *));
+  rec->edges = gt_array_new(sizeof (GtScaffolderGraphEdge *));
   return rec;
 }
 
 void gt_scaffolder_graph_record_add_edge(GtScaffolderGraphRecord *rec,
-                                         GtScaffolderGraphEdge *edge) {
+                                         GtScaffolderGraphEdge *edge)
+{
   gt_assert(rec != NULL);
   gt_assert(edge != NULL);
 
@@ -997,7 +999,8 @@ GtArray *gt_scaffolder_graph_iterate_scaffolds(const GtScaffolderGraph *graph,
 /* write scaffold into file */
 int gt_scaffolder_graph_write_scaffold(GtArray *records,
                                        const char *file_name,
-                                       GtError *err) {
+                                       GtError *err)
+{
   GtFile *file;
   GtScaffolderGraphRecord *rec;
   GtScaffolderGraphEdge *e;
