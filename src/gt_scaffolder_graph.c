@@ -53,9 +53,10 @@ static void gt_scaffolder_graph_init_edges(GtScaffolderGraph *graph,
   graph->max_nof_edges = max_nof_edges;
 }
 
-/* Construct graph data structure <*GtScaffolderGraph>. Wrap around two
-   seperate constructor functions, which allocate memory for <max_nof_edges>
-   edges and <max_nof_vertices> vertices. */
+/* Construct graph data structure <*GtScaffolderGraph>. Initialize edges and
+   allocate memory for <max_nof_edges> if != 0. Initialize vertices and allocate
+   memory for <max_nof_vertices> vertices if != 0. Edges and/or vertices will
+   have to be initialized seperately otherwise. */
 GtScaffolderGraph *gt_scaffolder_graph_new(GtUword max_nof_vertices,
                                            GtUword max_nof_edges)
 {
@@ -77,7 +78,8 @@ void gt_scaffolder_graph_delete(GtScaffolderGraph *graph)
 
   if (graph != NULL) {
 
-    /* If existent, free header_seq and pointer to outgoing edges first */
+    /* Iterate over vertices and free header_seq and pointer to outgoing edges
+       first */
     if (graph->vertices != NULL) {
       for ( vertex = graph->vertices;
             vertex < (graph->vertices + graph->nof_vertices);
@@ -89,6 +91,7 @@ void gt_scaffolder_graph_delete(GtScaffolderGraph *graph)
       }
     }
 
+    /* Now delete vertices and edges*/
     gt_free(graph->vertices);
     gt_free(graph->edges);
   }
@@ -166,6 +169,7 @@ void gt_scaffolder_graph_add_edge(GtScaffolderGraph *graph,
   graph->nof_edges++;
 }
 
+/* Returns pointer to edge between <*vertex1> and <*vertex2> */
 GtScaffolderGraphEdge
 *gt_scaffolder_graph_find_edge(const GtScaffolderGraphVertex *vertex_1,
                                const GtScaffolderGraphVertex *vertex_2)
@@ -359,9 +363,12 @@ int gt_scaffolder_graph_new_from_file(GtScaffolderGraph **graph_par,
   if (had_err == 0)
   {
     /* allocate memory for vertices of scaffolder graph */
+
+    /*graph = gt_scaffolder_graph_new(0, 0);*/
     graph = gt_malloc(sizeof (*graph));
     graph->vertices = NULL;
     graph->edges = NULL;
+
     gt_scaffolder_graph_init_vertices(graph, nof_contigs);
     /* parse contigs in FASTA-format and save them as vertices of
      scaffold graph */
