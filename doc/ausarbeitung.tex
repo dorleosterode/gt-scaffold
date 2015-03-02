@@ -600,7 +600,65 @@ mögliche Erklärungen ergänzt.
 \label{sec: Ergebnisse}
 \subsection{Vergleich der Pipelines \todo{präzisere Überschrift finden}}
 
+\begin{figure}
+  \centering
+  \begin{minipage}{.45\textwidth}
+      \begin{tikzpicture}[node distance=.6cm]
+        \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny];
+        \node[prog] (prep) {preprocess};
+        \node[prog, below of=prep] (index) {index};
+        \node[prog, below of=index] (correct) {correct};
+        \node[prog, below of=correct] (index2) {index};
+        \node[prog, below of=index2] (filter) {filter};
+        \node[prog, below of=filter] (overlap) {overlap};
+        \node[prog, below of=overlap] (assemble) {assemble};
+        \node[prog, right of=prep, xshift=1.5cm, fill=red!40] (bindex) {index};
+        \node[prog, below of=bindex, fill=red!40] (aln) {align};
+        \node[prog, below of=aln, fill=red!40] (sampe) {sampe};
+        \node[prog, below of=sampe, rectangle split, rectangle split parts=3, yshift=-.45cm, rectangle split part fill={blue!40, green!40, blue!40}] (bam2de) {\nodepart{one}fixmate\nodepart{two}samtools\nodepart{three}DistanceEst};
+        \node[prog, below of=bam2de, yshift=-.45cm, fill=yellow!40] (pysam) {astat};
+        \node[prog, below of=pysam] (scaff) {scaffold};
+        \node[prog, below of=scaff] (scaf2fasta) {scaf2fasta};
 
+        \path[->]
+        (prep) edge (index)
+        (index) edge (correct)
+        (correct) edge (index2)
+        (index2) edge (filter)
+        (filter) edge (overlap)
+        (overlap) edge (assemble)
+        (assemble.east) edge[in=180, out=0] (bindex.west)
+        (bindex) edge (aln)
+        (aln) edge (sampe)
+        (sampe) edge (bam2de)
+        (bam2de) edge (pysam)
+        (pysam) edge (scaff)
+        (scaff) edge (scaf2fasta);
+      \end{tikzpicture}
+    \end{minipage}
+    \begin{minipage}{2cm}
+      \begin{tikzpicture}[node distance=.6cm]
+        \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny];
+        \node[prog] (prefilter) {prefilter};
+        \node[prog, below of=prefilter] (overlap) {overlap};
+        \node[prog, below of=overlap] (assembly) {assembly};
+        \node[prog, right of=prefilter, xshift=1cm] (scaffold) {scaffold};
+
+        \path[->]
+        (prefilter) edge (overlap)
+        (overlap) edge (assembly)
+        (assembly.east) edge[in=180, out=0] (scaffold.west);
+      \end{tikzpicture}
+    \end{minipage}
+    \caption{\label{abb: Pipeline}Vergleich der Assemblierungs- und
+      Scaffolding-Pipelines von SGA (links) und gt Scaffolder
+      (rechts). Externe Abhängigkeiten zu unterschiedlichen Programmen
+      oder Bibliotheken sind jeweils in unterschiedlichen Farben
+      hervorgehoben. Innerhalb jeder Pipeline sind die zur Assemblierung
+      notwendigen Schritte links, die für das Scaffolding ausgeführten Schritte
+      rechts angeordnet.}
+\end{figure}
+\todo{abbildung 5 auf Seitenbreite groß ziehen?}
 
 Auf der jeweils linken Seite sind die notwendigen Schritte zur
 Assemblierung dargestellt und auf der rechten Seite die Schritte für
@@ -686,7 +744,7 @@ assembliert, bevor die komparative Scaffold-Berechnung durchgeführt wurde.
 
 Für alle 4 Testdatensätze konnte gt Scaffolder eine erfolgreiche
 Scaffold-Berechnung durchführen. Ein Vergleich mit SGA (vgl.
-Tabelle~\ref{tab: Vergleich}) zeigt das Güte der Ergebnisse für die
+Tabelle~\ref{tab: Scaffolding}) zeigt das Güte der Ergebnisse für die
 betrachteten Metriken exakt übereinstimmen. Die Abdeckung der
 jeweiligen Zielsequenz durch die Gesamtlänge der ermittelten Scaffolds
 schwankt zwischen 71 und 94\%. Eine Korrelation mit der Genomlänge
@@ -729,7 +787,7 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
       & gt Scaffolder & $1\times$     &  $1\times$  & $1\times$ & $0.9\times$ & $0.62\times$     \\
       \bottomrule
   \end{tabular}}
-  \caption{\label{tab: Vergleich}Ergebnisse der Scaffold-Berechnung.
+  \caption{\label{tab: Scaffolding}Ergebnisse der Scaffold-Berechnung.
   Datensatz bezeichnet die Testdatensätze mit zugehöriger Anzahl der
   assemblierten Contigs, um die Größe des jeweiligen Scaffold-Graphen zu
   skizzieren. Für jeden Datensatz wurden die zunächst die durch SGA erzielten
@@ -737,20 +795,20 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
   denen die Ergebnisse von gt Scaffolder in der zweiten Zeile als relative
   Faktoren folgen. Abdeckung bezeichnet Gesamtlänge aller Scaffolds und die
   prozentuale Abdeckung der Zielsequenz, \#Scaffolds
-  deren Anzahl und N50 die Länge, sodass alle Scaffolds mit gleicher oder
+  deren Anzahl und N50 die Länge, sodass alle  Scaffolds mit gleicher oder
   größerer Länge mindestens die Hälfte der Abdeckung ausmachen. CPU bezeichnet
   die Gesamtlaufzeit und RAM den maximalen Speicherbedarf während der
-  Berechnug.}
+  Berechnung.}
 \end{table}
 \todo{Tabelle 1 bessere Beschreibung für Abdeckung ausdenken}
 
-\subsection{Vergleich der Laufzeit und des Speicherplatzbedarfs}
 \begin{figure}[t]
   \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{presentation/figures/sga_vs_gt.pdf}
   \caption{\label{abb: Zeit}Graphische Darstellung der Laufzeit (Graphen) und
   des Speicherplatzbedarfs (Balkendiagramme) von gt Scaffolder (grün) und SGA
   Scaffold (rot) für die nach Größe geordneten Testdatensätze. }
-\end{figure}
+\end{figure}ls
+
 
 \subsubsection*{Ergebnisse der Sequenz-Rekonstruktion}
 
@@ -787,16 +845,16 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
       $471\times$ & $21871\times$\\
       \bottomrule
   \end{tabular}}
-  \caption{\label{tab: Vergleich}Ergebnisse der Sequenz-Rekonstruktion.
+  \caption{\label{tab: Rekonstruktion}Ergebnisse der Sequenz-Rekonstruktion.
   Datensatz bezeichnet die Testdatensätze mit zugehöriger Anzahl der
   assemblierten Contigs, um die Größe des jeweiligen Scaffold-Graphen zu
   skizzieren. Für jeden Datensatz wurden die zunächst die durch SGA erzielten
   Ergebnisse aufgetragen in der ersten Zeile als absolute Werte aufgetragen,
   denen die Ergebnisse von gt Scaffolder in der zweiten Zeile als relative
   Faktoren folgen. Abdeckung bezeichnet Gesamtlänge aller Scaffolds, Abdeckung
-  die prozentuale Abdeckung der Zielsequenz \todo{bessere Beschreibung für
-  Abdeckung ausdenken} und N50 die Länge, sodass alle Scaffolds mit gleicher
-  oder größerer Länge mindestens die Hälfte der Gesamtlänge ausmachen.
+  die prozentuale Abdeckung der Zielsequenz und N50 die Länge, sodass alle
+  Scaffolds mit gleicher oder größerer Länge mindestens die Hälfte der
+  Gesamtlänge ausmachen.
   \#Missassemblierungen bezeichnet die Anzahl der Missassemblierungen nach
   Plantagora \cite{Gurevich:2013je}, Unaligniert die Gesamtlänge nicht
   alignierter Regionen der Assemblierungen.}
@@ -815,7 +873,7 @@ Aus den Ergebnissen im Vergleich der Ausgabe im SCAF-Format ist zu
 erkennen, dass die Laufzeit und der Speicherplatzbedarf nicht mit der
 Größe der Referenzgenome zusammenhängt. Allerdings hängen diese
 Aspekte auch nicht direkt von der Größe des Scaffold-Graphen ab. In
-Tabelle \ref{tab: Vergleich} sind zu den Datensätzen die Anzahl an
+Tabelle \ref{tab: Scaffolding} sind zu den Datensätzen die Anzahl an
 Knoten in dem Scaffold-Graph dargestellt. So ist die Anzahl an Knoten
 für den \textit{D. melanogaster} Datensatz mit $3970$ geringer als für
 den \textit{H. sapiens} Chr. 21 Datensatz mit $4817$ Knoten. Trotzdem
