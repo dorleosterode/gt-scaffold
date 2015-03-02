@@ -63,7 +63,7 @@ werden. Typischerweise wird hierbei in zwei Schritten vorgegangen:
 Zunächst werden die einzelnen Reads zu durchgängigen Sequenzen
 (Contigs) assembliert. Dabei kann das Zielgenom oftmals nicht
 vollständig rekonstruiert werden. Aufgrund teilweise unzureichender
-Abdeckung durch die Sequenzierung sowie repititive Teilsequenzen
+Abdeckung durch die Sequenzierung sowie repititiver Teilsequenzen
 entstehen Lücken (Gaps), welche zu unabhängigen Contigs führen. Die
 relative Anordnung und Orientierung der Contigs zueinander kann nicht
 bestimmt werden.
@@ -83,10 +83,10 @@ einzelnen Contigs. Zwischen zwei Knoten existiert eine Kante, falls
 ein Read-Paar die beiden repräsentierten Contigs verbindet. Kanten
 enthalten hierbei Informationen über die Distanz der verbundenen Contigs
 und die Orientierung der Read-Paare zueinander. Die Ermittlung eines
-Scaffolds, eines optimalen Pfades (Pfad mit maximalem Kantengewicht)
+Scaffolds bzw.\ eines optimalen Pfades (Pfad mit maximalem Kantengewicht)
 jeder Zusammenhangskomponente des Scaffolding Graphen, ist
 NP-vollständig~\cite{Huson:2002kf}. Daher verwenden aktuelle
-Strategien eine Heuristik, um einen ausreichend guten Pfad zu
+Strategien eine Heuristik, um einen guten Pfad zu
 bestimmen.
 
 Diese Ausarbeitung beschäftigt sich mit der Implementation eines
@@ -594,7 +594,7 @@ verwendet. Das Laufzeitverhaltens und der Speicherbedarf wurden durch das in den
 GenomeTools enthaltene Skript rdj-spacepeak.sh auf auf 2 identischen Computern
 gemessen, um eine eventuelle Verfälschung durch das
 Caching der Eingabedateien zu vermeiden. Die Metriken der gewonnenen Scaffolds
-wurden mit QUAST ermittelt.
+wurden mit QUAST~\cite{Gurevich:2013je} ermittelt.
 
 \subsubsection*{Generierung und Assemblierung der Testdaten}
 Mithilfe der Software ART~\cite{Huang:2012kq} wurde eine
@@ -616,8 +616,8 @@ assembliert, da gt Scaffolder auch die SGA Eingabeformate verwenden kann.
   \begin{tabular}{l | c | l}
     Genom & Größe & Datensatzid \\
     \hline
-    \textit{S. cerevisiae} & ~~12 Mbp & Ensembl R64-1-1 \\
-    \textit{H. sapiens}, Chr. 21 & ~~48 Mbp & Ensembl GRCh37 \\
+    \textit{S. cerevisiae} &~~12 Mbp & Ensembl R64-1-1 \\
+    \textit{H. sapiens}, Chr. 21 &~~48 Mbp & Ensembl GRCh37 \\
     \textit{C. elegans} & 100 Mbp & Ensembl WBcel235 \\
     \textit{D. melanogaster} & 140 Mbp & Ensembl BDGP5
   \end{tabular}
