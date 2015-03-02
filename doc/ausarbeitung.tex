@@ -851,8 +851,26 @@ gewählt werden können, sind auch bei gt Scaffolder einstellbar. Somit
 ist SGA-Scaffold flexibler in der Selektion relevanter Kanten und
 Knoten als gt Scaffolder.
 
-\todo{absatz mit vergleich zur implementation in einer skript-sprache
-  schreiben}
+Die Wahl der Programmiersprache C für gt Scaffolder war gut im
+Verlgeich zu einer Implementierung der Scaffolding-Software in einer
+Skriptsprache wie z.\,B. Python, Ruby oder Perl. Bei einer
+Implementation in einer Skriptsprache wäre das Einlesen der
+verschiedenen Format wesentlich einfacher gewesen und die
+Implementation schneller beendet, da Stringmanipulation in diesen
+Sprachen nicht so aufwändig ist. Allerdings hätte die in den
+GenomeTools vorhandene Infrastruktur nicht so einfach genutzt werden
+können. So hätte vor allem die Implementation des Moduls zur
+Rekonstruktion der Sequenzen länger gedauert. Es hätten
+Datenstrukturen wie der String-Graph nutzbar gemacht oder neu
+implementiert werden müssen. Ebenfalls hätten vorhandene
+Implementationen von Algorithmen wie z.\,B. die Implementation des
+Smith-Waterman-Algorithmus zur Berechnung lokaler Alignments nicht
+einfach genutzt werden können. Der geringere Verbrauch an
+Speicherplatz wäre in einer Skriptsprache wahrscheinlich nicht möglich
+gewesen. Durch die Infrastruktur der GenomeTools waren Datenstrukturen
+wie z.\,B. Arrays, Queues oder Hashes schon vorhanden. Dadurch war die
+Nutzung solcher Datenstrukturen vergleichbar komfortabel mit einer
+Skriptsprache.
 
 \section{Ausblick}
 \label{sec: Ausblick}
