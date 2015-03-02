@@ -72,6 +72,11 @@ Test do
   run("diff $(pwd)/gt_scaffolder_parser_test_read_distances.de #{$testdata}/libPE.de", :retval => 0)
 end
 
+# TODO: Decide whether to combine all tests of the scaffold module into a single
+#       one. At the moment the module is executed for every single test,
+#       effectively generating the same results several times (it's fast!).
+#       Advantage: No redundant computation of scaffolds.
+#       Disadvantage: Harder to see, where an potential error occured.
 Name "gt scaffolder scaffold: make scaffold"
 Keywords "scaffold"
 Test do
