@@ -45,43 +45,8 @@ void gt_scaffolder_graph_filter(GtScaffolderGraph *graph,
                                 float cncutoff,
                                 GtWord ocutoff);
 
-/* check if vertex holds just sense or antisense edges */
-bool
-gt_scaffolder_graph_isterminal(const GtScaffolderGraphVertex *vertex);
-
-/* create new walk */
-GtScaffolderGraphWalk *gt_scaffolder_walk_new(void);
-
-/* remove walk <*walk> */
-void gt_scaffolder_walk_delete(GtScaffolderGraphWalk *walk);
-
-/* add edge <*edge> to walk <*walk> */
-void gt_scaffolder_walk_addegde(GtScaffolderGraphWalk *walk,
-                                       GtScaffolderGraphEdge *edge);
-
-/* create new scaffold-record with root-node <*root> */
-GtScaffolderGraphRecord *
-gt_scaffolder_graph_record_new(GtScaffolderGraphVertex *root);
-
-/* add edge to scaffold-record */
-void gt_scaffolder_graph_record_add_edge(GtScaffolderGraphRecord *rec,
-                                         GtScaffolderGraphEdge *edge);
-
 /* delete scaffold-record */
 void gt_scaffolder_graph_record_delete(GtScaffolderGraphRecord *rec);
-
-/* traverse the graph and calculate all connected components. all
-   terminal vertices for each connected component are stored in an
-   GtArray. all GtArray for the terminial vertices are stored in
-   ccs. */
-void gt_scaffolder_calc_cc_and_terminals(const GtScaffolderGraph *graph,
-                                         GtArray *ccs);
-
-/* creates all minimal walks with respect to edge->dist from start to
-   every other terminal vertex in the current cc. the walk with the
-   greatest total contig length is returned */
-GtScaffolderGraphWalk *gt_scaffolder_create_walk(GtScaffolderGraph *graph,
-                 GtScaffolderGraphVertex *start);
 
 /* constructs the scaffolds for every cc. all vertices and edges in a
    scaffold are marked as GIS_SCAFFOLD. */
