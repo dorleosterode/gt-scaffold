@@ -600,6 +600,8 @@ mögliche Erklärungen ergänzt.
 \label{sec: Ergebnisse}
 \subsection{Vergleich der Pipelines \todo{präzisere Überschrift finden}}
 
+
+
 Auf der jeweils linken Seite sind die notwendigen Schritte zur
 Assemblierung dargestellt und auf der rechten Seite die Schritte für
 das Scaffolding. In der linken Abbildung ist die SGA-Pipeline zu sehen
@@ -686,10 +688,12 @@ Für alle 4 Testdatensätze konnte gt Scaffolder eine erfolgreiche
 Scaffold-Berechnung durchführen. Ein Vergleich mit SGA (vgl.
 Tabelle~\ref{tab: Vergleich}) zeigt das Güte der Ergebnisse für die
 betrachteten Metriken exakt übereinstimmen. Die Abdeckung der
-jeweiligen Zielsequenz durch die Gesamtlänge der ermittelten Scaffolds schwankt
-zwischen 71 und 94\%. Eine Korrelation mit der Genomlänge oder Anzahl
-der zugrundeliegenden \todo{Alternative für zugrundeliegend finden} Contigs ist
-hierbei nicht zu erkennen.
+jeweiligen Zielsequenz durch die Gesamtlänge der ermittelten Scaffolds
+schwankt zwischen 71 und 94\%. Eine Korrelation mit der Genomlänge
+oder Anzahl der zugrundeliegenden \todo{Alternative für
+  zugrundeliegend finden} \todo{gehört der satz mit der korrelation
+  nicht eher in eine diskussion, weil er die daten schon auswertet?}
+Contigs ist hierbei nicht zu erkennen.
 
 Insgesamt war gt Scaffolder mindestens genauso oder etwas performanter als
 SGA (vgl. Abbildung~\ref{abb: Zeit}). Der Laufzeitbedarf betrug für alle
@@ -732,13 +736,13 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
   Ergebnisse aufgetragen in der ersten Zeile als absolute Werte aufgetragen,
   denen die Ergebnisse von gt Scaffolder in der zweiten Zeile als relative
   Faktoren folgen. Abdeckung bezeichnet Gesamtlänge aller Scaffolds und die
-  prozentuale Abdeckung der Zielsequenz \todo{bessere Beschreibung für
-  Abdeckung ausdenken}, \#Scaffolds
+  prozentuale Abdeckung der Zielsequenz, \#Scaffolds
   deren Anzahl und N50 die Länge, sodass alle Scaffolds mit gleicher oder
   größerer Länge mindestens die Hälfte der Abdeckung ausmachen. CPU bezeichnet
   die Gesamtlaufzeit und RAM den maximalen Speicherbedarf während der
   Berechnug.}
 \end{table}
+\todo{Tabelle 1 bessere Beschreibung für Abdeckung ausdenken}
 
 \subsection{Vergleich der Laufzeit und des Speicherplatzbedarfs}
 \begin{figure}[t]
@@ -842,8 +846,26 @@ gewählt werden können, sind auch bei gt Scaffolder einstellbar. Somit
 ist SGA-Scaffold flexibler in der Selektion relevanter Kanten und
 Knoten als gt Scaffolder.
 
-\todo{absatz mit vergleich zur implementation in einer skript-sprache
-  schreiben}
+Die Wahl der Programmiersprache C für gt Scaffolder war gut im
+Verlgeich zu einer Implementierung der Scaffolding-Software in einer
+Skriptsprache wie z.\,B. Python, Ruby oder Perl. Bei einer
+Implementation in einer Skriptsprache wäre das Einlesen der
+verschiedenen Format wesentlich einfacher gewesen und die
+Implementation schneller beendet, da Stringmanipulation in diesen
+Sprachen nicht so aufwändig ist. Allerdings hätte die in den
+GenomeTools vorhandene Infrastruktur nicht so einfach genutzt werden
+können. So hätte vor allem die Implementation des Moduls zur
+Rekonstruktion der Sequenzen länger gedauert. Es hätten
+Datenstrukturen wie der String-Graph nutzbar gemacht oder neu
+implementiert werden müssen. Ebenfalls hätten vorhandene
+Implementationen von Algorithmen wie z.\,B. die Implementation des
+Smith-Waterman-Algorithmus zur Berechnung lokaler Alignments nicht
+einfach genutzt werden können. Der geringere Verbrauch an
+Speicherplatz wäre in einer Skriptsprache wahrscheinlich nicht möglich
+gewesen. Durch die Infrastruktur der GenomeTools waren Datenstrukturen
+wie z.\,B. Arrays, Queues oder Hashes schon vorhanden. Dadurch war die
+Nutzung solcher Datenstrukturen vergleichbar komfortabel mit einer
+Skriptsprache.
 
 \section{Ausblick}
 \label{sec: Ausblick}
