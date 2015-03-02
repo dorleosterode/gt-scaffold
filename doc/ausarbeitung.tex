@@ -807,18 +807,25 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
   \caption{\label{abb: Zeit}Graphische Darstellung der Laufzeit (Graphen) und
   des Speicherplatzbedarfs (Balkendiagramme) von gt Scaffolder (grün) und SGA
   Scaffold (rot) für die nach Größe geordneten Testdatensätze. }
-\end{figure}ls
+\end{figure}
 
 
 \subsubsection*{Ergebnisse der Sequenz-Rekonstruktion}
+Während gt Scaffolder die Scaffold-Berechnung und Rekonstruktion der Zielsequenz
+in einem Schritt berechnen kann, handelt es sich bei SGA um 2 getrennte
+Schritte: SGA scaffold und SGA scaffold2fasta. Für alle 4 Testdatensätze konnte
+gt Scaffolder eine Sequenz-Rekonstruktion durchführen. Im Gegensatz zur
+Scaffold-Berechnung existieren hier wesentlich Unterschiede zu den mit SGA
+rekonstruierten Sequenzen (vgl. Tabelle~\ref{tab: Rekonstruktion}), welche das
+jeweilige Referenzgenom deutlich besser abdecken und gleichzeitig weniger
+missassemblierte Positionen besitzen.
 
 \begin{table}
   \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
     \begin{tabular}{llccccc}
       \toprule
-      Datensatz & Programm & Gesamtlänge & Abdeckung (\%) & N50 (kb)
-      & \#Missassemblierungen & Unaligniert (Mbp)
-      (MB) \\
+      Datensatz & Programm & Gesamtlänge (Mbp) & Abdeckung (\%) & N50 (kb)
+      & \#Miss & Unaligniert (bp) \\
       \midrule
       \textit{S. cerevisiae}
       & SGA scaffold2fasta  & 10.91  &    88.9     &  7.9        &
@@ -854,10 +861,9 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
   Faktoren folgen. Abdeckung bezeichnet Gesamtlänge aller Scaffolds, Abdeckung
   die prozentuale Abdeckung der Zielsequenz und N50 die Länge, sodass alle
   Scaffolds mit gleicher oder größerer Länge mindestens die Hälfte der
-  Gesamtlänge ausmachen.
-  \#Missassemblierungen bezeichnet die Anzahl der Missassemblierungen nach
-  Plantagora \cite{Gurevich:2013je}, Unaligniert die Gesamtlänge nicht
-  alignierter Regionen der Assemblierungen.}
+  Gesamtlänge ausmachen. \#Miss bezeichnet die Anzahl der
+  Missassemblierungen nach Plantagora \cite{Gurevich:2013je}, Unaligniert die
+  Gesamtlänge nicht alignierter Regionen der Assemblierungen.}
 \end{table}
 
 
