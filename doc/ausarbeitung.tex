@@ -584,51 +584,23 @@ mögliche Erklärungen ergänzt.
 
 \section{Ergebnisse}
 
-\subsection{Komparative Scaffold-Berechnung durch gt Scaffolder und SGA}
-Zur Überprüfung und Evaluation wurden Scaffolds für verschiedene Testdaten durch
-gt Scaffolder berechnet. Zur besseren Einordnung der Ergebnisse wurde eine
-Scaffold-Berechnung ebenfalls mit SGA durchgeführt. Die Berechnungen wurden auf
-einem Computer mit 3.10GHz Intel Core-i7 Prozessor, 8GB Arbeitsspeicher unter
-einem 64bit Linux Betriebssystem ausgeführt. Dabei wurde lediglich ein Kern
-verwendet. Das Laufzeitverhaltens und der Speicherbedarf wurden durch das in den
-GenomeTools enthaltene Skript rdj-spacepeak.sh auf auf 2 identischen Computern
-gemessen, um eine eventuelle Verfälschung durch das
-Caching der Eingabedateien zu vermeiden. Die Metriken der gewonnenen Scaffolds
-wurden mit QUAST~\cite{Gurevich:2013je} ermittelt.
+\subsection{Vergleich der Pipelines \todo{präzisere Überschrift finden}}
 
-\subsubsection*{Generierung und Assemblierung der Testdaten}
-Mithilfe der Software ART~\cite{Huang:2012kq} wurde eine
-Illumina-\textit{Paired-End}-Sequenzierung für vier verschiedene Referenzgenome
-(vgl. Tabelle~\ref{tab: Referenzgenome}) simuliert. Dabei wurde die Read-Länge
-auf 150 bp, die Fragmentlänge auf 400 bp $\pm$ 10 bp und die Coverage auf
-20X festgelegt sowie der Seed 123 gewählt. Die Längen der Referenzgenome
-variieren im Bereich von ca. 10 bis 140 Mbp, um die Entwicklung der Laufzeit
-und des Speicherbedarfs mit steigender Länge beobachten zu können.
-Getestete, kürzere Zielsequenzen konnten teilweise bereits während der
-Assemblierung vollständig rekonstruiert werden.
-
-Anschließend wurden die simulierten \textit{Paired-End}-Reads aller vier
-Datensätze jeweils durch die SGA-Pipeline (vgl. Abbildung~\ref{abb: Pipeline})
-assembliert, da gt Scaffolder auch die SGA Eingabeformate verwenden kann.
-
-\begin{table}
-  \centering
-  \begin{tabular}{l | c | l}
-    Genom & Größe & Datensatzid \\
-    \hline
-    \textit{S. cerevisiae} &~~12 Mbp & Ensembl R64-1-1 \\
-    \textit{H. sapiens}, Chr. 21 &~~48 Mbp & Ensembl GRCh37 \\
-    \textit{C. elegans} & 100 Mbp & Ensembl WBcel235 \\
-    \textit{D. melanogaster} & 140 Mbp & Ensembl BDGP5
-  \end{tabular}
-  \caption{\label{tab: Referenzgenome} Verwendete Referenzgenome mit
-    ihrer Größe und den Datensatzids.}
-\end{table}
-
-\subsection{Vergleich der Pipelines}
-
-In Abbildung \ref{abb: Pipeline} sind die Assemblierungs- und
-Scaffolding-Pipelines von SGA und gt Scaffolder dargestellt.
+Ein Vergleich der \textit{de novo}-Assemblierungs-Pipelines von SGA und gt
+Scaffolder (vgl. Abbildung~\ref{abb: Pipeline}) zeigt wesentliche Unterschiede
+in der Anzahl der benötigten Schritte sowie externen Abhängigkeiten auf.
+SGA durchläuft sowohl bei der Assemblierung als auch beim Scaffolding wesentlich
+mehr Schritte. Gleichzeitig besitzt die SGA-Pipeline externe Abhängigkeiten,
+was ihre Komplexität noch erhöht: Neben der Software Abyss, BWA, Samtools und
+ihren Kompilierungsabhängigkeiten müssen externe Bibliotheken wie Pysam
+vorliegen, da manche Schritte der SGA-Pipeline von Perl- und Python-Skripten
+verwaltet werden.
+gt Scaffolder besitzt für die Assemblierung eine GenomeTools-interne
+Abhängigkeit zur gt Readjoiner. Zum Zeitpunkt dieser Ausarbeitung ist die
+Schnittstelle zu Readjoiner noch nicht vollständig implementiert
+(vgl. Abschnitt~\ref{sec: Ausblick}). Darüber hinaus ist gt Scaffolder zur
+SGA-Pipeline kompatibel und kann dieselben Eingabedaten verarbeiten wie SGA
+scaffold.
 
 \begin{figure}
   \centering
@@ -682,8 +654,11 @@ Scaffolding-Pipelines von SGA und gt Scaffolder dargestellt.
     \end{minipage}
     \caption{\label{abb: Pipeline}Vergleich der Assemblierungs- und
       Scaffolding-Pipelines von SGA (links) und gt Scaffolder
-      (rechts). In farbig sind Abhängigkeiten zu anderen Programmen
-      oder externen Bibliotheken dargestellt.}
+      (rechts). Externe Abhängigkeiten zu unterschiedlichen Programmen
+      oder Bibliotheken sind jeweils in unterschiedlichen Farben
+      hervorgehoben. Innerhalb jeder Pipeline sind die zur Assemblierung
+      notwendigen Schritte links, die für das Scaffolding ausgeführten Schritte
+      rechts angeordnet.}
 \end{figure}
 
 Auf der jeweils linken Seite sind die notwendigen Schritte zur
@@ -701,7 +676,46 @@ nicht-Standardsoftware, in der Abbildung farbig markiert. Die
 unterschiedlichen Farben kennzeichnen unterschiedliche Programme und
 Bibliotheken, zu denen Abhängigkeiten bestehen.
 
-\todo{unser Tool anpreisen *hihi*}
+\subsection{Komparative Scaffold-Berechnung durch gt Scaffolder und SGA}
+Zur Überprüfung und Evaluation wurden Scaffolds für verschiedene Testdaten durch
+gt Scaffolder berechnet. Zur besseren Einordnung der Ergebnisse wurde eine
+Scaffold-Berechnung ebenfalls mit SGA durchgeführt. Die Berechnungen wurden auf
+einem Computer mit 3.10GHz Intel Core-i7 Prozessor, 8GB Arbeitsspeicher unter
+einem 64bit Linux Betriebssystem ausgeführt. Dabei wurde lediglich ein Kern
+verwendet. Das Laufzeitverhaltens und der Speicherbedarf wurden durch das in den
+GenomeTools enthaltene Skript rdj-spacepeak.sh auf auf 2 identischen Computern
+gemessen, um eine eventuelle Verfälschung durch das
+Caching der Eingabedateien zu vermeiden. Die Metriken der gewonnenen Scaffolds
+wurden mit QUAST~\cite{Gurevich:2013je} ermittelt.
+
+\subsubsection*{Generierung und Assemblierung der Testdaten}
+Mithilfe der Software ART~\cite{Huang:2012kq} wurde eine
+Illumina-\textit{Paired-End}-Sequenzierung für vier verschiedene Referenzgenome
+(vgl. Tabelle~\ref{tab: Referenzgenome}) simuliert. Dabei wurde die Read-Länge
+auf 150 bp, die Fragmentlänge auf 400 bp $\pm$ 10 bp und die Coverage auf
+20X festgelegt sowie der Seed 123 gewählt. Die Längen der Referenzgenome
+variieren im Bereich von ca. 10 bis 140 Mbp, um die Entwicklung der Laufzeit
+und des Speicherbedarfs mit steigender Länge beobachten zu können.
+Getestete, kürzere Zielsequenzen konnten teilweise bereits während der
+Assemblierung vollständig rekonstruiert werden.
+
+Anschließend wurden die simulierten \textit{Paired-End}-Reads aller vier
+Datensätze jeweils durch die SGA-Pipeline (vgl. Abbildung~\ref{abb: Pipeline})
+assembliert, bevor die komparative Scaffold-Berechnung durchgeführt wurde.
+
+\begin{table}
+  \centering
+  \begin{tabular}{l | c | l}
+    Genom & Größe & Datensatzid \\
+    \hline
+    \textit{S. cerevisiae} &~~12 Mbp & Ensembl R64-1-1 \\
+    \textit{H. sapiens}, Chr. 21 &~~48 Mbp & Ensembl GRCh37 \\
+    \textit{C. elegans} & 100 Mbp & Ensembl WBcel235 \\
+    \textit{D. melanogaster} & 140 Mbp & Ensembl BDGP5
+  \end{tabular}
+  \caption{\label{tab: Referenzgenome} Verwendete Referenzgenome mit
+    ihrer Größe und den Datensatzids.}
+\end{table}
 
 \subsection{Evaluation der Ergebnisse}
 
@@ -799,7 +813,7 @@ Laufzeit und mehr Speicherplatz benötigt, wie aus Tabelle \ref{tab:
 wird. \todo{LG: gehören Abschnitte 7.1-7.3 ganz bzw. teilweise in die Diskussion?}
 
 
-\section{Diskussion und Ausblick}
+\section{Diskussion und Ausblick}\label{sec: Ausblick}
 
 Wie in Abschnitt \ref{sec: Ergebnisse} dargestellt, liefert gt
 Scaffolder in den Testfällen die gleichen Ergebnisse wie SGA
