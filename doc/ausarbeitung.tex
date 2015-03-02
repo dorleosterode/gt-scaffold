@@ -685,8 +685,11 @@ einem 64bit Linux Betriebssystem ausgeführt. Dabei wurde lediglich ein Kern
 verwendet. Das Laufzeitverhaltens und der Speicherbedarf wurden durch das in den
 GenomeTools enthaltene Skript rdj-spacepeak.sh auf auf 2 identischen Computern
 gemessen, um eine eventuelle Verfälschung durch das
-Caching der Eingabedateien zu vermeiden. Die Metriken der gewonnenen Scaffolds
-wurden mit QUAST~\cite{Gurevich:2013je} ermittelt.
+Caching der Eingabedateien zu vermeiden. Die von beiden Programmen ausgegebenen
+Metriken wurden durch gt seqstat nochmals überprüft. Bei der
+Rekonstruktion der Sequenzen aus den ermittelten Scaffolds handelt es sich um
+einen separaten Schritt, der gesondert ausgewertet wurde. Hier wurden die
+Metriken durch QUAST~\cite{Gurevich:2013je} ermittelt.
 
 \subsubsection*{Generierung und Assemblierung der Testdaten}
 Mithilfe der Software ART~\cite{Huang:2012kq} wurde eine
@@ -718,16 +721,23 @@ assembliert, bevor die komparative Scaffold-Berechnung durchgeführt wurde.
   die jeweilige Build-Nummer ist angegeben.}
 \end{table}
 
-\subsection{Evaluation der Ergebnisse}
+\subsubsection*{Ergebnisse der Scaffold-Berechnung}
 
-In Tabelle \ref{tab: Vergleich} sind die Ergebnisse der Evaluation
-dargestellt. Jeweils zwei Zeilen enthalten die Angaben zu einem
-Referenzdatensatz. Dabei sind immer zuerst die Ergebnisse von SGA
-Scaffold aufgetragen und in der Zeile darunter die Ergebnisse von gt
-Scaffolder als Faktor. Zu jedem Datensatz ist in der ersten Spalte die
-Anzahl an Contigs dargestellt, um die Größe des jeweiligen
-Scaffold-Graphen zu skizzieren. Der Vergleich wurde anhand der Ausgabe
-im SCAF-Format durchgeführt.
+Für alle 4 Testdatensätze konnte gt Scaffolder eine erfolgreiche
+Scaffold-Berechnung durchführen. Ein Vergleich mit SGA (vgl.
+Tabelle~\ref{tab: Vergleich}) zeigt das Güte der Ergebnisse für die
+betrachteten Metriken exakt übereinstimmen. Die Abdeckung der
+jeweiligen Zielsequenz durch die Gesamtlänge der ermittelten Scaffolds schwankt
+zwischen 71 und 94\%. Eine Korrelation mit der Genomlänge oder Anzahl
+der zugrundeliegenden \todo{Alternative für zugrundeliegend finden} Contigs ist
+hierbei nicht zu erkennen.
+
+Insgesamt war gt Scaffolder mindestens genauso oder etwas performanter als
+SGA (vgl. Abbildung~\ref{abb: Zeit}). Der Laufzeitbedarf betrug für alle
+Berechnung nur einige Milisekunden, der maximale Speicherbedarf etwa 30 MB. gt
+Scaffolder war dabei etwa gleich schnell oder um den Faktor $0.9\times$
+schneller als SGA. Der Speicherbedarf während der Berechung durch gt
+Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
 
 \begin{table}
   \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
@@ -756,29 +766,20 @@ im SCAF-Format durchgeführt.
       & gt Scaffolder & $1\times$     &  $1\times$  & $1\times$ & $0.9\times$ & $0.62\times$     \\
       \bottomrule
   \end{tabular}}
-  \caption{\label{tab: Vergleich}Vergleich der Ergebnisse, der
-    Laufzeit und des Speicherplatzbedarfs von gt Scaffolder und
-    SGA-Scaffold.}
+  \caption{\label{tab: Vergleich}Ergebnisse der Scaffold-Berechnung.
+  Datensatz bezeichnet die Testdatensätze mit zugehöriger Anzahl der
+  assemblierten Contigs, um die Größe des jeweiligen Scaffold-Graphen zu
+  skizzieren. Für jeden Datensatz wurden die zunächst die durch SGA erzielten
+  Ergebnisse aufgetragen in der ersten Zeile als absolute Werte aufgetragen,
+  denen die Ergebnisse von gt Scaffolder in der zweiten Zeile als relative
+  Faktoren folgen. Abdeckung bezeichnet Gesamtlänge aller Scaffolds und die
+  prozentuale Abdeckung der Zielsequenz \todo{bessere Beschreibung für
+  Abdeckung ausdenken}, \#Scaffolds
+  deren Anzahl und N50 die Länge, sodass alle Scaffolds mit gleicher oder
+  größerer Länge mindestens die Hälfte der Abdeckung ausmachen. CPU bezeichnet
+  die Gesamtlaufzeit und RAM den maximalen Speicherbedarf während der
+  Berechnug.}
 \end{table}
-
-Die verglichenen Aspekte sind: Die Abdeckung des (\todo{welche
-Abdeckung wurde betrachtet?!}) in Mbp und Prozent, die Anzahl an
-berechneten Scaffolds, der N50 Wert der berechneten Scaffolds in kb,
-die benötigte CPU-Zeit in Sekunden und der maximal benötigte
-Speicherplatzbedarf in MB.
-
-Der Faktor $1\times$ in den Spalten Abdeckung, \# Scaffolds und N50
-zeigt an, dass gt Scaffolder und SGA Scaffold bei allen
-Testdatensätzen die gleichen Ergebnisse produziert haben.
-
-Bei der Laufzeit ist gt Scaffolder ungefähr genauso schnell wie SGA Scaffold. Der Faktor
-$0.1\times$ um den gt Scaffolder bei den Testdatensätzen von
-\textit{C. elegans} und \textit{D. melanogaster} schneller ist, ist
-bei dieser Größenordnung nicht signifikant.
-
-gt Scaffolder benötigt maximal um einen Faktor $0.1\times$ bis
-$0.57\times$ weniger Speicherplatz bei der Berechnung der Scaffolds,
-als SGA Scaffold.
 
 \subsection{Vergleich der Laufzeit und des Speicherplatzbedarfs}
 \begin{figure}[t]
@@ -788,20 +789,8 @@ als SGA Scaffold.
     unterschiedliche Testdatensätze}
 \end{figure}
 
-In Abbildung \ref{abb: Zeit} sind die Laufzeiten und der
-Speicherplatzbedarf der Programme gt Scaffolder und SGA Scaffold für
-die verschiedenen Testdatensätze dargestellt. Die Testdatensätze sind
-dabei der Größe nach von links nach rechts geordnet. Die Ergebnisse
-von SGA Scaffold sind jeweils in rot dargestellt während die
-Ergebnisse von gt Scaffolder grün eingefärbt sind.
+\subsubsection*{Ergebnisse der Sequenz-Rekonstruktion}
 
-Die Grafik verdeutlicht, dass gt Scaffolder sowohl bei der Laufzeit
-als auch bei dem maximalen Speicherplatzbedarf entweder gleichauf mit
-SGA Scaffold oder sogar besser ist.
-
-\todo{LG: gehören Abschnitte 7.1-7.3 ganz bzw. teilweise in die
-  Diskussion? da wird gefuehlt nur dargestellt wie die ergebnisse sind
-  und nicht bewertet, oder?}
 
 
 \section{Diskussion und Ausblick}\label{sec: Ausblick}
