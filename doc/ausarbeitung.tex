@@ -81,7 +81,7 @@ Das Scaffolding Problem kann als graphentheoretisches Problem
 formuliert werden. Dabei repräsentieren die Knoten des Graphen die
 einzelnen Contigs. Zwischen zwei Knoten existiert eine Kante, falls
 ein Read-Paar die beiden repräsentierten Contigs verbindet. Kanten
-enthalten dabei Informationen über die Distanz der verbundenen Contigs
+enthalten hierbei Informationen über die Distanz der verbundenen Contigs
 und die Orientierung der Read-Paare zueinander. Die Ermittlung eines
 Scaffolds, eines optimalen Pfades (Pfad mit maximalem Kantengewicht)
 jeder Zusammenhangskomponente des Scaffolding Graphen, ist
@@ -190,7 +190,7 @@ Als Eingabe werden die Contigs im FASTA-Format, die
 Distanzinformationen aus der \textit{Paired-End}-
 bzw. \textit{Mate-Pair}-Sequenzierung und die A-Statistik der einzelnen
 Contigs benötigt.
- 
+
 In gt Scaffolder können die Distanzinformationen explizit durch eine
 Datei im ABySS-Distance-Format (*.de) angegeben werden. Eine solche
 Datei wird durch das Programm DistEst von ABySS nach dem Assemblierungs-
@@ -212,7 +212,7 @@ separaten Datei oder als Annotation in den Contigs angeführt werden.
 \subsection{Erstellen der Distanzinformationen}
 Die Methode, die das Programm DistEst verwendet, durchläuft folgende
 Schritte. Zunächst werden alle Reads aus der BAM-Datei geladen und
-die Read-Paare ermittelt. Anschließend berechnet man die Fragmentlängen 
+die Read-Paare ermittelt. Anschließend berechnet man die Fragmentlängen
 aller Read-Paare, die gegenüber dem gleichen Contig angeordnet sind,
 und erstellt auf deren Basis eine Häufigkeitsverteilung.
 Danach wird von der Verteilung eine Wahrscheinlichkeitsfunktion für die
@@ -583,9 +583,32 @@ mögliche Erklärungen ergänzt.
 
 \section{Ergebnisse}
 
-Zum Evaluieren und Testen der implementierten Software wurden
-verschiedene Testdatensätze ausgewählt. Die verwendeten Referenzgenome
-sind in Tabelle \ref{tab: Referenzgenome} dargestellt.
+\subsection{Komparative Scaffold-Berechnung durch gt Scaffolder und SGA}
+Zur Überprüfung und Evaluation wurden Scaffolds für verschiedene Testdaten durch
+gt Scaffolder berechnet. Zur besseren Einordnung der Ergebnisse wurde eine
+Scaffold-Berechnung ebenfalls mit SGA durchgeführt. Die Berechnungen wurden auf
+einem Computer mit 3.10GHz Intel Core-i7 Prozessor, 8GB Arbeitsspeicher unter
+einem 64bit Linux Betriebssystem ausgeführt. Dabei wurde lediglich ein Kern
+verwendet. Das Laufzeitverhaltens und der Speicherbedarf wurden durch das in den
+GenomeTools enthaltene Skript rdj-spacepeak.sh auf auf 2 identischen Computern
+gemessen, um eine eventuelle Verfälschung durch das
+Caching der Eingabedateien zu vermeiden. Die Metriken der gewonnenen Scaffolds
+wurden mit QUAST ermittelt.
+
+\subsubsection*{Generierung und Assemblierung der Testdaten}
+Mithilfe der Software ART~\cite{Huang:2012kq} wurde eine
+Illumina-\textit{Paired- End}-Sequenzierung für vier verschiedene Referenzgenome
+(vgl. Tabelle~\ref{tab: Referenzgenome}) simuliert. Dabei wurde die Read-Länge
+auf 150 bp, die Fragmentlänge auf 400 bp $\pm$ 10 bp und die Coverage auf
+20X festgelegt sowie der Seed 123 gewählt. Die Längen der Referenzgenome
+variieren im Bereich von ca. 10 bis 140 Mbp, um die Entwicklung der Laufzeit
+und des Speicherbedarfs mit steigender Länge beobachten zu können.
+Getestete, kürzere Zielsequenzen konnten teilweise bereits während der
+Assemblierung vollständig rekonstruiert werden.
+
+Anschließend wurden die simulierten \textit{Paired-End}-Reads aller vier
+Datensätze jeweils durch die SGA-Pipeline (vgl. Abbildung~\ref{abb: Pipeline})
+assembliert, da gt Scaffolder auch die SGA Eingabeformate verwenden kann.
 
 \begin{table}
   \centering
@@ -600,28 +623,6 @@ sind in Tabelle \ref{tab: Referenzgenome} dargestellt.
   \caption{\label{tab: Referenzgenome} Verwendete Referenzgenome mit
     ihrer Größe und den Datensatzids.}
 \end{table}
-
-Es wurden diese Referenzgenome gewählt, da sie sehr unterschiedliche
-Größen haben. Die Größen decken einen Bereich von ca. 10 Mbp bis 140
-Mbp ab, so dass die Entwicklung des Laufzeitverhaltens und des
-Speicherplatzbedarfs über die Länge des Genoms betrachtet werden kann.
-Zusätzlich sind die Referenzgenome hinreichend groß um ein
-interessantes Problem darzustellen. Kleinere Genome konnten teilweise
-von der SGA-Pipeline schon bei der Assemblierung vollständig
-rekonstruiert werden.
-
-Mit dem Sequenzierungssimulator ART~\cite{Huang:2012kq} wurde für
-jedes der Genome eine \textit{Paired-End}-Sequenzierung mit einem
-Illumina Sequenzierer simuliert. Dabei wurde die Read-Länge auf 150
-bp, die Fragmentlänge auf 400 bp $\pm$ 10 bp und die Coverage auf 20X
-festgelegt.
-
-Die so erhaltenen \textit{Paired-End}-Reads wurden mit der
-SGA-Pipeline assembliert und das Ergebnis für das Scaffolding
-verwendet.
-
-Die Berechnungen wurden auf einer Workstation durchgeführt. Die
-technischen Daten sind: Core-i7 @ 3.10GHz, 8GB RAM, Linux 64 bit.
 
 \subsection{Vergleich der Pipelines}
 
