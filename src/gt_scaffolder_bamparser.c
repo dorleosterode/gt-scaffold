@@ -370,7 +370,8 @@ static void create_pmf(PmfData *pmf_data, HistogramData histogram_data) {
   pmf_data->mean = histogram_data.mean;
   pmf_data->std_dev = histogram_data.std_dev;
   pmf_data->minp = 1.0 / histogram_data.value_sum;
-  pmf_data->dist = gt_malloc(sizeof (*pmf_data->dist) * (histogram_data.max + 1));
+  pmf_data->dist = gt_malloc(sizeof (*pmf_data->dist) *
+                             (histogram_data.max + 1));
   pmf_data->nof = histogram_data.max + 1;
   for (key = 0; key <= histogram_data.max; key++) {
     nof = gt_hashmap_get(histogram_data.hash_map, &key);
