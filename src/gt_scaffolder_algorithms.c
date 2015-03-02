@@ -111,7 +111,7 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
     file = fopen(filename, "rb");
     if (file == NULL) {
       had_err = -1;
-      gt_error_set(err, "can not read file %s", filename);
+      gt_error_set(err, "can not read A-statistic file %s", filename);
     }
     if (had_err != -1)
     {
@@ -161,7 +161,7 @@ int gt_scaffolder_graph_mark_repeats(const char *filename,
     for (vertex = graph->vertices;
       vertex < (graph->vertices + graph->nof_vertices); vertex++)
     {
-      if (vertex->astat <= astat_cutoff ||
+       if (vertex->astat <= astat_cutoff ||
           (strlen(filename) != 0 && vertex->copy_num < copy_num_cutoff))
         mark_vertex(vertex, GIS_REPEAT);
     }

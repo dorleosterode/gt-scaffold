@@ -38,6 +38,7 @@ typedef struct {
   GtScaffolderGraph *graph;
   bool astat_is_annotated;
   float astat;
+  float copynum;
 } GtScaffolderGraphFastaReaderData;
 
 /* sort by lexicographic ascending order */
@@ -68,7 +69,7 @@ int gt_scaffolder_parser_read_distances_test(const char *filename,
   file = fopen(filename, "rb");
   if (file == NULL) {
     had_err = -1;
-    gt_error_set(err, "can not read file %s",filename);
+    gt_error_set(err, "can not read distance file %s",filename);
   }
 
   if (had_err != -1) {
@@ -179,7 +180,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
   file = fopen(file_name, "rb");
   if (file == NULL) {
     had_err = -1;
-    gt_error_set(err, "can not read file %s",file_name);
+    gt_error_set(err, "can not read distance file %s",file_name);
   }
 
   edge_counter = gt_calloc(graph->nof_vertices, sizeof (*edge_counter));
@@ -325,7 +326,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
   file = fopen(filename, "rb");
   if (file == NULL) {
     had_err = -1;
-    gt_error_set(err, " can not read file %s ",filename);
+    gt_error_set(err, " can not read distance file %s ",filename);
   }
 
   if (had_err != -1)
@@ -444,20 +445,25 @@ static int gt_scaffolder_graph_save_header(const char *description,
   char *writeable_description, *space_ptr;
   GtScaffolderGraphFastaReaderData *fasta_reader_data =
   (GtScaffolderGraphFastaReaderData*) data;
-  char part_1[BUFSIZE], part_2[BUFSIZE];
+  char part_1[BUFSIZE];
   GtWord num_1, num_2;
-  float astat;
+  float astat, copynum;
 
   had_err = 0;
 
+/*>contig_1 length=307 depth=3 k=1.00 astat=20.373520 6B-(67)->43919B-(90)->156572E*/
+
   fasta_reader_data->astat = 0.0;
+  fasta_reader_data->copynum = 0.0;
   /* check if astat is annotated in contig header and if so parse it */
   if (fasta_reader_data->astat_is_annotated) {
-    if (sscanf(description,"%s length=" GT_WD " depth=" GT_WD " astat=%f"
-        "%s", part_1, &num_1, &num_2, &astat, part_2) == 5)
+    if (sscanf(description,"%s length=" GT_WD " depth=" GT_WD " k=%f astat=%f"
+        , part_1, &num_1, &num_2, &copynum, &astat) == 5) {
       fasta_reader_data->astat = astat;
+      fasta_reader_data->copynum = copynum;
+    }
     else {
-      gt_error_set (err , "No astat was found in header");
+      gt_error_set (err , "No A-statisitc/copy number was found in header");
       had_err = -1;
     }
   }
@@ -495,7 +501,8 @@ static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
   {
     cloned_gt_str = gt_str_clone(fasta_reader_data->header_seq);
     gt_scaffolder_graph_add_vertex(fasta_reader_data->graph,
-    cloned_gt_str, seq_length, fasta_reader_data->astat, 0.0);
+    cloned_gt_str, seq_length, fasta_reader_data->astat,
+                               fasta_reader_data->copynum);
   }
 
   if (seq_length == 0) {
