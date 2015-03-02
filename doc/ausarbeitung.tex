@@ -801,6 +801,25 @@ wird. \todo{LG: gehören Abschnitte 7.1-7.3 ganz bzw. teilweise in die Diskussio
 
 \section{Diskussion und Ausblick}
 
+Wie in Abschnitt \ref{sec: Ergebnisse} dargestellt, liefert gt
+Scaffolder in den Testfällen die gleichen Ergebnisse wie SGA
+Scaffold. Dabei benötigt gt Scaffolder die gleiche Laufzeit und
+weniger Speicherplatz.
+
+Das Modul zur Rekonstruktion der Sequenzen ist scheinbar noch
+fehlerhaft und liefert keine vergleichbar gute Ergebnisse wie das
+äquivalente Modul von SGA. Dies kann dadurch kommen, das SGA den
+String-Graph nach dem Einlesen noch modifiziert und ebenfalls Lücken
+mit negativer Distanz anhand des String-Graphen schließt. Ebenfalls
+verwendet SGA eine andere Strategie zur Berechnung von Alignments. Bei
+dieser Berechnung verwendet das Modul von gt Scaffolder ein
+Distanz-Modell. SGA hingegen verwendet ein
+Ähnlichkeits-Scoring-Modell, welches übereinstimmende Buchstaben
+stärker positiv bewertet. Zusätzlich kann das Modul von gt Scaffolder
+die nicht im Scaffolding enthaltenen Contigs noch nicht mit
+ausgeben. SGA gibt kann diese Contigs mit ausgeben und erreicht
+dadurch gegebenenfalls eine höhere Abdeckung des Referenzgenoms.
+
 \section*{Anhang}
 \subsection*{Pseudocode}
 (\todo{Algorithmen anpassen!!!})
