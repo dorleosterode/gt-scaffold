@@ -99,13 +99,6 @@ typedef struct GtScaffolderGraphRecord {
   GtArray *edges;
 }GtScaffolderGraphRecord;
 
-/* Construct graph data structure <*GtScaffolderGraph>. Initialize edges and
-   allocate memory for <max_nof_edges> if != 0. Initialize vertices and allocate
-   memory for <max_nof_vertices> vertices if != 0. Edges and/or vertices will
-   have to be initialized seperately otherwise. */
-GtScaffolderGraph *gt_scaffolder_graph_new(GtUword max_nof_vertices,
-                                           GtUword max_nof_edges);
-
 /* Free all memory allocated for <*graph> including vertices and edges */
 void gt_scaffolder_graph_delete(GtScaffolderGraph *graph);
 
