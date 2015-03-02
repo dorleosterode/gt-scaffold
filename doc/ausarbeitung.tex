@@ -25,6 +25,20 @@
 % coole inline-todos :)
 \usepackage[colorinlistoftodos,prependcaption]{todonotes}
 
+% PDF Bookmarks
+\usepackage[backref=true,pagebackref=true,colorlinks=false,bookmarks=true,bookmarksopen=false,bookmarksnumbered=false,pdfpagemode=None]{hyperref}
+
+% Typographie: Besseres Absatz-Handling, größere Toleranzen beim Blocksatz
+\tolerance 1414
+\hbadness 1414
+\emergencystretch 1.5em
+\hfuzz 0.3pt
+\widowpenalty=10000               % Hurenkinder vermeiden
+\displaywidowpenalty=10000        % Hurenkinder vermeiden
+\clubpenalty=10000                % Schusterjungen vermeiden
+\vfuzz \hfuzz
+\raggedbottom
+
 \renewcommand{\arraystretch}{1.5}
 
 \usetikzlibrary{shapes.geometric, positioning, calc, shapes, fit, backgrounds}
@@ -90,9 +104,9 @@ Strategien eine Heuristik, um einen guten Pfad zu
 bestimmen.
 
 Diese Ausarbeitung beschäftigt sich mit der Implementation eines
-Scaffolding-Programms im Rahmen des Bioinformatik-Projektes. Die
-Implementation und komplette Dokumentation ist zu finden unter:
-\url{https://github.com/dorleosterode/gt-scaffold}. Der Fokus der
+Scaffolding-Programms im Rahmen des Genominformatik-Projektes. Die
+Implementation und komplette Dokumentation ist unter
+\url{https://github.com/dorleosterode/gt-scaffold} zu finden. Der Fokus der
 Ausarbeitung liegt auf der zugrunde liegenden Methodik. Für
 Implementationsdetails steht der Source-Code zur Verfügung.
 
@@ -586,21 +600,22 @@ mögliche Erklärungen ergänzt.
 
 \subsection{Vergleich der Pipelines \todo{präzisere Überschrift finden}}
 
-Ein Vergleich der \textit{de novo}-Assemblierungs-Pipelines von SGA und gt
-Scaffolder (vgl. Abbildung~\ref{abb: Pipeline}) zeigt wesentliche Unterschiede
-in der Anzahl der benötigten Schritte sowie externen Abhängigkeiten auf.
-SGA durchläuft sowohl bei der Assemblierung als auch beim Scaffolding wesentlich
-mehr Schritte. Gleichzeitig besitzt die SGA-Pipeline externe Abhängigkeiten,
-was ihre Komplexität noch erhöht: Neben der Software Abyss, BWA, Samtools und
-ihren Kompilierungsabhängigkeiten müssen externe Bibliotheken wie Pysam
-vorliegen, da manche Schritte der SGA-Pipeline von Perl- und Python-Skripten
-verwaltet werden.
+Ein Gegenüberstellung der \textit{de novo}-Assemblierungs-Pipelines von SGA und
+gt Scaffolder (vgl. Abbildung~\ref{abb: Pipeline}) zeigt wesentliche
+Unterschiede in der Anzahl der benötigten Schritte sowie externen Abhängigkeiten
+auf.
+SGA durchläuft sowohl bei der Assemblierung als auch beim Scaffolding
+wesentlich mehr Schritte. Gleichzeitig besitzt die SGA-Pipeline externe
+Abhängigkeiten, was ihre Komplexität noch erhöht: Neben der Software Abyss, BWA,
+Samtools und ihren Kompilierungsabhängigkeiten müssen externe Bibliotheken wie
+Pysam vorliegen, da manche Schritte der SGA-Pipeline von Perl- und Python-
+Skripten verwaltet werden.
 gt Scaffolder besitzt für die Assemblierung eine GenomeTools-interne
-Abhängigkeit zur gt Readjoiner. Zum Zeitpunkt dieser Ausarbeitung ist die
-Schnittstelle zu Readjoiner noch nicht vollständig implementiert
-(vgl. Abschnitt~\ref{sec: Ausblick}). Darüber hinaus ist gt Scaffolder zur
-SGA-Pipeline kompatibel und kann dieselben Eingabedaten verarbeiten wie SGA
-scaffold.
+Abhängigkeit zur gt Readjoiner. Zum Zeitpunkt dieser
+Ausarbeitung ist die Schnittstelle zu Readjoiner noch nicht vollständig
+implementiert (vgl. Abschnitt~\ref{sec: Ausblick}). Darüber hinaus ist gt
+Scaffolder zur SGA-Pipeline kompatibel und kann dieselben Eingabedaten
+verarbeiten wie SGA scaffold.
 
 \begin{figure}
   \centering
@@ -658,23 +673,8 @@ scaffold.
       oder Bibliotheken sind jeweils in unterschiedlichen Farben
       hervorgehoben. Innerhalb jeder Pipeline sind die zur Assemblierung
       notwendigen Schritte links, die für das Scaffolding ausgeführten Schritte
-      rechts angeordnet.}
+      rechts angeordnet. \todo{tikz auf Seitenbreite groß ziehen?}}
 \end{figure}
-
-Auf der jeweils linken Seite sind die notwendigen Schritte zur
-Assemblierung dargestellt und auf der rechten Seite die Schritte für
-das Scaffolding. In der linken Abbildung ist die SGA-Pipeline zu sehen
-und in der rechten Abbildung die Pipeline aus dem Assemblierer
-Readjoiner und gt Scaffolder. Die rechte Pipeline funktioniert noch
-nicht komplett, da einige in Readjoiner intern vorhandene
-Informationen in den richtigen Formaten mit ausgegeben werden müssen.
-
-In der Abbildung ist zu erkennen, dass SGA wesentlich mehr Schritte
-sowohl bei der Assemblierung als auch beim Scaffolding
-durchläuft. Zusätzlich enthält die Pipeline Abhängigkeiten von
-nicht-Standardsoftware, in der Abbildung farbig markiert. Die
-unterschiedlichen Farben kennzeichnen unterschiedliche Programme und
-Bibliotheken, zu denen Abhängigkeiten bestehen.
 
 \subsection{Komparative Scaffold-Berechnung durch gt Scaffolder und SGA}
 Zur Überprüfung und Evaluation wurden Scaffolds für verschiedene Testdaten durch
@@ -705,16 +705,17 @@ assembliert, bevor die komparative Scaffold-Berechnung durchgeführt wurde.
 
 \begin{table}
   \centering
-  \begin{tabular}{l | c | l}
-    Genom & Größe & Datensatzid \\
+  \begin{tabular}{lcl}
+    Genom & Größe (Mbp) & Ensemble Build \\
     \hline
-    \textit{S. cerevisiae} &~~12 Mbp & Ensembl R64-1-1 \\
-    \textit{H. sapiens}, Chr. 21 &~~48 Mbp & Ensembl GRCh37 \\
-    \textit{C. elegans} & 100 Mbp & Ensembl WBcel235 \\
-    \textit{D. melanogaster} & 140 Mbp & Ensembl BDGP5
+    \textit{S. cerevisiae} &~~12 & R64-1-1 \\
+    \textit{H. sapiens}, Chr. 21 &~~48 & GRCh37 \\
+    \textit{C. elegans} & 100 & WBcel235 \\
+    \textit{D. melanogaster} & 140 & BDGP5
   \end{tabular}
-  \caption{\label{tab: Referenzgenome} Verwendete Referenzgenome mit
-    ihrer Größe und den Datensatzids.}
+  \caption{\label{tab: Referenzgenome}Verwendete Referenzgenome mit ihrer
+  Größe. Alle Sequenzen stammen aus dem Ensemble-Projekt (www.ensembl.org),
+  die jeweilige Build-Nummer ist angegeben.}
 \end{table}
 
 \subsection{Evaluation der Ergebnisse}
