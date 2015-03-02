@@ -798,19 +798,7 @@ Die Grafik verdeutlicht, dass gt Scaffolder sowohl bei der Laufzeit
 als auch bei dem maximalen Speicherplatzbedarf entweder gleichauf mit
 SGA Scaffold oder sogar besser ist.
 
-Ebenfalls ist zu erkennen, dass die Laufzeit und der
-Speicherplatzbedarf nicht mit der Größe der Referenzgenome
-zusammenhängt. Allerdings hängen diese Aspekte auch nicht direkt von
-der Größe des Scaffold-Graphen ab. In Tabelle \ref{tab: Vergleich} sind
-zu den Datensätzen die Anzahl an Knoten in dem Scaffold-Graph
-dargestellt. So ist die Anzahl an Knoten für den
-\textit{D. melanogaster} Datensatz mit $3970$ geringer als für den
-\textit{H. sapiens} Chr. 21 Datensatz mit $4817$ Knoten. Trotzdem wird
-zur Berechnung der Scaffolds für den \textit{D. melanogaster}
-Datensatz sowohl von SGA Scaffold als auch von gt Scaffolder mehr
-Laufzeit und mehr Speicherplatz benötigt, wie aus Tabelle \ref{tab:
-  Vergleich} und Abbildung \ref{abb: Zeit} ersichtlich
-wird. \todo{LG: gehören Abschnitte 7.1-7.3 ganz bzw. teilweise in die Diskussion?}
+\todo{LG: gehören Abschnitte 7.1-7.3 ganz bzw. teilweise in die Diskussion?}
 
 
 \section{Diskussion und Ausblick}\label{sec: Ausblick}
@@ -819,6 +807,19 @@ Wie in Abschnitt \ref{sec: Ergebnisse} dargestellt, liefert gt
 Scaffolder in den Testfällen die gleichen Ergebnisse wie SGA
 Scaffold. Dabei benötigt gt Scaffolder die gleiche Laufzeit und
 weniger Speicherplatz.
+
+Aus den Ergebnissen im Vergleich der Ausgabe im SCAF-Format ist zu
+erkennen, dass die Laufzeit und der Speicherplatzbedarf nicht mit der
+Größe der Referenzgenome zusammenhängt. Allerdings hängen diese
+Aspekte auch nicht direkt von der Größe des Scaffold-Graphen ab. In
+Tabelle \ref{tab: Vergleich} sind zu den Datensätzen die Anzahl an
+Knoten in dem Scaffold-Graph dargestellt. So ist die Anzahl an Knoten
+für den \textit{D. melanogaster} Datensatz mit $3970$ geringer als für
+den \textit{H. sapiens} Chr. 21 Datensatz mit $4817$ Knoten. Trotzdem
+wird zur Berechnung der Scaffolds für den \textit{D. melanogaster}
+Datensatz sowohl von SGA Scaffold als auch von gt Scaffolder mehr
+Laufzeit und mehr Speicherplatz benötigt, wie aus Tabelle \ref{tab:
+  Vergleich} und Abbildung \ref{abb: Zeit} ersichtlich wird.
 
 Das Modul zur Rekonstruktion der Sequenzen ist scheinbar noch
 fehlerhaft und liefert keine vergleichbar gute Ergebnisse wie das
