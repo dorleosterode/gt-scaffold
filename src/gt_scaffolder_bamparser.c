@@ -230,6 +230,7 @@ static void add_contig_dist_record(DistRecords *dist_records,
   dist_records->record[current_record].nof_ctg++;
 }
 
+/* calculate statistical values of histogram */
 static void calc_stat_of_histogram(HistogramData *histogram_data) {
   GtUword index, value, value_sum;
   GtWord key, squares, total, min, max;
@@ -402,7 +403,7 @@ static double window(GtWord x1,
   return (double)return_val / x1;
 }
 
-/* sort fragment sizes */
+/* callback function to sort fragment sizes */
 static int compare_fragments(const void *a,
                              const void *b) {
   GtUword *fragment_a = (GtUword*) a;
@@ -592,56 +593,6 @@ static int estimate_dist_using_mle(GtWord *dist,
 
   return had_err;
 }
-
-/* callback function
-int compare_pmf_histogram(void *key,
-                          void *value,
-                          void *data,
-                          GtError *err) {
-  GtWord *key_2 = (GtUword*) key;
-  GtUword *value_2 = (GtUword*) value;
-  CompareData *compare_data = (CompareData*) data;
-  double pmf_prob;
-
-  if ((*key_2 + compare_data->dist) < compare_data->pmf_data.nof)
-    pmf_prob = compare_data->pmf_data.dist[*key_2 + compare_data->dist];
-  else
-    pmf_prob = compare_data->pmf_data.minp;
-
-  if (pmf_prob > compare_data->pmf_data.minp)
-    compare_data->nof_pairs += *value_2;
-  return 0;
-}
-*/
-
-/* Estimate the distance between two contigs using the difference of
-   the population mean and the sample mean
-int estimate_dist_using_mean(FragmentData fragment_data,
-                             PmfData pmf_data,
-                             GtUword *nof_pairs,
-                             GtWord *dist,
-                             GtError *err) {
-  int had_err;
-  HistogramData histogram_data;
-  CompareData compare_data;
-
-  had_err = 0;
-
-  histogram_data = create_histogram_from_dist(fragment_data);
-
-  *dist = roundl(pmf_data.mean - histogram_data.mean);
-
- Count the number of fragments that agree with the distribution
-  compare_data.nof_pairs = 0;
-  compare_data.pmf_data = pmf_data;
-  compare_data.dist = *dist;
-  had_err = gt_hashmap_foreach(histogram_data.hash_map,
-                               compare_pmf_histogram, &compare_data, err);
-  if (had_err == 0)
-    *nof_pairs = compare_data.nof_pairs;
-
-  return had_err;
-}*/
 
 /* calculate provisional fragment size as if the contigs
    were perfectly adjacent with no overlap or gap and
@@ -1096,7 +1047,6 @@ static void create_histogram(HistogramData *histogram_data,
     value_sum += *value;
 
     gt_hashmap_add(histogram_data->hash_map, key, value);
-    /* printf("" GT_WD "\t" GT_WU " \n", *key, *value); */
   }
 
   histogram_data->lib_rf = nof_fr < nof_rf;
