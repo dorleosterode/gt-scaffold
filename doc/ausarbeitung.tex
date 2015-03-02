@@ -545,7 +545,7 @@ Traversierung des String-Graphen noch nicht in die GenomeTools
 übernommen wurde.
 
 \section{Wunderliche Strategien in SGA Scaffold}
-
+\label{sec: wunderlich}
 SGA benutzt eine relativ konservative Strategie, um vermeintlich
 fehlerhafte Knoten und Kanten aus dem Scaffold-Graph zu
 entfernen. D.\,h. korrekte Knoten und Kanten werden lieber als
@@ -856,6 +856,34 @@ Knoten als gt Scaffolder.
 
 \section{Ausblick}
 \label{sec: Ausblick}
+
+Die Scaffolding-Software gt Scaffolder kann um viele Optionen
+erweitert werden. So können weitere Strategien zur Selektion
+relevanter Knoten und Kanten implementiert werden, um für den
+jeweiligen Datensatz eine gute Lösung produzieren zu
+können. Z.\,B. können weitere Zyklendetektionsalgorithmen, wie in
+SGA-Scaffold, implementiert werden. Ebenso ist in SGA-Scaffold die
+Möglichkeit vorhanden transitive Kanten zu entfernen.
+
+Zusätzlich sollten die konservativen Strategien zur Klassifikation in
+repetitive bzw. eindeutige Knoten untersucht werden. Durch besser
+gewählte Schwellenwerte könnten bessere Ergebnisse erzielt werden. Die
+in Abschnitt \ref{sec: wunderlich} dokumentierten Strategien sollten
+ebenfalls überprüft werden.
+
+gt Scaffolder bietet zudem einen Ausgangspunkt für eine Laufzeit- und
+Speicherplatzoptimierung. Die Ergebnisse bezgülich dieser Aspekte sind
+schon vielversprechend und könnten noch weiter optimiert werden. Für
+eine Laufzeitoptimierung ist eine Parallelisierung einiger Schritte
+möglich. So ist die Berechnung der einzelnen Scaffolds unabhängig
+voneinander, da diese für die einzelnen Zusammenhangskomponenten
+berechnet werden. Nach der Ermittlung der Zusammenhangskomponenten
+könnten die Zyklendetektion und später das eigentliche Scaffolding für
+jede Zusammenhangskomponente in einem eigenen Thread durchgeführt
+werden. Durch die Verwendung effizienterer Datenstrukturen können
+ebenfalls Laufzeit und Speicherplatzbedarf eingespart werden. Der
+Fokus der hier beschriebenen Implementation lag nicht auf Laufzeit-
+und Speicherplatzeffizienz.
 
 \section*{Anhang}
 \subsection*{Pseudocode}
