@@ -83,11 +83,8 @@ int gt_scaffolder_parser_read_distances_test(const char *filename,
     /* iterate over each line of file until eof (contig record) */
     while (fgets(line, BUFSIZE, file) != NULL)
     {
-      /* remove '\n' from end of line */
       line[strlen(line)-1] = '\0';
-      /* set sense direction as default */
       sense = true;
-      /* split line by first space delimiter */
       field = strtok(line," ");
 
       /* write parsed distance information to file */
@@ -102,7 +99,6 @@ int gt_scaffolder_parser_read_distances_test(const char *filename,
         if (sscanf(field,"%[^>,]," GT_WD "," GT_WD ",%f", ctg_header, &dist,
             &num_pairs, &std_dev) == 4)
         {
-          /* ignore invalid records */
           if (num_pairs < 0) {
             had_err = -1;
             gt_error_set(err, "Invalid value for number of pairs");
@@ -126,7 +122,6 @@ int gt_scaffolder_parser_read_distances_test(const char *filename,
         else if (*field == ';')
           sense = sense ? false : true;
 
-        /* split line by next space delimiter */
         field = strtok(NULL," ");
 
         if (!sense && first_antisense) {
@@ -190,14 +185,12 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
     /* iterate over each line of file until eof (contig record) */
     while (fgets(line, BUFSIZE, file) != NULL)
     {
-      /* split line by first space delimiter */
       field = strtok(line," ");
 
       gt_str_set(gt_str_field, field);
       valid_contig = gt_scaffolder_graph_get_vertex(graph, &root_ctg,
                 gt_str_field);
 
-      /* split line by next space delimiter */
       field = strtok(NULL," ");
 
       /* if no records exist */
@@ -216,7 +209,6 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
         while (field != NULL)
         {
           /* count records */
-          /* SD: Keep an eye on negated string, might fail, did before */
           if (sscanf(field,"%[^>,]," GT_WD "," GT_WD ",%f", ctg_header,
               &dist, &num_pairs, &std_dev) == 4) {
 
@@ -265,7 +257,6 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
             break;
           }
 
-          /* split line by next space delimiter */
           field = strtok(NULL," ");
         }
         if (had_err == -1)
@@ -300,10 +291,7 @@ int gt_scaffolder_parser_count_distances(const GtScaffolderGraph *graph,
 }
 
 /* parse distance information of contigs in abyss-dist-format and
-   save them as edges of scaffold graph
-   PRECONDITION: header contains no commas and spaces */
-/* LG: check for "mate-flag"? */
-/* Bsp.: Ctg1 Ctg2+,15,10,5.1 ; Ctg3-,65,10,5.1 */
+   save them as edges of scaffold graph */
 int gt_scaffolder_parser_read_distances(const char *filename,
                                               GtScaffolderGraph *graph,
                                               bool ismatepair,
@@ -334,11 +322,8 @@ int gt_scaffolder_parser_read_distances(const char *filename,
     /* iterate over each line of file until eof (contig record) */
     while (fgets(line, BUFSIZE, file) != NULL)
     {
-      /* remove '\n' from end of line */
       line[strlen(line)-1] = '\0';
-      /* set sense direction as default */
       sense = true;
-      /* split line by first space delimiter */
       field = strtok(line," ");
 
       /* get vertex id corresponding to root contig header */
@@ -374,17 +359,13 @@ int gt_scaffolder_parser_read_distances(const char *filename,
               edge = gt_scaffolder_graph_find_edge(root_ctg, ctg);
               if (edge != NULL)
               {
-                /* SGA: edge->std_dev < std_dev ? */
                 if (!ismatepair && edge->std_dev < std_dev)
                 {
-                  /* need for checking edge direction? */
                   gt_scaffolder_graph_alter_edge(edge, dist, std_dev,
                                                num_pairs,sense, same);
                 }
               }
               else {
-                /* set edge with corresponding twin edge, as dist format does
-                 not contain twin edge in all cases (why?!) */
                 if (same)
                   twin_dir = !sense;
                 else
@@ -401,7 +382,6 @@ int gt_scaffolder_parser_read_distances(const char *filename,
           else if (*field == ';')
             sense = sense ? false : true;
 
-          /* split line by next space delimiter */
           field = strtok(NULL," ");
         }
       }
@@ -413,7 +393,7 @@ int gt_scaffolder_parser_read_distances(const char *filename,
   return had_err;
 }
 
-/* counts contigs with minimum length in callback data
+/* count contigs with minimum length in callback data
    (fasta reader callback function, gets called after fasta entry
    has been read) */
 static int gt_scaffolder_graph_count_ctg(GtUword length,
@@ -434,7 +414,7 @@ static int gt_scaffolder_graph_count_ctg(GtUword length,
   return had_err;
 }
 
-/* saves header to callback data
+/* save header to callback data
    (fasta reader callback function, gets called for each description
     of fasta entry) */
 static int gt_scaffolder_graph_save_header(const char *description,
@@ -451,12 +431,10 @@ static int gt_scaffolder_graph_save_header(const char *description,
 
   had_err = 0;
 
-/*>contig_1 length=307 depth=3 k=1.00 astat=20.373520
-6B-(67)->43919B-(90)->156572E*/
-
   fasta_reader_data->astat = 0.0;
   fasta_reader_data->copynum = 0.0;
-  /* check if astat is annotated in contig header and if so parse it */
+  /* check if astat/copy number is annotated in contig header and
+     if so parse it */
   if (fasta_reader_data->astat_is_annotated) {
     if (sscanf(description,
                "%s length=" GT_WD " depth=" GT_WD " k=%f astat=%f",
@@ -487,7 +465,7 @@ static int gt_scaffolder_graph_save_header(const char *description,
   return had_err;
 }
 
-/* saves header, sequence length of contig to scaffolder graph
+/* save header, sequence length of contig to scaffolder graph
    (fasta reader callback function, gets called after fasta entry
    has been read) */
 static int gt_scaffolder_graph_save_ctg(GtUword seq_length,
