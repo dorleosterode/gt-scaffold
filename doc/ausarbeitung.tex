@@ -559,7 +559,7 @@ Traversierung des String-Graphen noch nicht in die GenomeTools
 übernommen wurde.
 
 \section{Wunderliche Strategien in SGA Scaffold}
-
+\label{sec: wunderlich}
 SGA benutzt eine relativ konservative Strategie, um vermeintlich
 fehlerhafte Knoten und Kanten aus dem Scaffold-Graph zu
 entfernen. D.\,h. korrekte Knoten und Kanten werden lieber als
@@ -597,25 +597,8 @@ mögliche Erklärungen ergänzt.
 \end{itemize}
 
 \section{Ergebnisse}
-
+\label{sec: Ergebnisse}
 \subsection{Vergleich der Pipelines \todo{präzisere Überschrift finden}}
-
-Ein Gegenüberstellung der \textit{de novo}-Assemblierungs-Pipelines von SGA und
-gt Scaffolder (vgl. Abbildung~\ref{abb: Pipeline}) zeigt wesentliche
-Unterschiede in der Anzahl der benötigten Schritte sowie externen Abhängigkeiten
-auf.
-SGA durchläuft sowohl bei der Assemblierung als auch beim Scaffolding
-wesentlich mehr Schritte. Gleichzeitig besitzt die SGA-Pipeline externe
-Abhängigkeiten, was ihre Komplexität noch erhöht: Neben der Software Abyss, BWA,
-Samtools und ihren Kompilierungsabhängigkeiten müssen externe Bibliotheken wie
-Pysam vorliegen, da manche Schritte der SGA-Pipeline von Perl- und Python-
-Skripten verwaltet werden.
-gt Scaffolder besitzt für die Assemblierung eine GenomeTools-interne
-Abhängigkeit zur gt Readjoiner. Zum Zeitpunkt dieser
-Ausarbeitung ist die Schnittstelle zu Readjoiner noch nicht vollständig
-implementiert (vgl. Abschnitt~\ref{sec: Ausblick}). Darüber hinaus ist gt
-Scaffolder zur SGA-Pipeline kompatibel und kann dieselben Eingabedaten
-verarbeiten wie SGA scaffold.
 
 \begin{figure}
   \centering
@@ -675,6 +658,41 @@ verarbeiten wie SGA scaffold.
       notwendigen Schritte links, die für das Scaffolding ausgeführten Schritte
       rechts angeordnet. \todo{tikz auf Seitenbreite groß ziehen?}}
 \end{figure}
+
+Auf der jeweils linken Seite sind die notwendigen Schritte zur
+Assemblierung dargestellt und auf der rechten Seite die Schritte für
+das Scaffolding. In der linken Abbildung ist die SGA-Pipeline zu sehen
+und in der rechten Abbildung die Pipeline aus dem Assemblierer
+Readjoiner und gt Scaffolder. Die rechte Pipeline funktioniert noch
+nicht komplett, da einige in Readjoiner intern vorhandene
+Informationen in den richtigen Formaten mit ausgegeben werden müssen.
+
+In der Abbildung ist zu erkennen, dass SGA wesentlich mehr Schritte
+sowohl bei der Assemblierung als auch beim Scaffolding
+durchläuft. Zusätzlich enthält die Pipeline Abhängigkeiten von
+nicht-Standardsoftware, in der Abbildung farbig markiert. Die
+unterschiedlichen Farben kennzeichnen unterschiedliche Programme und
+Bibliotheken, zu denen Abhängigkeiten bestehen.  \todo{ich wuerde die
+  textuelle beschreibung der abbildung 5 lieber ausserhalb der
+  bildunterschrift haben und vor dem text zum vergleich. einwaende?}
+\todo{SD: hm, gehört eine beschreibung nicht immer zum bild und die qualitative
+aussage des bildes in den text? überlegen wir morgen :)}
+
+Ein Vergleich der \textit{de novo}-Assemblierungs-Pipelines von SGA und gt
+Scaffolder (vgl. Abbildung~\ref{abb: Pipeline}) zeigt wesentliche Unterschiede
+in der Anzahl der benötigten Schritte sowie externen Abhängigkeiten auf.
+SGA durchläuft sowohl bei der Assemblierung als auch beim Scaffolding wesentlich
+mehr Schritte. Gleichzeitig besitzt die SGA-Pipeline externe Abhängigkeiten,
+was ihre Komplexität noch erhöht: Neben der Software ABySS, BWA, Samtools und
+ihren Kompilierungsabhängigkeiten müssen externe Bibliotheken wie Pysam
+vorliegen, da manche Schritte der SGA-Pipeline von Perl- und Python-Skripten
+verwaltet werden.
+gt Scaffolder besitzt für die Assemblierung eine GenomeTools-interne
+Abhängigkeit zur gt Readjoiner. Zum Zeitpunkt dieser Ausarbeitung ist die
+Schnittstelle zu Readjoiner noch nicht vollständig implementiert
+(vgl. Abschnitt~\ref{sec: Ausblick}). Darüber hinaus ist gt Scaffolder zur
+SGA-Pipeline kompatibel und kann dieselben Eingabedaten verarbeiten wie
+SGA-Scaffold.
 
 \subsection{Komparative Scaffold-Berechnung durch gt Scaffolder und SGA}
 Zur Überprüfung und Evaluation wurden Scaffolds für verschiedene Testdaten durch
@@ -793,7 +811,8 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
 
 
 
-\section{Diskussion und Ausblick}\label{sec: Ausblick}
+\section{Diskussion}
+\label{sec: Diskussion}
 
 Wie in Abschnitt \ref{sec: Ergebnisse} dargestellt, liefert gt
 Scaffolder in den Testfällen die gleichen Ergebnisse wie SGA
@@ -826,6 +845,72 @@ stärker positiv bewertet. Zusätzlich kann das Modul von gt Scaffolder
 die nicht im Scaffolding enthaltenen Contigs noch nicht mit
 ausgeben. SGA gibt kann diese Contigs mit ausgeben und erreicht
 dadurch gegebenenfalls eine höhere Abdeckung des Referenzgenoms.
+
+SGA-Scaffold hat viele Parameter und Optionen für das Scaffolding. So
+kann die Strategie für die Auswahl der relevanten Knoten und Kanten
+ausgewählt werden. gt Scaffolder implementiert hingegen nur eine
+dieser möglichen Optionen. Die meisten Parameter, die bei SGA-Scaffold
+gewählt werden können, sind auch bei gt Scaffolder einstellbar. Somit
+ist SGA-Scaffold flexibler in der Selektion relevanter Kanten und
+Knoten als gt Scaffolder.
+
+\todo{absatz mit vergleich zur implementation in einer skript-sprache
+  schreiben}
+
+\section{Ausblick}
+\label{sec: Ausblick}
+
+Die Scaffolding-Software gt Scaffolder kann um viele Optionen
+erweitert werden. So können weitere Strategien zur Selektion
+relevanter Knoten und Kanten implementiert werden, um für den
+jeweiligen Datensatz eine gute Lösung produzieren zu
+können. Z.\,B. können weitere Zyklendetektionsalgorithmen, wie in
+SGA-Scaffold, implementiert werden. Ebenso ist in SGA-Scaffold die
+Möglichkeit vorhanden transitive Kanten zu entfernen.
+
+Zusätzlich sollten die konservativen Strategien zur Klassifikation in
+repetitive bzw. eindeutige Knoten untersucht werden. Durch besser
+gewählte Schwellenwerte könnten bessere Ergebnisse erzielt werden. Die
+in Abschnitt \ref{sec: wunderlich} dokumentierten Strategien sollten
+ebenfalls überprüft werden.
+
+gt Scaffolder bietet zudem einen Ausgangspunkt für eine Laufzeit- und
+Speicherplatzoptimierung. Die Ergebnisse bezüglich dieser Aspekte sind
+schon vielversprechend und könnten noch weiter optimiert werden. Für
+eine Laufzeitoptimierung ist eine Parallelisierung einiger Schritte
+möglich. So ist die Berechnung der einzelnen Scaffolds unabhängig
+voneinander, da diese für die einzelnen Zusammenhangskomponenten
+berechnet werden. Nach der Ermittlung der Zusammenhangskomponenten
+könnten die Zyklendetektion und später das eigentliche Scaffolding für
+jede Zusammenhangskomponente in einem eigenen Thread durchgeführt
+werden. Durch die Verwendung effizienterer Datenstrukturen können
+ebenfalls Laufzeit und Speicherplatzbedarf eingespart werden. Der
+Fokus der hier beschriebenen Implementation lag nicht auf Laufzeit-
+und Speicherplatzeffizienz.
+
+Wie in Abschnitt \ref{sec: Ergebnisse} aufgezeigt ist die
+Implementation des Moduls zur Rekonstruktion der Sequenzen
+verbesserungsbedürftig. Bei der Rekonstruktion der Sequenzen können
+die durch gt Scaffolder erzeugten Scaffolds im SCAF-Format genutzt
+werden. Die Strategie um die Sequenzen zu rekonstruieren kann dabei
+von SGA adaptiert werden oder eine andere Strategie genutzt werden.
+
+Die Ausgaben des in den GenomeTools enthaltenen Assemblers Readjoiner
+müssen teilweise noch verändert werden um eine Nutzung mit gt
+Scaffolder in einer Pipeline zu ermöglichen. So müssen die
+Mapping-Informationen über die Reads zu den Contigs in das BAM-Format
+übertragen werden. Dabei ist das BAM-Format ein Standardformat und es
+könnte sowohl Readjoiner um eine Ausgabe im BAM-Format erweitert oder
+ein Skript zur Transformation der Information in das benötigte Format
+genutzt werden.
+
+Die Standardwerte für die einzelnen Parameter müssen bei einer
+Benutzung mit Readjoiner auf dessen Ergebnisse eingestellt werden. Die
+momentan verwendeten Standardwerte sind von SGA übernommen und
+dementsprechend auf die Ergebnisse der SGA-Pipeline optimiert. Da
+Readjoiner z.\,B. andere Ergebnisse bei der Berechnung der A-Statistik
+erreicht, müsste der Schwellenwert zur Klassifikation als nicht
+repetitive Sequenz angepasst werden.
 
 \section*{Anhang}
 \subsection*{Pseudocode}
