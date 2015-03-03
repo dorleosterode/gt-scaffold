@@ -472,11 +472,10 @@ der Präfix von $c_2$ der Länge 25 durch die gleiche Anzahl an
 \label{sec: Datenstrukturen}
 
 \section{gt Scaffolder als Tool in den GenomeTools}
-Die in dem Abschnitt \ref{sec: Methoden} vorgestellte Funktionalität
-wurde in Form eines Tools in die GenomeTools eingebunden. In Abbildung
-\ref{abb: help} ist die Hilfe-Ausgabe des Tools gt Scaffolder
-dargestellt. Dabei sind alle einstellbaren Parameter mit ihren
-standardmäßigen Belegungen zu sehen.
+Die Software gt Scaffolder wurde als eigenständiges Tool in die GenomeTools
+eingebunden. In Abbildung \ref{abb: help} ist die Ausgabe der Hilfe des Tools
+gt Scaffolder dargestellt, in der alle einstellbaren Parameter mit ihren
+standardmäßigen Belegungen aufgelistet sind.
 
 \begin{figure}
 \begin{verbatim}
@@ -511,7 +510,7 @@ Constructs scaffolds of the contigs.
 -bam_min_dist      minimal distance of contigs
                    default: -99
 -bam_max_dist      maximal distance of contigs
-                   default: 9223372036854775807
+                   default: infinite
 -bam_min_align     minimal alignment length
                    default: 100
 -bam               bam file containing alignments of paired reads to the contigs
@@ -524,35 +523,31 @@ Report bugs to <gt-users@genometools.org>.
 \caption{\label{abb: help}Hilfeausgabe des Tools gt Scaffolder.}
 \end{figure}
 
-Die Optionen -contig und entweder -dist oder -bam sind
-verpflichtend. Wird mit der Option -dist eine Distanzdatei in dem
-erforderlichen Format übergeben, so wird diese eingelesen und die
-Informationen verwendet. Wird mit der Option -bam eine BAM-Datei mit
-Alignments der Reads zu den Contigs übergeben, so werden aus der
-BAM-Datei die Distanzinformationen berechnet und in dem erforderlichen
-Format gespeichert. Diese neu erzeugte Datei wird anschließend
-eingelesen und die enthaltenen Informationen verwendet. Durch die
-Möglichkeit eine BAM-Datei anzugeben wird die Abhängigkeit zu einem
-Mapping-Programm (z.\,B. BWA) und einem Teil des Assemblers ABySS
-potentiell durchbrochen. Aus dem in den GenomeTools vorhandenen
-String-Graph Assembler Readjoiner können die Informationen, welche
-Reads mit den Contigs aligniert werden können, direkt ausgegeben
-werden. Momentan kann diese Information noch nicht im BAM-Format
-ausgegeben und aus Zeitgründen konnte kein Modul zur Ausgabe
-der Informationen im richtigen Format implementiert werden.
+Beim Aufruf von gt Scaffolder stellen die Optionen -contig und entweder
+-dist oder -bam Pflichtangaben dar. Wenn die Übergabe einer Distanzdatei
+im ABySS-Distance-Format (*.de) mit der Option -dist erfolgt, dann wird
+diese Datei eingelesen und die enthaltenen Distanzinformationen verwendet.
+Gibt man dagegen mit der Option -bam eine BAM-Datei mit Alignments der Reads
+zu den Contigs an, so werden aus der BAM-Datei die Distanzinformationen
+berechnet und im ABySS-Distance-Format (*.de) gespeichert. Diese neu erzeugte
+Datei wird anschließend eingelesen und die enthaltenen Informationen genutzt. 
+Die Verwendung einer BAM-Datei und des String-Graph Assemblers Readjoiner
+ermöglicht die Abhängigkeit zu einem Mapping-Programm (z.\,B. BWA) und der
+Software DistEst von ABySS potentiell zu durchbrechen. So kann Readjoiner die
+Daten, auf denen die Alignments der Reads zu den Contigs basieren, direkt
+ausgeben. Auf Grund von Zeitmangel existiert jedoch noch kein Modul zur
+Konvertierung dieser Daten in eine entsprechende BAM-Datei.
 
 Mit der Option -astat kann zusätzlich eine Datei mit Informationen
 über die A-Statistik und die berechneten Kopiezahlen der Contigs
 übergeben werden. Diese Option wird für die Kompatibilität mit der
-Eingabe von SGA Scaffold benötigt. Sollen Contigs aus einer
-Assemblierung mit Readjoiner verwendet werden, so kann mit den
-Optionen -astat und -copy$\_$num von Readjoiner direkt die Information
-in der FASTA-Datei der Contigs mit angegeben werden. Wird gt
-Scaffolder ohne eine extra A-Statistik-Datei aufgerufen, so wird
-angenommen, dass diese Information in der FASTA-Datei der Contigs
-enthalten ist.
+Eingabe von SGA Scaffold benötigt. Wenn diese Option fehlt, besteht die
+Annahme, dass diese Informationen innerhalb des Headers der
+Contigs vorliegen. Dabei diente das Ausgabeformat für die Contigs von
+Readjoiner als Vorlage, das bei Verwendung der Optionen -astat und
+-copy$\_$num die A-Statistik und Kopiezahl der Contigs enthält.
 
-Als Ausgabe wird Standardmäßig eine Datei im SCAF-Format erzeugt. Die
+Die Standardausgabe stellt eine Datei im SCAF-Format dar. Die
 Rekonstruktion der Sequenzen ist in dem Tool noch nicht möglich, da
 die Erweiterung der String-Graph-API zur Sequenzkonstruktion mittels
 Traversierung des String-Graphen noch nicht in die GenomeTools
