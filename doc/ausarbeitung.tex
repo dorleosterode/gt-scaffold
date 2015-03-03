@@ -592,13 +592,16 @@ Traversierung des String-Graphen noch nicht in die GenomeTools
 \subsection{Strategien in SGA Scaffold mit unklarer Bedeutung}
 \label{sec: wunderlich}
 SGA benutzt eine relativ konservative Strategie, um vermeintlich
-fehlerhafte Knoten und Kanten aus dem Scaffold-Graph zu
-entfernen. D.\,h.\ korrekte Knoten und Kanten werden lieber als
-fehlerhaft eingestuft und entfernt, als dass fehlerhafte Knoten oder
-Kanten nicht erkannt werden und in dem Endergebnis enthalten sein
-könnten. Einige nicht sofort ersichtliche Strategien von SGA wurden
-zuerst in gt Scaffolder übernommen, um eine Vergleichbarkeit der
-Ergebnisse der beiden Programme zu erhalten.
+fehlerhafte Knoten und Kanten aus dem Scaffold-Graphen zu
+entfernen. Daher werden sehr strikte Schwellenwerte verwendet und
+falsch-negative bevorzugt gegenüber falsch-positiven Knoten und Kanten
+gelöscht. Einige Strategien von SGA mit unklarer Bedeutung, wurden
+zunächst in gt Scaffolder übernommen, um eine Vergleichbarkeit der
+Ergebnisse der beiden Programme zu erhalten. Im Folgenden findet sich
+eine Auflistung dieser Strategien teilweise kombiniert mit einer
+Beschreibung der möglichen Bedeutung. Des Weiteren erfolgte zum Teil
+die Evaluierung der Güte dieser Strategien
+(siehe Abschnitt~\ref{sec: Ergebnisse}).
 
 Es folgt eine ungeordnete Auflistung solcher Strategien, teilweise um
 mögliche Erklärungen ergänzt.
