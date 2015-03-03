@@ -661,7 +661,7 @@ mögliche Erklärungen ergänzt.
         (assembly.east) edge[in=180, out=0] (scaffold.west);
       \end{tikzpicture}
     \end{minipage}
-    \caption{\label{abb: Pipeline}Vergleich der Assemblierungs- und
+    \caption{\label{abb: Pipeline}Assemblierungs- und
       Scaffolding-Pipelines von SGA (links) und gt Scaffolder
       (rechts). Externe Abhängigkeiten zu unterschiedlichen Programmen
       oder Bibliotheken sind jeweils in unterschiedlichen Farben
@@ -669,21 +669,6 @@ mögliche Erklärungen ergänzt.
       notwendigen Schritte links, die für das Scaffolding ausgeführten Schritte
       rechts angeordnet.}
 \end{figure}
-
-Auf der jeweils linken Seite sind die notwendigen Schritte zur
-Assemblierung dargestellt und auf der rechten Seite die Schritte für
-das Scaffolding. In der linken Abbildung ist die SGA-Pipeline zu sehen
-und in der rechten Abbildung die Pipeline aus dem Assemblierer
-Readjoiner und gt Scaffolder. Die rechte Pipeline funktioniert noch
-nicht komplett, da einige in Readjoiner intern vorhandene
-Informationen in den richtigen Formaten mit ausgegeben werden müssen.
-
-In der Abbildung ist zu erkennen, dass SGA wesentlich mehr Schritte
-sowohl bei der Assemblierung als auch beim Scaffolding
-durchläuft. Zusätzlich enthält die Pipeline Abhängigkeiten von
-nicht-Standardsoftware, in der Abbildung farbig markiert. Die
-unterschiedlichen Farben kennzeichnen unterschiedliche Programme und
-Bibliotheken, zu denen Abhängigkeiten bestehen.
 
 Ein Vergleich der \textit{de novo}-Assemblierungs-Pipelines von SGA und gt
 Scaffolder (vgl. Abbildung~\ref{abb: Pipeline}) zeigt wesentliche Unterschiede
@@ -695,7 +680,7 @@ ihren Kompilierungsabhängigkeiten müssen externe Bibliotheken wie Pysam
 vorliegen, da manche Schritte der SGA-Pipeline von Perl- und Python-Skripten
 verwaltet werden.
 gt Scaffolder besitzt für die Assemblierung eine GenomeTools-interne
-Abhängigkeit zur gt Readjoiner. Zum Zeitpunkt dieser Ausarbeitung ist die
+Abhängigkeit zu gt Readjoiner. Zum Zeitpunkt dieser Ausarbeitung ist die
 Schnittstelle zu Readjoiner noch nicht vollständig implementiert
 (vgl. Abschnitt~\ref{sec: Ausblick}). Darüber hinaus ist gt Scaffolder zur
 SGA-Pipeline kompatibel und kann dieselben Eingabedaten verarbeiten wie
@@ -768,7 +753,7 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
   \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
     \begin{tabular}{llccccc}
       \toprule
-      Datensatz & Programm & Abdeckung (Mbp / \%) & \#Scaffolds & N50 (kb) & CPU (s) & RAM (MB) \\
+      Datensatz & Programm & Abdeckung (Mbp / \%) & \#Scaf & N50 (kb) & CPU (s) & RAM (MB) \\
       \midrule
       \textit{S. cerevisiae}
       & SGA Scaffold  & ~~11.08 / 92  &     ~~600   &  32.3     & 0.01      &  28.9 \\
@@ -791,18 +776,17 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
       & gt Scaffolder & $1\times$     &  $1\times$  & $1\times$ & $0.9\times$ & $0.62\times$     \\
       \bottomrule
   \end{tabular}}
-  \caption{\label{tab: Scaffolding}Ergebnisse der Scaffold-Berechnung.
-  Datensatz bezeichnet die Testdatensätze mit zugehöriger Anzahl der
-  assemblierten Contigs, um die Größe des jeweiligen Scaffold-Graphen zu
-  skizzieren. Für jeden Datensatz wurden die zunächst die durch SGA erzielten
-  Ergebnisse aufgetragen in der ersten Zeile als absolute Werte aufgetragen,
-  denen die Ergebnisse von gt Scaffolder in der zweiten Zeile als relative
-  Faktoren folgen. Abdeckung bezeichnet Gesamtlänge aller Scaffolds und die
-  prozentuale Abdeckung der Zielsequenz, \#Scaffolds
-  deren Anzahl und N50 die Länge, sodass alle  Scaffolds mit gleicher oder
-  größerer Länge mindestens die Hälfte der Abdeckung ausmachen. CPU bezeichnet
-  die Gesamtlaufzeit und RAM den maximalen Speicherbedarf während der
-  Berechnung.}
+  \caption{\label{tab: Scaffolding}\textbf{Ergebnisse der Scaffold-Berechnung.}
+  Die Anzahl der eingehenden Contigs jedes Datensatzes ist angegeben. Die
+  SGA-Ergebnisse sind als absolute Werte aufgetragen, die gt
+  Scaffolder-Ergebnisse als relative Faktoren zu ersteren.
+  ~~\textit{Abdeckung:} Gesamtlänge aller Scaffolds und prozentuale Abdeckung der
+  Zielsequenz.
+  ~~\textit{\#Scaf:} Anzahl Scaffolds.
+  ~~\textit{N50:} Länge, sodass alle Scaffolds deren Länge $\geq N50$ mindestens
+  die Hälfte der Abdeckung ausmachen.
+  ~~\textit{CPU:} Gesamtlaufzeit.
+  ~~\textit{RAM:} Maximaler Speicherbedarf während Berechnung.}
 \end{table}
 
 \begin{figure}[t]
@@ -827,7 +811,7 @@ missassemblierte Positionen besitzen.
   \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
     \begin{tabular}{llccccc}
       \toprule
-      Datensatz & Programm & Gesamtlänge (Mbp) & Abdeckung (\%) & N50 (kb)
+      Datensatz & Programm & Länge (Mbp) & Abdeckung (\%) & N50 (kb)
       & \#Miss & Unaligniert (bp) \\
       \midrule
       \textit{S. cerevisiae}
@@ -855,18 +839,17 @@ missassemblierte Positionen besitzen.
       $471\times$ & $21871\times$\\
       \bottomrule
   \end{tabular}}
-  \caption{\label{tab: Rekonstruktion}Ergebnisse der Sequenz-Rekonstruktion.
-  Datensatz bezeichnet die Testdatensätze mit zugehöriger Anzahl der
-  assemblierten Contigs, um die Größe des jeweiligen Scaffold-Graphen zu
-  skizzieren. Für jeden Datensatz wurden die zunächst die durch SGA erzielten
-  Ergebnisse aufgetragen in der ersten Zeile als absolute Werte aufgetragen,
-  denen die Ergebnisse von gt Scaffolder in der zweiten Zeile als relative
-  Faktoren folgen. Abdeckung bezeichnet Gesamtlänge aller Scaffolds, Abdeckung
-  die prozentuale Abdeckung der Zielsequenz und N50 die Länge, sodass alle
-  Scaffolds mit gleicher oder größerer Länge mindestens die Hälfte der
-  Gesamtlänge ausmachen. \#Miss bezeichnet die Anzahl der
-  Missassemblierungen nach Plantagora \cite{Gurevich:2013je}, Unaligniert die
-  Gesamtlänge nicht alignierter Regionen der Assemblierungen.}
+  \caption{\label{tab: Rekonstruktion}\textbf{Ergebnisse der
+  Sequenz-Rekonstruktion.} Die durch
+  SGA-Ergebnisse sind als absolute Werte aufgetragen, die gt
+  Scaffolder-Ergebnisse als relative Faktoren zu ersteren.
+  ~~\textit{Länge:} Gesamtlänge aller Scaffolds.
+  ~~\textit{Abdeckung:} Prozentuale Abdeckung der Zielsequenz.
+  ~~\textit{N50:} Länge, sodass alle Scaffolds deren Länge $\geq N50$ mindestens
+  die Hälfte der Abdeckung ausmachen.
+  ~~\textit{\#Miss:} Anzahl der Missassemblierungen nach
+  Plantagora~\cite{Gurevich:2013je}.
+  ~\textit{Unaligniert:} Anzahl nicht alignierter Basen.}
 \end{table}
 
 
