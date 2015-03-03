@@ -75,8 +75,6 @@
 \newpage{}
 \setcounter{page}{1}
 \section{Einleitung}
-\todo{Das Scaffolding Problem. brauchen wir das ueberhaupt noch bei
-  der einleitung?}
 
 Das Ziel einer DNA-Sequenzierung ist die Bestimmung der Basen-Abfolge
 der vorliegenden DNA. Moderne Sequenzierungstechniken, auch
@@ -97,11 +95,11 @@ relative Anordnung und Orientierung der Contigs zueinander kann nicht
 bestimmt werden.
 
 Durch \textit{Paired-End}- oder \textit{Mate-Pair}-Sequenzierung
-gewonnene Reads können auf unterschiedlichen Contigs liegen und so
-eine Beziehung zwischen diesen herstellen. Im zweiten Schritt einer
+gewonnene Read-Paare können auf unterschiedlichen Contigs liegen und
+so eine Beziehung zwischen diesen herstellen. Im zweiten Schritt einer
 \textit{de novo} Assemblierung können diese Distanzinformationen dazu
 verwendet werden, um die Contigs in Scaffolds anzuordnen. Dies erhöht
-die Durchgängigkeit der assemblierten Sequenz. Scaffolds bestehen
+den Zusammenhang der assemblierten Sequenz. Scaffolds bestehen
 dabei aus einer Reihe von geordneten Contigs, deren Distanz und
 relative Orientierung festgelegt werden.
 
@@ -109,13 +107,12 @@ Das Scaffolding Problem kann als graphentheoretisches Problem
 formuliert werden. Dabei repräsentieren die Knoten des Graphen die
 einzelnen Contigs. Zwischen zwei Knoten existiert eine Kante, falls
 ein Read-Paar die beiden repräsentierten Contigs verbindet. Kanten
-enthalten hierbei Informationen über die Distanz der verbundenen Contigs
-und die Orientierung der Read-Paare zueinander. Die Ermittlung eines
-Scaffolds bzw.\ eines optimalen Pfades (Pfad mit maximalem Kantengewicht)
-jeder Zusammenhangskomponente des Scaffolding Graphen, ist
-NP-vollständig~\cite{Huson:2002kf}. Daher verwenden aktuelle
-Strategien eine Heuristik, um einen guten Pfad zu
-bestimmen.
+enthalten hierbei Informationen über die Distanz der verbundenen
+Contigs und die Orientierung der Read-Paare zueinander. Die Ermittlung
+eines Scaffolds bzw.\ eines optimalen Pfades (Pfad mit maximalem
+Kantengewicht) jeder Zusammenhangskomponente des Scaffold-Graphen, ist
+NP-vollständig~\cite{Huson:2002kf}. Daher verwenden Implementationen
+eine Heuristik, um einen guten Pfad zu bestimmen.
 
 Diese Ausarbeitung beschäftigt sich mit der Implementation eines
 Scaffolding-Programms im Rahmen des Genominformatik-Projektes. Die
@@ -341,7 +338,7 @@ Startcontigs. Für die darauffolgenden Contigs werden folgende
 Informationen mit Kommata getrennt angegeben: Id des Contigs, Distanz
 zu dem vorherigen Contig, Standardabweichung der Distanz, Orientierung
 zu dem vorherigen Contig (0: gleicher Strang, 1: entgegengesetzter
-Strang) und Information über die Lage des Reads aus dem Readpaar (0:
+Strang) und Information über die Lage des Reads aus dem Read-Paar (0:
 gleicher Strang, 1: entgegengesetzter Strang).
 
 \begin{figure}
