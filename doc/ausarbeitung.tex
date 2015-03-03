@@ -598,8 +598,8 @@ mögliche Erklärungen ergänzt.
 \begin{figure}
   \centering
   \begin{minipage}{.45\textwidth}
-      \begin{tikzpicture}[node distance=.6cm]
-        \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny];
+      \begin{tikzpicture}[node distance=.8cm]
+        \tikzstyle{prog}=[draw, rectangle, rounded corners];
         \node[prog] (prep) {preprocess};
         \node[prog, below of=prep] (index) {index};
         \node[prog, below of=index] (correct) {correct};
@@ -607,7 +607,7 @@ mögliche Erklärungen ergänzt.
         \node[prog, below of=index2] (filter) {filter};
         \node[prog, below of=filter] (overlap) {overlap};
         \node[prog, below of=overlap] (assemble) {assemble};
-        \node[prog, right of=prep, xshift=1.5cm, fill=red!40] (bindex) {index};
+        \node[prog, right of=prep, xshift=2cm, fill=red!40] (bindex) {index};
         \node[prog, below of=bindex, fill=red!40] (aln) {align};
         \node[prog, below of=aln, fill=red!40] (sampe) {sampe};
         \node[prog, below of=sampe, rectangle split, rectangle split parts=3, yshift=-.45cm, rectangle split part fill={blue!40, green!40, blue!40}] (bam2de) {\nodepart{one}fixmate\nodepart{two}samtools\nodepart{three}DistanceEst};
@@ -632,12 +632,12 @@ mögliche Erklärungen ergänzt.
       \end{tikzpicture}
     \end{minipage}
     \begin{minipage}{2cm}
-      \begin{tikzpicture}[node distance=.6cm]
-        \tikzstyle{prog}=[draw, rectangle, rounded corners, font=\tiny];
+      \begin{tikzpicture}[node distance=.8cm]
+        \tikzstyle{prog}=[draw, rectangle, rounded corners];
         \node[prog] (prefilter) {prefilter};
         \node[prog, below of=prefilter] (overlap) {overlap};
         \node[prog, below of=overlap] (assembly) {assembly};
-        \node[prog, right of=prefilter, xshift=1cm] (scaffold) {scaffold};
+        \node[prog, right of=prefilter, xshift=1.5cm] (scaffold) {scaffold};
 
         \path[->]
         (prefilter) edge (overlap)
@@ -653,7 +653,6 @@ mögliche Erklärungen ergänzt.
       notwendigen Schritte links, die für das Scaffolding ausgeführten Schritte
       rechts angeordnet.}
 \end{figure}
-\todo{abbildung 5 auf Seitenbreite groß ziehen?}
 
 Auf der jeweils linken Seite sind die notwendigen Schritte zur
 Assemblierung dargestellt und auf der rechten Seite die Schritte für
