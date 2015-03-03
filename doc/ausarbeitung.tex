@@ -121,7 +121,7 @@ Implementation und komplette Dokumentation ist unter
 Ausarbeitung liegt auf der zugrunde liegenden Methodik. Für
 Implementationsdetails steht der Source Code zur Verfügung.
 
-\section{Ziel des Projektes und Arbeitsvorgehen}
+\section{Ziel des Projektes und Vorgehen}
 \subsection{Ziel des Projektes}
 Die Implementierung und Evaluierung einer Scaffolding-Software stellte
 das allgemeine Projektziel dar. Dabei sollten die in der
@@ -130,19 +130,19 @@ Infrastruktur verwendet und eine Kompatibilität mit den Ausgaben des
 Assemblers Readjoiner~\cite{Gonnella:2012gn} gewährleistet werden. Der
 Scaffolder aus dem SGA-Softwarepaket~\cite{Simpson:2012ef} sollte als
 Vorlage dienen, da diese Software im Rahmen einer Untersuchung
-verschiedener Scaffolding-Programme Ergebnisse mit besonders hoher
-Qualität lieferte~\cite{Hunt:2014dh}. Andererseits enthält
-SGA-Scaffold zahlreiche Abhängigkeiten zu nicht-Standardsoftware, die
-durch die Reimplementierung minimiert werden sollten. Dazu gehört zum
-Beispiel, dass zur Ermittelung der Distanzinformationen eine Zuordnung
-der Reads zu den Contigs auf Basis des String-Graphen erfolgt anstelle
-eines Read-Mappings durch BWA~\cite{Li:2009}. Des Weiteren existiert
-keine hinreichende Dokumentation der Methodik von SGA-Scaffold, so
-dass dessen Aufklärung einen zentralen Teil des Projektes umfasste.
+verschiedener Scaffolding-Programme gute Ergebnisse
+lieferte~\cite{Hunt:2014dh}. Andererseits enthält SGA Scaffold
+zahlreiche Abhängigkeiten zu nicht-Standardsoftware, die durch die
+Reimplementierung minimiert werden sollten. Dazu gehört zum Beispiel,
+dass zur Ermittelung der Distanzinformationen eine Zuordnung der Reads
+zu den Contigs auf Basis des String-Graphen erfolgen kann anstelle eines
+Read-Mappings durch z.\,B. BWA~\cite{Li:2009}. Des Weiteren existiert keine
+hinreichende Dokumentation der Methodik von SGA Scaffold, so dass
+dessen Aufklärung einen zentralen Teil des Projektes umfasste.
 
-\subsection{Arbeitsvorgehen}
+\subsection{Vorgehen}
 Die erste Aufgabe bestand darin, die Datenformate und Algorithmen
-von SGA-Scaffold aufzuklären. Die benötigten Informationen
+von SGA Scaffold aufzuklären. Die benötigten Informationen
 wurden direkt aus dem Quelltext von SGA extrahiert, der über die
 Plattform GitHub frei zugänglich ist~\cite{source}.
 
@@ -150,9 +150,9 @@ Die Datenformate und Algorithmen wurden leicht modifiziert und in
 der Programmiersprache C neu implementiert, um sowohl Laufzeit
 als auch Speicherplatz einzusparen. Mehrere Unklarheiten in der
 Methodik wurden zunächst übernommen, um die gleichen Resultate wie
-SGA-Scaffold erzeugen zu können. Des Weiteren verwendete man die
-Eingabeformate von SGA-Scaffold, damit die Ergebnisse von gt Scaffolder
-und SGA-Scaffold verglichen werden konnten.
+SGA Scaffold erzeugen zu können. Des Weiteren verwendeten wir die
+Eingabeformate von SGA Scaffold, damit die Ergebnisse von gt Scaffolder
+und SGA Scaffold verglichen werden konnten.
 
 Als nächstes simulierte man eine \textit{Paired-End}-Sequenzierung mit
 einem Illumina Sequenzierer für verschiedene Referenzsequenzen
@@ -160,7 +160,7 @@ einem Illumina Sequenzierer für verschiedene Referenzsequenzen
  \textit{D. melanogaster}) durch die Software ART~\cite{Huang:2012kq}.
 Danach wurde eine Genomassemblierung für die \textit{Paired-End}
 Bibliotheken mit der SGA-Pipeline und der Scaffolding-Schritt
-mit gt Scaffolder und SGA-Scaffold durchgeführt. Schließlich erfolgte
+mit gt Scaffolder und SGA Scaffold durchgeführt. Schließlich erfolgte
 eine Evaluation der Ergebnisse.
 
 \section{Methoden}
@@ -222,8 +222,8 @@ In gt Scaffolder können die Distanzinformationen explizit durch eine
 Datei im ABySS-Distanz-Format (*.de) angegeben werden. Eine solche
 Datei wird durch das Programm DistEst von ABySS nach dem Assemblierungs-
 und Read-Mapping Schritt in der SGA-Pipeline erstellt und dient als
-Eingabe der Distanzinformationen für SGA-Scaffold. In der Evaluierung
-wurde diese Option für Vergleiche zwischen gt Scaffolder und SGA-Scaffold
+Eingabe der Distanzinformationen für SGA Scaffold. In der Evaluierung
+wurde diese Option für Vergleiche zwischen gt Scaffolder und SGA Scaffold
 verwendet. Des Weiteren besteht die Möglichkeit, die Distanzinformationen aus
 einer Datei im BAM-Format (*.bam) mit Hilfe eines Moduls zu
 extrahieren. Dafür diente die Methode des Programms DistEst von ABySS
@@ -415,7 +415,7 @@ einer komprimierten Sequenzrepräsentation in den GenomeTools.
 Mit dieser Repräsentation des String-Graphen nach der Assemblierung
 wird der String-Graph wieder aufgebaut. Dazu wird die Datei im
 SPM-Format mit Infrastruktur eingelesen, die in den Readjoiner
-zugrundeliegenden Bibliotheken vorhanden ist.
+zugrunde liegenden Bibliotheken vorhanden ist.
 
 Der String-Graph wird anschließend für jedes Paar
 aufeinanderfolgender Contigs $c_1$, $c_2$ in jedem Scaffold mit einer
@@ -483,6 +483,20 @@ der Präfix von $c_2$ der Länge 25 durch die gleiche Anzahl an
 
 \subsection{Datenstrukturen}
 \label{sec: Datenstrukturen}
+
+Der GtScaffolderGraph stellt die zentrale Datenstruktur von gt Scaffolder dar
+und besteht aus Knoten und Kanten, die über Zeiger miteinander verknüpft sind.
+Die Knoten repräsentieren die Contigs und enthalten als Eigenschaften dessen
+Header Sequenz, Sequenzlänge, A-Statistik Wert und Kopiezahl. Außerdem
+verfügen sie über einen Zustand, der die Klassifikation des Knotens beschreibt
+(z.B. polymorphe, repetitive Knoten), und besitzen Zeiger auf ihre Kanten. 
+
+Die Kanten stellen die Distanzinformationen zwischen den Contigs dar und
+enthalten als Eigenschaften den paarweisen Abstand, deren Standardabweichung,
+Anzahl der Readpaare, die zur Abstandsberechnung verwendet wurden und die
+Strangorientierung der beteiligten Contigs. Des Weiteren besitzen sie einen
+Zustand, der die Klassifikation der Kante beschreibt (z.B. inkonsistente,
+polymorphe Kanten) und Zeiger auf die beteiligten Contigs.
 
 \begin{figure}
   \centering
@@ -688,7 +702,7 @@ Abhängigkeit zu gt Readjoiner. Zum Zeitpunkt dieser Ausarbeitung ist die
 Schnittstelle zu Readjoiner noch nicht vollständig implementiert
 (vgl. Abschnitt~\ref{sec: Ausblick}). Darüber hinaus ist gt Scaffolder zur
 SGA-Pipeline kompatibel und kann dieselben Eingabedaten verarbeiten wie
-SGA-Scaffold.
+SGA Scaffold.
 
 \subsection{Scaffold-Berechnung durch gt Scaffolder und SGA im Vergleich}
 Zur Überprüfung und Evaluation wurden Scaffolds für verschiedene Testdaten durch
@@ -945,12 +959,12 @@ die nicht im Scaffolding enthaltenen Contigs noch nicht mit
 ausgeben. SGA gibt kann diese Contigs mit ausgeben und erreicht
 dadurch gegebenenfalls eine höhere Abdeckung des Referenzgenoms.
 
-SGA-Scaffold hat viele Parameter und Optionen für das Scaffolding. So
+SGA Scaffold hat viele Parameter und Optionen für das Scaffolding. So
 kann die Strategie für die Auswahl der relevanten Knoten und Kanten
 ausgewählt werden. gt Scaffolder implementiert hingegen nur eine
-dieser möglichen Optionen. Die meisten Parameter, die bei SGA-Scaffold
+dieser möglichen Optionen. Die meisten Parameter, die bei SGA Scaffold
 gewählt werden können, sind auch bei gt Scaffolder einstellbar. Somit
-ist SGA-Scaffold flexibler in der Selektion relevanter Kanten und
+ist SGA Scaffold flexibler in der Selektion relevanter Kanten und
 Knoten als gt Scaffolder.
 
 Die Wahl der Programmiersprache C für gt Scaffolder war gut im
@@ -982,7 +996,7 @@ erweitert werden. So können weitere Strategien zur Selektion
 relevanter Knoten und Kanten implementiert werden, um für den
 jeweiligen Datensatz eine gute Lösung produzieren zu
 können. Z.\,B. können weitere Zyklendetektionsalgorithmen, wie in
-SGA-Scaffold, implementiert werden. Ebenso ist in SGA-Scaffold die
+SGA Scaffold, implementiert werden. Ebenso ist in SGA Scaffold die
 Möglichkeit vorhanden transitive Kanten zu entfernen.
 
 Zusätzlich sollten die konservativen Strategien zur Klassifikation in
