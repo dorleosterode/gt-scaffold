@@ -489,7 +489,7 @@ und besteht aus Knoten und Kanten, die über Zeiger miteinander verknüpft sind.
 Die Knoten repräsentieren die Contigs und enthalten als Eigenschaften dessen
 Header Sequenz, Sequenzlänge, A-Statistik Wert und Kopiezahl. Außerdem
 verfügen sie über einen Zustand, der die Klassifikation des Knotens beschreibt
-(z.B. polymorphe, repetitive Knoten), und besitzen Zeiger auf ihre Kanten. 
+(z.B. polymorphe, repetitive Knoten), und besitzen Zeiger auf ihre Kanten.
 
 Die Kanten stellen die Distanzinformationen zwischen den Contigs dar und
 enthalten als Eigenschaften den paarweisen Abstand, deren Standardabweichung,
@@ -886,12 +886,11 @@ Kriteriums evaluieren zu können, wurden 2 unterschiedliche Strategien in gt
 Scaffolder implementiert: Die eingangs beschriebene MaxStdDev-Strategie und eine
 MinStdDev-Strategie, bei der das Kantenpaar mit der geringsten
 Standardabweichung gewählt wird. Anschließend wurde die Scaffold-Berechnung mit
-beiden Strategien für 4 Testdatensätze (vgl.~\ref{sec: Testdaten}) ausgeführt.
-
-Vergleich~\ref{tab: stddev}.
-
-Zum Zeitpunkt dieser Ausarbeitung ist die MaxStdDev-Strategie in gt Scaffolder
-implementiert.
+beiden Strategien für 4 Testdatensätze (vgl. Tabelle ~\ref{sec: Testdaten})
+ausgeführt. Dabei wurden nur sehr kleine Unterschiede festgestellt (vgl.
+Tabelle~\ref{tab: stddev}): Die Ergebnisse waren größtenteils identisch oder
+wichen zwischen $0.97\times$ und $1.001\times$ voneinandner ab. Zum Zeitpunkt
+dieser Ausarbeitung ist die MaxStdDev-Strategie in gt Scaffolder implementiert.
 
 \begin{table}
   \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
