@@ -480,7 +480,7 @@ der Präfix von $c_2$ der Länge 25 durch die gleiche Anzahl an
 \subsection{Datenstrukturen}
 \label{sec: Datenstrukturen}
 
-\begin{figure}[H]
+\begin{figure}
   \centering
   \includegraphics[width=1\linewidth]{uml.eps}
   \caption{Klassendiagramm für gt Scaffolder.}
@@ -991,9 +991,8 @@ repetitive Sequenz angepasst werden.
 
 \section*{Anhang}
 \subsection*{Pseudocode}
-(\todo{Algorithmen anpassen!!!})
 
-\begin{algorithm}[H]
+\begin{algorithm}
   \ForEach{Knoten $k_0$ im Graph $G$}{
     \ForEach{Kantenrichtung $dir$ in [ANTISENSE, SENSE]}{
       \ForEach{Kantenpaar $(e_0,e_1)$ in Richtung $dir$}{
@@ -1026,9 +1025,9 @@ repetitive Sequenz angepasst werden.
             }
        }
        \If{längste Überlappung $>$ 400} {
-	 Markiere alle ausgehenden Sense- bzw. Antisensekanten
-         von $k_0$ und die eingehenden Kanten mit der Richtung der
-         jeweiligen Zwillingskante als inkonsistent\;
+          Markiere alle ausgehenden Sense- bzw. Antisensekanten
+          von $k_0$ und die eingehenden Kanten mit der Richtung der
+          jeweiligen Zwillingskante als inkonsistent\;
       }
     }
   }
@@ -1038,7 +1037,7 @@ repetitive Sequenz angepasst werden.
     dargestellt.}
 \end{algorithm}
 
-\begin{algorithm}[H]
+\begin{algorithm}
   \KwData{Kante $e_0$ und Kante $e_1$, die auf eindeutige Ordnung geprüft werden
     sollen. Wahrscheinlichkeitsschwellenwert $p\_cutoff$}
   \KwResult{Ob die Kanten $e_0$ und $e_1$ nicht eindeutig geordnet werden können}
@@ -1052,7 +1051,7 @@ repetitive Sequenz angepasst werden.
 \end{algorithm}
 
 
-\begin{algorithm}[H]
+\begin{algorithm}
   \KwData{Graph}
   \KwResult{Graph ohne Zyklen}
   \While{Zyklus gefunden wurde}{
@@ -1073,7 +1072,7 @@ repetitive Sequenz angepasst werden.
     Zusammenhangskomponente auf}
 \end{algorithm}
 
-\begin{algorithm}[H]
+\begin{algorithm}
   \SetAlgoLined
   \KwData{Graph $G$}
   \KwResult{Graph $G$ mit Knoten der Scaffolds markiert}
@@ -1094,7 +1093,7 @@ repetitive Sequenz angepasst werden.
     Berechnung aller Pfade ist in Algorithmus \ref{alg: Pfade} dargestellt.}
 \end{algorithm}
 
-\begin{algorithm}[H]
+\begin{algorithm}
   \SetAlgoLined
   \KwData{terminaler Startknoten $t_0$}
   \KwResult{Alle von diesem Knoten möglichen Pfade}
