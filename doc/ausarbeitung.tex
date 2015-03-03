@@ -489,7 +489,7 @@ und besteht aus Knoten und Kanten, die über Zeiger miteinander verknüpft sind.
 Die Knoten repräsentieren die Contigs und enthalten als Eigenschaften dessen
 Header Sequenz, Sequenzlänge, A-Statistik Wert und Kopiezahl. Außerdem
 verfügen sie über einen Zustand, der die Klassifikation des Knotens beschreibt
-(z.B. polymorphe, repetitive Knoten), und besitzen Zeiger auf ihre Kanten. 
+(z.B. polymorphe, repetitive Knoten), und besitzen Zeiger auf ihre Kanten.
 
 Die Kanten stellen die Distanzinformationen zwischen den Contigs dar und
 enthalten als Eigenschaften den paarweisen Abstand, deren Standardabweichung,
@@ -596,8 +596,7 @@ fehlerhaft eingestuft und entfernt, als dass fehlerhafte Knoten oder
 Kanten nicht erkannt werden und in dem Endergebnis enthalten sein
 könnten. Einige nicht sofort ersichtliche Strategien von SGA wurden
 zuerst in gt Scaffolder übernommen, um eine Vergleichbarkeit der
-Ergebnisse der beiden Programme zu erhalten. Die Güte der Strategien
-wurde teilweise evaluiert (siehe Abschnitt~\ref{sec: Ergebnisse}).
+Ergebnisse der beiden Programme zu erhalten.
 
 Es folgt eine ungeordnete Auflistung solcher Strategien, teilweise um
 mögliche Erklärungen ergänzt.
@@ -611,7 +610,8 @@ mögliche Erklärungen ergänzt.
 \item Bei der Konstruktion des Graphen werden zwischen zwei Knoten
   jeweils nur zwei Kante eingefügt, eine Hin- und eine Rückkante.
   Wenn es mehr als ein mögliches Kantenpaar gibt, wird das Kantenpaar mit der
-  größten Standardabweichung gewählt. \\
+  größten Standardabweichung gewählt. Die Güte dieser Strategie wurde
+  exemplarisch evaluiert (vgl. Abschnitt~\ref{sec: wunderlich_assert}).\\
   Mögliche Erklärung: keine.
 \item Bei der Klassifikation der Knoten als repetitiv oder eindeutig
   wird zusätzlich zu der A-Statistik auch die berechnete Anzahl an
@@ -720,6 +720,7 @@ einen separaten Schritt, der gesondert ausgewertet wurde. Hier wurden die
 Metriken durch QUAST~\cite{Gurevich:2013je} ermittelt.
 
 \subsubsection*{Generierung und Assemblierung der Testdaten}
+\label{sec: Testdaten}
 Mithilfe der Software ART~\cite{Huang:2012kq} wurde eine
 Illumina-\textit{Paired-End}-Sequenzierung für vier verschiedene Referenzgenome
 (vgl. Tabelle~\ref{tab: Referenzgenome}) simuliert. Dabei wurde die Read-Länge
@@ -774,7 +775,7 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
       Datensatz & Programm & Abdeckung (Mbp / \%) & \#Scaf & N50 (kb) & CPU (s) & RAM (MB) \\
       \midrule
       \textit{S. cerevisiae}
-      & SGA Scaffold  & ~~11.08 / 92  &     ~~600   &  32.3     & 0.01      &  28.9 \\
+      & SGA Scaffold  & ~~11.08 / 92  &      ~600   &  32.3     & 0.01      &  28.9 \\
       1694 contigs
       & gt Scaffolder & $1\times$     &  $1\times$  & $1\times$ & $1\times$ &  $0.43\times$ \\
       \midrule
@@ -870,6 +871,51 @@ missassemblierte Positionen besitzen.
   ~\textit{Unaligniert:} Anzahl nicht alignierter Basen.}
 \end{table}
 
+\subsection{Auswirkung des Auswahlkriteriums für Kantenpaare}
+\label{sec: wunderlich_assert}
+Wie in Abschnitt~\ref{sec: wunderlich} motiviert, wird im Falle mehrerer
+potentieller Kantenpaare bei der Graphkonstruktion dasjenige gewählt, welches
+die größte Standardabweichung besitzt. Um die Auswirkung dieses
+Kriteriums evaluieren zu können, wurden 2 unterschiedliche Strategien in gt
+Scaffolder implementiert: Die eingangs beschriebene MaxStdDev-Strategie und eine
+MinStdDev-Strategie, bei der das Kantenpaar mit der geringsten
+Standardabweichung gewählt wird. Anschließend wurde die Scaffold-Berechnung mit
+beiden Strategien für 4 Testdatensätze (vgl. Tabelle ~\ref{sec: Testdaten})
+ausgeführt. Dabei wurden nur sehr kleine Unterschiede festgestellt (vgl.
+Tabelle~\ref{tab: stddev}): Die Ergebnisse waren größtenteils identisch oder
+wichen zwischen $0.97\times$ und $1.001\times$ voneinandner ab. Zum Zeitpunkt
+dieser Ausarbeitung ist die MaxStdDev-Strategie in gt Scaffolder implementiert.
+
+\begin{table}
+  \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
+    \begin{tabular}{llccccc}
+      \toprule
+      Datensatz & Strategie & Abdeckung (Mbp / \%) & \#Scaf & N50 (kb)\\
+      \midrule
+      \textit{S. cerevisiae}
+      & MaxStdDev  & ~~11.08 / 92  &      ~600   &  32.3      \\
+      & MinStdDev  & $0.97\times$     &  $1\times$  & $1\times$    \\
+      \midrule
+      \textit{H. sapiens}, Chr. 21
+      & MaxStdDev  & ~~34.25 / 71  &      1368   &  54.2      \\
+      & MinStdDev  & $1\times$     &  $0.99\times$  & $1\times$    \\
+      \midrule
+      \textit{C. elegans}
+      & MaxStdDev  & ~~94.07 / 94  &      5659   &  36.9      \\
+      & MinStdDev  & $1\times$     &  $1\times$  & $1\times$    \\
+      \midrule
+      \textit{D. melanogaster}
+      & MaxStdDev  & 113.48 / 81   &      2281   &  126.3     \\
+      & MinStdDev  & $1\times$     &  $1.00\times$  & $1.001\times$    \\
+      \bottomrule
+  \end{tabular}}
+  \caption{\label{tab: stddev}\textbf{Ergebnisse der Scaffold-Berechnung.}
+  Die Anzahl der eingehenden Contigs jedes Datensatzes ist angegeben. Die
+  SGA-Ergebnisse sind als absolute Werte aufgetragen, die gt
+  Scaffolder-Ergebnisse als relative Faktoren zu ersteren.
+  \textit{Abdeckung}, \textit{\#Scaf} und \textit{N50} sind in
+  Tabelle~\ref{tab: Scaffolding} erläutert.}
+\end{table}
 
 \section{Diskussion}
 \label{sec: Diskussion}
