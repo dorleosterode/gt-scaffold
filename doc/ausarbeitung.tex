@@ -603,11 +603,19 @@ Beschreibung der möglichen Bedeutung. Des Weiteren erfolgte zum Teil
 die Evaluierung der Güte dieser Strategien
 (siehe Abschnitt~\ref{sec: Ergebnisse}).
 
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\linewidth]{inkonsistenteKante.eps}
+  \caption{Entfernung inkonsistenter Kanten.}
+\label{abb: inkonsistenteKante}
+\end{figure}
+
 \begin{itemize}
 \item Bei der Entfernung inkonsistenter Kanten eines Knotens $k_0$
-  werden alle Kanten des Nachbarknotens mit der gleichen Richtung
-  (\textit{sense} oder \textit{antisense}) wie die inkonsistente
-  Kante ebenfalls gelöscht.\\
+  werden alle ausgehenden Kanten der Nachbarknoten, die in der gleichen
+  Richtung (\textit{sense} oder \textit{antisense}) verlaufen wie die
+  Kante vom Nachbarknoten zu $k_0$, ebenfalls als inkonsistent makiert
+  und gelöscht (siehe Abbildung~\ref{abb: inkonsistenteKante}).\\
   Mögliche Erklärung: Potentiell enthalten auch diese Kanten
   Inkonsistenzen und sollten deshalb nicht weiter betrachtet werden.
 \item Bei der Konstruktion des Graphen werden zwischen zwei Knoten
