@@ -1,4 +1,4 @@
-\documentclass[a4paper,10pt,parskip]{scrartcl}
+\documentclass[a4paper,12pt,parskip]{scrartcl}
 \usepackage[utf8]{inputenc}
 \usepackage[ngerman]{babel}
 \usepackage[T1]{fontenc}
@@ -25,8 +25,15 @@
 % coole inline-todos :)
 \usepackage[colorinlistoftodos,prependcaption]{todonotes}
 
+% Zeilenabstand
+\usepackage{setspace}
+
 % PDF Bookmarks
 \usepackage[backref=true,pagebackref=true,colorlinks=false,bookmarks=true,bookmarksopen=false,bookmarksnumbered=false,pdfpagemode=None]{hyperref}
+
+% Seitenränder
+\usepackage{geometry}             % Satzspiegel festlegen
+\geometry{left=3cm, right=2.5cm, top=3cm, bottom=2cm, foot=1cm}
 
 % Typographie: Besseres Absatz-Handling, größere Toleranzen beim Blocksatz
 \tolerance 1414
@@ -154,7 +161,9 @@ eine Evaluation der Ergebnisse.
 
 \section{Methoden}
 \label{sec: Methoden}
-\subsection{Übersicht der Schritte}
+
+\subsection{Algorithmen}
+\subsubsection{Übersicht der Schritte}
 
 \begin{figure}
     \begin{tikzpicture}[every node/.style={font=\footnotesize}]
@@ -188,7 +197,7 @@ eine Evaluation der Ergebnisse.
     \caption{\label{abb: gtscaffolder}Schematische Darstellung des Programmablaufs von gt Scaffolder.}
 \end{figure}
 
-In Abbildung \ref{abb: gtscaffolder} ist der Programmablauf von gt
+In Abbildung~\ref{abb: gtscaffolder} ist der Programmablauf von gt
 Scaffolder schematisch dargestellt. Als Eingabe dienen Dateien,
 die die Repetitivität, die Sequenz und die Distanzinformationen der Contigs
 beschreiben. Mit Hilfe dieser Eingaben erfolgt zunächst die Konstruktion des
@@ -199,7 +208,7 @@ der als Scaffold ausgegeben wird.
 
 Die einzelnen Schritte werden in den folgenden Abschnitten näher erläutert.
 
-\subsection{Eingabe}
+\subsubsection{Eingabe}
 Als Eingabe werden die Contigs im FASTA-Format, die
 Distanzinformationen aus der \textit{Paired-End}-
 bzw. \textit{Mate-Pair}-Sequenzierung und die A-Statistik der einzelnen
@@ -223,7 +232,7 @@ Die A-Statistik ist ein statistisches Maß und beschreibt die Repetitivität
 einer Sequenz~\cite{Myers:2005iq}. Die A-Statistik kann in Form einer
 separaten Datei oder als Annotation in den Contigs angeführt werden.
 
-\subsection{Erstellen der Distanzinformationen}
+\subsubsection{Erstellen der Distanzinformationen}
 Die Methode, die das Programm DistEst verwendet, durchläuft folgende
 Schritte. Zunächst werden alle Reads aus der BAM-Datei geladen und
 die Read-Paare ermittelt. Anschließend berechnet man die Fragmentlängen
@@ -243,7 +252,7 @@ Schließlich wählt man als Abstand zwischen den Contigs den Faktor, bei
 dem die Wahrscheinlichkeitssumme ein Maximum erreicht.
 \todo{Strangorientierung fehlt}
 
-\subsection{Konstruktion des Graphen}
+\subsubsection{Konstruktion des Graphen}
 Aus den Contigs und den Distanzinformationen wird der Scaffold-Graph
 konstruiert. Dabei wird für jeden Contig, der eine Mindestlänge von
 200 bp überschreitet, eine A-Statistik größer 19 und eine berechnete
@@ -254,7 +263,7 @@ Knotenpaar, zwischen dessen repräsentierten Contigs eine
 Distanzinformation anhand von Read-Paaren vorhanden ist, zwei Kanten
 eingefügt. Die Kanten geben jeweils Orientierung und Distanz an.
 
-\subsection{Selektion relevanter Knoten und Kanten}
+\subsubsection{Selektion relevanter Knoten und Kanten}
 In dem konstruierten Graph werden relevante Knoten und Kanten
 selektiert. Dazu werden nicht relevante Knoten und Kanten markiert und
 im späteren Vorgehen nur unmarkierte Knoten und Kanten betrachtet. Es
@@ -298,7 +307,7 @@ keine Zyklen mehr gefunden werden.
 Der Pseudocode für diesen Filterungsschritt ist in Algorithmus
 \ref{alg: Zyklen} abgebildet.
 
-\subsection{Ermittlung des besten Pfades/ Scaffolding}
+\subsubsection{Ermittlung des besten Pfades/ Scaffolding}
 
 Nach der Selektion relevanter Knoten und Kanten wird das eigentliche
 Scaffolding durchgeführt. Dazu werden alle Zusammenhangskomponenten
@@ -315,7 +324,7 @@ haben, werden ebenfalls als Scaffolds gewählt.
 Der Pseudocode für die Berechnung des Scaffolds ist in Algorithmus
 \ref{alg: Scaffold} dargestellt.
 
-\subsection{Ausgabe}
+\subsubsection{Ausgabe}
 Die ermittelten Scaffolds werden in dem gleichen Format ausgegeben,
 wie bei SGA. In diesem Format (\textit{.scaf}) steht in jeder Zeile
 ein Scaffold. Die einzelnen Contigs mit ihren Informationen sind dabei
@@ -344,7 +353,7 @@ und Lücken zwischen den Contigs durch Pfade im String-Graph zu
 schließen. Die Rekonstruktion der Sequenzen ist in Abschnitt \ref{sec:
   Rekonstruktion} näher beschrieben.
 
-\subsection{Rekonstruktion der Sequenz}
+\subsubsection{Rekonstruktion der Sequenz}
 \label{sec: Rekonstruktion}
 Zur Rekonstruktion der Sequenzen der berechneten Scaffolds werden drei
 Schritte für alle aufeinander folgende Contigs durchlaufen. Zuerst
@@ -369,7 +378,7 @@ Orientierung der Contigs zueinander und zum ersten Contig
 beachtet. Dementsprechend wird jeweils die normale, die reverse oder
 revers-komplementierte Sequenz verwendet.
 
-\subsubsection{Traversierung des String-Graphen}
+\paragraph{Traversierung des String-Graphen}~\\
 Nach der Assemblierung wird in SGA ein String-Graph im ASQG-Format
 (*.asqg) ausgegeben. Für eine Beschreibung des Formats
 siehe~\cite{asqg}. Dieser String-Graph wird mit einem Python-Skript in
@@ -421,7 +430,7 @@ $c_2$ gespeichert und anschließend die Sequenz des Pfades anhand der
 Repräsentation der Sequenzen der Contigs als GtEncseq rekonstruiert.
 Diese rekonstruierte Sequenz wird schließlich zurückgegeben.
 
-\subsubsection{Berechnung von Alignments}
+\paragraph{Berechnung von Alignments}~\\
 Ist die Distanz zwischen zwei im Scaffold benachbarten Contigs $c_1$
 und $c_2$ negativ, so überlappen sich die Contigs. Um diese
 Überlappung in der Sequenz aufzulösen, wird ein Alignment zwischen den
@@ -453,7 +462,7 @@ so wird die Sequenz ab der Position $l$ ($seq_{c_2}[l:|seq_{c_2}|]$)
 zurückgegeben. Falls kein hinreichendes Alignment gefunden werden
 konnte, muss der nächste Schritt durchgeführt werden.
 
-\subsubsection{Die Lücke zwischen zwei Contigs schließen}
+\paragraph{Die Lücke zwischen zwei Contigs schließen}~\\
 Konnte die Lücke zwischen zwei Contigs $c_1$ und $c_2$ nicht durch
 eine Graph-Traversierung oder ein Alignment geschlossen werden, so wird
 in diesem Schritt die Sequenz mit 'N's aufgefüllt. Dabei gibt es eine
@@ -468,10 +477,12 @@ Ist die ermittelte Distanz zwischen $c_1$ und $c_2$ negativ, so wird
 der Präfix von $c_2$ der Länge 25 durch die gleiche Anzahl an
 'N'-Symbolen ersetzt.
 
-\section{Datenstrukturen}
+\subsection{Datenstrukturen}
 \label{sec: Datenstrukturen}
 
-\section{gt Scaffolder als Tool in den GenomeTools}
+\todo{UML Diagramm einbinden sobald vorhanden}
+
+\subsection{gt Scaffolder als Tool in den GenomeTools}
 Die Software gt Scaffolder wurde als eigenständiges Tool in die GenomeTools
 eingebunden. In Abbildung \ref{abb: help} ist die Ausgabe der Hilfe des Tools
 gt Scaffolder dargestellt, in der alle einstellbaren Parameter mit ihren
@@ -530,7 +541,7 @@ diese Datei eingelesen und die enthaltenen Distanzinformationen verwendet.
 Gibt man dagegen mit der Option -bam eine BAM-Datei mit Alignments der Reads
 zu den Contigs an, so werden aus der BAM-Datei die Distanzinformationen
 berechnet und im ABySS-Distance-Format (*.de) gespeichert. Diese neu erzeugte
-Datei wird anschließend eingelesen und die enthaltenen Informationen genutzt. 
+Datei wird anschließend eingelesen und die enthaltenen Informationen genutzt.
 Die Verwendung einer BAM-Datei und des String-Graph Assemblers Readjoiner
 ermöglicht die Abhängigkeit zu einem Mapping-Programm (z.\,B. BWA) und der
 Software DistEst von ABySS potentiell zu durchbrechen. So kann Readjoiner die
@@ -553,17 +564,17 @@ die Erweiterung der String-Graph-API zur Sequenzkonstruktion mittels
 Traversierung des String-Graphen noch nicht in die GenomeTools
 übernommen wurde.
 
-\section{Wunderliche Strategien in SGA Scaffold}
+\subsection{Strategien in SGA Scaffold mit unklarer Bedeutung}
 \label{sec: wunderlich}
 SGA benutzt eine relativ konservative Strategie, um vermeintlich
 fehlerhafte Knoten und Kanten aus dem Scaffold-Graph zu
-entfernen. D.\,h. korrekte Knoten und Kanten werden lieber als
+entfernen. D.\,h.\ korrekte Knoten und Kanten werden lieber als
 fehlerhaft eingestuft und entfernt, als dass fehlerhafte Knoten oder
 Kanten nicht erkannt werden und in dem Endergebnis enthalten sein
 könnten. Einige nicht sofort ersichtliche Strategien von SGA wurden
 zuerst in gt Scaffolder übernommen, um eine Vergleichbarkeit der
 Ergebnisse der beiden Programme zu erhalten. Die Güte der Strategien
-wurde teilweise evaluiert (siehe Abschnitt \ref{sec: Ergebnisse}).
+wurde teilweise evaluiert (siehe Abschnitt~\ref{sec: Ergebnisse}).
 
 Es folgt eine ungeordnete Auflistung solcher Strategien, teilweise um
 mögliche Erklärungen ergänzt.
