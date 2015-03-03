@@ -799,13 +799,13 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
   Die Anzahl der eingehenden Contigs jedes Datensatzes ist angegeben. Die
   SGA-Ergebnisse sind als absolute Werte aufgetragen, die gt
   Scaffolder-Ergebnisse als relative Faktoren zu ersteren.
-  ~~\textit{Abdeckung:} Gesamtlänge aller Scaffolds und prozentuale Abdeckung der
+  ~\textit{Abdeckung:} Gesamtlänge aller Scaffolds und prozentuale Abdeckung der
   Zielsequenz.
-  ~~\textit{\#Scaf:} Anzahl Scaffolds.
-  ~~\textit{N50:} Länge, sodass alle Scaffolds deren Länge $\geq N50$ mindestens
+  ~\textit{\#Scaf:} Anzahl Scaffolds.
+  ~\textit{N50:} Länge, sodass alle Scaffolds deren Länge $\geq N50$ mindestens
   die Hälfte der Abdeckung ausmachen.
-  ~~\textit{CPU:} Gesamtlaufzeit.
-  ~~\textit{RAM:} Maximaler Speicherbedarf während Berechnung.}
+  ~\textit{CPU:} Gesamtlaufzeit.
+  ~\textit{RAM:} Maximaler Speicherbedarf während Berechnung.}
 \end{table}
 
 \begin{figure}[t]
@@ -862,11 +862,11 @@ missassemblierte Positionen besitzen.
   Sequenz-Rekonstruktion.} Die durch
   SGA-Ergebnisse sind als absolute Werte aufgetragen, die gt
   Scaffolder-Ergebnisse als relative Faktoren zu ersteren.
-  ~~\textit{Länge:} Gesamtlänge aller Scaffolds.
-  ~~\textit{Abdeckung:} Prozentuale Abdeckung der Zielsequenz.
-  ~~\textit{N50:} Länge, sodass alle Scaffolds deren Länge $\geq N50$ mindestens
+  ~\textit{Länge:} Gesamtlänge aller Scaffolds.
+  ~\textit{Abdeckung:} Prozentuale Abdeckung der Zielsequenz.
+  ~\textit{N50:} Länge, sodass alle Scaffolds deren Länge $\geq N50$ mindestens
   die Hälfte der Abdeckung ausmachen.
-  ~~\textit{\#Miss:} Anzahl der Missassemblierungen nach
+  ~\textit{\#Miss:} Anzahl der Missassemblierungen nach
   Plantagora~\cite{Gurevich:2013je}.
   ~\textit{Unaligniert:} Anzahl nicht alignierter Basen.}
 \end{table}
@@ -880,36 +880,36 @@ Kriteriums evaluieren zu können, wurden 2 unterschiedliche Strategien in gt
 Scaffolder implementiert: Die eingangs beschriebene MaxStdDev-Strategie und eine
 MinStdDev-Strategie, bei der das Kantenpaar mit der geringsten
 Standardabweichung gewählt wird. Anschließend wurde die Scaffold-Berechnung mit
-beiden Strategien für 4 Testdatensätze (vgl. Tabelle ~\ref{sec: Testdaten})
+beiden Strategien für 4 Testdatensätze (vgl. Tabelle~\ref{sec: Testdaten})
 ausgeführt. Dabei wurden nur sehr kleine Unterschiede festgestellt (vgl.
 Tabelle~\ref{tab: stddev}): Die Ergebnisse waren größtenteils identisch oder
 wichen zwischen $0.97\times$ und $1.001\times$ voneinandner ab. Zum Zeitpunkt
 dieser Ausarbeitung ist die MaxStdDev-Strategie in gt Scaffolder implementiert.
 
 \begin{table}
-  \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
-    \begin{tabular}{llccccc}
-      \toprule
-      Datensatz & Strategie & Abdeckung (Mbp / \%) & \#Scaf & N50 (kb)\\
-      \midrule
-      \textit{S. cerevisiae}
-      & MaxStdDev  & ~~11.08 / 92  &      ~600   &  32.3      \\
-      & MinStdDev  & $0.97\times$     &  $1\times$  & $1\times$    \\
-      \midrule
-      \textit{H. sapiens}, Chr. 21
-      & MaxStdDev  & ~~34.25 / 71  &      1368   &  54.2      \\
-      & MinStdDev  & $1\times$     &  $0.99\times$  & $1\times$    \\
-      \midrule
-      \textit{C. elegans}
-      & MaxStdDev  & ~~94.07 / 94  &      5659   &  36.9      \\
-      & MinStdDev  & $1\times$     &  $1\times$  & $1\times$    \\
-      \midrule
-      \textit{D. melanogaster}
-      & MaxStdDev  & 113.48 / 81   &      2281   &  126.3     \\
-      & MinStdDev  & $1\times$     &  $1.00\times$  & $1.001\times$    \\
-      \bottomrule
-  \end{tabular}}
-  \caption{\label{tab: stddev}\textbf{Ergebnisse der Scaffold-Berechnung.}
+  \begin{tabular}{llccccc}
+    \toprule
+    Datensatz & Strategie & Abdeckung (Mbp / \%) & \#Scaf & N50 (kb)\\
+    \midrule
+    \textit{S. cerevisiae}
+    & MaxStdDev  & ~~11.08 / 92  &      ~600   &  32.3      \\
+    & MinStdDev  & $0.97\times$     &  $1\times$  & $1\times$    \\
+    \midrule
+    \textit{H. sapiens}, Chr. 21
+    & MaxStdDev  & ~~34.25 / 71  &      1368   &  54.2      \\
+    & MinStdDev  & $1\times$     &  $0.99\times$  & $1\times$    \\
+    \midrule
+    \textit{C. elegans}
+    & MaxStdDev  & ~~94.07 / 94  &      5659   &  36.9      \\
+    & MinStdDev  & $1\times$     &  $1\times$  & $1\times$    \\
+    \midrule
+    \textit{D. melanogaster}
+    & MaxStdDev  & 113.48 / 81   &      2281   &  126.3     \\
+    & MinStdDev  & $1\times$     &  $1.00\times$  & $1.001\times$    \\
+    \bottomrule
+  \end{tabular}
+  \caption{\label{tab: stddev}\textbf{Ergebnisse der Scaffold-Berechnung mit
+  verschiedenen Strategien bei der Graphkonstruktion.}
   Die Anzahl der eingehenden Contigs jedes Datensatzes ist angegeben. Die
   SGA-Ergebnisse sind als absolute Werte aufgetragen, die gt
   Scaffolder-Ergebnisse als relative Faktoren zu ersteren.
@@ -920,23 +920,25 @@ dieser Ausarbeitung ist die MaxStdDev-Strategie in gt Scaffolder implementiert.
 \section{Diskussion}
 \label{sec: Diskussion}
 
-Wie in Abschnitt \ref{sec: Ergebnisse} dargestellt, liefert gt
-Scaffolder in den Testfällen die gleichen Ergebnisse wie SGA
-Scaffold. Dabei benötigt gt Scaffolder die gleiche Laufzeit und
-weniger Speicherplatz.
+Wie in Tabelle~\ref{tab: Scaffolding} dargestellt, konnten mit gt Scaffolder für
+die betrachteten Metriken identische Ergebnisse zu SGA erzielt werden.
+Gleichzeitig war der Laufzeit- und Speicherbedarf leicht bis deutlich geringer.
 
-Aus den Ergebnissen im Vergleich der Ausgabe im SCAF-Format ist zu
-erkennen, dass die Laufzeit und der Speicherplatzbedarf nicht mit der
-Größe der Referenzgenome zusammenhängt. Allerdings hängen diese
-Aspekte auch nicht direkt von der Größe des Scaffold-Graphen ab. In
-Tabelle \ref{tab: Scaffolding} sind zu den Datensätzen die Anzahl an
-Knoten in dem Scaffold-Graph dargestellt. So ist die Anzahl an Knoten
-für den \textit{D. melanogaster} Datensatz mit $3970$ geringer als für
-den \textit{H. sapiens} Chr. 21 Datensatz mit $4817$ Knoten. Trotzdem
-wird zur Berechnung der Scaffolds für den \textit{D. melanogaster}
-Datensatz sowohl von SGA Scaffold als auch von gt Scaffolder mehr
-Laufzeit und mehr Speicherplatz benötigt, wie aus Tabelle \ref{tab:
-  Vergleich} und Abbildung \ref{abb: Zeit} ersichtlich wird.
+Die Ergebnisse der Scaffold-Berechnung lassen keine Rückschlüsse auf eine
+Korrelation zwischen der Größe der Zielsequenz und der Qualität der Ergebnisse
+zu. Auch die Größe des Scaffold-Graphen, welche von der Anzahl der eingehenden
+Contigs abhängt, scheint keinen Einfluss zu haben. So konnte die größten
+Abdeckungen über 90\% für das kleinste (\textit{S. cerevisiae}, 1694 contigs)
+und zweitgrößte (\textit{C. elegans}, 11113 contigs) der Referenzgenome erzielt
+werden.
+
+Die Laufzeit hängt für die 4 betrachteten Datensätze von der Länge des
+Zielgenoms ab, korreliert jedoch nicht mit der Größe des Scaffold Graphen. Der
+Speicherplatzbedarf scheint von einer Kombination beider Faktoren abzuhängen und
+unterliegt für gt Scaffolder stärkeren Schwankungen als SGA (vgl.
+Abbildung~\ref{abb: Zeit}).
+
+%%%%%%%%%%%%%%%%%%%%%%%
 
 Das Modul zur Rekonstruktion der Sequenzen ist scheinbar noch
 fehlerhaft und liefert keine vergleichbar gute Ergebnisse wie das
@@ -995,7 +997,7 @@ Möglichkeit vorhanden transitive Kanten zu entfernen.
 Zusätzlich sollten die konservativen Strategien zur Klassifikation in
 repetitive bzw. eindeutige Knoten untersucht werden. Durch besser
 gewählte Schwellenwerte könnten bessere Ergebnisse erzielt werden. Die
-in Abschnitt \ref{sec: wunderlich} dokumentierten Strategien sollten
+in Abschnitt\ref{sec: wunderlich} dokumentierten Strategien sollten
 ebenfalls überprüft werden.
 
 gt Scaffolder bietet zudem einen Ausgangspunkt für eine Laufzeit- und
@@ -1012,7 +1014,7 @@ ebenfalls Laufzeit und Speicherplatzbedarf eingespart werden. Der
 Fokus der hier beschriebenen Implementation lag nicht auf Laufzeit-
 und Speicherplatzeffizienz.
 
-Wie in Abschnitt \ref{sec: Ergebnisse} aufgezeigt ist die
+Wie in Abschnitt\ref{sec: Ergebnisse} aufgezeigt ist die
 Implementation des Moduls zur Rekonstruktion der Sequenzen
 verbesserungsbedürftig. Bei der Rekonstruktion der Sequenzen können
 die durch gt Scaffolder erzeugten Scaffolds im SCAF-Format genutzt
@@ -1097,7 +1099,6 @@ repetitive Sequenz angepasst werden.
   \caption{\label{alg: Order}Funktion \textsc{AmbiguousOrdering}$(e_0, e_1, p\_cutoff)$}
 \end{algorithm}
 
-
 \begin{algorithm}
   \KwData{Graph}
   \KwResult{Graph ohne Zyklen}
@@ -1178,6 +1179,6 @@ repetitive Sequenz angepasst werden.
 \end{algorithm}
 
 \bibliography{presentation/literatur}
-\bibliographystyle{alpha}
+\bibliographystyle{alphadin}
 
 \end{document}
