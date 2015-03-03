@@ -91,7 +91,7 @@ werden. Typischerweise wird hierbei in zwei Schritten vorgegangen:
 Zunächst werden die einzelnen Reads zu durchgängigen Sequenzen
 (Contigs) assembliert. Dabei kann das Zielgenom oftmals nicht
 vollständig rekonstruiert werden. Aufgrund teilweise unzureichender
-Abdeckung durch die Sequenzierung sowie repititiver Teilsequenzen
+Abdeckung durch die Sequenzierung sowie repetitiver Teilsequenzen
 entstehen Lücken (Gaps), welche zu unabhängigen Contigs führen. Die
 relative Anordnung und Orientierung der Contigs zueinander kann nicht
 bestimmt werden.
@@ -122,7 +122,7 @@ Scaffolding-Programms im Rahmen des Genominformatik-Projektes. Die
 Implementation und komplette Dokumentation ist unter
 \url{https://github.com/dorleosterode/gt-scaffold} zu finden. Der Fokus der
 Ausarbeitung liegt auf der zugrunde liegenden Methodik. Für
-Implementationsdetails steht der Source-Code zur Verfügung.
+Implementationsdetails steht der Source Code-Code zur Verfügung.
 
 \section{Ziel des Projektes und Arbeitsvorgehen}
 \subsection{Ziel des Projektes}
@@ -147,7 +147,7 @@ dass dessen Aufklärung einen zentralen Teil des Projektes umfasste.
 Die erste Aufgabe bestand darin, die Datenformate und Algorithmen
 von SGA-Scaffold aufzuklären. Die benötigten Informationen
 wurden direkt aus dem Quelltext von SGA extrahiert, der über die
-Plattform GitHub freizugänglich ist~\cite{source}.
+Plattform GitHub frei zugänglich ist~\cite{source}.
 
 Die Datenformate und Algorithmen wurden leicht modifiziert und in
 der Programmiersprache C neu implementiert, um sowohl Laufzeit
@@ -222,7 +222,7 @@ bzw. \textit{Mate-Pair}-Sequenzierung und die A-Statistik der einzelnen
 Contigs benötigt.
 
 In gt Scaffolder können die Distanzinformationen explizit durch eine
-Datei im ABySS-Distance-Format (*.de) angegeben werden. Eine solche
+Datei im ABySS-Distanz-Format (*.de) angegeben werden. Eine solche
 Datei wird durch das Programm DistEst von ABySS nach dem Assemblierungs-
 und Read-Mapping Schritt in der SGA-Pipeline erstellt und dient als
 Eingabe der Distanzinformationen für SGA-Scaffold. In der Evaluierung
@@ -379,7 +379,7 @@ wird übernommen. Danach wird für den jeweils nächsten Contig versucht
 einen eindeutigen Pfad der richtigen Länge zwischen dem vorherigen und
 diesem Contig im String-Graph zu finden. War dies nicht erfolgreich
 wird bei negativer Distanz versucht zwischen den Contigs ein Alignment
-zu finden. Ansonst wird die Lücke zwischen den Contigs mit einer Reihe
+zu finden. Ansonsten wird die Lücke zwischen den Contigs mit einer Reihe
 von 'N'-Symbolen aufgefüllt. Bei diesem Vorgang wird die relative
 Orientierung der Contigs zueinander und zum ersten Contig
 beachtet. Dementsprechend wird jeweils die normale, die reverse oder
@@ -548,11 +548,11 @@ Report bugs to <gt-users@genometools.org>.
 
 Beim Aufruf von gt Scaffolder stellen die Optionen -contig und entweder
 -dist oder -bam Pflichtangaben dar. Wenn die Übergabe einer Distanzdatei
-im ABySS-Distance-Format (*.de) mit der Option -dist erfolgt, dann wird
+im ABySS-Distanz-Format (*.de) mit der Option -dist erfolgt, dann wird
 diese Datei eingelesen und die enthaltenen Distanzinformationen verwendet.
 Gibt man dagegen mit der Option -bam eine BAM-Datei mit Alignments der Reads
 zu den Contigs an, so werden aus der BAM-Datei die Distanzinformationen
-berechnet und im ABySS-Distance-Format (*.de) gespeichert. Diese neu erzeugte
+berechnet und im ABySS-Distanz-Format (*.de) gespeichert. Diese neu erzeugte
 Datei wird anschließend eingelesen und die enthaltenen Informationen genutzt.
 Die Verwendung einer BAM-Datei und des String-Graph Assemblers Readjoiner
 ermöglicht die Abhängigkeit zu einem Mapping-Programm (z.\,B. BWA) und der
@@ -682,7 +682,7 @@ Scaffolder (vgl. Abbildung~\ref{abb: Pipeline}) zeigt wesentliche Unterschiede
 in der Anzahl der benötigten Schritte sowie externen Abhängigkeiten auf.
 SGA durchläuft sowohl bei der Assemblierung als auch beim Scaffolding wesentlich
 mehr Schritte. Gleichzeitig besitzt die SGA-Pipeline externe Abhängigkeiten,
-was ihre Komplexität noch erhöht: Neben der Software ABySS, BWA, Samtools und
+was ihre Komplexität noch erhöht: Neben der Software ABySS, BWA, SAMtools und
 ihren Kompilierungsabhängigkeiten müssen externe Bibliotheken wie Pysam
 vorliegen, da manche Schritte der SGA-Pipeline von Perl- und Python-Skripten
 verwaltet werden.
@@ -751,9 +751,9 @@ hierbei nicht vorhanden.
 
 Insgesamt war gt Scaffolder mindestens genauso oder etwas performanter als
 SGA (vgl. Abbildung~\ref{abb: Zeit}). Der Laufzeitbedarf betrug für alle
-Berechnung nur einige Milisekunden, der maximale Speicherbedarf etwa 30 MB. gt
+Berechnung nur einige Millisekunden, der maximale Speicherbedarf etwa 30 MB. gt
 Scaffolder war dabei etwa gleich schnell oder um den Faktor $0.9\times$
-schneller als SGA. Der Speicherbedarf während der Berechung durch gt
+schneller als SGA. Der Speicherbedarf während der Berechnung durch gt
 Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
 
 \begin{table}
@@ -807,7 +807,7 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
 \subsubsection*{Ergebnisse der Sequenz-Rekonstruktion}
 Während gt Scaffolder die Scaffold-Berechnung und Rekonstruktion der Zielsequenz
 in einem Schritt berechnen kann, handelt es sich bei SGA um 2 getrennte
-Schritte: SGA scaffold und SGA scaffold2fasta. Für alle 4 Testdatensätze konnte
+Schritte: SGA Scaffold und SGA scaffold2fasta. Für alle 4 Testdatensätze konnte
 gt Scaffolder eine Sequenz-Rekonstruktion durchführen. Im Gegensatz zur
 Scaffold-Berechnung existieren hier wesentlich Unterschiede zu den mit SGA
 rekonstruierten Sequenzen (vgl. Tabelle~\ref{tab: Rekonstruktion}), welche das
@@ -904,7 +904,7 @@ ist SGA-Scaffold flexibler in der Selektion relevanter Kanten und
 Knoten als gt Scaffolder.
 
 Die Wahl der Programmiersprache C für gt Scaffolder war gut im
-Verlgeich zu einer Implementierung der Scaffolding-Software in einer
+Vergleich zu einer Implementierung der Scaffolding-Software in einer
 Skriptsprache wie z.\,B. Python, Ruby oder Perl. Bei einer
 Implementation in einer Skriptsprache wäre das Einlesen der
 verschiedenen Format wesentlich einfacher gewesen und die
