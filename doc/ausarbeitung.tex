@@ -603,31 +603,32 @@ Beschreibung der möglichen Bedeutung. Des Weiteren erfolgte zum Teil
 die Evaluierung der Güte dieser Strategien
 (siehe Abschnitt~\ref{sec: Ergebnisse}).
 
-Es folgt eine ungeordnete Auflistung solcher Strategien, teilweise um
-mögliche Erklärungen ergänzt.
 \begin{itemize}
-\item Bei der Entfernung inkonsistenter Kanten eines Knoten $k_0$
-  werden alle Kanten von den Nachbarknoten, die in der gleichen
-  Richtung (\textit{sense} oder \textit{antisense}) verlaufen wie die
-  Kante vom Nachbarknoten zu $k_0$, ebenfalls entfernt. \\
+\item Bei der Entfernung inkonsistenter Kanten eines Knotens $k_0$
+  werden alle Kanten des Nachbarknotens mit der gleichen Richtung
+  (\textit{sense} oder \textit{antisense}) wie die inkonsistente
+  Kante ebenfalls gelöscht.\\
   Mögliche Erklärung: Potentiell enthalten auch diese Kanten
   Inkonsistenzen und sollten deshalb nicht weiter betrachtet werden.
 \item Bei der Konstruktion des Graphen werden zwischen zwei Knoten
-  jeweils nur zwei Kante eingefügt, eine Hin- und eine Rückkante.
-  Wenn es mehr als ein mögliches Kantenpaar gibt, wird das Kantenpaar mit der
-  größten Standardabweichung gewählt. Die Güte dieser Strategie wurde
-  exemplarisch evaluiert (vgl. Abschnitt~\ref{sec: wunderlich_assert}).\\
+  jeweils nur zwei Kanten eingefügt, eine Hin- und eine Rückkante.
+  Wenn für ein Contig-Paar mehr als eine Distanzinformation existiert,
+  also für zwei Knoten mehr als ein mögliches Kantenpaar gibt,
+  wird das Kantenpaar mit der größten Standardabweichung gewählt.
+  Die Güte dieser Strategie wurde exemplarisch evaluiert
+  (vgl. Abschnitt~\ref{sec: wunderlich_assert}).\\
   Mögliche Erklärung: keine.
 \item Bei der Klassifikation der Knoten als repetitiv oder eindeutig
-  wird zusätzlich zu der A-Statistik auch die berechnete Anzahl an
-  Kopien für jeden repräsentierten Contig betrachtet. Ein Knoten wird
+  wird neben der A-Statistik auch die berechnete Anzahl an
+  Kopien des zugehörigen Contigs betrachtet. Ein Knoten wird
   dabei als repetitiv markiert und später entfernt, wenn die
-  berechnete Anzahl an Kopien für den repräsentierten Contig zu gering
-  ist. \\
+  A-Statistik oder aber die berechnete Anzahl an Kopien des zugehörigen
+  Contigs unterhalb eines Schwellenwertes liegt. \\
   Mögliche Erklärung: Die Contigs mit einer zu geringen
-  Kopiezahl sind potentiell fehlerhaft und sollten nicht betrachtet
-  werden. Die Markierung als repetitiv ist dabei semantisch falsch und
-  dient nur der späteren Entfernung des zugehörigen Knoten.
+  Kopiezahl sind potentiell fehlerhaft und sollten daher unberücksichtigt
+  bleiben. Die Markierung als repetitiv in diesen Fällen ist jedoch
+  semantisch inkorrekt und dient nur der späteren Entfernung des
+  zugehörigen Knotens.
 \end{itemize}
 
 \section{Ergebnisse}
