@@ -499,15 +499,15 @@ und besteht aus Knoten und Kanten, die über Zeiger miteinander verknüpft sind.
 Die Knoten repräsentieren die Contigs und enthalten als Eigenschaften dessen
 Header Sequenz, Sequenzlänge, A-Statistik Wert und Kopiezahl. Außerdem
 verfügen sie über einen Zustand, der die Klassifikation des Knotens beschreibt
-(z.\,B. polymorphe oder repetitive Knoten), und besitzen Zeiger auf ihre ausgehenden
-Kanten.
+(z.\,B. polymorphe oder repetitive Knoten), und besitzen Zeiger auf ihre
+ausgehenden Kanten.
 
 Die Kanten stellen die Distanzinformationen zwischen den Contigs dar und
 enthalten als Eigenschaften den paarweisen Abstand, deren Standardabweichung,
 die Anzahl der Read-Paare, die zur Abstandsberechnung verwendet wurden und die
-Strangorientierung der beteiligten Contigs und Reads. Des Weiteren besitzen sie einen
-Zustand, der die Klassifikation der Kante beschreibt (z.\,B. inkonsistente oder
-polymorphe Kanten) und Zeiger auf die beteiligten Contigs.
+Strangorientierung der beteiligten Contigs und Reads. Des Weiteren besitzen
+sie einen Zustand, der die Klassifikation der Kante beschreibt (z.\,B.
+inkonsistente oder polymorphe Kanten) und Zeiger auf die beteiligten Contigs.
 
 Die Module Parser und Algorithms benutzen den Graph. Der Parser liest
 die Informationen für die Contigs aus der Datei im FASTA-Format und
@@ -522,20 +522,20 @@ einzelnen Contigs durchgeführt, wenn eine separate Datei mit diesen
 Informationen übergeben wird. Beide Module haben eine transitive
 Abhängigkeit von den Knoten und Kanten.
 
-Die Beziehungen zwischen diesen Modulen ist in Abbildung~\ref{abb:
-  UML} anhand eines UML-Diagramms dargestellt.
-
-Wie in Abbildung~\ref{abb: UML} erkenntlich ist, hat das Modul
-Bamparser keinerlei Abhängigkeiten zu den anderen Modulen. Mit diesem
-Modul werden die Distanzinformationen generiert, wenn eine Datei im
-BAM-Format übergeben wird. Da es keine Abhängigkeiten zu anderen
-Modulen gibt, könnte der Bamparser auch als selbständiges Tool in die
-GenomeTools aufgenommen werden.
+Das Modul Bamparser weist keine Abhängigkeiten zu anderen Modulen auf
+(siehe Abbildung~\ref{abb: UML}). Es dient der Erzeugung der
+Distanzinformationen auf der Basis einer BAM-Datei und legt diese
+in der Datenstruktur DistRecords ab. Aufgrund der fehlenden
+Abhängigkeiten zu anderen Modulen könnte der Bamparser auch als
+selbständiges Tool in die GenomeTools integriert werden.
 
 Das Modul zur Rekonstruktion der Sequenzen ist abhängig von dem
-Algorithms Modul, da es eine bestimmte Repräsentation der Scaffolds
-erwartet. Ansonsten hält es Abhängigkeiten zu den Knoten und Kanten
-aber nicht zum Graph.
+Modul Algorithms, da es eine bestimmte Repräsentation der Scaffolds
+erwartet. Ansonsten besitzt es Abhängigkeiten zu den Knoten und Kanten,
+aber nicht zum Graphen.
+
+Die Beziehungen zwischen den Modulen sind in Abbildung~\ref{abb:
+  UML} anhand eines UML-Diagramms dargestellt.
 
 \begin{figure}
   \centering
