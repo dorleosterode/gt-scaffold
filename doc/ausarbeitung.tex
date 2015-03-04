@@ -976,29 +976,29 @@ MaxStdDev-Strategie in gt Scaffolder implementiert.
 
 \subsection{Scaffold-Berechnung durch gt Scaffolder und SGA im Vergleich}
 
-Wie in Tabelle~\ref{tab: Scaffolding} dargestellt, konnten für die Scaffold-
-Berechnung mit gt Scaffolder im Vergleich zu SGA Scaffold nahezu identische
-Metriken erzielt werden. Gleichzeitig war der Laufzeit- und
-Speicherplatzbedarf
-leicht bis deutlich geringer.
-Hierbei lassen die Ergebnisse der Scaffold- Berechnung lassen keine
-Rückschlüsse auf eine Korrelation zwischen der Größe der Zielsequenz und der
-Qualität der Ergebnisse zu. Auch die Größe des Scaffold-Graphen, welche von
-der Anzahl der eingehenden Contigs abhängt, scheint keinen Einfluss zu haben.
-So konnte die größten Abdeckungen über 90\% für das kleinste (\textit{S.
-cerevisiae}, 1694 contigs) und zweitgrößte (\textit{C. elegans}, 11113
-contigs) der Referenzgenome erzielt werden.
-Die Laufzeit korreliert für die 4 betrachteten Datensätze zwar nicht mit der
-Größe des Scaffold Graphen, steigt jedoch mit der Länge des Zielgenoms an. Der
-Speicherplatzbedarf scheint von einer Kombination beider Faktoren abzuhängen
-und unterliegt für gt Scaffolder stärkeren Schwankungen als SGA (vgl.
+Wie in Tabelle~\ref{tab: Scaffolding} dargestellt, konnten für die
+Scaffold-Berechnung mit gt Scaffolder im Vergleich zu SGA Scaffold
+nahezu identische Metriken erzielt werden. Gleichzeitig war der
+Laufzeit- und Speicherplatzbedarf leicht bis deutlich geringer.
+Hierbei lassen die Ergebnisse der Scaffold-Berechnung keine
+Rückschlüsse auf eine Korrelation zwischen der Größe der Zielsequenz
+und der Qualität der Ergebnisse zu. Auch die Größe des
+Scaffold-Graphen, welche von der Anzahl der eingehenden Contigs
+abhängt, scheint keinen Einfluss zu haben. So konnte die größten
+Abdeckungen über 90\% für das kleinste (\textit{S.  cerevisiae}, 1694
+Contigs) und zweitgrößte (\textit{C. elegans}, 11113 Contigs) der
+Referenzgenome erzielt werden.  Die Laufzeit korreliert für die 4
+betrachteten Datensätze zwar nicht mit der Größe des Scaffold-Graphen,
+steigt jedoch mit der Länge des Zielgenoms an. Der Speicherplatzbedarf
+scheint von einer Kombination beider Faktoren abzuhängen und
+unterliegt für gt Scaffolder stärkeren Schwankungen als SGA (vgl.
 Abbildung~\ref{abb: Zeit}).
 
 Das in gt Scaffolder implementierte Modul zur Sequenz-Rekonstruktion konnte
 hingegen keine vergleichbar guten Ergebnisse wie SGA scaffold2fasta liefern
-(vgl. Abbildung~\ref{tab: Rekonstruktion}). Dafür kann es mehrere potentielle
-Ursachen geben: SGA modifiziert String-Graphen nach dem Einlesevorgang noch
-weiter und schließt Lücken zwischen Scaffolds mit negativer Distanz anhand des
+(vgl. Abbildung~\ref{tab: Rekonstruktion}). Dafür kann es verschiedene, mögliche
+Ursachen geben: SGA modifiziert den String-Graphen nach dem Einlesen noch
+weiter und schließt Lücken zwischen Contigs mit negativer Distanz anhand des
 Graphen. Zusätzlich unterscheiden sich die Strategien zur
 Alignment-Berechnung. Während gt Scaffolder ein Distanz-Modell verwendet,
 nutzt SGA ein Ähnlichkeits-Scoring-Modell, welches übereinstimmende Basen
