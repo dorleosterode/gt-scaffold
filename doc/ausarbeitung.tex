@@ -394,7 +394,7 @@ das SPM-Format (*.spm) umgeschrieben. Das SPM-Format wird von
 Readjoiner verwendet um String-Graphen zu repräsentieren.
 
 Wie in Abbildung \ref{abb: spm} dargestellt, ist das SPM-Format ein
-Zeilenbasiertes Format. In jeder Zeile ist ein Suffix-Präfix-Match
+zeilenbasiertes Format. In jeder Zeile ist eine Suffix-Präfix-Überlappung
 eingetragen. Die erste Zahl repräsentiert den einen Contig oder Read,
 das folgende Zeichen gibt den Strang an ('+' steht für den
 \textit{sense}-Strang und '-' für den \textit{antisense}-Strang), die
@@ -412,14 +412,14 @@ einer komprimierten Sequenzrepräsentation in den GenomeTools.
 39261 - 1 + 137
 2 + 27698 + 149
 \end{verbatim}
-\caption{\label{abb: spm}Beispielzeilen aus der \textit{.spm}-Datei des
+\caption{\label{abb: spm}Beispielzeilen aus der .spm-Datei des
   String-Graphen für den \textit{C. elegans} Testdatensatz.}
 \end{figure}
 
-Mit dieser Repräsentation des String-Graphen nach der Assemblierung
-wird der String-Graph wieder aufgebaut. Dazu wird die Datei im
-SPM-Format mit Infrastruktur eingelesen, die in den Readjoiner
-zugrunde liegenden Bibliotheken vorhanden ist.
+Aus dieser Repräsentation wird der String-Graph nach der Assemblierung
+wieder aufgebaut. Dazu wird die Datei im SPM-Format mit Infrastruktur
+eingelesen, die in den Readjoiner zugrunde liegenden Bibliotheken
+vorhanden ist.
 
 Der String-Graph wird anschließend für jedes Paar
 aufeinanderfolgender Contigs $c_1$, $c_2$ in jedem Scaffold mit einer
