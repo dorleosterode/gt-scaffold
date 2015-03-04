@@ -1001,32 +1001,31 @@ Skriptsprache.
 \label{sec: Ausblick}
 
 Die Scaffolding-Software gt Scaffolder kann um viele Optionen
-erweitert werden. So können weitere Strategien zur Selektion
-relevanter Knoten und Kanten implementiert werden, um für den
-jeweiligen Datensatz eine gute Lösung produzieren zu
-können. Z.\,B. können weitere Zyklendetektionsalgorithmen, wie in
-SGA Scaffold, implementiert werden. Ebenso ist in SGA Scaffold die
-Möglichkeit vorhanden transitive Kanten zu entfernen.
+erweitert werden. Dazu gehört die Implementation weiterer Strategien
+zur Selektion relevanter Knoten und Kanten, um für den jeweiligen
+Datensatz eine gute Lösung produzieren zu können. Beispiele für
+solche Strategien finden sich in SGA Scaffold und umfassen eine
+erweiterte Zyklendetektion oder Entfernung transitiver Kanten.
 
 Zusätzlich sollten die konservativen Strategien zur Klassifikation in
-repetitive bzw. eindeutige Knoten untersucht werden. Durch besser
-gewählte Schwellenwerte könnten bessere Ergebnisse erzielt werden. Die
-in Abschnitt\ref{sec: wunderlich} dokumentierten Strategien sollten
-ebenfalls überprüft werden.
+repetitive bzw. eindeutige Knoten untersucht werden. So ist es möglich
+durch Anpassung der entsprechenden Schwellenwerte bessere Ergebnisse zu
+erzielen. Außerdem muss die Güte der in Abschnitt~\ref{sec: wunderlich}
+dokumentierten Strategien beleuchtet werden. 
 
-gt Scaffolder bietet zudem einen Ausgangspunkt für eine Laufzeit- und
-Speicherplatzoptimierung. Die Ergebnisse bezüglich dieser Aspekte sind
-schon vielversprechend und könnten noch weiter optimiert werden. Für
-eine Laufzeitoptimierung ist eine Parallelisierung einiger Schritte
-möglich. So ist die Berechnung der einzelnen Scaffolds unabhängig
-voneinander, da diese für die einzelnen Zusammenhangskomponenten
-berechnet werden. Nach der Ermittlung der Zusammenhangskomponenten
-könnten die Zyklendetektion und später das eigentliche Scaffolding für
-jede Zusammenhangskomponente in einem eigenen Thread durchgeführt
-werden. Durch die Verwendung effizienterer Datenstrukturen können
-ebenfalls Laufzeit und Speicherplatzbedarf eingespart werden. Der
-Fokus der hier beschriebenen Implementation lag nicht auf Laufzeit-
-und Speicherplatzeffizienz.
+Des Weiteren bietet gt Scaffolder einen Ausgangspunkt für eine Laufzeit-
+und Speicherplatzoptimierung. Andererseits zeigen die Laufzeit alsauch der
+Speicherplatzbedarf anhand der Ergebnisse~\ref{sec: Ergebnisse}
+bereits ein gutes Verhalten. Die Parallelisierung einiger Schritte
+stellt eine Möglichkeit der Laufzeitoptimierung dar. So ist die
+Berechnung der Scaffolds unabhängig voneinander durchführbar, da diese
+für jede Zusammenhangskomponente separat ermittelt werden. Nach der
+Bestimmung der Zusammenhangskomponenten könnten die Zyklendetektion
+und später das eigentliche Scaffolding für jede Zusammenhangskomponente
+in einem eigenen Thread stattfinden. Schließlich können die Verwendung
+effizienterer Datenstrukturen eine Einsparung bei der Laufzeit und
+Speicherplatz bewirken. Der Fokus der hier beschriebenen Implementation
+lag nicht auf Laufzeit- und Speicherplatzeffizienz.
 
 Wie in Abschnitt\ref{sec: Ergebnisse} aufgezeigt ist die
 Implementation des Moduls zur Rekonstruktion der Sequenzen
