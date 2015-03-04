@@ -995,49 +995,39 @@ hingegen keine vergleichbar guten Ergebnisse wie SGA scaffold2fasta liefern
 (vgl. Abbildung~\ref{tab: Rekonstruktion}). Dafür kann es mehrere potentielle
 Ursachen geben: SGA modifiziert String-Graphen nach dem Einlesevorgang noch
 weiter und schließt Lücken zwischen Scaffolds mit negativer Distanz anhand des
-Graphen. Zusätzlich unterscheiden sich die Strategien zur Alignment-
-Berechnung. Während gt Scaffolder ein Distanz-Modell verwendet, nutzt SGA ein
-Ähnlichkeits-Scoring-Modell, welches übereinstimmende Basen stärker positiv
-bewertet. Darüber hinaus kann SGA Contigs ausgeben, welche nicht im Scaffold
-enthalten sind. Diese Option (--write-unplaced), welche gegebenenfalls eine
-höhere Abdeckung der Zielsequenz erzielen kann, ist in gt Scaffolder noch
-nicht implementiert und wurde auch nicht zur Sequenz- Rekonstruktion
-verwendet.
+Graphen. Zusätzlich unterscheiden sich die Strategien zur
+Alignment-Berechnung. Während gt Scaffolder ein Distanz-Modell verwendet,
+nutzt SGA ein Ähnlichkeits-Scoring-Modell, welches übereinstimmende Basen
+stärker positiv bewertet. Darüber hinaus kann SGA Contigs ausgeben, welche
+nicht im Scaffold enthalten sind. Diese Option (--write-unplaced), welche
+gegebenenfalls eine höhere Abdeckung der Zielsequenz erzielen kann, ist in gt
+Scaffolder noch nicht implementiert und wurde auch nicht zur
+Sequenz-Rekonstruktion verwendet.
 
 \subsection{Evaluation der technischen Implementation}
 
+Sowohl gt Scaffolder (vgl. Abbildung~\ref{abb: help}) als auch SGA bieten
+viele vom Nutzer definierbare Parameter und Optionen an. Eine Vielzahl dieser
+Parameter ist optional und ermöglicht eine Feinabstimmung der Scaffold-
+Berechnung, falls die Standardwerte unzureichend sind. Lediglich bei der
+Selektion relevanter Knoten und Kanten ist SGA flexibler als gt Scaffolder.
 
+gt Scaffolder wurde vollständig in C implementiert. Dies ermöglicht eine hohe
+Ausführungsgeschwindigkeit bei geringem Speicherbedarf und einer
+vergleichsweise geringen Codegröße von etwas mehr als 200 KB -- das in C++
+implementierte SGA Scaffold ist etwa 500 KB groß.
 
-%%%%%%%%%%%%%%%%%%%%%%%
-
-SGA Scaffold hat viele Parameter und Optionen für das Scaffolding. So
-kann die Strategie für die Auswahl der relevanten Knoten und Kanten
-ausgewählt werden. gt Scaffolder implementiert hingegen nur eine
-dieser möglichen Optionen. Die meisten Parameter, die bei SGA Scaffold
-gewählt werden können, sind auch bei gt Scaffolder einstellbar. Somit
-ist SGA Scaffold flexibler in der Selektion relevanter Kanten und
-Knoten als gt Scaffolder.
-
-Die Wahl der Programmiersprache C für gt Scaffolder war gut im
-Vergleich zu einer Implementierung der Scaffolding-Software in einer
-Skriptsprache wie z.\,B. Python, Ruby oder Perl. Bei einer
-Implementation in einer Skriptsprache wäre das Einlesen der
-verschiedenen Format wesentlich einfacher gewesen und die
-Implementation schneller beendet, da Stringmanipulation in diesen
-Sprachen nicht so aufwändig ist. Allerdings hätte die in den
-GenomeTools vorhandene Infrastruktur nicht so einfach genutzt werden
-können. So hätte vor allem die Implementation des Moduls zur
-Rekonstruktion der Sequenzen länger gedauert. Es hätten
-Datenstrukturen wie der String-Graph nutzbar gemacht oder neu
-implementiert werden müssen. Ebenfalls hätten vorhandene
-Implementationen von Algorithmen wie z.\,B. die Implementation des
-Smith-Waterman-Algorithmus zur Berechnung lokaler Alignments nicht
-einfach genutzt werden können. Der geringere Verbrauch an
-Speicherplatz wäre in einer Skriptsprache wahrscheinlich nicht möglich
-gewesen. Durch die Infrastruktur der GenomeTools waren Datenstrukturen
-wie z.\,B. Arrays, Queues oder Hashes schon vorhanden. Dadurch war die
-Nutzung solcher Datenstrukturen vergleichbar komfortabel mit einer
-Skriptsprache.
+Durch die in den GenomeTools-Bibliotheken vorhandene Datenstrukturen und
+Konzepte, wie beispielsweise Arrays, Queues und Hashes war die Implementierung
+ähnlich komfortabel zu einer höheren, objektorientierten Sprache wie C++. Es
+konnte ebenfalls auf vorhandene, spezialisierte Algorithmen und
+Datenstrukturen zurückgegriffen werden, die unter anderem die Berechung
+lokaler Alignments (Smith-Waterman- Algorithmus) oder die Nutzung eines
+String-Graphen möglich machen. Dies stellt neben der höheren
+Ausführungsgeschwindigkeit einen wesentlichen Vorteil gegenüber der Nutzung
+von Skriptsprachen (Python, Ruby, Perl, $\ldots$) dar. Dort hätten die
+vorhandenen Möglichkeiten zur Stringmanipulation wiederum das Einlesen der
+Eingabeformate vereinfacht.
 
 \section{Ausblick}
 \label{sec: Ausblick}
