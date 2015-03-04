@@ -875,12 +875,9 @@ static int load_read_set(ReadSet *readset,
           gt_str_set(name, gt_samfile_iterator_reference_name(
                          bam_iterator, readset->read[next_free].tid));
           readset->read[next_free].ref_name = gt_str_clone(name);
-          readset->read[next_free].ref_len = 0;
-        /*              SK: DOES NOT COMPILE OTHERWISE
-
-                        gt_samfile_iterator_reference_length(
+          readset->read[next_free].ref_len = 
+                         gt_samfile_iterator_reference_length(
                          bam_iterator, readset->read[next_free].tid);
-        */
 
         }
         else {
