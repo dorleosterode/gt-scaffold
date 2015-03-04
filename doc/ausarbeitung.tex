@@ -748,7 +748,7 @@ Abhängigkeit zu gt Readjoiner. Zum Zeitpunkt dieser Ausarbeitung ist die
 Schnittstelle zu Readjoiner noch nicht vollständig implementiert
 (vgl. Abschnitt~\ref{sec: Ausblick}). Darüber hinaus ist gt Scaffolder zur
 SGA-Pipeline kompatibel und kann dieselben Eingabedaten verarbeiten wie
-SGA Scaffold.
+SGA Scaffold (vgl. Abbildung~\ref{abb: gtscaffolder}).
 
 \subsection{Scaffold-Berechnung durch gt Scaffolder und SGA im Vergleich}
 Zur Überprüfung und Evaluation wurden Scaffolds für verschiedene Testdaten durch
@@ -858,7 +858,7 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
   \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{presentation/figures/sga_vs_gt.pdf}
   \caption{\label{abb: Zeit}Graphische Darstellung der Laufzeit (Graphen) und
   des Speicherplatzbedarfs (Balkendiagramme) von gt Scaffolder (grün) und SGA
-  Scaffold (rot) für die nach Größe geordneten Testdatensätze. }
+  Scaffold (rot) für die nach Größe geordneten Testdatensätze.}
 \end{figure}
 
 
@@ -967,39 +967,44 @@ dieser Ausarbeitung ist die MaxStdDev-Strategie in gt Scaffolder implementiert.
 \section{Diskussion}
 \label{sec: Diskussion}
 
-Wie in Tabelle~\ref{tab: Scaffolding} dargestellt, konnten mit gt Scaffolder für
-die betrachteten Metriken identische Ergebnisse zu SGA erzielt werden.
-Gleichzeitig war der Laufzeit- und Speicherbedarf leicht bis deutlich geringer.
+\subsection{Scaffold-Berechnung durch gt Scaffolder und SGA im Vergleich}
 
-Die Ergebnisse der Scaffold-Berechnung lassen keine Rückschlüsse auf eine
-Korrelation zwischen der Größe der Zielsequenz und der Qualität der Ergebnisse
-zu. Auch die Größe des Scaffold-Graphen, welche von der Anzahl der eingehenden
-Contigs abhängt, scheint keinen Einfluss zu haben. So konnte die größten
-Abdeckungen über 90\% für das kleinste (\textit{S. cerevisiae}, 1694 contigs)
-und zweitgrößte (\textit{C. elegans}, 11113 contigs) der Referenzgenome erzielt
-werden.
-
-Die Laufzeit hängt für die 4 betrachteten Datensätze von der Länge des
-Zielgenoms ab, korreliert jedoch nicht mit der Größe des Scaffold Graphen. Der
-Speicherplatzbedarf scheint von einer Kombination beider Faktoren abzuhängen und
-unterliegt für gt Scaffolder stärkeren Schwankungen als SGA (vgl.
+Wie in Tabelle~\ref{tab: Scaffolding} dargestellt, konnten für die Scaffold-
+Berechnung mit gt Scaffolder im Vergleich zu SGA Scaffold nahezu identische
+Metriken erzielt werden. Gleichzeitig war der Laufzeit- und Speicherbedarf
+leicht bis deutlich geringer.
+Hierbei lassen die Ergebnisse der Scaffold- Berechnung lassen keine
+Rückschlüsse auf eine Korrelation zwischen der Größe der Zielsequenz und der
+Qualität der Ergebnisse zu. Auch die Größe des Scaffold-Graphen, welche von
+der Anzahl der eingehenden Contigs abhängt, scheint keinen Einfluss zu haben.
+So konnte die größten Abdeckungen über 90\% für das kleinste (\textit{S.
+cerevisiae}, 1694 contigs) und zweitgrößte (\textit{C. elegans}, 11113
+contigs) der Referenzgenome erzielt werden.
+Die Laufzeit korreliert für die 4 betrachteten Datensätze zwar nicht mit der
+Größe des Scaffold Graphen, steigt jedoch mit der Länge des Zielgenoms an. Der
+Speicherplatzbedarf scheint von einer Kombination beider Faktoren abzuhängen
+und unterliegt für gt Scaffolder stärkeren Schwankungen als SGA (vgl.
 Abbildung~\ref{abb: Zeit}).
 
-%%%%%%%%%%%%%%%%%%%%%%%
+Das in gt Scaffolder implementierte Modul zur Sequenz-Rekonstruktion konnte
+hingegen keine vergleichbar guten Ergebnisse wie SGA scaffold2fasta liefern
+(vgl. Abbildung~\ref{tab: Rekonstruktion}). Dafür kann es mehrere potentielle
+Ursachen geben: SGA modifiziert String-Graphen nach dem Einlesevorgang noch
+weiter und schließt Lücken zwischen Scaffolds mit negativer Distanz anhand des
+Graphen. Zusätzlich unterscheiden sich die Strategien zur Alignment-
+Berechnung. Während gt Scaffolder ein Distanz-Modell verwendet, nutzt SGA ein
+Ähnlichkeits-Scoring-Modell, welches übereinstimmende Basen stärker positiv
+bewertet. Darüber hinaus kann SGA Contigs ausgeben, welche nicht im Scaffold
+enthalten sind. Diese Option (--write-unplaced), welche gegebenenfalls eine
+höhere Abdeckung der Zielsequenz erzielen kann, ist in gt Scaffolder noch
+nicht implementiert und wurde auch nicht zur Sequenz- Rekonstruktion
+verwendet.
 
-Das Modul zur Rekonstruktion der Sequenzen ist scheinbar noch
-fehlerhaft und liefert keine vergleichbar gute Ergebnisse wie das
-äquivalente Modul von SGA. Dies kann dadurch kommen, das SGA den
-String-Graph nach dem Einlesen noch modifiziert und ebenfalls Lücken
-mit negativer Distanz anhand des String-Graphen schließt. Ebenfalls
-verwendet SGA eine andere Strategie zur Berechnung von Alignments. Bei
-dieser Berechnung verwendet das Modul von gt Scaffolder ein
-Distanz-Modell. SGA hingegen verwendet ein
-Ähnlichkeits-Scoring-Modell, welches übereinstimmende Buchstaben
-stärker positiv bewertet. Zusätzlich kann das Modul von gt Scaffolder
-die nicht im Scaffolding enthaltenen Contigs noch nicht mit
-ausgeben. SGA gibt kann diese Contigs mit ausgeben und erreicht
-dadurch gegebenenfalls eine höhere Abdeckung des Referenzgenoms.
+\subsection{Evaluation der technischen Implementation}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%
 
 SGA Scaffold hat viele Parameter und Optionen für das Scaffolding. So
 kann die Strategie für die Auswahl der relevanten Knoten und Kanten
@@ -1044,7 +1049,7 @@ Zusätzlich sollten die konservativen Strategien zur Klassifikation in
 repetitive bzw. eindeutige Knoten untersucht werden. So ist es möglich
 durch Anpassung der entsprechenden Schwellenwerte bessere Ergebnisse zu
 erzielen. Außerdem muss die Güte der in Abschnitt~\ref{sec: wunderlich}
-dokumentierten Strategien beleuchtet werden. 
+dokumentierten Strategien beleuchtet werden.
 
 Des Weiteren bietet gt Scaffolder einen Ausgangspunkt für eine Laufzeit-
 und Speicherplatzoptimierung. Andererseits zeigen die Laufzeit als auch der
@@ -1064,25 +1069,20 @@ Wie in Abschnitt\ref{sec: Ergebnisse} aufgezeigt ist die
 Implementation des Moduls zur Rekonstruktion der Sequenzen
 verbesserungsbedürftig. Bei der Rekonstruktion der Sequenzen können
 die durch gt Scaffolder erzeugten Scaffolds im SCAF-Format genutzt
-werden. Die Strategie um die Sequenzen zu rekonstruieren kann dabei
-von SGA adaptiert werden oder eine andere Strategie genutzt werden.
+werden. Die Strategie hierfür kann von SGA adaptiert werden oder eine
+alternative Strategie verwendet werden.
 
 Die Ausgaben des in den GenomeTools enthaltenen Assemblers Readjoiner
-müssen teilweise noch verändert werden um eine Nutzung mit gt
-Scaffolder in einer Pipeline zu ermöglichen. So müssen die
-Mapping-Informationen über die Reads zu den Contigs in das BAM-Format
-übertragen werden. Dabei ist das BAM-Format ein Standardformat und es
-könnte sowohl Readjoiner um eine Ausgabe im BAM-Format erweitert oder
-ein Skript zur Transformation der Information in das benötigte Format
-genutzt werden.
-
-Die Standardwerte für die einzelnen Parameter müssen bei einer
-Benutzung mit Readjoiner auf dessen Ergebnisse eingestellt werden. Die
-momentan verwendeten Standardwerte sind von SGA übernommen und
-dementsprechend auf die Ergebnisse der SGA-Pipeline optimiert. Da
-Readjoiner z.\,B. andere Ergebnisse bei der Berechnung der A-Statistik
-erreicht, müsste der Schwellenwert zur Klassifikation als nicht
-repetitive Sequenz angepasst werden.
+müssen teilweise noch angepasst werden, um eine gemeinsame Nutzung von gt
+Scaffolder und Readjoiner in einer Pipeline zu ermöglichen. So müssen die
+Informationen über das Mapping der Reads gegenüber den Contigs in das
+Standardformat BAM übertragen werden. Dabei könnte Readjoiner um
+eine Ausgabe im BAM-Format erweitert oder ein Skript zur Umwandlung der
+Informationen in das benötigte Format geschrieben werden. Des Weiteren
+müssen bei einer Benutzung mit Readjoiner die Standardwerte der
+Parameter von gt Scaffolder entsprechend angepasst werden. Die momentan
+verwendeten Standardwerte stammen aus SGA und sind auf die Ergebnisse
+der SGA-Pipeline optimiert.
 
 \section*{Anhang}
 \subsection*{Pseudocode}

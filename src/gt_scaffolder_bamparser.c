@@ -23,19 +23,18 @@
 #include <float.h>
 #include <string.h>
 
-#include "core/str_api.h"
-#include "core/unused_api.h"
 #include "core/alphabet_api.h"
-#include "core/minmax.h"
 #include "core/error.h"
-#include "core/ma_api.h"
-#include "core/types_api.h"
+#include "core/file_api.h"
 #include "core/hashmap_api.h"
+#include "core/ma_api.h"
+#include "core/minmax.h"
+#include "core/str_api.h"
+#include "core/types_api.h"
 #include "extended/sam_alignment.h"
 #include "extended/samfile_iterator.h"
 
 #include "gt_scaffolder_bamparser.h"
-#include "gt_scaffolder_parser.h"
 
 #define INCREMENT_SIZE 1024
 #define INCREMENT_SIZE_2 64
@@ -875,7 +874,7 @@ static int load_read_set(ReadSet *readset,
           gt_str_set(name, gt_samfile_iterator_reference_name(
                          bam_iterator, readset->read[next_free].tid));
           readset->read[next_free].ref_name = gt_str_clone(name);
-          readset->read[next_free].ref_len = 
+          readset->read[next_free].ref_len =
                          gt_samfile_iterator_reference_length(
                          bam_iterator, readset->read[next_free].tid);
 
