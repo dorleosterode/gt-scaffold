@@ -333,12 +333,12 @@ Der Pseudocode für die Berechnung des Scaffolds ist in Algorithmus
 
 \subsubsection{Ausgabe}
 Die ermittelten Scaffolds werden in dem gleichen Format ausgegeben,
-wie bei SGA. In diesem Format (\textit{.scaf}) steht in jeder Zeile
+wie bei SGA. In diesem Format (*.scaf) steht in jeder Zeile
 ein Scaffold. Die einzelnen Contigs mit ihren Informationen sind dabei
 durch Tabs getrennt. Ein Beispieleintrag ist in Abbildung \ref{abb:
-  scaf} dargestellt. Der erste Eintrag in einer Zeile ist die Id des
+  scaf} dargestellt. Der erste Eintrag in einer Zeile ist die ID des
 Startcontigs. Für die darauffolgenden Contigs werden folgende
-Informationen mit Kommata getrennt angegeben: Id des Contigs, Distanz
+Informationen durch Kommata getrennt angegeben: ID des Contigs, Distanz
 zu dem vorherigen Contig, Standardabweichung der Distanz, Orientierung
 zu dem vorherigen Contig (0: gleicher Strang, 1: entgegengesetzter
 Strang) und Information über die Lage des Reads aus dem Read-Paar (0:
@@ -358,7 +358,8 @@ ebenfalls ein separater Schritt. Um die Sequenzqualität zu verbessern
 wird dabei versucht Überlappungen durch Sequenzalignments aufzulösen
 und Lücken zwischen den Contigs durch Pfade im String-Graph zu
 schließen. Die Rekonstruktion der Sequenzen ist in Abschnitt \ref{sec:
-  Rekonstruktion} näher beschrieben.
+  Rekonstruktion} näher beschrieben und wurde separat evaluiert (siehe
+Abschnitt \ref{sec: Seq-Rek}).
 
 \subsubsection{Rekonstruktion der Sequenz}
 \label{sec: Rekonstruktion}
@@ -832,6 +833,7 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
 
 
 \subsubsection*{Ergebnisse der Sequenz-Rekonstruktion}
+\label{sec: Seq-Rek}
 Während gt Scaffolder die Scaffold-Berechnung und Rekonstruktion der Zielsequenz
 in einem Schritt berechnen kann, handelt es sich bei SGA um 2 getrennte
 Schritte: SGA Scaffold und SGA scaffold2fasta. Für alle 4 Testdatensätze konnte
