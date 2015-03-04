@@ -514,16 +514,27 @@ durchzuführen. Dazu gehören die Selektion der relevanten Kanten und
 Knoten und das Scaffolding an sich. Zusätzlich wird in dem Modul die
 Klassifikation anhand der A-Statistik und die Kopiezahlen für die
 einzelnen Contigs durchgeführt, wenn eine separate Datei mit diesen
-Informationen übergeben wird.
+Informationen übergeben wird. Beide Module haben eine transitive
+Abhängigkeit von den Knoten und Kanten.
 
 Die Beziehungen zwischen diesen Modulen ist in Abbildung \ref{abb:
   UML} anhand eines UML-Diagramms dargestellt.
 
-\todo{was zum bamparser schreiben}
+Wie in Abbildung \ref{abb: UML} erkenntlich ist, hat das Modul
+Bamparser keinerlei Abhängigkeiten zu den anderen Modulen. Mit diesem
+Modul werden die Distanzinformationen generiert, wenn eine Datei im
+BAM-Format übergeben wird. Da es keine Abhängigkeiten zu anderen
+Modulen gibt, könnte der Bamparser auch als selbständiges Tool in die
+GenomeTools aufgenommen werden.
+
+Das Modul zur Rekonstruktion der Sequenzen ist abhängig von dem
+Algorithms Modul, da es eine bestimmte Repräsentation der Scaffolds
+erwartet. Ansonsten hält es Abhängigkeiten zu den Knoten und Kanten
+aber nicht zum Graph.
 
 \begin{figure}
   \centering
-  \includegraphics[width=1\linewidth]{uml.eps}
+  \includegraphics[width=1\linewidth]{uml2.eps}
   \caption{Klassendiagramm für gt Scaffolder.}
 \label{abb: UML}
 \end{figure}
