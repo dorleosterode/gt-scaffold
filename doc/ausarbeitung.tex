@@ -394,7 +394,7 @@ das SPM-Format (*.spm) umgeschrieben. Das SPM-Format wird von
 Readjoiner verwendet um String-Graphen zu repräsentieren.
 
 Wie in Abbildung \ref{abb: spm} dargestellt, ist das SPM-Format ein
-Zeilenbasiertes Format. In jeder Zeile ist ein Suffix-Präfix-Match
+zeilenbasiertes Format. In jeder Zeile ist eine Suffix-Präfix-Überlappung
 eingetragen. Die erste Zahl repräsentiert den einen Contig oder Read,
 das folgende Zeichen gibt den Strang an ('+' steht für den
 \textit{sense}-Strang und '-' für den \textit{antisense}-Strang), die
@@ -412,14 +412,14 @@ einer komprimierten Sequenzrepräsentation in den GenomeTools.
 39261 - 1 + 137
 2 + 27698 + 149
 \end{verbatim}
-\caption{\label{abb: spm}Beispielzeilen aus der \textit{.spm}-Datei des
+\caption{\label{abb: spm}Beispielzeilen aus der .spm-Datei des
   String-Graphen für den \textit{C. elegans} Testdatensatz.}
 \end{figure}
 
-Mit dieser Repräsentation des String-Graphen nach der Assemblierung
-wird der String-Graph wieder aufgebaut. Dazu wird die Datei im
-SPM-Format mit Infrastruktur eingelesen, die in den Readjoiner
-zugrunde liegenden Bibliotheken vorhanden ist.
+Aus dieser Repräsentation wird der String-Graph nach der Assemblierung
+wieder aufgebaut. Dazu wird die Datei im SPM-Format mit Infrastruktur
+eingelesen, die in den Readjoiner zugrunde liegenden Bibliotheken
+vorhanden ist.
 
 Der String-Graph wird anschließend für jedes Paar
 aufeinanderfolgender Contigs $c_1$, $c_2$ in jedem Scaffold mit einer
@@ -450,10 +450,10 @@ Smith-Waterman-Algorithmus für lokale Alignments~\cite{smith}
 verwendet. Der Sequenzbereich der Contigs, in dem Alignments gesucht
 werden, wird dabei durch die im Scaffolding ermittelte Distanz und das
 dreifache der Standardabweichung festgelegt. Der Sequenzbereich wird
-natürlich auch durch die Länge der beiden Contigs mit
-eingeschränkt. Maximal werden allerdings je 500 Basen zur
-Berechnung des Alignments verwendet, um zu hohen Rechenaufwand zu
-vermeiden. Diese Maximallänge wurde von SGA übernommen.
+zusätzlich durch die Längen der beiden Contigs eingeschränkt. Maximal
+werden allerdings je 500 Basen zur Berechnung des Alignments
+verwendet, um zu hohen Rechenaufwand zu vermeiden. Diese Maximallänge
+wurde von SGA übernommen.
 
 Nur Suffix-Präfix-Überlappungen von Contig $c_1$ mit Contig $c_2$
 werden betrachtet, wenn Contig $c_1$ im Scaffold direkt vor Contig
@@ -466,15 +466,16 @@ die Mindestlänge eines Alignments auf 20 Basen festgelegt.
 Von allen gefundenen, den Kriterien entsprechenden Alignments, wird das
 Alignment mit der kleinsten Edit-Distanz gewählt. Ist $l$ die Länge
 des besten Alignments und $seq_{c_2}$ die Sequenz des Contigs $c_2$,
-so wird die Sequenz ab der Position $l$ ($seq_{c_2}[l:|seq_{c_2}|]$)
+so wird die Sequenz ab der Position $l$ ($seq_{c_2}[l,|seq_{c_2}|]$)
 zurückgegeben. Falls kein hinreichendes Alignment gefunden werden
 konnte, muss der nächste Schritt durchgeführt werden.
 
 \paragraph{Die Lücke zwischen zwei Contigs schließen}~\\
 Konnte die Lücke zwischen zwei Contigs $c_1$ und $c_2$ nicht durch
-eine Graph-Traversierung oder ein Alignment geschlossen werden, so wird
-in diesem Schritt die Sequenz mit 'N's aufgefüllt. Dabei gibt es eine
-Fallunterscheidung anhand der Distanz.
+eine Graph-Traversierung oder ein Alignment geschlossen werden, so
+wird in diesem Schritt die Sequenz mit Wiederholungen des Buchstaben
+'N' aufgefüllt. Dabei gibt es eine Fallunterscheidung anhand der
+Distanz.
 
 Ist die ermittelte Distanz zwischen $c_1$ und $c_2$ positiv, so wird
 die Sequenz von $c_2$ nicht verändert. Vor die Sequenz werden der
@@ -493,14 +494,32 @@ und besteht aus Knoten und Kanten, die über Zeiger miteinander verknüpft sind.
 Die Knoten repräsentieren die Contigs und enthalten als Eigenschaften dessen
 Header Sequenz, Sequenzlänge, A-Statistik Wert und Kopiezahl. Außerdem
 verfügen sie über einen Zustand, der die Klassifikation des Knotens beschreibt
-(z.B. polymorphe, repetitive Knoten), und besitzen Zeiger auf ihre Kanten.
+(z.\,B. polymorphe oder repetitive Knoten), und besitzen Zeiger auf ihre ausgehenden
+Kanten.
 
 Die Kanten stellen die Distanzinformationen zwischen den Contigs dar und
 enthalten als Eigenschaften den paarweisen Abstand, deren Standardabweichung,
-Anzahl der Readpaare, die zur Abstandsberechnung verwendet wurden und die
-Strangorientierung der beteiligten Contigs. Des Weiteren besitzen sie einen
-Zustand, der die Klassifikation der Kante beschreibt (z.B. inkonsistente,
+die Anzahl der Read-Paare, die zur Abstandsberechnung verwendet wurden und die
+Strangorientierung der beteiligten Contigs und Reads. Des Weiteren besitzen sie einen
+Zustand, der die Klassifikation der Kante beschreibt (z.\,B. inkonsistente oder
 polymorphe Kanten) und Zeiger auf die beteiligten Contigs.
+
+Die Module Parser und Algorithms benutzen den Graph. Der Parser liest
+die Informationen für die Contigs aus der Datei im FASTA-Format und
+die Distanzinformationen aus der entsprechenden Datei ein und
+allokiert und befüllt den Graph dementsprechend. Das Modul für die
+Algorithmen benutzt die so konstruierte Graph-Struktur um die in
+Abschnitt \ref{sec: Methoden} dargestellten Berechnungen
+durchzuführen. Dazu gehören die Selektion der relevanten Kanten und
+Knoten und das Scaffolding an sich. Zusätzlich wird in dem Modul die
+Klassifikation anhand der A-Statistik und die Kopiezahlen für die
+einzelnen Contigs durchgeführt, wenn eine separate Datei mit diesen
+Informationen übergeben wird.
+
+Die Beziehungen zwischen diesen Modulen ist in Abbildung \ref{abb:
+  UML} anhand eines UML-Diagramms dargestellt.
+
+\todo{was zum bamparser schreiben}
 
 \begin{figure}
   \centering
