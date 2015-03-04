@@ -738,13 +738,13 @@ die Evaluierung der Güte dieser Strategien
 \end{figure}
 
 Ein Vergleich der \textit{de novo}-Assemblierungs-Pipelines von SGA und gt
-Scaffolder (vgl. Abbildung~\ref{abb: Pipeline}) zeigt wesentliche Unterschiede
+Scaffolder (vgl. Abbildung~\ref{abb: Pipeline}) zeigt deutliche Unterschiede
 in der Anzahl der benötigten Schritte sowie externen Abhängigkeiten auf.
 SGA durchläuft sowohl bei der Assemblierung als auch beim Scaffolding wesentlich
 mehr Schritte. Gleichzeitig besitzt die SGA-Pipeline externe Abhängigkeiten,
 was ihre Komplexität noch erhöht: Neben der Software ABySS, BWA, SAMtools und
-ihren Kompilierungsabhängigkeiten müssen externe Bibliotheken wie Pysam
-vorliegen, da manche Schritte der SGA-Pipeline von Perl- und Python-Skripten
+deren Kompilierungsabhängigkeiten müssen externe Bibliotheken wie Pysam
+vorliegen, da einige Schritte der SGA-Pipeline von Perl- und Python-Skripten
 verwaltet werden.
 gt Scaffolder besitzt für die Assemblierung eine GenomeTools-interne
 Abhängigkeit zu gt Readjoiner. Zum Zeitpunkt dieser Ausarbeitung ist die
