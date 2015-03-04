@@ -937,39 +937,44 @@ dieser Ausarbeitung ist die MaxStdDev-Strategie in gt Scaffolder implementiert.
 \section{Diskussion}
 \label{sec: Diskussion}
 
-Wie in Tabelle~\ref{tab: Scaffolding} dargestellt, konnten mit gt Scaffolder für
-die betrachteten Metriken identische Ergebnisse zu SGA erzielt werden.
-Gleichzeitig war der Laufzeit- und Speicherbedarf leicht bis deutlich geringer.
+\subsection{Scaffold-Berechnung durch gt Scaffolder und SGA im Vergleich}
 
-Die Ergebnisse der Scaffold-Berechnung lassen keine Rückschlüsse auf eine
-Korrelation zwischen der Größe der Zielsequenz und der Qualität der Ergebnisse
-zu. Auch die Größe des Scaffold-Graphen, welche von der Anzahl der eingehenden
-Contigs abhängt, scheint keinen Einfluss zu haben. So konnte die größten
-Abdeckungen über 90\% für das kleinste (\textit{S. cerevisiae}, 1694 contigs)
-und zweitgrößte (\textit{C. elegans}, 11113 contigs) der Referenzgenome erzielt
-werden.
-
-Die Laufzeit hängt für die 4 betrachteten Datensätze von der Länge des
-Zielgenoms ab, korreliert jedoch nicht mit der Größe des Scaffold Graphen. Der
-Speicherplatzbedarf scheint von einer Kombination beider Faktoren abzuhängen und
-unterliegt für gt Scaffolder stärkeren Schwankungen als SGA (vgl.
+Wie in Tabelle~\ref{tab: Scaffolding} dargestellt, konnten für die Scaffold-
+Berechnung mit gt Scaffolder im Vergleich zu SGA Scaffold nahezu identische
+Metriken erzielt werden. Gleichzeitig war der Laufzeit- und Speicherbedarf
+leicht bis deutlich geringer.
+Hierbei lassen die Ergebnisse der Scaffold- Berechnung lassen keine
+Rückschlüsse auf eine Korrelation zwischen der Größe der Zielsequenz und der
+Qualität der Ergebnisse zu. Auch die Größe des Scaffold-Graphen, welche von
+der Anzahl der eingehenden Contigs abhängt, scheint keinen Einfluss zu haben.
+So konnte die größten Abdeckungen über 90\% für das kleinste (\textit{S.
+cerevisiae}, 1694 contigs) und zweitgrößte (\textit{C. elegans}, 11113
+contigs) der Referenzgenome erzielt werden.
+Die Laufzeit korreliert für die 4 betrachteten Datensätze zwar nicht mit der
+Größe des Scaffold Graphen, steigt jedoch mit der Länge des Zielgenoms an. Der
+Speicherplatzbedarf scheint von einer Kombination beider Faktoren abzuhängen
+und unterliegt für gt Scaffolder stärkeren Schwankungen als SGA (vgl.
 Abbildung~\ref{abb: Zeit}).
 
-%%%%%%%%%%%%%%%%%%%%%%%
+Das in gt Scaffolder implementierte Modul zur Sequenz-Rekonstruktion konnte
+hingegen keine vergleichbar guten Ergebnisse wie SGA scaffold2fasta liefern
+(vgl. Abbildung~\ref{tab: Rekonstruktion}). Dafür kann es mehrere potentielle
+Ursachen geben: SGA modifiziert String-Graphen nach dem Einlesevorgang noch
+weiter und schließt Lücken zwischen Scaffolds mit negativer Distanz anhand des
+Graphen. Zusätzlich unterscheiden sich die Strategien zur Alignment-
+Berechnung. Während gt Scaffolder ein Distanz-Modell verwendet, nutzt SGA ein
+Ähnlichkeits-Scoring-Modell, welches übereinstimmende Basen stärker positiv
+bewertet. Darüber hinaus kann SGA Contigs ausgeben, welche nicht im Scaffold
+enthalten sind. Diese Option (--write-unplaced), welche gegebenenfalls eine
+höhere Abdeckung der Zielsequenz erzielen kann, ist in gt Scaffolder noch
+nicht implementiert und wurde auch nicht zur Sequenz- Rekonstruktion
+verwendet.
 
-Das Modul zur Rekonstruktion der Sequenzen ist scheinbar noch
-fehlerhaft und liefert keine vergleichbar gute Ergebnisse wie das
-äquivalente Modul von SGA. Dies kann dadurch kommen, das SGA den
-String-Graph nach dem Einlesen noch modifiziert und ebenfalls Lücken
-mit negativer Distanz anhand des String-Graphen schließt. Ebenfalls
-verwendet SGA eine andere Strategie zur Berechnung von Alignments. Bei
-dieser Berechnung verwendet das Modul von gt Scaffolder ein
-Distanz-Modell. SGA hingegen verwendet ein
-Ähnlichkeits-Scoring-Modell, welches übereinstimmende Buchstaben
-stärker positiv bewertet. Zusätzlich kann das Modul von gt Scaffolder
-die nicht im Scaffolding enthaltenen Contigs noch nicht mit
-ausgeben. SGA gibt kann diese Contigs mit ausgeben und erreicht
-dadurch gegebenenfalls eine höhere Abdeckung des Referenzgenoms.
+\subsection{Evaluation der technischen Implementation}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%
 
 SGA Scaffold hat viele Parameter und Optionen für das Scaffolding. So
 kann die Strategie für die Auswahl der relevanten Knoten und Kanten
