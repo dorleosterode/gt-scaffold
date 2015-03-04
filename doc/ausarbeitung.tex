@@ -312,16 +312,18 @@ keine Zyklen mehr gefunden werden.
 Der Pseudocode für die Detektion und das Auflösen von Zyklen ist in
 Algorithmus \ref{alg: Zyklen} abgebildet.
 
-\subsubsection{Ermittlung des besten Pfades/ Scaffolding}
+\subsubsection{Ermittlung des besten Pfades (Scaffolding)}
 
 Nach der Selektion relevanter Knoten und Kanten wird das eigentliche
 Scaffolding durchgeführt. Dazu werden alle Zusammenhangskomponenten
 des Graphen bestimmt, um für jede Zusammenhangskomponente die beste
 Anordnung der repräsentierten Contigs zu berechnen. Für jede
 Zusammenhangskomponente werden die kürzesten Pfade bezüglich der
-Kantengewichte zwischen terminalen Knoten mit einer Breitensuche
+Kantengewichte zwischen allen terminalen Knoten mit einer Breitensuche
 berechnet. Der kürzeste Pfad mit der meisten Sequenzabdeckung wird als
-Scaffold für die Zusammenhangskomponente gewählt.
+Scaffold für die Zusammenhangskomponente gewählt. Die Sequenzabdeckung
+eines Pfades berechnet sich dabei durch die Aufsummierung der
+Sequenzlängen der enthaltenen Contigs.
 
 Contigs, deren repräsentierende Knoten keine oder nur markierte Kanten
 haben, werden ebenfalls als Scaffolds gewählt.
