@@ -16,6 +16,7 @@
 %% \usepackage{algorithm}
 \usepackage{graphicx}
 \usepackage{placeins}
+\usepackage{siunitx}  % Einheiten mit korrekten Leerzeichen
 
 % an seitenbreite angepasste tabellen
 \usepackage{booktabs}
@@ -266,7 +267,7 @@ dem die Summe der Wahrscheinlichkeiten ein Maximum erreicht.
 \subsubsection{Konstruktion des Graphen}
 Aus den Contigs und den Distanzinformationen wird der Scaffold-Graph
 konstruiert. Dabei wird für jeden Contig, der eine Mindestlänge von
-200 bp überschreitet, eine A-Statistik größer 19 und eine berechnete
+\SI{200}{bp} überschreitet, eine A-Statistik größer 19 und eine berechnete
 Anzahl an Kopien von mindestens \num{0.3} hat, ein Knoten in den Graph
 eingefügt. Die Distanzinformationen werden genutzt um die Knoten durch
 Kanten miteinander zu verbinden. Dabei werden zwischen jedem Paar von
@@ -289,7 +290,7 @@ werden folgende Kriterien überprüft:
 \item Inkonsistente Kanten: Zwei Kanten $e_1$ und $e_2$ gelten als
   inkonsistent, wenn sich die Endknoten $e_1.end$ und $e_2.end$ bei
   einer Anordnung anhand ihrer Distanz bezüglich des gemeinsamen
-  Startknotens $e_1.start = e_2.start$ mit mindestens 400 bp
+  Startknotens $e_1.start = e_2.start$ mit mindestens \SI{400}{bp}
   überlappen. Gehen von einem Knoten zwei inkonsistente Kanten aus, so
   werden alle ausgehenden Kanten des Knotens sowie ihre Rückkanten als
   inkonsistent markiert. Zusätzlich werden alle Kanten der über
@@ -758,30 +759,29 @@ Schnittstelle zu Readjoiner noch nicht vollständig implementiert
 SGA-Pipeline kompatibel und kann dieselben Eingabedaten verarbeiten wie
 SGA Scaffold (vgl. Abbildung~\ref{abb: gtscaffolder}).
 
-\subsection{Scaffold-Berechnung durch gt Scaffolder und SGA im Vergleich}
-Zur Überprüfung und Evaluation wurden Scaffolds für verschiedene Testdaten durch
+\subsection{Scaffold-Berechnung durch gt Scaffolder und SGA im Vergleich} Zur
+Überprüfung und Evaluation wurden Scaffolds für verschiedene Testdaten durch
 gt Scaffolder berechnet. Zur besseren Einordnung der Ergebnisse wurde eine
-Scaffold-Berechnung ebenfalls mit SGA durchgeführt. Die Berechnungen wurden auf
-einem Computer mit 3.10~GHz Intel Core-i7 Prozessor, 8GB Arbeitsspeicher unter
-einem 64bit Linux Betriebssystem ausgeführt. Dabei wurde lediglich ein Kern
-verwendet. Das Laufzeitverhalten und der Speicherplatzbedarf wurden durch das
-in den
-GenomeTools enthaltene Skript rdj-spacepeak.sh auf 2 gleichen Computern
-gemessen, um eine eventuelle Verfälschung durch das
-Caching der Eingabedateien zu vermeiden. Die von beiden Programmen ausgegebenen
-Metriken wurden durch gt seqstat nochmals überprüft. Bei der
-Rekonstruktion der Sequenzen aus den ermittelten Scaffolds handelt es sich um
-einen separaten Schritt, der gesondert ausgewertet wurde. Hier wurden die
-Metriken durch QUAST~\cite{Gurevich:2013je} ermittelt.
+Scaffold-Berechnung ebenfalls mit SGA durchgeführt. Die Berechnungen wurden
+auf einem Computer mit \SI{3.10}{GHz} Intel Core-i7 Prozessor, \SI{8}{GB}
+Arbeitsspeicher unter einem \SI{64}{bit} Linux Betriebssystem ausgeführt.
+Dabei wurde lediglich ein Kern verwendet. Das Laufzeitverhalten und der
+Speicherplatzbedarf wurden durch das in den GenomeTools enthaltene Skript
+rdj-spacepeak.sh auf 2 gleichen Computern gemessen, um eine eventuelle
+Verfälschung durch das Caching der Eingabedateien zu vermeiden. Die von beiden
+Programmen ausgegebenen Metriken wurden durch gt seqstat nochmals überprüft.
+Bei der Rekonstruktion der Sequenzen aus den ermittelten Scaffolds handelt es
+sich um einen separaten Schritt, der gesondert ausgewertet wurde. Hier wurden
+die Metriken durch QUAST~\cite{Gurevich:2013je} ermittelt.
 
 \subsubsection*{Generierung und Assemblierung der Testdaten}
 \label{sec: Testdaten}
 Mithilfe der Software ART~\cite{Huang:2012kq} wurde eine
 Illumina-\textit{Paired-End}-Sequenzierung für vier verschiedene Referenzgenome
 (vgl. Tabelle~\ref{tab: Referenzgenome}) simuliert. Dabei wurde die Read-Länge
-auf 150 bp, die Fragmentlänge auf 400 bp $\pm$ 10 bp und die Coverage auf
+auf \SI{150}{bp}, die Fragmentlänge auf \SI{400}{bp} $\pm$ \SI{10}{bp} und die Coverage auf
 20X festgelegt sowie der Seed 123 gewählt. Die Längen der Referenzgenome
-variieren im Bereich von ca. 10 bis 140 Mbp, um die Entwicklung der Laufzeit
+variieren im Bereich von ca. 10 bis \SI{140}{Mbp}, um die Entwicklung der Laufzeit
 und des Speicherplatzbedarfs mit steigender Länge beobachten zu können.
 Getestete, kürzere Zielsequenzen konnten teilweise bereits während der
 Assemblierung vollständig rekonstruiert werden.
@@ -818,8 +818,7 @@ hierbei nicht vorhanden.
 
 Insgesamt war gt Scaffolder mindestens genauso oder etwas performanter als
 SGA (vgl. Abbildung~\ref{abb: Zeit}). Der Laufzeitbedarf betrug für alle
-Berechnung nur einige Millisekunden, der maximale Speicherplatzbedarf etwa 30
-MB. gt
+Berechnung nur einige Millisekunden, der maximale Speicherplatzbedarf etwa \SI{30}{MB}. gt
 Scaffolder war dabei etwa gleich schnell oder um den Faktor $0.9\times$
 schneller als SGA. Der Speicherplatzbedarf während der Berechnung durch gt
 Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
