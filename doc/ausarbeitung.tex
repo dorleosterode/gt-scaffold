@@ -759,7 +759,8 @@ gt Scaffolder berechnet. Zur besseren Einordnung der Ergebnisse wurde eine
 Scaffold-Berechnung ebenfalls mit SGA durchgeführt. Die Berechnungen wurden auf
 einem Computer mit 3.10~GHz Intel Core-i7 Prozessor, 8GB Arbeitsspeicher unter
 einem 64bit Linux Betriebssystem ausgeführt. Dabei wurde lediglich ein Kern
-verwendet. Das Laufzeitverhalten und der Speicherbedarf wurden durch das in den
+verwendet. Das Laufzeitverhalten und der Speicherplatzbedarf wurden durch das
+in den
 GenomeTools enthaltene Skript rdj-spacepeak.sh auf 2 gleichen Computern
 gemessen, um eine eventuelle Verfälschung durch das
 Caching der Eingabedateien zu vermeiden. Die von beiden Programmen ausgegebenen
@@ -776,7 +777,7 @@ Illumina-\textit{Paired-End}-Sequenzierung für vier verschiedene Referenzgenome
 auf 150 bp, die Fragmentlänge auf 400 bp $\pm$ 10 bp und die Coverage auf
 20X festgelegt sowie der Seed 123 gewählt. Die Längen der Referenzgenome
 variieren im Bereich von ca. 10 bis 140 Mbp, um die Entwicklung der Laufzeit
-und des Speicherbedarfs mit steigender Länge beobachten zu können.
+und des Speicherplatzbedarfs mit steigender Länge beobachten zu können.
 Getestete, kürzere Zielsequenzen konnten teilweise bereits während der
 Assemblierung vollständig rekonstruiert werden.
 
@@ -812,9 +813,10 @@ hierbei nicht vorhanden.
 
 Insgesamt war gt Scaffolder mindestens genauso oder etwas performanter als
 SGA (vgl. Abbildung~\ref{abb: Zeit}). Der Laufzeitbedarf betrug für alle
-Berechnung nur einige Millisekunden, der maximale Speicherbedarf etwa 30 MB. gt
+Berechnung nur einige Millisekunden, der maximale Speicherplatzbedarf etwa 30
+MB. gt
 Scaffolder war dabei etwa gleich schnell oder um den Faktor $0.9\times$
-schneller als SGA. Der Speicherbedarf während der Berechnung durch gt
+schneller als SGA. Der Speicherplatzbedarf während der Berechnung durch gt
 Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
 
 \begin{table}
@@ -975,7 +977,8 @@ dieser Ausarbeitung ist die MaxStdDev-Strategie in gt Scaffolder implementiert.
 
 Wie in Tabelle~\ref{tab: Scaffolding} dargestellt, konnten für die Scaffold-
 Berechnung mit gt Scaffolder im Vergleich zu SGA Scaffold nahezu identische
-Metriken erzielt werden. Gleichzeitig war der Laufzeit- und Speicherbedarf
+Metriken erzielt werden. Gleichzeitig war der Laufzeit- und
+Speicherplatzbedarf
 leicht bis deutlich geringer.
 Hierbei lassen die Ergebnisse der Scaffold- Berechnung lassen keine
 Rückschlüsse auf eine Korrelation zwischen der Größe der Zielsequenz und der
@@ -1013,7 +1016,7 @@ Berechnung, falls die Standardwerte unzureichend sind. Lediglich bei der
 Selektion relevanter Knoten und Kanten ist SGA flexibler als gt Scaffolder.
 
 gt Scaffolder wurde vollständig in C implementiert. Dies ermöglicht eine hohe
-Ausführungsgeschwindigkeit bei geringem Speicherbedarf und einer
+Ausführungsgeschwindigkeit bei geringem Speicherplatzbedarf und einer
 vergleichsweise geringen Codegröße von etwas mehr als 200 KB -- das in C++
 implementierte SGA Scaffold ist etwa 500 KB groß.
 
@@ -1032,51 +1035,44 @@ Eingabeformate vereinfacht.
 \section{Ausblick}
 \label{sec: Ausblick}
 
-Die Scaffolding-Software gt Scaffolder kann um viele Optionen
-erweitert werden. Dazu gehört die Implementation weiterer Strategien
-zur Selektion relevanter Knoten und Kanten, um für den jeweiligen
-Datensatz eine gute Lösung produzieren zu können. Beispiele für
-solche Strategien finden sich in SGA Scaffold und umfassen eine
-erweiterte Zyklendetektion oder Entfernung transitiver Kanten.
+Die Scaffolding-Software gt Scaffolder kann um weitere Optionen erweitert
+werden. Dazu gehört die Implementation weiterer Strategien zur Selektion
+relevanter Knoten und Kanten, um eine feinere Abstimmung der Scaffold-
+Berechnung zu ermögichen. Beispiele für solche Strategien finden sich in SGA
+Scaffold und umfassen eine erweiterte Zyklendetektion oder Entfernung
+transitiver Kanten.
 
-Zusätzlich sollten die konservativen Strategien zur Klassifikation in
-repetitive bzw. eindeutige Knoten untersucht werden. So ist es möglich
-durch Anpassung der entsprechenden Schwellenwerte bessere Ergebnisse zu
-erzielen. Außerdem muss die Güte der in Abschnitt~\ref{sec: wunderlich}
-dokumentierten Strategien beleuchtet werden.
+Zusätzlich sollten die konservativen Strategien zur Klassifikation
+repetitiver bzw.\ eindeutiger Knoten untersucht werden. So sollten die Güte
+der entsprechenden Standard-Schwellenwerte evaluiert werden, um potentiell
+bessere Ergebnisse erzielen zu können. Einige Strategien von SGA übernommene
+Strategien mit unklarer Bedeutung (vgl. Abschnitt~\ref{sec: wunderlich})
+müssen darüber hinaus noch überprüft werden.
 
-Des Weiteren bietet gt Scaffolder einen Ausgangspunkt für eine Laufzeit-
-und Speicherplatzoptimierung. Andererseits zeigen die Laufzeit als auch der
-Speicherplatzbedarf anhand der Ergebnisse~\ref{sec: Ergebnisse}
-bereits ein gutes Verhalten. Die Parallelisierung einiger Schritte
-stellt eine Möglichkeit der Laufzeitoptimierung dar. So ist die
-Berechnung der Scaffolds unabhängig voneinander durchführbar, da diese
-für jede Zusammenhangskomponente separat ermittelt werden. Nach der
-Bestimmung der Zusammenhangskomponenten könnten die Zyklendetektion
-und später das eigentliche Scaffolding für jede Zusammenhangskomponente
-in einem eigenen Thread stattfinden. Schließlich können die Verwendung
-effizienterer Datenstrukturen eine Einsparung bei der Laufzeit und
-Speicherplatz bewirken. Der Fokus der hier beschriebenen Implementation
-lag nicht auf Laufzeit- und Speicherplatzeffizienz.
+Obwohl gt Scaffolder einen geringeren Laufzeit- und der Speicherplatzbedarf
+als SGA aufweist, lag der Fokus der hier beschriebenen Implementation nicht
+auf der Zeit- und Speichereffizienz. Hier stellt die Parallelisierung einiger
+Schritte eine Möglichkeit der Laufzeitoptimierung dar. So können die
+Scaffolds unabhängig voneinander berechnet werden, da deren Ermittlung für
+jede Zusammenhangskomponente separat erfolgt. Die Zyklendetektion und das
+darauf folgende eigentliche Scaffolding könnte folglich für jede
+Zusammenhangskomponente in einem eigenen Thread stattfinden. Schließlich
+könnte die Verwendung effizienterer Datenstrukturen eine Einsparung bei der
+Lufzeit und Speicherplatz bewirken.
 
-Wie in Abschnitt\ref{sec: Ergebnisse} aufgezeigt ist die
-Implementation des Moduls zur Rekonstruktion der Sequenzen
-verbesserungsbedürftig. Bei der Rekonstruktion der Sequenzen können
-die durch gt Scaffolder erzeugten Scaffolds im SCAF-Format genutzt
-werden. Die Strategie hierfür kann von SGA adaptiert werden oder eine
-alternative Strategie verwendet werden.
+Die Rekonstruktion der Zielsequenz ist noch verbesserungswürdig (vgl.
+Abschnitt~\ref{sec: Rekonstruktion}). Hier können die durch gt Scaffolder
+erzeugten Scaffolds im SCAF-Format zur Rekonstruktion genutzt werden. Dazu
+könnte eine in SGA bereits implementierte Strategie adaptiert werden.
 
-Die Ausgaben des in den GenomeTools enthaltenen Assemblers Readjoiner
-müssen teilweise noch angepasst werden, um eine gemeinsame Nutzung von gt
-Scaffolder und Readjoiner in einer Pipeline zu ermöglichen. So müssen die
+Zur gemeinsamen Nutzung in einer Pipeline, müssen weitere Anpassungen sowohl
+in gt Scaffolder als auch in Readjoiner erfolgen. So müssen die
 Informationen über das Mapping der Reads gegenüber den Contigs in das
 Standardformat BAM übertragen werden. Dabei könnte Readjoiner um
-eine Ausgabe im BAM-Format erweitert oder ein Skript zur Umwandlung der
-Informationen in das benötigte Format geschrieben werden. Des Weiteren
-müssen bei einer Benutzung mit Readjoiner die Standardwerte der
-Parameter von gt Scaffolder entsprechend angepasst werden. Die momentan
-verwendeten Standardwerte stammen aus SGA und sind auf die Ergebnisse
-der SGA-Pipeline optimiert.
+eine Ausgabe im BAM-Format erweitert oder entsprechendes Umwandlungsskript
+für das bestehende Format geschrieben werden. Des Weiteren sollten die
+Standardwerte der Parameter nach Fertigstellung der Schnittstelle evaluiert
+werden, da die momentan verwendeten Werte aus der SGA-Pipeline stammen.
 
 \section*{Anhang}
 \subsection*{Pseudocode}
