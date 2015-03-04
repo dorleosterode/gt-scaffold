@@ -1058,25 +1058,20 @@ Wie in Abschnitt\ref{sec: Ergebnisse} aufgezeigt ist die
 Implementation des Moduls zur Rekonstruktion der Sequenzen
 verbesserungsbedürftig. Bei der Rekonstruktion der Sequenzen können
 die durch gt Scaffolder erzeugten Scaffolds im SCAF-Format genutzt
-werden. Die Strategie um die Sequenzen zu rekonstruieren kann dabei
-von SGA adaptiert werden oder eine andere Strategie genutzt werden.
+werden. Die Strategie hierfür kann von SGA adaptiert werden oder eine
+alternative Strategie verwendet werden.
 
 Die Ausgaben des in den GenomeTools enthaltenen Assemblers Readjoiner
-müssen teilweise noch verändert werden um eine Nutzung mit gt
-Scaffolder in einer Pipeline zu ermöglichen. So müssen die
-Mapping-Informationen über die Reads zu den Contigs in das BAM-Format
-übertragen werden. Dabei ist das BAM-Format ein Standardformat und es
-könnte sowohl Readjoiner um eine Ausgabe im BAM-Format erweitert oder
-ein Skript zur Transformation der Information in das benötigte Format
-genutzt werden.
-
-Die Standardwerte für die einzelnen Parameter müssen bei einer
-Benutzung mit Readjoiner auf dessen Ergebnisse eingestellt werden. Die
-momentan verwendeten Standardwerte sind von SGA übernommen und
-dementsprechend auf die Ergebnisse der SGA-Pipeline optimiert. Da
-Readjoiner z.\,B. andere Ergebnisse bei der Berechnung der A-Statistik
-erreicht, müsste der Schwellenwert zur Klassifikation als nicht
-repetitive Sequenz angepasst werden.
+müssen teilweise noch angepasst werden, um eine gemeinsame Nutzung von gt
+Scaffolder und Readjoiner in einer Pipeline zu ermöglichen. So müssen die
+Informationen über das Mapping der Reads gegenüber den Contigs in das
+Standardformat BAM übertragen werden. Dabei könnte Readjoiner um
+eine Ausgabe im BAM-Format erweitert oder ein Skript zur Umwandlung der
+Informationen in das benötigte Format geschrieben werden. Des Weiteren
+müssen bei einer Benutzung mit Readjoiner die Standardwerte der
+Parameter von gt Scaffolder entsprechend angepasst werden. Die momentan
+verwendeten Standardwerte stammen aus SGA und sind auf die Ergebnisse
+der SGA-Pipeline optimiert.
 
 \section*{Anhang}
 \subsection*{Pseudocode}
