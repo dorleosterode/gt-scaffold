@@ -63,7 +63,8 @@ int main(int argc, char **argv)
   DistRecords *dist;
 
   if (argc == 1 || sscanf(argv[1], "%s", argv[1]) != 1) {
-    fprintf(stderr,"Usage: %s <module> <arguments>\n", argv[0]);
+    fprintf(stderr, "Usage: %s <module> <arguments>\n\n"
+            "MODULES:\n graph\n parser\n scaffold\n bamparser\n", argv[0]);
     exit(EXIT_FAILURE);
   }
 
@@ -222,7 +223,7 @@ int main(int argc, char **argv)
   }
   else {
     fprintf(stderr, "Usage: %s <module> <arguments>\n\n"
-            "Modules:\n\ngraph\nparser\nscaffold\nbamparser", argv[0]);
+            "MODULES:\n graph\n parser\n scaffold\n bamparser\n", argv[0]);
     exit(EXIT_FAILURE);
   }
 
