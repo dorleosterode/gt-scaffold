@@ -250,20 +250,23 @@ Programm DistEst verwendet, durchläuft folgende Schritte: Zunächst werden alle
 Reads aus der BAM-Datei geladen und die Read-Paare ermittelt. Anschließend
 werden die Fragmentlängen aller Read-Paare berechnet, die gegenüber dem
 gleichen Contig angeordnet sind, und auf deren Basis eine
-Häufigkeitsverteilung erstellt. Danach wird aus der Verteilung eine
-Wahrscheinlichkeitsfunktion für die Fragmentlängen abgeleitet. Im nächsten
-Schritt versuchen wir, den paarweisen Abstand der Contigs durch eine Maximum-
-Likelihood-Methode abzuschätzen. Dabei werden für ein Contig-Paar die
+Häufigkeitsverteilung (Histogramm) erstellt. Danach wird aus der Verteilung eine
+Wahrscheinlichkeitsfunktion für die Fragmentlängen abgeleitet.
+
+Im nächsten Schritt versuchen wir, den paarweisen Abstand der Contigs durch
+eine Maximum-Likelihood-Methode abzuschätzen. Dabei werden für ein Contig-Paar die
 zugehörigen Read-Paare ermittelt und deren Fragmentlänge berechnet unter der
 Annahme, dass die beiden Contigs lückenlos direkt aneinander angrenzen. Als
 nächstes werden mehrere Iterationen durchlaufen, in denen jeweils die
 Fragmentlängen um einen Faktor (min\_dist bis max\_dist) korrigiert werden.
-Des Weiteren erfolgt eine Aufsummierung der logarithmischen
-Wahrscheinlichkeiten (log odds) der korrigierten Fragmentlängen multipliziert
-mit dessen Häufigkeiten in jedem Durchlauf. Schließlich wählen wir den Faktor
-mit maximaler Summe der Wahrscheinlichkeiten als Abstand zwischen den Contigs.
-\todo{Strangorientierung fehlt, SD: Worauf bezieht sich dessen im vorletzten
-Satz?}
+Des Weiteren erfolgt in jedem Durchlauf die Bestimmung der logarithmischen
+Wahrscheinlichkeiten (log odds) der korrigierten Fragmentlängen und deren
+Aufsummierung. Schließlich wählen wir als Abstand zwischen den Contigs
+den Faktor, bei dem die Summe der Wahrscheinlichkeiten ein Maximum erreicht.
+
+Neben dem paarweisen Abstand der Contigs wird zusätzlich die relative
+Orientierung der Contigs zueinander ermittelt mithilfe der Read-Paar
+Informationen aus der BAM-Datei.
 
 \subsubsection{Konstruktion des Graphen}
 Aus den Contigs und den Distanzinformationen wird der Scaffold-Graph
