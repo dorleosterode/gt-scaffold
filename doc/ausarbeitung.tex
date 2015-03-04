@@ -298,20 +298,19 @@ Kanten ist in Algorithmus \ref{alg: Selektion} dargestellt.
 
 Zusätzlich werden gerichtete Zyklen aufgelöst. Dazu werden alle
 Zusammenhangskomponenten des Graphen berechnet. Für jede dieser
-Zusammenhangskomponente wird mit einer rekursiven Tiefensuche nach
+Zusammenhangskomponenten wird mit einer rekursiven Tiefensuche nach
 Rückkanten gesucht. Dabei wird diese Tiefensuche von jedem terminalen
 Knoten, ein Knoten der nur ausgehende \textit{sense} oder
 \textit{antisense} Kanten hat, aus gestartet. Wird eine Rückkante
 gefunden, so werden die Kante und die durch die Kante verbundenen
-Knoten als zyklisch markiert und nicht weiter betrachtet.
-
-Da sich durch die Entfernung einer Kante die Struktur des Graphen
+Knoten als zyklisch markiert und nicht weiter betrachtet. Da sich
+durch die Entfernung von Kanten und Knoten die Struktur des Graphen
 verändert und immer nur ein Zyklus für jeden terminalen Knoten
 aufgelöst wird, muss diese Prozedur so lange wiederholt werden bis
 keine Zyklen mehr gefunden werden.
 
-Der Pseudocode für diesen Filterungsschritt ist in Algorithmus
-\ref{alg: Zyklen} abgebildet.
+Der Pseudocode für die Detektion und das Auflösen von Zyklen ist in
+Algorithmus \ref{alg: Zyklen} abgebildet.
 
 \subsubsection{Ermittlung des besten Pfades/ Scaffolding}
 
