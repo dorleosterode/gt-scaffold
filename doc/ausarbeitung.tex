@@ -1045,35 +1045,40 @@ Eingabeformate vereinfacht.
 \section{Ausblick}
 \label{sec: Ausblick}
 
-Die Scaffolding-Software gt Scaffolder kann um weitere Optionen erweitert
-werden. Dazu gehört die Implementation weiterer Strategien zur Selektion
-relevanter Knoten und Kanten, um eine feinere Abstimmung der Scaffold-
-Berechnung zu ermögichen. Beispiele für solche Strategien finden sich in SGA
-Scaffold und umfassen eine erweiterte Zyklendetektion oder Entfernung
-transitiver Kanten.
+Die Scaffolding-Software gt Scaffolder kann um weitere Optionen
+erweitert werden. Dazu gehört die Implementation weiterer Strategien
+zur Selektion relevanter Knoten und Kanten, um eine feinere Abstimmung
+der Scaffold-Berechnung zu ermöglichen. Beispiele für solche Strategien
+finden sich in SGA Scaffold und umfassen eine erweiterte
+Zyklendetektion oder Entfernung transitiver Kanten.
 
 Zusätzlich sollten die konservativen Strategien zur Klassifikation
-repetitiver bzw.\ eindeutiger Knoten untersucht werden. So sollten die Güte
+repetitiver bzw.\ eindeutiger Knoten untersucht werden. So sollte die Güte
 der entsprechenden Standard-Schwellenwerte evaluiert werden, um potentiell
-bessere Ergebnisse erzielen zu können. Einige Strategien von SGA übernommene
+bessere Ergebnisse erzielen zu können. Einige von SGA übernommene
 Strategien mit unklarer Bedeutung (vgl. Abschnitt~\ref{sec: wunderlich})
 müssen darüber hinaus noch überprüft werden.
 
-Obwohl gt Scaffolder einen geringeren Laufzeit- und der Speicherplatzbedarf
-als SGA aufweist, lag der Fokus der hier beschriebenen Implementation nicht
-auf der Zeit- und Speichereffizienz. Hier stellt die Parallelisierung einiger
+Obwohl gt Scaffolder eine geringere Laufzeit und einen geringeren
+Speicherplatzbedarf als SGA aufweist, lag der Fokus der hier
+beschriebenen Implementation nicht auf der Zeit- und
+Speicherplatzeffizienz. Hier stellt die Parallelisierung einiger
 Schritte eine Möglichkeit der Laufzeitoptimierung dar. So können die
-Scaffolds unabhängig voneinander berechnet werden, da deren Ermittlung für
-jede Zusammenhangskomponente separat erfolgt. Die Zyklendetektion und das
-darauf folgende eigentliche Scaffolding könnte folglich für jede
-Zusammenhangskomponente in einem eigenen Thread stattfinden. Schließlich
-könnte die Verwendung effizienterer Datenstrukturen eine Einsparung bei der
-Lufzeit und Speicherplatz bewirken.
+Scaffolds unabhängig voneinander berechnet werden, da deren Ermittlung
+für jede Zusammenhangskomponente separat erfolgt. Die Zyklendetektion
+und das darauf folgende Scaffolding könnten folglich für jede
+Zusammenhangskomponente in einem eigenen Thread
+stattfinden. Schließlich könnte die Verwendung effizienterer
+Datenstrukturen eine Einsparung bei der Laufzeit und dem Speicherplatz
+bewirken.
 
 Die Rekonstruktion der Zielsequenz ist noch verbesserungswürdig (vgl.
-Abschnitt~\ref{sec: Rekonstruktion}). Hier können die durch gt Scaffolder
-erzeugten Scaffolds im SCAF-Format zur Rekonstruktion genutzt werden. Dazu
-könnte eine in SGA bereits implementierte Strategie adaptiert werden.
+Abschnitt~\ref{sec: Seq-Rek}). Die durch gt Scaffolder
+erzeugten Scaffolds im SCAF-Format können zur Rekonstruktion genutzt
+werden, da sie eine gleichwertige Qualität aufweisen
+(vgl. Abschnitt~\ref{sec: Ergebnisse}). Die in SGA implementierte
+Strategie könnte dabei verwendet werden. Die Grundstruktur ist bereits
+in einem Modul vorhanden.
 
 Zur gemeinsamen Nutzung in einer Pipeline, müssen weitere Anpassungen sowohl
 in gt Scaffolder als auch in Readjoiner erfolgen. So müssen die
