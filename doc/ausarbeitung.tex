@@ -16,6 +16,7 @@
 %% \usepackage{algorithm}
 \usepackage{graphicx}
 \usepackage{placeins}
+\usepackage[toc,page]{appendix} % Anhang
 \usepackage{siunitx}  % Einheiten mit korrekten Leerzeichen
 
 % an seitenbreite angepasste tabellen
@@ -1018,8 +1019,8 @@ Kanten ist SGA flexibler als gt Scaffolder.
 
 gt Scaffolder wurde vollständig in C implementiert. Dies ermöglicht eine hohe
 Ausführungsgeschwindigkeit bei geringem Speicherplatzbedarf und einer
-vergleichsweise geringen Codegröße von etwas mehr als 200 KB. Das in C++
-implementierte SGA Scaffold ist etwa 500 KB groß.
+vergleichsweise geringen Codegröße von etwas mehr als SI{200}{KB}. Das in C++
+implementierte SGA Scaffold ist etwa SI{500}{KB} groß.
 
 Durch die in den GenomeTools-Bibliotheken vorhandene Datenstrukturen und
 Konzepte, wie beispielsweise Arrays, Queues und Hashes, war die Implementierung
@@ -1082,16 +1083,16 @@ werden, da die momentan verwendeten Werte aus der SGA-Pipeline stammen.
 Die Verarbeitung der Distanzinformationen in gt Scaffolder besitzt ebenfalls
 noch Optimierungsbedarf.
 Das Modul Bamparser liefert die Distanzinformationen in Form einer speziellen
-Datenstruktur, die in der aktuellen Implementation von gt Scaffolder in dem
+Datenstruktur, die in der aktuellen Implementation von gt Scaffolder im
 ABySS-Distanz-Format gespeichert und dann vom Modul Parser wieder eingelesen
 wird. Dieser Umweg könnte durch die Implementation einer Funktion wegfallen,
 die diese Informationen direkt als Kanten im Graphen speichert.
 
 
-\section*{Anhang}
-\subsection*{Pseudocode}
+\begin{appendices}
+\section*{Pseudocode}
 
-\begin{algorithm}
+\begin{algorithm}[H]
   \ForEach{Knoten $k_0$ im Graph $G$}{
     \ForEach{Kantenrichtung $dir$ in [ANTISENSE, SENSE]}{
       \ForEach{Kantenpaar $(e_0,e_1)$ in Richtung $dir$}{
@@ -1136,7 +1137,9 @@ die diese Informationen direkt als Kanten im Graphen speichert.
     dargestellt.}
 \end{algorithm}
 
-\begin{algorithm}
+~\\
+
+\begin{algorithm}[H]
   \KwData{Kante $e_0$ und Kante $e_1$, die auf eindeutige Ordnung geprüft werden
     sollen. Wahrscheinlichkeitsschwellenwert $p\_cutoff$}
   \KwResult{Ob die Kanten $e_0$ und $e_1$ nicht eindeutig geordnet werden können}
@@ -1149,7 +1152,7 @@ die diese Informationen direkt als Kanten im Graphen speichert.
   \caption{\label{alg: Order}Funktion \textsc{AmbiguousOrdering}$(e_0, e_1, p\_cutoff)$}
 \end{algorithm}
 
-\begin{algorithm}
+\begin{algorithm}[H]
   \KwData{Graph}
   \KwResult{Graph ohne Zyklen}
   \While{Zyklus gefunden wurde}{
@@ -1170,7 +1173,9 @@ die diese Informationen direkt als Kanten im Graphen speichert.
     Zusammenhangskomponente auf}
 \end{algorithm}
 
-\begin{algorithm}
+~\\
+
+\begin{algorithm}[H]
   \SetAlgoLined
   \KwData{Graph $G$}
   \KwResult{Graph $G$ mit Knoten der Scaffolds markiert}
@@ -1191,7 +1196,9 @@ die diese Informationen direkt als Kanten im Graphen speichert.
     Berechnung aller Pfade ist in Algorithmus \ref{alg: Pfade} dargestellt.}
 \end{algorithm}
 
-\begin{algorithm}
+~\\
+
+\begin{algorithm}[H]
   \SetAlgoLined
   \KwData{terminaler Startknoten $t_0$}
   \KwResult{Alle von diesem Knoten möglichen Pfade}
@@ -1228,7 +1235,10 @@ die diese Informationen direkt als Kanten im Graphen speichert.
     Zusammenhangskomponente}
 \end{algorithm}
 
+\newpage
 \bibliography{presentation/literatur}
 \bibliographystyle{alphadin}
+
+\end{appendices}
 
 \end{document}
