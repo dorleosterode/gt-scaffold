@@ -514,16 +514,27 @@ durchzuführen. Dazu gehören die Selektion der relevanten Kanten und
 Knoten und das Scaffolding an sich. Zusätzlich wird in dem Modul die
 Klassifikation anhand der A-Statistik und die Kopiezahlen für die
 einzelnen Contigs durchgeführt, wenn eine separate Datei mit diesen
-Informationen übergeben wird.
+Informationen übergeben wird. Beide Module haben eine transitive
+Abhängigkeit von den Knoten und Kanten.
 
 Die Beziehungen zwischen diesen Modulen ist in Abbildung \ref{abb:
   UML} anhand eines UML-Diagramms dargestellt.
 
-\todo{was zum bamparser schreiben}
+Wie in Abbildung \ref{abb: UML} erkenntlich ist, hat das Modul
+Bamparser keinerlei Abhängigkeiten zu den anderen Modulen. Mit diesem
+Modul werden die Distanzinformationen generiert, wenn eine Datei im
+BAM-Format übergeben wird. Da es keine Abhängigkeiten zu anderen
+Modulen gibt, könnte der Bamparser auch als selbständiges Tool in die
+GenomeTools aufgenommen werden.
+
+Das Modul zur Rekonstruktion der Sequenzen ist abhängig von dem
+Algorithms Modul, da es eine bestimmte Repräsentation der Scaffolds
+erwartet. Ansonsten hält es Abhängigkeiten zu den Knoten und Kanten
+aber nicht zum Graph.
 
 \begin{figure}
   \centering
-  \includegraphics[width=1\linewidth]{uml.eps}
+  \includegraphics[width=1\linewidth]{uml2.eps}
   \caption{Klassendiagramm für gt Scaffolder.}
 \label{abb: UML}
 \end{figure}
@@ -580,19 +591,22 @@ Report bugs to <gt-users@genometools.org>.
 \caption{\label{abb: help}Hilfeausgabe des Tools gt Scaffolder.}
 \end{figure}
 
-Beim Aufruf von gt Scaffolder stellen die Optionen -contig und entweder
--dist oder -bam Pflichtangaben dar. Wenn die Übergabe einer Distanzdatei
-im ABySS-Distanz-Format (*.de) mit der Option -dist erfolgt, dann wird
-diese Datei eingelesen und die enthaltenen Distanzinformationen verwendet.
-Gibt man dagegen mit der Option -bam eine BAM-Datei mit Alignments der Reads
-zu den Contigs an, so werden aus der BAM-Datei die Distanzinformationen
-berechnet und im ABySS-Distanz-Format (*.de) gespeichert. Diese neu erzeugte
-Datei wird anschließend eingelesen und die enthaltenen Informationen genutzt.
-Die Verwendung einer BAM-Datei und des String-Graph Assemblers Readjoiner
-ermöglicht die Abhängigkeit zu einem Mapping-Programm (z.\,B. BWA) und der
-Software DistEst von ABySS potentiell zu durchbrechen. So kann Readjoiner die
-Daten, auf denen die Alignments der Reads zu den Contigs basieren, direkt
-ausgeben. Auf Grund von Zeitmangel existiert jedoch noch kein Modul zur
+Beim Aufruf von gt Scaffolder stellen die Optionen -contig und
+entweder -dist oder -bam Pflichtangaben dar. Wenn die Übergabe einer
+Distanzdatei im ABySS-Distanz-Format (*.de) mit der Option -dist
+erfolgt, dann wird diese Datei eingelesen und die enthaltenen
+Distanzinformationen verwendet.  Gibt man dagegen mit der Option -bam
+eine BAM-Datei mit Alignments der Reads zu den Contigs an, so werden
+aus der BAM-Datei die Distanzinformationen berechnet und im
+ABySS-Distanz-Format (*.de) gespeichert. Diese neu erzeugte Datei wird
+anschließend eingelesen und die enthaltenen Informationen genutzt.
+Die Verwendung einer BAM-Datei und des String-Graph Assemblers
+Readjoiner ermöglicht die Abhängigkeit zu einem Mapping-Programm
+(z.\,B. BWA) und der Software DistEst von ABySS potentiell zu
+durchbrechen. So kann Readjoiner die Positionen der Reads auf den
+Contigs direkt ausgeben. Dabei fehlen aber die Information über
+Read-Paare und Informationen über enthaltene oder herausgefilterte
+Reads. Auf Grund von Zeitmangel existiert jedoch noch kein Modul zur
 Konvertierung dieser Daten in eine entsprechende BAM-Datei.
 
 Mit der Option -astat kann zusätzlich eine Datei mit Informationen
@@ -642,8 +656,8 @@ die Evaluierung der Güte dieser Strategien
 \item Bei der Konstruktion des Graphen werden zwischen zwei Knoten
   jeweils nur zwei Kanten eingefügt, eine Hin- und eine Rückkante.
   Wenn für ein Contig-Paar mehr als eine Distanzinformation existiert,
-  also für zwei Knoten mehr als ein mögliches Kantenpaar gibt,
-  wird das Kantenpaar mit der größten Standardabweichung gewählt.
+  also für zwei Knoten mehr als ein mögliches Paar an Kanten vorhanden ist,
+  wird das Paar an Kanten mit der größten Standardabweichung gewählt.
   Die Güte dieser Strategie wurde exemplarisch evaluiert
   (vgl. Abschnitt~\ref{sec: wunderlich_assert}).\\
   Mögliche Erklärung: keine.
@@ -676,7 +690,7 @@ die Evaluierung der Güte dieser Strategien
         \node[prog, below of=index2] (filter) {filter};
         \node[prog, below of=filter] (overlap) {overlap};
         \node[prog, below of=overlap] (assemble) {assemble};
-        \node[prog, right of=prep, xshift=2cm, fill=red!40] (bindex) {index};
+        \node[prog, right of=prep, xshift=2.1cm, fill=red!40] (bindex) {index};
         \node[prog, below of=bindex, fill=red!40] (aln) {align};
         \node[prog, below of=aln, fill=red!40] (sampe) {sampe};
         \node[prog, below of=sampe, rectangle split, rectangle split parts=3, yshift=-.45cm, rectangle split part fill={blue!40, green!40, blue!40}] (bam2de) {\nodepart{one}fixmate\nodepart{two}samtools\nodepart{three}DistanceEst};
@@ -724,13 +738,13 @@ die Evaluierung der Güte dieser Strategien
 \end{figure}
 
 Ein Vergleich der \textit{de novo}-Assemblierungs-Pipelines von SGA und gt
-Scaffolder (vgl. Abbildung~\ref{abb: Pipeline}) zeigt wesentliche Unterschiede
+Scaffolder (vgl. Abbildung~\ref{abb: Pipeline}) zeigt deutliche Unterschiede
 in der Anzahl der benötigten Schritte sowie externen Abhängigkeiten auf.
 SGA durchläuft sowohl bei der Assemblierung als auch beim Scaffolding wesentlich
 mehr Schritte. Gleichzeitig besitzt die SGA-Pipeline externe Abhängigkeiten,
 was ihre Komplexität noch erhöht: Neben der Software ABySS, BWA, SAMtools und
-ihren Kompilierungsabhängigkeiten müssen externe Bibliotheken wie Pysam
-vorliegen, da manche Schritte der SGA-Pipeline von Perl- und Python-Skripten
+deren Kompilierungsabhängigkeiten müssen externe Bibliotheken wie Pysam
+vorliegen, da einige Schritte der SGA-Pipeline von Perl- und Python-Skripten
 verwaltet werden.
 gt Scaffolder besitzt für die Assemblierung eine GenomeTools-interne
 Abhängigkeit zu gt Readjoiner. Zum Zeitpunkt dieser Ausarbeitung ist die
@@ -743,10 +757,10 @@ SGA Scaffold (vgl. Abbildung~\ref{abb: gtscaffolder}).
 Zur Überprüfung und Evaluation wurden Scaffolds für verschiedene Testdaten durch
 gt Scaffolder berechnet. Zur besseren Einordnung der Ergebnisse wurde eine
 Scaffold-Berechnung ebenfalls mit SGA durchgeführt. Die Berechnungen wurden auf
-einem Computer mit 3.10GHz Intel Core-i7 Prozessor, 8GB Arbeitsspeicher unter
+einem Computer mit 3.10~GHz Intel Core-i7 Prozessor, 8GB Arbeitsspeicher unter
 einem 64bit Linux Betriebssystem ausgeführt. Dabei wurde lediglich ein Kern
-verwendet. Das Laufzeitverhaltens und der Speicherbedarf wurden durch das in den
-GenomeTools enthaltene Skript rdj-spacepeak.sh auf auf 2 identischen Computern
+verwendet. Das Laufzeitverhalten und der Speicherbedarf wurden durch das in den
+GenomeTools enthaltene Skript rdj-spacepeak.sh auf 2 gleichen Computern
 gemessen, um eine eventuelle Verfälschung durch das
 Caching der Eingabedateien zu vermeiden. Die von beiden Programmen ausgegebenen
 Metriken wurden durch gt seqstat nochmals überprüft. Bei der
@@ -789,8 +803,8 @@ assembliert, bevor die komparative Scaffold-Berechnung durchgeführt wurde.
 
 Für alle 4 Testdatensätze konnte gt Scaffolder eine erfolgreiche
 Scaffold-Berechnung durchführen. Ein Vergleich mit SGA (vgl.
-Tabelle~\ref{tab: Scaffolding}) zeigt das Güte der Ergebnisse für die
-betrachteten Metriken exakt übereinstimmen. Die Abdeckung der
+Tabelle~\ref{tab: Scaffolding}) zeigt das die Güte der Ergebnisse für die
+betrachteten Metriken übereinstimmen. Die Abdeckung der
 jeweiligen Zielsequenz durch die Gesamtlänge der ermittelten Scaffolds
 schwankt zwischen 71 und 94\%. Eine Korrelation mit der Genomlänge
 oder Anzahl der in den Scaffolding-Schritt eingehenden Contigs ist
@@ -840,7 +854,7 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
   ~\textit{N50:} Länge, sodass alle Scaffolds deren Länge $\geq N50$ mindestens
   die Hälfte der Abdeckung ausmachen.
   ~\textit{CPU:} Gesamtlaufzeit.
-  ~\textit{RAM:} Maximaler Speicherbedarf während Berechnung.}
+  ~\textit{RAM:} Maximaler Speicherplatzbedarf während der Berechnung.}
 \end{table}
 
 \begin{figure}[t]
@@ -853,14 +867,15 @@ Scaffolder war um den Faktor $0.90\times$ bis $0.43\times$ geringer.
 
 \subsubsection*{Ergebnisse der Sequenz-Rekonstruktion}
 \label{sec: Seq-Rek}
-Während gt Scaffolder die Scaffold-Berechnung und Rekonstruktion der Zielsequenz
-in einem Schritt berechnen kann, handelt es sich bei SGA um 2 getrennte
-Schritte: SGA Scaffold und SGA scaffold2fasta. Für alle 4 Testdatensätze konnte
-gt Scaffolder eine Sequenz-Rekonstruktion durchführen. Im Gegensatz zur
-Scaffold-Berechnung existieren hier wesentlich Unterschiede zu den mit SGA
-rekonstruierten Sequenzen (vgl. Tabelle~\ref{tab: Rekonstruktion}), welche das
-jeweilige Referenzgenom deutlich besser abdecken und gleichzeitig weniger
-missassemblierte Positionen besitzen.
+Während gt Scaffolder die Scaffold-Berechnung und Rekonstruktion der
+Zielsequenz in einem Schritt berechnen kann, handelt es sich bei SGA
+um 2 getrennte Schritte: SGA Scaffold und SGA scaffold2fasta. Für alle
+4 Testdatensätze konnte gt Scaffolder eine Sequenz-Rekonstruktion
+durchführen. Im Gegensatz zur Scaffold-Berechnung existieren hier
+wesentlich Unterschiede zu den mit SGA rekonstruierten Sequenzen
+(vgl. Tabelle~\ref{tab: Rekonstruktion}). Die von SGA rekonstruierten
+Sequenzen decken das jeweilige Referenzgenom deutlich besser ab und
+besitzen gleichzeitig weniger missassemblierte Positionen.
 
 \begin{table}
   \adjustbox{max height=\dimexpr\textheight-5.5cm\relax, max width=\textwidth}{
@@ -1048,25 +1063,20 @@ Wie in Abschnitt\ref{sec: Ergebnisse} aufgezeigt ist die
 Implementation des Moduls zur Rekonstruktion der Sequenzen
 verbesserungsbedürftig. Bei der Rekonstruktion der Sequenzen können
 die durch gt Scaffolder erzeugten Scaffolds im SCAF-Format genutzt
-werden. Die Strategie um die Sequenzen zu rekonstruieren kann dabei
-von SGA adaptiert werden oder eine andere Strategie genutzt werden.
+werden. Die Strategie hierfür kann von SGA adaptiert werden oder eine
+alternative Strategie verwendet werden.
 
 Die Ausgaben des in den GenomeTools enthaltenen Assemblers Readjoiner
-müssen teilweise noch verändert werden um eine Nutzung mit gt
-Scaffolder in einer Pipeline zu ermöglichen. So müssen die
-Mapping-Informationen über die Reads zu den Contigs in das BAM-Format
-übertragen werden. Dabei ist das BAM-Format ein Standardformat und es
-könnte sowohl Readjoiner um eine Ausgabe im BAM-Format erweitert oder
-ein Skript zur Transformation der Information in das benötigte Format
-genutzt werden.
-
-Die Standardwerte für die einzelnen Parameter müssen bei einer
-Benutzung mit Readjoiner auf dessen Ergebnisse eingestellt werden. Die
-momentan verwendeten Standardwerte sind von SGA übernommen und
-dementsprechend auf die Ergebnisse der SGA-Pipeline optimiert. Da
-Readjoiner z.\,B. andere Ergebnisse bei der Berechnung der A-Statistik
-erreicht, müsste der Schwellenwert zur Klassifikation als nicht
-repetitive Sequenz angepasst werden.
+müssen teilweise noch angepasst werden, um eine gemeinsame Nutzung von gt
+Scaffolder und Readjoiner in einer Pipeline zu ermöglichen. So müssen die
+Informationen über das Mapping der Reads gegenüber den Contigs in das
+Standardformat BAM übertragen werden. Dabei könnte Readjoiner um
+eine Ausgabe im BAM-Format erweitert oder ein Skript zur Umwandlung der
+Informationen in das benötigte Format geschrieben werden. Des Weiteren
+müssen bei einer Benutzung mit Readjoiner die Standardwerte der
+Parameter von gt Scaffolder entsprechend angepasst werden. Die momentan
+verwendeten Standardwerte stammen aus SGA und sind auf die Ergebnisse
+der SGA-Pipeline optimiert.
 
 \section*{Anhang}
 \subsection*{Pseudocode}
