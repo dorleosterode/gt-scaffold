@@ -504,6 +504,23 @@ Strangorientierung der beteiligten Contigs und Reads. Des Weiteren besitzen sie 
 Zustand, der die Klassifikation der Kante beschreibt (z.\,B. inkonsistente oder
 polymorphe Kanten) und Zeiger auf die beteiligten Contigs.
 
+Die Module Parser und Algorithms benutzen den Graph. Der Parser liest
+die Informationen für die Contigs aus der Datei im FASTA-Format und
+die Distanzinformationen aus der entsprechenden Datei ein und
+allokiert und befüllt den Graph dementsprechend. Das Modul für die
+Algorithmen benutzt die so konstruierte Graph-Struktur um die in
+Abschnitt \ref{sec: Methoden} dargestellten Berechnungen
+durchzuführen. Dazu gehören die Selektion der relevanten Kanten und
+Knoten und das Scaffolding an sich. Zusätzlich wird in dem Modul die
+Klassifikation anhand der A-Statistik und die Kopiezahlen für die
+einzelnen Contigs durchgeführt, wenn eine separate Datei mit diesen
+Informationen übergeben wird.
+
+Die Beziehungen zwischen diesen Modulen ist in Abbildung \ref{abb:
+  UML} anhand eines UML-Diagramms dargestellt.
+
+\todo{was zum bamparser schreiben}
+
 \begin{figure}
   \centering
   \includegraphics[width=1\linewidth]{uml.eps}
