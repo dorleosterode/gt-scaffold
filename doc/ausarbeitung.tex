@@ -214,7 +214,7 @@ die Repetitivität, die Sequenz und die Distanzinformationen der
 einzelnen Contigs beschreiben. Mit Hilfe dieser Eingaben erfolgt
 zunächst die Konstruktion des Scaffold-Graphen. Im Anschluss werden
 die relevanten Knoten und Kanten selektiert und alle
-Zusammenhangskomponenten des Scaffold-Graphen ermittelt.  Danach wird
+Zusammenhangskomponenten des Scaffold-Graphen ermittelt. Danach wird
 für jede Zusammenhangskomponente ein Pfad berechnet, der als Scaffold
 ausgegeben wird.
 
@@ -235,34 +235,34 @@ wurde diese Option für Vergleiche zwischen gt Scaffolder und SGA Scaffold
 verwendet. Des Weiteren besteht die Möglichkeit, die Distanzinformationen aus
 einer Datei im BAM-Format (*.bam) mit Hilfe eines Moduls zu
 extrahieren. Dafür diente die Methode des Programms DistEst von ABySS
-als Vorlage. Aus Zeitgründen ist es nicht gelungen ein Modul zu
-entwickeln zur Erzeugung der BAM-Datei auf Basis des String-Graphen.
-Stattdessen muss ebenfalls ein Read-Mapping separat nach der Assemblierung
+als Vorlage. Aus Zeitgründen ist es nicht gelungen ein Modul zur Erzeugung
+der BAM-Datei auf Basis des String-Graphen zu entwickeln.
+Stattdessen muss ein Read-Mapping separat nach der Assemblierung
 durchgeführt werden.
 
 Die A-Statistik ist ein statistisches Maß und beschreibt die Repetitivität
 einer Sequenz~\cite{Myers:2005iq}. Die A-Statistik kann in Form einer
 separaten Datei oder als Annotation in den Contigs angeführt werden.
 
-\subsubsection{Erstellen der Distanzinformationen}
-Die Methode, die das Programm DistEst verwendet, durchläuft folgende
-Schritte. Zunächst werden alle Reads aus der BAM-Datei geladen und
-die Read-Paare ermittelt. Anschließend werden die Fragmentlängen
-aller Read-Paare berechnet, die gegenüber dem gleichen Contig angeordnet sind,
-und auf deren Basis eine Häufigkeitsverteilung erstellt.
-Danach wird aus der Verteilung eine Wahrscheinlichkeitsfunktion für die
-Fragmentlängen abgeleitet. Im nächsten Schritt versucht man, den paarweisen
-Abstand der Contigs durch eine Maximum-Likelihood-Methode abzuschätzen.
-Dabei werden für ein Contig-Paar die zugehörigen Read-Paare ermittelt und
-deren Fragmentlänge berechnet unter der Annahme, dass die beiden Contigs
-ohne Lücke direkt aneinander angrenzen. Als nächstes werden mehrere
-Iterationen durchlaufen, bei denen jeweils die Fragmentlängen um einen Faktor (min\_dist
-bis max\_dist) korrigiert werden. Des Weiteren erfolgt eine Aufsummierung
-der logarithmischen Wahrscheinlichkeiten (log odds) der korrigierten
-Fragmentlängen multipliziert mit dessen Häufigkeiten in jedem Durchlauf.
-Schließlich wählt man als Abstand zwischen den Contigs den Faktor, bei
-dem die Summe der Wahrscheinlichkeiten ein Maximum erreicht.
-\todo{Strangorientierung fehlt}
+\subsubsection{Erstellen der Distanzinformationen} Die Methode, die das
+Programm DistEst verwendet, durchläuft folgende Schritte: Zunächst werden alle
+Reads aus der BAM-Datei geladen und die Read-Paare ermittelt. Anschließend
+werden die Fragmentlängen aller Read-Paare berechnet, die gegenüber dem
+gleichen Contig angeordnet sind, und auf deren Basis eine
+Häufigkeitsverteilung erstellt. Danach wird aus der Verteilung eine
+Wahrscheinlichkeitsfunktion für die Fragmentlängen abgeleitet. Im nächsten
+Schritt versuchen wir, den paarweisen Abstand der Contigs durch eine Maximum-
+Likelihood-Methode abzuschätzen. Dabei werden für ein Contig-Paar die
+zugehörigen Read-Paare ermittelt und deren Fragmentlänge berechnet unter der
+Annahme, dass die beiden Contigs lückenlos direkt aneinander angrenzen. Als
+nächstes werden mehrere Iterationen durchlaufen, in denen jeweils die
+Fragmentlängen um einen Faktor (min\_dist bis max\_dist) korrigiert werden.
+Des Weiteren erfolgt eine Aufsummierung der logarithmischen
+Wahrscheinlichkeiten (log odds) der korrigierten Fragmentlängen multipliziert
+mit dessen Häufigkeiten in jedem Durchlauf. Schließlich wählen wir den Faktor
+mit maximaler Summe der Wahrscheinlichkeiten als Abstand zwischen den Contigs.
+\todo{Strangorientierung fehlt, SD: Worauf bezieht sich dessen im vorletzten
+Satz?}
 
 \subsubsection{Konstruktion des Graphen}
 Aus den Contigs und den Distanzinformationen wird der Scaffold-Graph
@@ -294,7 +294,7 @@ werden folgende Kriterien überprüft:
   überlappen. Gehen von einem Knoten zwei inkonsistente Kanten aus, so
   werden alle ausgehenden Kanten des Knotens sowie ihre Rückkanten als
   inkonsistent markiert. Zusätzlich werden alle Kanten der über
-  inkonsistente Kanten erreichbaren Knoten, die die gleiche Richtung
+  inkonsistente Kanten erreichbaren Knoten, welche die gleiche Richtung
   (\textit{sense} oder \textit{antisense}) wie die markierte Rückkante
   haben, als inkonsistent markiert. Alle markierten Kanten werden
   nicht weiter betrachtet.
@@ -308,15 +308,15 @@ Zusammenhangskomponenten wird mit einer rekursiven Tiefensuche nach
 Rückkanten gesucht. Dabei wird diese Tiefensuche von jedem terminalen
 Knoten, ein Knoten der nur ausgehende \textit{sense} oder
 \textit{antisense} Kanten hat, aus gestartet. Wird eine Rückkante
-gefunden, so werden die Kante und die durch die Kante verbundenen
+gefunden, so werden die Kante und die durch sie verbundenen
 Knoten als zyklisch markiert und nicht weiter betrachtet. Da sich
 durch die Entfernung von Kanten und Knoten die Struktur des Graphen
-verändert und immer nur ein Zyklus für jeden terminalen Knoten
+verändert und jeweils nur ein Zyklus pro Durchlauf
 aufgelöst wird, muss diese Prozedur so lange wiederholt werden bis
 keine Zyklen mehr gefunden werden.
 
 Der Pseudocode für die Detektion und das Auflösen von Zyklen ist in
-Algorithmus \ref{alg: Zyklen} abgebildet.
+Algorithmus~\ref{alg: Zyklen} abgebildet.
 
 \subsubsection{Ermittlung des besten Pfades (Scaffolding)}
 
@@ -337,18 +337,16 @@ haben, werden ebenfalls als Scaffolds gewählt.
 Der Pseudocode für die Berechnung des Scaffolds ist in Algorithmus
 \ref{alg: Scaffold} dargestellt.
 
-\subsubsection{Ausgabe}
-Die ermittelten Scaffolds werden in dem gleichen Format ausgegeben,
-wie bei SGA. In diesem Format (*.scaf) steht in jeder Zeile
-ein Scaffold. Die einzelnen Contigs mit ihren Informationen sind dabei
-durch Tabs getrennt. Ein Beispieleintrag ist in Abbildung \ref{abb:
-  scaf} dargestellt. Der erste Eintrag in einer Zeile ist die ID des
-Startcontigs. Für die darauffolgenden Contigs werden folgende
-Informationen durch Kommata getrennt angegeben: ID des Contigs, Distanz
-zu dem vorherigen Contig, Standardabweichung der Distanz, Orientierung
-zu dem vorherigen Contig (0: gleicher Strang, 1: entgegengesetzter
-Strang) und Information über die Lage des Reads aus dem Read-Paar (0:
-gleicher Strang, 1: entgegengesetzter Strang).
+\subsubsection{Ausgabe} Die ermittelten Scaffolds werden in dem gleichen
+Format ausgegeben wie bei SGA (*.scaf). Jede Zeile enthält dabei einen
+Scaffold. Die einzelnen Contigs mit ihren Informationen sind hierbei
+Tabulator-separiert. Ein Beispieleintrag ist in Abbildung~\ref{abb: scaf}
+dargestellt. Der erste Eintrag in einer Zeile ist die ID des Startcontigs.
+Für die darauffolgenden Contigs werden folgende Informationen durch Kommata
+getrennt angegeben: ID des Contigs, Distanz zu dem vorherigen Contig,
+Standardabweichung der Distanz, Orientierung zu dem vorherigen Contig (0:
+gleicher Strang, 1: entgegengesetzter Strang) und Information über die Lage
+des Reads aus dem Read-Paar (0: gleicher Strang, 1: entgegengesetzter Strang).
 
 \begin{figure}
 \begin{verbatim}
@@ -399,7 +397,7 @@ siehe~\cite{asqg}. Dieser String-Graph wird mit einem Python-Skript in
 das SPM-Format (*.spm) umgeschrieben. Das SPM-Format wird von
 Readjoiner verwendet um String-Graphen zu repräsentieren.
 
-Wie in Abbildung \ref{abb: spm} dargestellt, ist das SPM-Format ein
+Wie in Abbildung~\ref{abb: spm} dargestellt, ist das SPM-Format ein
 zeilenbasiertes Format. In jeder Zeile ist eine Suffix-Präfix-Überlappung
 eingetragen. Die erste Zahl repräsentiert den einen Contig oder Read,
 das folgende Zeichen gibt den Strang an ('+' steht für den
@@ -418,7 +416,7 @@ einer komprimierten Sequenzrepräsentation in den GenomeTools.
 39261 - 1 + 137
 2 + 27698 + 149
 \end{verbatim}
-\caption{\label{abb: spm}Beispielzeilen aus der .spm-Datei des
+\caption{\label{abb: spm}Beispielzeilen aus der~.spm-Datei des
   String-Graphen für den \textit{C. elegans} Testdatensatz.}
 \end{figure}
 
