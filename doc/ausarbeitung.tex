@@ -742,10 +742,10 @@ Scaffolder (vgl. Abbildung~\ref{abb: Pipeline}) zeigt deutliche Unterschiede
 in der Anzahl der benötigten Schritte sowie externen Abhängigkeiten auf.
 SGA durchläuft sowohl bei der Assemblierung als auch beim Scaffolding wesentlich
 mehr Schritte. Gleichzeitig besitzt die SGA-Pipeline externe Abhängigkeiten,
-was ihre Komplexität noch erhöht: Neben der Software ABySS, BWA, SAMtools und
-deren Kompilierungsabhängigkeiten müssen externe Bibliotheken wie Pysam
-vorliegen, da einige Schritte der SGA-Pipeline von Perl- und Python-Skripten
-verwaltet werden.
+was ihre Komplexität noch erhöht: Neben der Software ABySS~\cite{abyss}, BWA,
+SAMtools~\cite{Li:2009st} und deren Kompilierungsabhängigkeiten müssen externe
+Bibliotheken wie Pysam vorliegen, da einige Schritte der SGA-Pipeline von Perl-
+und Python-Skripten verwaltet werden.
 gt Scaffolder besitzt für die Assemblierung eine GenomeTools-interne
 Abhängigkeit zu gt Readjoiner. Zum Zeitpunkt dieser Ausarbeitung ist die
 Schnittstelle zu Readjoiner noch nicht vollständig implementiert
@@ -890,7 +890,7 @@ besitzen gleichzeitig weniger missassemblierte Positionen.
       & SGA scaffold2fasta  & 10.91  &    88.9     &  7.9        &
       2 & 0\\
       & gt Scaffolder & $1.1\times$  & $0.4\times$ & $1.2\times$ &
-      $1587.5\times$ & \\
+      $1587.5\times$ & 0\\
       \midrule
       \textit{H. sapiens}, Chr. 21
       & SGA scaffold2fasta  & 34.32  &      73.1   &  54.3       &
@@ -908,15 +908,15 @@ besitzen gleichzeitig weniger missassemblierte Positionen.
       & SGA scaffold2fasta  & 113.50 &      94.2   &  126.4      &
       1  & 0 \\
       & gt Scaffolder & $0.6\times$  & $0.6\times$ & $0.6\times$ &
-      $471\times$ & $21871\times$\\
+      $471\times$ & $21871$\\
       \bottomrule
   \end{tabular}}
   \caption{\label{tab: Rekonstruktion}\textbf{Ergebnisse der
-  Sequenz-Rekonstruktion.} Die durch
-  SGA-Ergebnisse sind als absolute Werte aufgetragen, die gt
-  Scaffolder-Ergebnisse als relative Faktoren zu ersteren.
+      Sequenz-Rekonstruktion.} Die Ergebnisse von SGA sind als absolute Werte aufgetragen,
+    die Ergebnisse von gt Scaffolder als relative Faktoren zu ersteren. Wenn ein Wert von
+    SGA 0 ist, ist der zugehörige Wert von gt Scaffolder absolut angegeben.
   ~\textit{Länge:} Gesamtlänge aller Scaffolds.
-  ~\textit{Abdeckung:} Prozentuale Abdeckung der Zielsequenz.
+  ~\textit{Abdeckung:} Prozentuale Abdeckung des Refernzgenoms.
   ~\textit{N50:} Länge, sodass alle Scaffolds deren Länge $\geq N50$ mindestens
   die Hälfte der Abdeckung ausmachen.
   ~\textit{\#Miss:} Anzahl der Missassemblierungen nach
