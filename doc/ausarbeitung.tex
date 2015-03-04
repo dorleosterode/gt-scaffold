@@ -511,20 +511,20 @@ polymorphe Kanten) und Zeiger auf die beteiligten Contigs.
 Die Module Parser und Algorithms benutzen den Graph. Der Parser liest
 die Informationen für die Contigs aus der Datei im FASTA-Format und
 die Distanzinformationen aus der entsprechenden Datei ein und
-allokiert und befüllt den Graph dementsprechend. Das Modul für die
+alloziert und befüllt den Graph dementsprechend. Das Modul für die
 Algorithmen benutzt die so konstruierte Graph-Struktur um die in
-Abschnitt \ref{sec: Methoden} dargestellten Berechnungen
+Abschnitt~\ref{sec: Methoden} dargestellten Berechnungen
 durchzuführen. Dazu gehören die Selektion der relevanten Kanten und
-Knoten und das Scaffolding an sich. Zusätzlich wird in dem Modul die
+Knoten und das eigentliche Scaffolding. Zusätzlich wird in dem Modul die
 Klassifikation anhand der A-Statistik und die Kopiezahlen für die
 einzelnen Contigs durchgeführt, wenn eine separate Datei mit diesen
 Informationen übergeben wird. Beide Module haben eine transitive
 Abhängigkeit von den Knoten und Kanten.
 
-Die Beziehungen zwischen diesen Modulen ist in Abbildung \ref{abb:
+Die Beziehungen zwischen diesen Modulen ist in Abbildung~\ref{abb:
   UML} anhand eines UML-Diagramms dargestellt.
 
-Wie in Abbildung \ref{abb: UML} erkenntlich ist, hat das Modul
+Wie in Abbildung~\ref{abb: UML} erkenntlich ist, hat das Modul
 Bamparser keinerlei Abhängigkeiten zu den anderen Modulen. Mit diesem
 Modul werden die Distanzinformationen generiert, wenn eine Datei im
 BAM-Format übergeben wird. Da es keine Abhängigkeiten zu anderen
@@ -545,7 +545,7 @@ aber nicht zum Graph.
 
 \subsection{gt Scaffolder als Tool in den GenomeTools}
 Die Software gt Scaffolder wurde als eigenständiges Tool in die GenomeTools
-eingebunden. In Abbildung \ref{abb: help} ist die Ausgabe der Hilfe des Tools
+eingebunden. In Abbildung~\ref{abb: help} ist die Ausgabe der Hilfe des Tools
 gt Scaffolder dargestellt, in der alle einstellbaren Parameter mit ihren
 standardmäßigen Belegungen aufgelistet sind.
 
@@ -595,32 +595,31 @@ Report bugs to <gt-users@genometools.org>.
 \caption{\label{abb: help}Hilfeausgabe des Tools gt Scaffolder.}
 \end{figure}
 
-Beim Aufruf von gt Scaffolder stellen die Optionen -contig und
-entweder -dist oder -bam Pflichtangaben dar. Wenn die Übergabe einer
-Distanzdatei im ABySS-Distanz-Format (*.de) mit der Option -dist
-erfolgt, dann wird diese Datei eingelesen und die enthaltenen
-Distanzinformationen verwendet.  Gibt man dagegen mit der Option -bam
-eine BAM-Datei mit Alignments der Reads zu den Contigs an, so werden
-aus der BAM-Datei die Distanzinformationen berechnet und im
-ABySS-Distanz-Format (*.de) gespeichert. Diese neu erzeugte Datei wird
-anschließend eingelesen und die enthaltenen Informationen genutzt.
-Die Verwendung einer BAM-Datei und des String-Graph Assemblers
-Readjoiner ermöglicht die Abhängigkeit zu einem Mapping-Programm
-(z.\,B. BWA) und der Software DistEst von ABySS potentiell zu
-durchbrechen. So kann Readjoiner die Positionen der Reads auf den
-Contigs direkt ausgeben. Dabei fehlen aber die Information über
-Read-Paare und Informationen über enthaltene oder herausgefilterte
-Reads. Auf Grund von Zeitmangel existiert jedoch noch kein Modul zur
-Konvertierung dieser Daten in eine entsprechende BAM-Datei.
+Beim Aufruf von gt Scaffolder stellen die Optionen \texttt{-contig} und
+entweder \texttt{-dist} oder \texttt{-bam} Pflichtangaben dar. Wenn die
+Übergabe einer Distanzdatei im ABySS-Distanz-Format (*.de) mit der Option
+\texttt{-dist} erfolgt, dann wird diese Datei eingelesen und die enthaltenen
+Distanzinformationen verwendet. Gibt man dagegen mit der Option \texttt{-bam}
+eine BAM-Datei mit Alignments der Reads zu den Contigs an, so werden aus der
+BAM-Datei die Distanzinformationen berechnet und im ABySS-Distanz-Format
+(*.de) gespeichert. Diese neu erzeugte Datei wird anschließend eingelesen und
+die enthaltenen Informationen genutzt. Die Verwendung einer BAM-Datei und des
+String-Graph Assemblers Readjoiner ermöglicht die Abhängigkeit zu einem
+Mapping-Programm (z.\,B. BWA) und der Software DistEst von ABySS potentiell zu
+durchbrechen. So kann Readjoiner die Positionen der Reads auf den Contigs
+direkt ausgeben. Dabei fehlen aber die Information über Read-Paare und
+Informationen über enthaltene oder herausgefilterte Reads. Aufgrund von
+manglender Zeit existiert jedoch noch kein Modul zur Konvertierung dieser
+Daten in eine entsprechende BAM-Datei.
 
-Mit der Option -astat kann zusätzlich eine Datei mit Informationen
+Mit der Option \texttt{-astat} kann zusätzlich eine Datei mit Informationen
 über die A-Statistik und die berechneten Kopiezahlen der Contigs
 übergeben werden. Diese Option wird für die Kompatibilität mit der
 Eingabe von SGA Scaffold benötigt. Wenn diese Option fehlt, besteht die
 Annahme, dass diese Informationen innerhalb des Headers der
 Contigs vorliegen. Dabei diente das Ausgabeformat für die Contigs von
-Readjoiner als Vorlage, das bei Verwendung der Optionen -astat und
--copy$\_$num die A-Statistik und Kopiezahl der Contigs enthält.
+Readjoiner als Vorlage, das bei Verwendung der Optionen \texttt{-astat} und
+\texttt{-copy$\_$num} die A-Statistik und Kopiezahl der Contigs enthält.
 
 Die Standardausgabe stellt eine Datei im SCAF-Format dar. Die
 Rekonstruktion der Sequenzen ist in dem Tool noch nicht möglich, da
@@ -630,17 +629,15 @@ Traversierung des String-Graphen noch nicht in die GenomeTools
 
 \subsection{Strategien in SGA Scaffold mit unklarer Bedeutung}
 \label{sec: wunderlich}
-SGA benutzt eine relativ konservative Strategie, um vermeintlich
+SGA verfolgt eine relativ konservative Strategie, um vermeintlich
 fehlerhafte Knoten und Kanten aus dem Scaffold-Graphen zu
 entfernen. Daher werden sehr strikte Schwellenwerte verwendet und
-falsch-negative bevorzugt gegenüber falsch-positiven Knoten und Kanten
-gelöscht. Einige Strategien von SGA mit unklarer Bedeutung, wurden
+falsch-negative gegenüber falsch-positiven Knoten und Kanten
+bevorzugt. Einige Strategien von SGA mit unklarer Bedeutung, wurden
 zunächst in gt Scaffolder übernommen, um eine Vergleichbarkeit der
 Ergebnisse der beiden Programme zu erhalten. Im Folgenden findet sich
 eine Auflistung dieser Strategien teilweise kombiniert mit einer
-Beschreibung der möglichen Bedeutung. Des Weiteren erfolgte zum Teil
-die Evaluierung der Güte dieser Strategien
-(siehe Abschnitt~\ref{sec: Ergebnisse}).
+Beschreibung der möglichen Bedeutung.
 
 \begin{figure}
   \centering
