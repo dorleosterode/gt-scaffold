@@ -232,7 +232,7 @@ Contigs benötigt.
 
 In gt Scaffolder können die Distanzinformationen explizit durch eine
 Datei im ABySS-Distanz-Format (*.de) angegeben werden. Eine solche
-Datei wird durch das Programm DistEst von ABySS nach der Assemblierung
+Datei wird durch das Programm DistEst von ABySS~\cite{abyss} nach der Assemblierung
 und dem Read-Mapping in der SGA-Pipeline erstellt und dient als
 Eingabe der Distanzinformationen für SGA Scaffold. In der Evaluierung
 wurde diese Option für Vergleiche zwischen gt Scaffolder und SGA Scaffold
@@ -936,18 +936,20 @@ besitzen gleichzeitig weniger missassemblierte Positionen.
 
 \subsection{Auswirkung des Auswahlkriteriums für Kantenpaare}
 \label{sec: wunderlich_assert}
-Wie in Abschnitt~\ref{sec: wunderlich} motiviert, wird im Falle mehrerer
-potentieller Kantenpaare bei der Graphkonstruktion dasjenige gewählt, welches
-die größte Standardabweichung besitzt. Um die Auswirkung dieses
-Kriteriums evaluieren zu können, wurden 2 unterschiedliche Strategien in gt
-Scaffolder implementiert: Die eingangs beschriebene MaxStdDev-Strategie und eine
-MinStdDev-Strategie, bei der das Kantenpaar mit der geringsten
-Standardabweichung gewählt wird. Anschließend wurde die Scaffold-Berechnung mit
-beiden Strategien für 4 Testdatensätze (vgl. Tabelle~\ref{sec: Testdaten})
-ausgeführt. Dabei wurden nur sehr kleine Unterschiede festgestellt (vgl.
-Tabelle~\ref{tab: stddev}): Die Ergebnisse waren größtenteils identisch oder
-wichen zwischen $0.97\times$ und $1.001\times$ voneinandner ab. Zum Zeitpunkt
-dieser Ausarbeitung ist die MaxStdDev-Strategie in gt Scaffolder implementiert.
+Wie in Abschnitt~\ref{sec: wunderlich} motiviert, wird im Falle
+mehrerer potentieller Kantenpaare bei der Graphkonstruktion das Paar
+mit der größten Standardabweichung gewählt. Um die Auswirkung dieses
+Kriteriums evaluieren zu können, wurden 2 unterschiedliche Strategien
+in gt Scaffolder implementiert: Die beschriebene
+MaxStdDev-Strategie und eine MinStdDev-Strategie, bei der das
+Kantenpaar mit der geringsten Standardabweichung gewählt
+wird. Anschließend wurde die Scaffold-Berechnung mit beiden Strategien
+für 4 Testdatensätze (vgl. Tabelle~\ref{sec: Testdaten})
+ausgeführt. Dabei wurden nur sehr kleine Unterschiede festgestellt
+(vgl.  Tabelle~\ref{tab: stddev}): Die Ergebnisse waren größtenteils
+identisch oder wichen zwischen $0.97\times$ und $1.001\times$
+voneinandner ab. Zum Zeitpunkt dieser Ausarbeitung ist die
+MaxStdDev-Strategie in gt Scaffolder implementiert.
 
 \begin{table}
   \begin{tabular}{llccccc}
@@ -973,9 +975,8 @@ dieser Ausarbeitung ist die MaxStdDev-Strategie in gt Scaffolder implementiert.
   \end{tabular}
   \caption{\label{tab: stddev}\textbf{Ergebnisse der Scaffold-Berechnung mit
   verschiedenen Strategien bei der Graphkonstruktion.}
-  Die Anzahl der eingehenden Contigs jedes Datensatzes ist angegeben. Die
-  SGA-Ergebnisse sind als absolute Werte aufgetragen, die gt
-  Scaffolder-Ergebnisse als relative Faktoren zu ersteren.
+  Die Ergebnisse der MaxStdDev-Strategie sind als absolute Werte aufgetragen, die
+  Ergebnisse der MinStdDev-Strategie als relative Faktoren.
   \textit{Abdeckung}, \textit{\#Scaf} und \textit{N50} sind in
   Tabelle~\ref{tab: Scaffolding} erläutert.}
 \end{table}
