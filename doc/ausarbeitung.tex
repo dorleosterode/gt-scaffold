@@ -591,19 +591,22 @@ Report bugs to <gt-users@genometools.org>.
 \caption{\label{abb: help}Hilfeausgabe des Tools gt Scaffolder.}
 \end{figure}
 
-Beim Aufruf von gt Scaffolder stellen die Optionen -contig und entweder
--dist oder -bam Pflichtangaben dar. Wenn die Übergabe einer Distanzdatei
-im ABySS-Distanz-Format (*.de) mit der Option -dist erfolgt, dann wird
-diese Datei eingelesen und die enthaltenen Distanzinformationen verwendet.
-Gibt man dagegen mit der Option -bam eine BAM-Datei mit Alignments der Reads
-zu den Contigs an, so werden aus der BAM-Datei die Distanzinformationen
-berechnet und im ABySS-Distanz-Format (*.de) gespeichert. Diese neu erzeugte
-Datei wird anschließend eingelesen und die enthaltenen Informationen genutzt.
-Die Verwendung einer BAM-Datei und des String-Graph Assemblers Readjoiner
-ermöglicht die Abhängigkeit zu einem Mapping-Programm (z.\,B. BWA) und der
-Software DistEst von ABySS potentiell zu durchbrechen. So kann Readjoiner die
-Daten, auf denen die Alignments der Reads zu den Contigs basieren, direkt
-ausgeben. Auf Grund von Zeitmangel existiert jedoch noch kein Modul zur
+Beim Aufruf von gt Scaffolder stellen die Optionen -contig und
+entweder -dist oder -bam Pflichtangaben dar. Wenn die Übergabe einer
+Distanzdatei im ABySS-Distanz-Format (*.de) mit der Option -dist
+erfolgt, dann wird diese Datei eingelesen und die enthaltenen
+Distanzinformationen verwendet.  Gibt man dagegen mit der Option -bam
+eine BAM-Datei mit Alignments der Reads zu den Contigs an, so werden
+aus der BAM-Datei die Distanzinformationen berechnet und im
+ABySS-Distanz-Format (*.de) gespeichert. Diese neu erzeugte Datei wird
+anschließend eingelesen und die enthaltenen Informationen genutzt.
+Die Verwendung einer BAM-Datei und des String-Graph Assemblers
+Readjoiner ermöglicht die Abhängigkeit zu einem Mapping-Programm
+(z.\,B. BWA) und der Software DistEst von ABySS potentiell zu
+durchbrechen. So kann Readjoiner die Positionen der Reads auf den
+Contigs direkt ausgeben. Dabei fehlen aber die Information über
+Read-Paare und Informationen über enthaltene oder herausgefilterte
+Reads. Auf Grund von Zeitmangel existiert jedoch noch kein Modul zur
 Konvertierung dieser Daten in eine entsprechende BAM-Datei.
 
 Mit der Option -astat kann zusätzlich eine Datei mit Informationen
