@@ -241,21 +241,21 @@ separaten Datei oder als Annotation in den Contigs angeführt werden.
 \subsubsection{Erstellen der Distanzinformationen}
 Die Methode, die das Programm DistEst verwendet, durchläuft folgende
 Schritte. Zunächst werden alle Reads aus der BAM-Datei geladen und
-die Read-Paare ermittelt. Anschließend berechnet man die Fragmentlängen
-aller Read-Paare, die gegenüber dem gleichen Contig angeordnet sind,
-und erstellt auf deren Basis eine Häufigkeitsverteilung.
+die Read-Paare ermittelt. Anschließend werden die Fragmentlängen
+aller Read-Paare berechnet, die gegenüber dem gleichen Contig angeordnet sind,
+und auf deren Basis eine Häufigkeitsverteilung erstellt.
 Danach wird aus der Verteilung eine Wahrscheinlichkeitsfunktion für die
 Fragmentlängen abgeleitet. Im nächsten Schritt versucht man, den paarweisen
 Abstand der Contigs durch eine Maximum-Likelihood-Methode abzuschätzen.
 Dabei werden für ein Contig-Paar die zugehörigen Read-Paare ermittelt und
 deren Fragmentlänge berechnet unter der Annahme, dass die beiden Contigs
-ohne Lücke direkt aneinander angrenzen. Als nächstes durchläuft man mehrere
-Iterationen, bei der jeweils die Fragmentlängen um einen Faktor (min\_dist
+ohne Lücke direkt aneinander angrenzen. Als nächstes werden mehrere
+Iterationen durchlaufen, bei denen jeweils die Fragmentlängen um einen Faktor (min\_dist
 bis max\_dist) korrigiert werden. Des Weiteren erfolgt eine Aufsummierung
 der logarithmischen Wahrscheinlichkeiten (log odds) der korrigierten
 Fragmentlängen multipliziert mit dessen Häufigkeiten in jedem Durchlauf.
 Schließlich wählt man als Abstand zwischen den Contigs den Faktor, bei
-dem die Wahrscheinlichkeitssumme ein Maximum erreicht.
+dem die Summe der Wahrscheinlichkeiten ein Maximum erreicht.
 \todo{Strangorientierung fehlt}
 
 \subsubsection{Konstruktion des Graphen}
