@@ -1050,9 +1050,7 @@ werden. Dazu gehört die Implementation weiterer Strategien zur Selektion
 relevanter Knoten und Kanten, um eine feinere Abstimmung der Scaffold-
 Berechnung zu ermögichen. Beispiele für solche Strategien finden sich in SGA
 Scaffold und umfassen eine erweiterte Zyklendetektion oder Entfernung
-transitiver Kanten.
-
-Zusätzlich sollten die konservativen Strategien zur Klassifikation
+transitiver Kanten. Zusätzlich sollten die konservativen Strategien zur Klassifikation
 repetitiver bzw.\ eindeutiger Knoten untersucht werden. So sollten die Güte
 der entsprechenden Standard-Schwellenwerte evaluiert werden, um potentiell
 bessere Ergebnisse erzielen zu können. Einige Strategien von SGA übernommene
@@ -1083,6 +1081,15 @@ eine Ausgabe im BAM-Format erweitert oder entsprechendes Umwandlungsskript
 für das bestehende Format geschrieben werden. Des Weiteren sollten die
 Standardwerte der Parameter nach Fertigstellung der Schnittstelle evaluiert
 werden, da die momentan verwendeten Werte aus der SGA-Pipeline stammen.
+
+Die Verarbeitung der Distanzinformationen in gt Scaffolder besitzt ebenfalls
+noch Optimierungsbedarf.
+Das Modul Bamparser liefert die Distanzinformationen in Form einer speziellen
+Datenstruktur, die in der aktuellen Implementation von gt Scaffolder in das
+ABySS-Distanz-Format gespeichert und dann vom Modul Parser wieder eingelesen
+wird. Dieser Umweg könnte durch die Implementation einer Funktion wegfallen,
+die diese Informationen direkt als Kanten im Graphen speichert.
+
 
 \section*{Anhang}
 \subsection*{Pseudocode}
