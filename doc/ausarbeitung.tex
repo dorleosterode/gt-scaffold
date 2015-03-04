@@ -1020,27 +1020,28 @@ Sequenz-Rekonstruktion verwendet.
 
 \subsection{Evaluation der technischen Implementation}
 
-Sowohl gt Scaffolder (vgl. Abbildung~\ref{abb: help}) als auch SGA bieten
-viele vom Nutzer definierbare Parameter und Optionen an. Eine Vielzahl dieser
-Parameter ist optional und ermöglicht eine Feinabstimmung der Scaffold-
-Berechnung, falls die Standardwerte unzureichend sind. Lediglich bei der
-Selektion relevanter Knoten und Kanten ist SGA flexibler als gt Scaffolder.
+Sowohl gt Scaffolder (vgl. Abbildung~\ref{abb: help}) als auch SGA
+bieten viele vom Nutzer definierbare Parameter und Optionen an. Eine
+Vielzahl dieser Parameter ist optional und ermöglicht eine
+Feinabstimmung der Scaffold-Berechnung, falls die Standardwerte
+unzureichend sind. Lediglich bei der Selektion relevanter Knoten und
+Kanten ist SGA flexibler als gt Scaffolder.
 
 gt Scaffolder wurde vollständig in C implementiert. Dies ermöglicht eine hohe
 Ausführungsgeschwindigkeit bei geringem Speicherplatzbedarf und einer
-vergleichsweise geringen Codegröße von etwas mehr als 200 KB -- das in C++
+vergleichsweise geringen Codegröße von etwas mehr als 200 KB. Das in C++
 implementierte SGA Scaffold ist etwa 500 KB groß.
 
 Durch die in den GenomeTools-Bibliotheken vorhandene Datenstrukturen und
-Konzepte, wie beispielsweise Arrays, Queues und Hashes war die Implementierung
+Konzepte, wie beispielsweise Arrays, Queues und Hashes, war die Implementierung
 ähnlich komfortabel zu einer höheren, objektorientierten Sprache wie C++. Es
 konnte ebenfalls auf vorhandene, spezialisierte Algorithmen und
 Datenstrukturen zurückgegriffen werden, die unter anderem die Berechung
-lokaler Alignments (Smith-Waterman- Algorithmus) oder die Nutzung eines
-String-Graphen möglich machen. Dies stellt neben der höheren
+lokaler Alignments (Smith-Waterman-Algorithmus) oder die Nutzung eines
+String-Graphen ermöglichen. Dies stellt neben der höheren
 Ausführungsgeschwindigkeit einen wesentlichen Vorteil gegenüber der Nutzung
 von Skriptsprachen (Python, Ruby, Perl, $\ldots$) dar. Dort hätten die
-vorhandenen Möglichkeiten zur Stringmanipulation wiederum das Einlesen der
+vorhandenen Möglichkeiten zur Stringmanipulation hingegen das Einlesen der
 Eingabeformate vereinfacht.
 
 \section{Ausblick}
