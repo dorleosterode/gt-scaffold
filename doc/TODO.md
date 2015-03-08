@@ -1,4 +1,15 @@
 ## TODO
+
+## OBSTACLES
+- [insert line with standard deviation]
+- mark all edges of end vertex of inconsistent edge in twin direction ?
+  (ScaffoldVisitors.cpp: ScaffoldLinkValidator::visit: line 188)
+  (...algorithms.c: ...filter: line 314)
+- mark vertex as repeat if copy number below cutoff ? -> untrusted
+  (ScaffoldVisitors.cpp: ScaffoldAStatisticVisitor::visit: line 86)
+  (...algorithms.c: ...mark_repeats: line 83)
+
+## DONE
 - output: convert scaffolds to fasta [Dorle]
   - evaluate and test the implementation
   - quast evaluation [Stefan]
@@ -18,16 +29,7 @@
   - potential discussion: C vs script languages
     - possibilities: traverse string graph etc
 
-## OBSTACLES
-- [insert line with standard deviation]
-- mark all edges of end vertex of inconsistent edge in twin direction ?
-  (ScaffoldVisitors.cpp: ScaffoldLinkValidator::visit: line 188)
-  (...algorithms.c: ...filter: line 314)
-- mark vertex as repeat if copy number below cutoff ? -> untrusted
-  (ScaffoldVisitors.cpp: ScaffoldAStatisticVisitor::visit: line 86)
-  (...algorithms.c: ...mark_repeats: line 83)
-
-## DONE
+--
 - build tool architecture [Dorle]
 - allow min contig length as parameter [dorle]
 - algorithms: mark twin edge as GIS_SCAFFOLD -> (implement
