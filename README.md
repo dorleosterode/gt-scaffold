@@ -4,7 +4,7 @@ gt Scaffolder is a free scaffolding software and was developed as a student
 project (in the research group for genome informatics) at the Center for
 Bioinformatics, Hamburg. It is based on the [GenomeTools](https://github.com/genometools/genometools)-Library and is
 intended to be used in a *de novo* assembly pipeline with [Readjoiner](http://www.zbh.uni-hamburg.de/en/research/genome-informatics/software/readjoiner.html)
-(an assembly software available in the GenomeTools).
+(an assembly software available in GenomeTools).
 
 gt Scaffolder tries to solve the *Contig Scaffolding Problem* in the style
 of [SGA Scaffold](https://github.com/jts/sga) by using a scaffold graph and thus achieves competitive
