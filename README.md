@@ -23,7 +23,6 @@ gt Scaffolder should run on every POSIX compliant UNIX system, for example,
 Linux, Mac OS X, and OpenBSD. This will build gt Scaffolder both as a stand-alone
 binary and as a gt Tool.
 
-#### Build as a part of GenomeTools
 ```bash
 # Clone gt Scaffolder
 git clone https://github.com/dorleosterode/gt-scaffold.git
